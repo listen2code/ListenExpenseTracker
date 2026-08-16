@@ -35,7 +35,7 @@ graph LR
 - **组件粒度控制**：Compose View 层代码需保持短小精悍，复杂或可复用的子 UI 模块必须按单一职责抽取至组件文件（如 `ui/components/`）。
 
 ### 2.2 数据与网络层规范 (Data & Network Layer)
-- **错误收敛**：所有数据源操作（Room 读写、Google Drive REST API 请求）的返回值统一封装为 `Either<Failure, T>`，严禁在 UI 层直接抛出未捕获的 Exception。
+- **错误收敛**：所有数据源操作（Room 读写、Google Drive REST API 请求）统一使用 Kotlin 官方原生的 `Result<T>`（结合 `safeCall {}` 或 `Flow.asResult()`）封装，严禁在 UI 层直接抛出未捕获的 Exception。
 - **二级缓存与降级策略**：
   1. 优先读取本地 Room SQLite / DataStore 数据库。
   2. 离线/无网络时使用 `LocalMockServer` 或默认数据兜底。
