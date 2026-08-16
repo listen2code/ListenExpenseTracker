@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "19053100053",
+    "project_id": "com-listen-listenexpense-8f4dd",
+    "storage_bucket": "com-listen-listenexpense-8f4dd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:19053100053:android:4469ab4a8ba1775d84621c",
+        "android_client_info": {
+          "package_name": "com.listen.listenexpensetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBM4p5sN7JXzxGHwS_V_8mXbj6W-rlxTMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
