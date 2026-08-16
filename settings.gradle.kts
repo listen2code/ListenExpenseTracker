@@ -24,4 +24,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "ListenExpenseTracker"
 include(":app")
- 
+
+// Composite Build: Include independent core libraries for local real-time development
+includeBuild("../ListenArch")
+includeBuild("../ListenUiComponent")
