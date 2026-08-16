@@ -153,6 +153,17 @@ flowchart LR
 
 ---
 
+## 📚 文档索引 (Documentation Matrix)
+
+遵循“**主文只描述已落地能力，详细规范下沉至 `docs/`**”的原则，项目沉淀了以下指导性规范文档：
+
+- 📘 [docs/project_development_guide.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/project_development_guide.md)：**项目开发与架构设计指南**（包含 MVI 规范、网络错误收敛、APM 调试面板设计及 Lint 质量红线）
+- 📋 [docs/todo.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/todo.md)：**项目演进路线图与 Task 追踪**（记录各阶段目标态与待沉淀规格文档）
+- 📄 [PROMPTS.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/PROMPTS.md)：**AI 协作提示词与项目约束**
+
+---
+
 ## 📄 开源许可 (License)
 
 本项目基于 [MIT License](LICENSE) 开源。
+
