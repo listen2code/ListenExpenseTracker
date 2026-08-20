@@ -13,11 +13,11 @@
 全工程统一采用 `BaseViewModel<ViewState, UserIntent, ViewEffect>` 实现 MVI：
 1. **单一不可变状态**：UI 层仅观察单一 `StateFlow<ViewState>`，保证画面重绘一致性。
 2. **显式 Intent 输入**：所有用户动作通过 `handleIntent(intent)` 派发，便于打点追踪与单元测试。
-3. **单次副作用通道**：Toast、震动、导航等单次事件通过 `Channel<ViewEffect>` 独立分发。
+3. **单次副作用通道**：Toast、撤销 Snackbar、震动等单次事件通过 `Channel<ViewEffect>` 独立分发。
 
 ### 影响 (Consequences)
 - 优点：彻底杜绝 UI 状态不同步问题；TraceId 可贯穿每个 Intent 的全链路处理。
-- 成本：需定义清晰的 Intent 与 Effect 封闭枚举类。
+- 成本：需定义清晰的 Intent 与 Effect 封闭接口。
 
 ---
 
@@ -55,3 +55,39 @@
 1. 500 条内存环形链表，零 I/O 开销。
 2. 统一分发 `APP`, `DB`, `SYNC`, `CRASH` 四大频道。
 3. 配套 UI 浮窗 `LogInspectorSheet` 支持现场排查与导出。
+
+---
+
+## ADR-005: 真实 Google 账户连携与多账户隔离云端快照同步体系
+
+### 背景 (Context)
+跨设备换机和防丢账单需要可靠的云端备份，且需要确保用户隐私与数据按账号隔离。
+
+### 决策 (Decision)
+1. 接入 Google Play Services Auth SDK，实现系统级账号授权，支持优雅降级至备选账号选择器。
+2. 将 `isLoggedIn`、`userEmail`、`displayName` 及 `avatarUrl` 在 `BaseDataStoreManager` 中持久化存储，冷启动自动恢复。
+3. `CloudSyncManager` 引入基于账号的隔离快照机制与 MD5 校验和，确保备份数据的完整性与多账户隔离。
+
+---
+
+## ADR-006: 账单滑动删除“软删除撤销通道” (Undo Snackbar Pattern)
+
+### 背景 (Context)
+Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除都弹出确认 Dialog 则严重破坏流畅体验。
+
+### 决策 (Decision)
+1. 将滑动删除防误触阈值提高至 `70%`（需大幅度左滑才触发）。
+2. 删除触发时，通过 `TransactionsEffect.ShowUndoSnackbar` 在屏幕底部唤起带“撤销”按钮的 Snackbar（持续 4 秒）。
+3. 用户点击“撤销”即可一键将内存中暂存的 `TransactionEntity` 重新插回数据库，实现无缝恢复。
+
+---
+
+## ADR-007: 专属年月选择器与日聚合高信息密度投影
+
+### 背景 (Context)
+传统 Android DatePickerDialog 强迫用户选择具体日期，切换年份极慢；同时旧版流水列表条目过高，一屏能容纳的账单太少。
+
+### 决策 (Decision)
+1. 研发独立的 `MonthPickerDialog`：顶部 `< 2026年 >` 极速切年，下方 3x4 12 月份方块网格直选。
+2. 列表层通过 `groupBy { formatDayGroupHeader(it.timestamp) }` 实现按日自动聚合分组，并提供每日收支小计。
+3. 将条目图标与内边距压缩为 24dp/6dp，使信息密度提高 100%。
