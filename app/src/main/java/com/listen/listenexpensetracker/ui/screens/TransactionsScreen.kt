@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +26,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,11 +37,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,20 +60,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.i18n.StringsRes
+import com.listen.listenexpensetracker.data.model.AccountRepository
 import com.listen.listenexpensetracker.data.model.CategoryRepository
+import com.listen.listenexpensetracker.ui.components.MonthPickerDialog
 import com.listen.listenexpensetracker.ui.state.TransactionSortOrder
 import com.listen.listenexpensetracker.ui.state.TransactionsIntent
 import com.listen.listenexpensetracker.ui.state.TransactionsUiState
-import com.listen.uicomponent.charts.DonutChart
 import com.listen.uicomponent.components.EmptyStateView
 import com.listen.uicomponent.components.SearchBarInput
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
 import com.listen.uicomponent.theme.parseHexColor
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,28 +84,58 @@ fun TransactionsScreen(
     var showAddSheet by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var showAccountManageDialog by remember { mutableStateOf(false) }
+    var showMonthPickerDialog by remember { mutableStateOf(false) }
+    var accountListVersion by remember { mutableStateOf(0) }
 
     val sym = state.currencySymbol
     val lang = state.language
 
+    val accounts = remember(accountListVersion) { AccountRepository.getAllAccounts() }
+
+    val groupedTransactions = remember(state.filteredTransactions) {
+        state.filteredTransactions.groupBy { formatDayGroupHeader(it.timestamp) }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    // Sleek Compact Month Navigation Pill (Centered, tight width)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
                     ) {
-                        IconButton(onClick = { onIntent(TransactionsIntent.ChangeMonthOffset(-1)) }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev Month")
-                        }
-                        Text(
-                            text = state.monthTitle,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp
-                        )
-                        IconButton(onClick = { onIntent(TransactionsIntent.ChangeMonthOffset(1)) }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Month")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            IconButton(
+                                onClick = { onIntent(TransactionsIntent.ChangeMonthOffset(-1)) },
+                                modifier = Modifier.size(26.dp)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                            }
+                            Text(
+                                text = state.monthTitle,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clickable { showMonthPickerDialog = true }
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                            IconButton(
+                                onClick = { onIntent(TransactionsIntent.ChangeMonthOffset(1)) },
+                                modifier = Modifier.size(26.dp)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                            }
                         }
                     }
                 },
@@ -126,193 +160,238 @@ fun TransactionsScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Search Input Bar
-            SearchBarInput(
-                query = state.searchQuery,
-                onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
-                placeholder = StringsRes.get("search_placeholder", lang),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            // 1. Search Input Bar
+            item(key = "search_bar") {
+                SearchBarInput(
+                    query = state.searchQuery,
+                    onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
+                    placeholder = StringsRes.get("search_placeholder", lang),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            // Account Filter Chips & Sort Button Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // 2. Account Filter Chips with '+' Manage Button & Sort Dropdown
+            item(key = "filters_row") {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    listOf(
-                        "ALL" to StringsRes.get("filter_all", lang),
-                        "WECHAT" to StringsRes.get("filter_wechat", lang),
-                        "ALIPAY" to StringsRes.get("filter_alipay", lang),
-                        "BANK" to StringsRes.get("filter_bank", lang),
-                        "CASH" to StringsRes.get("filter_cash", lang)
-                    ).forEach { (accKey, label) ->
-                        FilterChip(
-                            selected = state.selectedAccountFilter == accKey,
-                            onClick = { onIntent(TransactionsIntent.FilterAccountChange(accKey)) },
-                            label = { Text(label, fontSize = 10.sp) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-                    }
-                }
-
-                Box {
-                    IconButton(onClick = { showSortMenu = true }) {
-                        Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
-                    }
-                    DropdownMenu(
-                        expanded = showSortMenu,
-                        onDismissRequest = { showSortMenu = false }
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        listOf(
-                            TransactionSortOrder.DATE_DESC to StringsRes.get("sort_date_desc", lang),
-                            TransactionSortOrder.DATE_ASC to StringsRes.get("sort_date_asc", lang),
-                            TransactionSortOrder.AMOUNT_DESC to StringsRes.get("sort_amount_desc", lang),
-                            TransactionSortOrder.AMOUNT_ASC to StringsRes.get("sort_amount_asc", lang)
-                        ).forEach { (order, label) ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = label,
-                                        fontWeight = if (state.sortOrder == order) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (state.sortOrder == order) MaterialTheme.colorScheme.primary else Color.Unspecified
-                                    )
-                                },
-                                onClick = {
-                                    onIntent(TransactionsIntent.ChangeSortOrder(order))
-                                    showSortMenu = false
-                                }
+                        item {
+                            FilterChip(
+                                selected = state.selectedAccountFilter == "ALL",
+                                onClick = { onIntent(TransactionsIntent.FilterAccountChange("ALL")) },
+                                label = { Text(StringsRes.get("filter_all", lang), fontSize = 11.sp, fontWeight = if (state.selectedAccountFilter == "ALL") FontWeight.Bold else FontWeight.Normal) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary
+                                )
                             )
+                        }
+
+                        items(accounts, key = { it.key }) { acc ->
+                            FilterChip(
+                                selected = state.selectedAccountFilter == acc.key,
+                                onClick = { onIntent(TransactionsIntent.FilterAccountChange(acc.key)) },
+                                label = { Text(acc.nameZh, fontSize = 11.sp, fontWeight = if (state.selectedAccountFilter == acc.key) FontWeight.Bold else FontWeight.Normal) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        }
+
+                        // '+' Manage Account Types Button
+                        item {
+                            IconButton(
+                                onClick = { showAccountManageDialog = true },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primaryContainer),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Manage Accounts",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            listOf(
+                                TransactionSortOrder.DATE_DESC to StringsRes.get("sort_date_desc", lang),
+                                TransactionSortOrder.DATE_ASC to StringsRes.get("sort_date_asc", lang),
+                                TransactionSortOrder.AMOUNT_DESC to StringsRes.get("sort_amount_desc", lang),
+                                TransactionSortOrder.AMOUNT_ASC to StringsRes.get("sort_amount_asc", lang)
+                            ).forEach { (order, label) ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            fontWeight = if (state.sortOrder == order) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (state.sortOrder == order) MaterialTheme.colorScheme.primary else Color.Unspecified
+                                        )
+                                    },
+                                    onClick = {
+                                        onIntent(TransactionsIntent.ChangeSortOrder(order))
+                                        showSortMenu = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // Overview Balance Card
-            SurfaceCard(modifier = Modifier.fillMaxWidth()) {
-                Column {
-                    Text(
-                        text = StringsRes.get("balance_title", lang),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.netBalance)}",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(StringsRes.get("total_expense", lang), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(
-                                text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalExpense)}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = ExpenseRed
-                            )
-                        }
-
-                        Column {
-                            Text(StringsRes.get("total_income", lang), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(
-                                text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalIncome)}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = IncomeGreen
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Monthly Budget Progress Bar
-                    Column {
+            // 3. Small-Screen Responsive Ultra-Compact Balance Card
+            item(key = "balance_card") {
+                SurfaceCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${StringsRes.get("monthly_budget", lang)} $sym${String.format("%.0f", state.monthlyBudget)} (${StringsRes.get("used_budget", lang)} ${String.format("%.1f", state.budgetUsageRatio * 100)}%)",
+                                text = StringsRes.get("balance_title", lang),
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            if (state.isOverBudget) {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Icon(Icons.Default.Warning, contentDescription = "Over Budget", tint = ExpenseRed, modifier = Modifier.size(12.dp))
-                                    Text(StringsRes.get("over_budget", lang), fontSize = 11.sp, color = ExpenseRed, fontWeight = FontWeight.Bold)
-                                }
+                            Text(
+                                text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.netBalance)}",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(StringsRes.get("total_expense", lang), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalExpense)}",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = ExpenseRed
+                                )
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(StringsRes.get("total_income", lang), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalIncome)}",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = IncomeGreen
+                                )
                             }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        LinearProgressIndicator(
-                            progress = { state.budgetUsageRatio.coerceIn(0f, 1f) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = if (state.isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            LinearProgressIndicator(
+                                progress = { state.budgetUsageRatio.coerceIn(0f, 1f) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                color = if (state.isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            Text(
+                                text = "${String.format("%.0f", state.budgetUsageRatio * 100)}%",
+                                fontSize = 9.sp,
+                                color = if (state.isOverBudget) ExpenseRed else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Category Donut Chart
-            if (state.categoryShares.isNotEmpty()) {
-                DonutChart(
-                    items = state.categoryShares,
-                    totalValue = state.totalExpense,
-                    centerTitle = StringsRes.get("total_expense", lang),
-                    centerValueText = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalExpense)}"
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            // Transaction Stream List
+            // 4. Date-Grouped Transaction Stream Items
             if (state.filteredTransactions.isEmpty()) {
-                EmptyStateView(message = StringsRes.get("empty_transactions", lang))
+                item(key = "empty_state") {
+                    EmptyStateView(message = StringsRes.get("empty_transactions", lang))
+                }
             } else {
-                Text(
-                    text = "${StringsRes.get("nav_transactions", lang)} (${state.filteredTransactions.size})",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                groupedTransactions.forEach { (dateHeader, dayList) ->
+                    val dayExpense = dayList.filter { it.type == "EXPENSE" }.sumOf { it.amount }
+                    val dayIncome = dayList.filter { it.type == "INCOME" }.sumOf { it.amount }
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(
-                        items = state.filteredTransactions,
-                        key = { it.id }
-                    ) { transaction ->
-                        TransactionItemRow(
+                    // Date Group Header
+                    item(key = "header_$dateHeader") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 6.dp, bottom = 1.dp, start = 2.dp, end = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = dateHeader,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                if (dayExpense > 0) {
+                                    Text(
+                                        text = "${StringsRes.get("type_expense", lang)} $sym${String.format("%.2f", dayExpense)}",
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                if (dayIncome > 0) {
+                                    Text(
+                                        text = "${StringsRes.get("type_income", lang)} $sym${String.format("%.2f", dayIncome)}",
+                                        fontSize = 10.sp,
+                                        color = IncomeGreen
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Ultra-Compact Transaction Items with perfectly matching 10.dp corner radius & 0 corner bleed
+                    items(items = dayList, key = { it.id }) { transaction ->
+                        UltraCompactTransactionItemRow(
                             transaction = transaction,
                             currencySymbol = sym,
                             hideAmount = state.hideBalance,
@@ -321,6 +400,11 @@ fun TransactionsScreen(
                         )
                     }
                 }
+            }
+
+            // Bottom Spacing for FloatingActionButton
+            item(key = "bottom_spacer") {
+                Spacer(modifier = Modifier.height(72.dp))
             }
         }
     }
@@ -355,18 +439,142 @@ fun TransactionsScreen(
             }
         )
     }
+
+    // Account Management Dialog (Unconstrained height, zero hint clipping)
+    if (showAccountManageDialog) {
+        AccountManageDialog(
+            accounts = accounts,
+            onAddAccount = { name ->
+                AccountRepository.addAccount(name)
+                accountListVersion++
+            },
+            onDeleteAccount = { key ->
+                AccountRepository.deleteAccount(key)
+                accountListVersion++
+            },
+            onDismiss = { showAccountManageDialog = false },
+            lang = lang
+        )
+    }
+
+    // Dedicated Year-Month Picker Dialog
+    if (showMonthPickerDialog) {
+        val nowCal = Calendar.getInstance()
+        val currentSelectedCal = Calendar.getInstance().apply {
+            add(Calendar.MONTH, state.selectedMonthOffset)
+        }
+        MonthPickerDialog(
+            initialYear = currentSelectedCal.get(Calendar.YEAR),
+            initialMonth = currentSelectedCal.get(Calendar.MONTH),
+            onMonthSelected = { selectedYear, selectedMonth ->
+                val targetCal = Calendar.getInstance().apply { set(selectedYear, selectedMonth, 1) }
+                val diffMonths = (targetCal.get(Calendar.YEAR) - nowCal.get(Calendar.YEAR)) * 12 +
+                        (targetCal.get(Calendar.MONTH) - nowCal.get(Calendar.MONTH))
+                val delta = diffMonths - state.selectedMonthOffset
+                onIntent(TransactionsIntent.ChangeMonthOffset(delta))
+            },
+            onDismiss = { showMonthPickerDialog = false },
+            lang = lang
+        )
+    }
+}
+
+@Composable
+private fun AccountManageDialog(
+    accounts: List<com.listen.listenexpensetracker.data.model.AccountTypeItem>,
+    onAddAccount: (String) -> Unit,
+    onDeleteAccount: (String) -> Unit,
+    onDismiss: () -> Unit,
+    lang: String
+) {
+    var newAccountName by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(StringsRes.get("manage_accounts_title", lang), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = newAccountName,
+                        onValueChange = { newAccountName = it },
+                        placeholder = { Text(StringsRes.get("account_name_input", lang), fontSize = 12.sp) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = {
+                            if (newAccountName.isNotBlank()) {
+                                onAddAccount(newAccountName.trim())
+                                newAccountName = ""
+                            }
+                        }
+                    ) {
+                        Text(StringsRes.get("btn_save", lang), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                }
+
+                Text("已有账户：", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    accounts.forEach { acc ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(acc.nameZh, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                            if (!acc.isSystem) {
+                                IconButton(
+                                    onClick = { onDeleteAccount(acc.key) },
+                                    modifier = Modifier.size(22.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        tint = ExpenseRed,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
+                            } else {
+                                Text("系统默认", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(StringsRes.get("btn_done", lang))
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TransactionItemRow(
+private fun UltraCompactTransactionItemRow(
     transaction: TransactionEntity,
     currencySymbol: String,
     hideAmount: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val exactCornerRadius = 10.dp
     val dismissState = rememberSwipeToDismissBoxState(
+        positionalThreshold = { totalDistance -> totalDistance * 0.70f },
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
                 onDelete()
@@ -379,81 +587,98 @@ private fun TransactionItemRow(
 
     SwipeToDismissBox(
         state = dismissState,
+        enableDismissFromStartToEnd = false,
         backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(ExpenseRed, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = Color.White
+            val isSwiping = dismissState.targetValue == SwipeToDismissBoxValue.EndToStart || dismissState.progress > 0.08f
+            if (isSwiping) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(exactCornerRadius))
+                        .background(ExpenseRed)
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Transparent)
                 )
             }
         }
     ) {
         SurfaceCard(
+            cornerRadius = exactCornerRadius,
+            contentPadding = 6.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onClick() }
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val cat = CategoryRepository.getCategoryById(transaction.categoryId)
                 val color = parseHexColor(transaction.categoryColorHex)
+                val accountDisplay = AccountRepository.getAccountName(transaction.accountType)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
+                    // 24dp Ultra-Compact Category Icon
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(24.dp)
                             .clip(CircleShape)
-                            .background(color.copy(alpha = 0.18f)),
+                            .background(color.copy(alpha = 0.16f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = cat.icon,
                             contentDescription = transaction.categoryName,
-                            tint = color
+                            tint = color,
+                            modifier = Modifier.size(12.dp)
                         )
                     }
 
                     Column {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
                                 text = transaction.categoryName,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp
+                                fontSize = 13.sp
                             )
                             Text(
-                                text = when (transaction.accountType) {
-                                    "WECHAT" -> "微信"
-                                    "ALIPAY" -> "支付宝"
-                                    "BANK" -> "银行卡"
-                                    "CASH" -> "现金"
-                                    else -> ""
-                                },
-                                fontSize = 10.sp,
+                                text = "· $accountDisplay",
+                                fontSize = 9.sp,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
 
-                        Text(
-                            text = if (transaction.note.isNotBlank()) transaction.note else formatDate(transaction.timestamp),
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (transaction.note.isNotBlank()) {
+                            Text(
+                                text = transaction.note,
+                                fontSize = 9.sp,
+                                maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
@@ -463,7 +688,7 @@ private fun TransactionItemRow(
                 Text(
                     text = if (hideAmount) "****" else "$amountPrefix$currencySymbol${String.format("%.2f", transaction.amount)}",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 13.sp,
                     color = amountColor
                 )
             }
@@ -471,7 +696,12 @@ private fun TransactionItemRow(
     }
 }
 
-private fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
-    return sdf.format(Date(timestamp))
+private fun formatDayGroupHeader(timestamp: Long): String {
+    val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
+    val day = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
+    val weekdays = arrayOf("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六")
+    val weekday = weekdays[cal.get(Calendar.DAY_OF_WEEK) - 1]
+    val year = cal.get(Calendar.YEAR)
+    val month = String.format("%02d", cal.get(Calendar.MONTH) + 1)
+    return "$day $weekday $year.$month"
 }

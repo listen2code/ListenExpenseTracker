@@ -27,6 +27,7 @@ data class TransactionsUiState(
     val totalIncome: Double = 0.0,
     val netBalance: Double = 0.0,
     val monthlyBudget: Double = 5000.0,
+    val remainingBudget: Double = 5000.0,
     val budgetUsageRatio: Float = 0.0f,
     val isOverBudget: Boolean = false,
     val dailyAverageExpense: Double = 0.0,
@@ -36,8 +37,11 @@ data class TransactionsUiState(
     val hideBalance: Boolean = false,
     val isLoading: Boolean = false,
     val syncState: SyncState = SyncState(),
+    val googleAccountEmail: String? = null,
+    val googleDisplayName: String? = null,
+    val googleAvatarUrl: String? = null,
     val searchQuery: String = "",
-    val selectedAccountFilter: String = "ALL", // "ALL", "WECHAT", "ALIPAY", "BANK", "CASH"
+    val selectedAccountFilter: String = "ALL", // "ALL", "BANK", "CASH", etc.
     val selectedMonthOffset: Int = 0, // 0 = current month, -1 = last month, etc.
     val monthTitle: String = "本月",
     val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
@@ -63,6 +67,7 @@ sealed interface TransactionsIntent {
     ) : TransactionsIntent
     data class UpdateTransaction(val transaction: TransactionEntity) : TransactionsIntent
     data class DeleteTransaction(val id: String) : TransactionsIntent
+    data class RestoreDeletedTransaction(val transaction: TransactionEntity) : TransactionsIntent
     data class ToggleHideBalance(val hide: Boolean) : TransactionsIntent
     data class SearchQueryChange(val query: String) : TransactionsIntent
     data class FilterAccountChange(val accountType: String) : TransactionsIntent
@@ -72,6 +77,12 @@ sealed interface TransactionsIntent {
     data class ChangeCurrencySymbol(val symbol: String) : TransactionsIntent
     data class UpdateMonthlyBudget(val budget: Double) : TransactionsIntent
     data class ImportBackupData(val json: String) : TransactionsIntent
+    data class LinkGoogleAccount(
+        val email: String,
+        val displayName: String? = null,
+        val avatarUrl: String? = null
+    ) : TransactionsIntent
+    data object UnlinkGoogleAccount : TransactionsIntent
     data object TriggerCloudBackup : TransactionsIntent
     data object TriggerCloudRestore : TransactionsIntent
     data object SeedDemoData : TransactionsIntent
@@ -83,5 +94,6 @@ sealed interface TransactionsIntent {
 
 sealed interface TransactionsEffect {
     data class ShowToast(val message: String) : TransactionsEffect
+    data class ShowUndoSnackbar(val message: String, val transaction: TransactionEntity) : TransactionsEffect
     data object TransactionAddedSuccess : TransactionsEffect
 }

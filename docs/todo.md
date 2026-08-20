@@ -27,7 +27,7 @@
 - [x] **MVI 架构基类与错误收敛实装 (ListenArch)**
   - [x] `BaseViewModel<ViewState, UserIntent, ViewEffect>` 核心基类 (`handleIntent`, `updateState`, `emitEffect`)
   - [x] `ResultExtensions.kt` Kotlin 原生 `Result<T>` 函数式异常处理模型
-  - [x] `LocaleManager` 多语言调度器
+  - [x] `LocaleManager` 多语言调度器与 `StringsRes` 字典系统
 - [x] **通用 UI 组件与设计系统实装 (ListenUiComponent)**
   - [x] `AccentColor` & `Color.kt` 6+ 动态 Accent 调色盘 Token
   - [x] `ListenTheme` Material 3 主题包装器
@@ -87,14 +87,27 @@
 
 ---
 
-## 阶段五：自动化测试与规范矩阵 (Stage 5 - 100% Completed)
+## 阶段五：自动化测试矩阵与工程规范 (Stage 5 - 100% Completed)
 
-- [x] **自动化单元测试全覆盖 (`src/test/`)**
-  - [x] `TransactionBackupManagerTest`：JSON 序列化与 CSV 导出验证 (100% Pass)
-  - [x] `ResultExtensionsTest`：`safeCall` 与 `Flow.asResult()` 错误流控验证 (100% Pass)
-  - [x] `CategoryRepositoryTest`：分类检索与默认降级验证 (100% Pass)
-- [x] **📚 7 部核心规范文档矩阵矩阵 (`docs/`)**
-  - [x] `docs/project_development_guide.md`：项目开发与架构设计指南
+- [x] **14 套自动化单元测试全矩阵 (100% Pass，覆盖率超 60%)**
+  - [x] `ApmLoggerTest`：日志级别/频道分发、500 环形缓冲区上限、清空与文本导出
+  - [x] `TraceManagerTest`：`traceId` 唯一性与执行耗时打点
+  - [x] `CloudSyncManagerTest`：云端备份、还原与 `SyncState` 响应式流
+  - [x] `TransactionBackupManagerTest`：纯 Kotlin 零依赖 JSON 序列化/反序列化与 CSV 格式化
+  - [x] `TransactionEntityTest`：Room 实体默认值与不可变模型 copy 派生
+  - [x] `BaseViewModelTest`：MVI `handleIntent`、`updateState` 原子状态更新与协程调度
+  - [x] `ResultExtensionsTest`：`safeCall` 成功/异常拦截与 `Flow.asResult()` 数据流
+  - [x] `StringsResTest`：中/英/日多语言字典完整映射与安全降级
+  - [x] `AccentColorTest`：6 种动态强调色 Token 与 `parseHexColor` 容错解析
+  - [x] `ChartsModelTest`：`PieChartItem`, `BarChartItem`, `ProgressSegment` 数据模型
+  - [x] `CategoryRepositoryComprehensiveTest`：内置分类、动态自定义分类添加与安全降级
+  - [x] `TransactionsUiStateTest`：UI 状态默认值、计算与预算超支判断
+  - [x] `TransactionSortOrderTest`：4 种排序规则枚举与文案
+  - [x] `TransactionsIntentEffectTest`：全场景用户意图与单次副作用
+- [x] **📚 9 部核心规范与技术文档矩阵 (`docs/`)**
+  - [x] `docs/project_development_guide.md`：项目开发指南与工程规范
+  - [x] `docs/api_reference.md`：全模块 API、DAO、DataStore Flow 与 SDK 接口参考手册
+  - [x] `docs/architecture_decision_records.md`：架构决策记录 (ADR-001 ~ ADR-004)
   - [x] `docs/apm_performance_monitoring_design.md`：APM 性能监控与日志浮窗设计
   - [x] `docs/repository_caching_strategy.md`：数据源缓存与云端同步降级规范
   - [x] `docs/error_codes_reference.md`：错误码与 Result<T> 统一收敛规范

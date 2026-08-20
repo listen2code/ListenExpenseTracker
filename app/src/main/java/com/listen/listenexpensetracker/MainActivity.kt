@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,12 +52,15 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         CrashHandler.init(this)
 
         setContent {
             val state by viewModel.viewState.collectAsState()
             val apmLogs by viewModel.apmLogsUiFlow.collectAsState()
+            val snackbarHostState = remember { SnackbarHostState() }
+
             var showApmSheet by remember { mutableStateOf(false) }
             var showImportSheet by remember { mutableStateOf(false) }
 
@@ -61,6 +69,16 @@ class MainActivity : ComponentActivity() {
                     when (effect) {
                         is TransactionsEffect.ShowToast -> {
                             Toast.makeText(this@MainActivity, effect.message, Toast.LENGTH_SHORT).show()
+                        }
+                        is TransactionsEffect.ShowUndoSnackbar -> {
+                            val res = snackbarHostState.showSnackbar(
+                                message = effect.message,
+                                actionLabel = "撤销",
+                                duration = SnackbarDuration.Short
+                            )
+                            if (res == SnackbarResult.ActionPerformed) {
+                                viewModel.handleIntent(TransactionsIntent.RestoreDeletedTransaction(effect.transaction))
+                            }
                         }
                         is TransactionsEffect.TransactionAddedSuccess -> {
                             // Haptic feedback
@@ -76,6 +94,7 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     ListenExpenseTrackerApp(
                         viewModel = viewModel,
+                        snackbarHostState = snackbarHostState,
                         onOpenApm = { showApmSheet = true },
                         onExportJson = {
                             val json = viewModel.exportBackupJson()
@@ -127,6 +146,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ListenExpenseTrackerApp(
     viewModel: TransactionsViewModel,
+    snackbarHostState: SnackbarHostState,
     onOpenApm: () -> Unit,
     onExportJson: () -> Unit,
     onExportCsv: () -> Unit,
@@ -138,6 +158,7 @@ fun ListenExpenseTrackerApp(
     val lang = state.language
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -160,7 +181,7 @@ fun ListenExpenseTrackerApp(
                 )
             }
         },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         val screenModifier = Modifier.padding(innerPadding)
         when (selectedTab) {

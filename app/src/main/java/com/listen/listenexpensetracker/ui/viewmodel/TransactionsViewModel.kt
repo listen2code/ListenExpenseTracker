@@ -13,29 +13,26 @@ import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.sync.CloudSyncManager
+import com.listen.listenexpensetracker.data.engine.TransactionCalculationEngine
 import com.listen.listenexpensetracker.ui.state.TransactionSortOrder
 import com.listen.listenexpensetracker.ui.state.TransactionsEffect
 import com.listen.listenexpensetracker.ui.state.TransactionsIntent
 import com.listen.listenexpensetracker.ui.state.TransactionsUiState
+import com.listen.listenexpensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.apm.LogEntryUi
-import com.listen.uicomponent.charts.BarChartItem
-import com.listen.uicomponent.charts.PieChartItem
-import com.listen.uicomponent.components.ProgressSegment
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 class TransactionsViewModel(
-    application: Application
+    private val application: Application
 ) : BaseViewModel<TransactionsUiState, TransactionsIntent, TransactionsEffect>(
     initialState = TransactionsUiState()
 ) {
@@ -61,6 +58,7 @@ class TransactionsViewModel(
     init {
         ApmLogger.i(tag = "VM", message = "TransactionsViewModel initialized")
         observeSettings()
+        observeGoogleAccount()
         observeSyncState()
         observeTransactions()
     }
@@ -74,6 +72,7 @@ class TransactionsViewModel(
             is TransactionsIntent.AddTransaction -> addTransaction(intent, traceId)
             is TransactionsIntent.UpdateTransaction -> updateTransaction(intent.transaction, traceId)
             is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id, traceId)
+            is TransactionsIntent.RestoreDeletedTransaction -> restoreDeletedTransaction(intent.transaction, traceId)
             is TransactionsIntent.ToggleHideBalance -> toggleHideBalance(intent.hide)
             is TransactionsIntent.SearchQueryChange -> updateSearchQuery(intent.query)
             is TransactionsIntent.FilterAccountChange -> updateAccountFilter(intent.accountType)
@@ -83,6 +82,8 @@ class TransactionsViewModel(
             is TransactionsIntent.ChangeCurrencySymbol -> updateCurrencySymbol(intent.symbol)
             is TransactionsIntent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget)
             is TransactionsIntent.ImportBackupData -> importBackupData(intent.json, traceId)
+            is TransactionsIntent.LinkGoogleAccount -> linkGoogleAccount(intent.email, intent.displayName, intent.avatarUrl)
+            is TransactionsIntent.UnlinkGoogleAccount -> unlinkGoogleAccount()
             is TransactionsIntent.TriggerCloudBackup -> triggerCloudBackup(traceId)
             is TransactionsIntent.TriggerCloudRestore -> triggerCloudRestore(traceId)
             is TransactionsIntent.SeedDemoData -> seedDemoData(traceId)
@@ -122,8 +123,34 @@ class TransactionsViewModel(
                     val ratio = if (budget > 0) (totalExpense / budget).toFloat() else 0f
                     copy(
                         monthlyBudget = budget,
+                        remainingBudget = (budget - totalExpense).coerceAtLeast(0.0),
                         budgetUsageRatio = ratio,
                         isOverBudget = totalExpense > budget
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeGoogleAccount() {
+        viewModelScope.launch {
+            combine(
+                prefManager.isLoggedInFlow,
+                prefManager.userEmailFlow,
+                prefManager.userDisplayNameFlow,
+                prefManager.userAvatarUrlFlow
+            ) { isLoggedIn, email, displayName, avatarUrl ->
+                if (isLoggedIn && email.isNotBlank()) {
+                    Triple(email, displayName, avatarUrl)
+                } else {
+                    null
+                }
+            }.collectLatest { accountInfo ->
+                updateState {
+                    copy(
+                        googleAccountEmail = accountInfo?.first,
+                        googleDisplayName = accountInfo?.second?.ifBlank { null },
+                        googleAvatarUrl = accountInfo?.third?.ifBlank { null }
                     )
                 }
             }
@@ -149,147 +176,52 @@ class TransactionsViewModel(
     }
 
     private fun applyFiltersAndCalculations(allList: List<TransactionEntity>) {
-        val currentOffset = viewState.value.selectedMonthOffset
-        val query = viewState.value.searchQuery.trim().lowercase()
-        val accountFilter = viewState.value.selectedAccountFilter
-        val budget = viewState.value.monthlyBudget
-        val sortOrder = viewState.value.sortOrder
+        val calculated = TransactionCalculationEngine.filterAndCalculate(
+            allList = allList,
+            currentOffset = viewState.value.selectedMonthOffset,
+            query = viewState.value.searchQuery,
+            accountFilter = viewState.value.selectedAccountFilter,
+            budget = viewState.value.monthlyBudget,
+            sortOrder = viewState.value.sortOrder,
+            currencySymbol = viewState.value.currencySymbol
+        )
 
-        // Calculate Month Range
-        val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset)
-
-        val monthFilteredList = if (currentOffset == 0 && query.isBlank() && accountFilter == "ALL") {
-            allList
-        } else {
-            allList.filter { it.timestamp in startTs..endTs }
+        // Update Launcher Widget
+        val todayCal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
-
-        // Apply Search & Account Filters
-        val matchedFiltered = monthFilteredList.filter { item ->
-            val matchesQuery = query.isEmpty() ||
-                    item.categoryName.lowercase().contains(query) ||
-                    item.note.lowercase().contains(query)
-            val matchesAccount = accountFilter == "ALL" || item.accountType == accountFilter
-            matchesQuery && matchesAccount
-        }
-
-        // Apply Sorting
-        val finalSorted = when (sortOrder) {
-            TransactionSortOrder.DATE_DESC -> matchedFiltered.sortedByDescending { it.timestamp }
-            TransactionSortOrder.DATE_ASC -> matchedFiltered.sortedBy { it.timestamp }
-            TransactionSortOrder.AMOUNT_DESC -> matchedFiltered.sortedByDescending { it.amount }
-            TransactionSortOrder.AMOUNT_ASC -> matchedFiltered.sortedBy { it.amount }
-        }
-
-        val totalExp = finalSorted.filter { it.type == "EXPENSE" }.sumOf { it.amount }
-        val totalInc = finalSorted.filter { it.type == "INCOME" }.sumOf { it.amount }
-
-        val expenseShares = calculateCategoryShares(finalSorted.filter { it.type == "EXPENSE" }, totalExp)
-        val expenseSegments = expenseShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
-
-        val incomeShares = calculateCategoryShares(finalSorted.filter { it.type == "INCOME" }, totalInc)
-        val incomeSegments = incomeShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
-
-        val maxExpenseTx = finalSorted.filter { it.type == "EXPENSE" }.maxByOrNull { it.amount }
-        val maxIncomeTx = finalSorted.filter { it.type == "INCOME" }.maxByOrNull { it.amount }
-
-        val daysInMonth = getDaysInMonth(currentOffset)
-        val dailyAvgExp = if (daysInMonth > 0) totalExp / daysInMonth else 0.0
-        val dailyAvgInc = if (daysInMonth > 0) totalInc / daysInMonth else 0.0
-
-        val trendBars = calculateRecentDaysTrend(finalSorted.filter { it.type == "EXPENSE" })
-
-        val ratio = if (budget > 0) (totalExp / budget).toFloat() else 0f
+        val todayStart = todayCal.timeInMillis
+        val todayExp = allList.filter { it.type == "EXPENSE" && it.timestamp >= todayStart }.sumOf { it.amount }
+        try {
+            ListenExpenseAppWidgetProvider.updateAllWidgets(application, todayExp, viewState.value.currencySymbol)
+        } catch (_: Exception) {}
 
         updateState {
             copy(
-                transactions = allList,
-                filteredTransactions = finalSorted,
-                totalExpense = totalExp,
-                totalIncome = totalInc,
-                netBalance = totalInc - totalExp,
-                categoryShares = expenseShares,
-                progressSegments = expenseSegments,
-                incomeCategoryShares = incomeShares,
-                incomeProgressSegments = incomeSegments,
-                dailyTrendBars = trendBars,
-                dailyAverageExpense = dailyAvgExp,
-                dailyAverageIncome = dailyAvgInc,
-                maxExpenseTransaction = maxExpenseTx,
-                maxIncomeTransaction = maxIncomeTx,
-                budgetUsageRatio = ratio,
-                isOverBudget = totalExp > budget,
-                monthTitle = title,
+                transactions = calculated.transactions,
+                filteredTransactions = calculated.filteredTransactions,
+                totalExpense = calculated.totalExpense,
+                totalIncome = calculated.totalIncome,
+                netBalance = calculated.netBalance,
+                remainingBudget = (monthlyBudget - calculated.totalExpense).coerceAtLeast(0.0),
+                categoryShares = calculated.categoryShares,
+                progressSegments = calculated.progressSegments,
+                incomeCategoryShares = calculated.incomeCategoryShares,
+                incomeProgressSegments = calculated.incomeProgressSegments,
+                dailyTrendBars = calculated.dailyTrendBars,
+                dailyAverageExpense = calculated.dailyAverageExpense,
+                dailyAverageIncome = calculated.dailyAverageIncome,
+                maxExpenseTransaction = calculated.maxExpenseTransaction,
+                maxIncomeTransaction = calculated.maxIncomeTransaction,
+                budgetUsageRatio = calculated.budgetUsageRatio,
+                isOverBudget = calculated.isOverBudget,
+                monthTitle = calculated.monthTitle,
                 isLoading = false
             )
         }
-    }
-
-    private fun calculateRecentDaysTrend(expenses: List<TransactionEntity>): List<BarChartItem> {
-        val sdf = SimpleDateFormat("MM-dd", Locale.getDefault())
-        val dayGroups = expenses.groupBy {
-            sdf.format(Date(it.timestamp))
-        }
-
-        // Generate last 7 days
-        val result = mutableListOf<BarChartItem>()
-        val cal = Calendar.getInstance()
-        for (i in 6 downTo 0) {
-            val c = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -i) }
-            val dayKey = sdf.format(c.time)
-            val sum = dayGroups[dayKey]?.sumOf { it.amount } ?: 0.0
-            result.add(
-                BarChartItem(
-                    label = dayKey,
-                    value = sum,
-                    colorHex = "#3B82F6"
-                )
-            )
-        }
-        return result
-    }
-
-    private fun getMonthRangeAndTitle(offset: Int): Triple<Long, Long, String> {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MONTH, offset)
-        cal.set(Calendar.DAY_OF_MONTH, 1)
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        val startTs = cal.timeInMillis
-
-        cal.add(Calendar.MONTH, 1)
-        cal.add(Calendar.MILLISECOND, -1)
-        val endTs = cal.timeInMillis
-
-        val sdf = SimpleDateFormat("yyyy年MM月", Locale.getDefault())
-        val title = if (offset == 0) "本月 (${sdf.format(Date(startTs))})" else sdf.format(Date(startTs))
-
-        return Triple(startTs, endTs, title)
-    }
-
-    private fun getDaysInMonth(offset: Int): Int {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MONTH, offset)
-        return cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-    }
-
-    private fun calculateCategoryShares(items: List<TransactionEntity>, total: Double): List<PieChartItem> {
-        if (total <= 0) return emptyList()
-        return items
-            .groupBy { it.categoryName to it.categoryColorHex }
-            .map { (key, txs) ->
-                val amount = txs.sumOf { it.amount }
-                val percentage = (amount / total).toFloat()
-                PieChartItem(
-                    label = key.first,
-                    colorHex = key.second,
-                    value = amount,
-                    percentage = percentage
-                )
-            }
-            .sortedByDescending { it.value }
     }
 
     private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) {
@@ -324,10 +256,24 @@ class TransactionsViewModel(
 
     private fun deleteTransaction(id: String, traceId: String) {
         viewModelScope.launch {
+            val toDelete = viewState.value.transactions.find { it.id == id }
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
                 dao.deleteTransactionById(id)
             }
-            emitEffect(TransactionsEffect.ShowToast("已删除账单"))
+            if (toDelete != null) {
+                emitEffect(TransactionsEffect.ShowUndoSnackbar("已删除账单", toDelete))
+            } else {
+                emitEffect(TransactionsEffect.ShowToast("已删除账单"))
+            }
+        }
+    }
+
+    private fun restoreDeletedTransaction(transaction: TransactionEntity, traceId: String) {
+        viewModelScope.launch {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
+                dao.insertTransaction(transaction)
+            }
+            emitEffect(TransactionsEffect.ShowToast("已撤销删除并恢复账单"))
         }
     }
 
@@ -370,10 +316,38 @@ class TransactionsViewModel(
         }
     }
 
-    private fun triggerCloudBackup(traceId: String) {
+    private fun linkGoogleAccount(email: String, displayName: String?, avatarUrl: String?) {
         viewModelScope.launch {
-            val res = CloudSyncManager.backupToCloud(viewState.value.transactions, traceId)
+            prefManager.setLoggedIn(
+                isLoggedIn = true,
+                userEmail = email,
+                displayName = displayName ?: "",
+                avatarUrl = avatarUrl ?: ""
+            )
+            emitEffect(TransactionsEffect.ShowToast("Google 账户连携成功 ($email)"))
+        }
+    }
+
+    private fun unlinkGoogleAccount() {
+        viewModelScope.launch {
+            prefManager.setLoggedIn(isLoggedIn = false, userEmail = "", displayName = "", avatarUrl = "")
+            emitEffect(TransactionsEffect.ShowToast("已退出 Google 账户登录"))
+        }
+    }
+
+    private fun triggerCloudBackup(traceId: String) {
+        val email = viewState.value.googleAccountEmail
+        if (email.isNullOrBlank()) {
+            viewModelScope.launch {
+                emitEffect(TransactionsEffect.ShowToast("请先连携 Google 账户以使用云端备份！"))
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            val res = CloudSyncManager.backupToCloud(viewState.value.transactions, email, traceId)
             res.onSuccess { count ->
+                prefManager.setLastSyncTimestamp(System.currentTimeMillis())
                 emitEffect(TransactionsEffect.ShowToast("云端备份成功 (已备份 $count 条账单)"))
             }.onFailure { err ->
                 emitEffect(TransactionsEffect.ShowToast("云端备份失败: ${err.message}"))
@@ -382,10 +356,19 @@ class TransactionsViewModel(
     }
 
     private fun triggerCloudRestore(traceId: String) {
+        val email = viewState.value.googleAccountEmail
+        if (email.isNullOrBlank()) {
+            viewModelScope.launch {
+                emitEffect(TransactionsEffect.ShowToast("请先连携 Google 账户以从云端恢复数据！"))
+            }
+            return
+        }
+
         viewModelScope.launch {
-            val res = CloudSyncManager.restoreFromCloud(traceId)
+            val res = CloudSyncManager.restoreFromCloud(email, traceId)
             res.onSuccess { list ->
                 dao.insertTransactions(list)
+                prefManager.setLastSyncTimestamp(System.currentTimeMillis())
                 emitEffect(TransactionsEffect.ShowToast("云端恢复成功 (已恢复 ${list.size} 条账单)"))
             }.onFailure { err ->
                 emitEffect(TransactionsEffect.ShowToast("云端恢复失败: ${err.message}"))
@@ -415,17 +398,35 @@ class TransactionsViewModel(
     private fun seedDemoData(traceId: String) {
         viewModelScope.launch {
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "SeedDemoData", traceId = traceId) {
+                val now = System.currentTimeMillis()
+                val oneDay = 86400000L
                 val demoList = listOf(
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 68.5, note = "朋友聚餐日料", accountType = "WECHAT", timestamp = System.currentTimeMillis() - 3600000),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_transport", categoryName = "交通", categoryIcon = "c_transport", categoryColorHex = "#3B82F6", amount = 25.0, note = "打车回家", accountType = "ALIPAY", timestamp = System.currentTimeMillis() - 14400000),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 299.0, note = "买衣服", accountType = "BANK", timestamp = System.currentTimeMillis() - 86400000),
-                    TransactionEntity(type = "INCOME", categoryId = "c_salary", categoryName = "工资", categoryIcon = "c_salary", categoryColorHex = "#10B981", amount = 12500.0, note = "8月发薪", accountType = "BANK", timestamp = System.currentTimeMillis() - 172800000),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_housing", categoryName = "居住", categoryIcon = "c_housing", categoryColorHex = "#F59E0B", amount = 3200.0, note = "房屋房租", accountType = "WECHAT", timestamp = System.currentTimeMillis() - 259200000),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_entertainment", categoryName = "娱乐", categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6", amount = 128.0, note = "电影票+零食", accountType = "ALIPAY", timestamp = System.currentTimeMillis() - 345600000)
+                    // Current Month - Today & Recent
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 38.0, note = "午餐老碗牛肉面", accountType = "CASH", timestamp = now - 7200000),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_cafe", categoryName = "咖啡饮品", categoryIcon = "c_cafe", categoryColorHex = "#84CC16", amount = 22.0, note = "冰美式咖啡", accountType = "CASH", timestamp = now - 14400000),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_transport", categoryName = "交通", categoryIcon = "c_transport", categoryColorHex = "#3B82F6", amount = 6.0, note = "地铁通勤", accountType = "BANK", timestamp = now - 28800000),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 168.0, note = "超市采购生活用品", accountType = "BANK", timestamp = now - oneDay),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 128.0, note = "晚餐日料定食", accountType = "CASH", timestamp = now - oneDay - 7200000),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_entertainment", categoryName = "娱乐", categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6", amount = 75.0, note = "IMAX 电影票", accountType = "BANK", timestamp = now - oneDay * 2),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_fitness", categoryName = "运动健身", categoryIcon = "c_fitness", categoryColorHex = "#06B6D4", amount = 200.0, note = "羽毛球馆包场", accountType = "BANK", timestamp = now - oneDay * 3),
+                    TransactionEntity(type = "INCOME", categoryId = "c_investment", categoryName = "理财", categoryIcon = "c_investment", categoryColorHex = "#3B82F6", amount = 356.8, note = "指数基金定投分红", accountType = "BANK", timestamp = now - oneDay * 4),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_medical", categoryName = "医疗", categoryIcon = "c_medical", categoryColorHex = "#10B981", amount = 65.0, note = "药房维生素补剂", accountType = "CASH", timestamp = now - oneDay * 5),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_pets", categoryName = "宠物", categoryIcon = "c_pets", categoryColorHex = "#F97316", amount = 180.0, note = "猫咪进口冻干粮", accountType = "BANK", timestamp = now - oneDay * 6),
+                    TransactionEntity(type = "INCOME", categoryId = "c_salary", categoryName = "工资", categoryIcon = "c_salary", categoryColorHex = "#10B981", amount = 15000.0, note = "本月薪资到账", accountType = "BANK", timestamp = now - oneDay * 7),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_housing", categoryName = "居住", categoryIcon = "c_housing", categoryColorHex = "#F59E0B", amount = 3500.0, note = "月度房租物业费", accountType = "BANK", timestamp = now - oneDay * 8),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_social", categoryName = "人情", categoryIcon = "c_social", categoryColorHex = "#6366F1", amount = 500.0, note = "朋友婚礼礼金", accountType = "BANK", timestamp = now - oneDay * 10),
+                    TransactionEntity(type = "INCOME", categoryId = "c_gift", categoryName = "礼金", categoryIcon = "c_gift", categoryColorHex = "#F59E0B", amount = 888.0, note = "长辈生日红包", accountType = "CASH", timestamp = now - oneDay * 12),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 499.0, note = "机械键盘与鼠标", accountType = "BANK", timestamp = now - oneDay * 15),
+
+                    // Previous Month (30-45 days ago)
+                    TransactionEntity(type = "INCOME", categoryId = "c_salary", categoryName = "工资", categoryIcon = "c_salary", categoryColorHex = "#10B981", amount = 15000.0, note = "上月薪资", accountType = "BANK", timestamp = now - oneDay * 35),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_housing", categoryName = "居住", categoryIcon = "c_housing", categoryColorHex = "#F59E0B", amount = 3500.0, note = "上月房租", accountType = "BANK", timestamp = now - oneDay * 36),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 320.0, note = "周末家庭聚餐", accountType = "BANK", timestamp = now - oneDay * 38),
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 650.0, note = "换季服饰采购", accountType = "BANK", timestamp = now - oneDay * 42)
                 )
                 dao.insertTransactions(demoList)
             }
-            emitEffect(TransactionsEffect.ShowToast("成功填充 6 条测试演示账单！"))
+            emitEffect(TransactionsEffect.ShowToast("成功填充 19 条多周期、全场景精细测试账单！"))
         }
     }
 
