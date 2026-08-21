@@ -12,7 +12,7 @@
 2. **单一事实来源 (Single Source of Truth)**：
    - 全局数据以 Room SQLite / DataStore 为准，ViewModel 严禁维护私有不可恢复的状态副本。
 3. **架构解耦红线**：
-   - `ListenArch` 必须 100% 独立于业务逻辑，严禁引用 `com.listen.listenexpensetracker.*`。
+   - `ListenArch` 必须 100% 独立于业务逻辑，严禁引用 `com.listen.expensetracker.*`。
    - `ListenUiComponent` 必须纯 UI 化，严禁引用 Room 数据库或平台具体业务实体。
 
 ---

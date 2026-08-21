@@ -83,7 +83,7 @@
 ## 3. `ListenExpenseTracker` 业务层核心类与引擎
 
 ### 3.1 `TransactionCalculationEngine`
-* **包名**：`com.listen.listenexpensetracker.data.engine`
+* **包名**：`com.listen.expensetracker.data.engine`
 * **职责**：纯函数式高阶计算引擎，将原始账单列表过滤、排序、分组并计算出所有统计指标。
 * **方法**：
   ```kotlin
@@ -99,7 +99,7 @@
   ```
 
 ### 3.2 `CategoryRepository` (动态分类管理)
-* **包名**：`com.listen.listenexpensetracker.data.model`
+* **包名**：`com.listen.expensetracker.data.model`
 * **方法**：
   * `val expenseCategories: List<Category>`
   * `val incomeCategories: List<Category>`
@@ -109,7 +109,7 @@
   * `fun deleteCategory(id: String): Boolean`
 
 ### 3.3 `AccountRepository` (支付账户管理)
-* **包名**：`com.listen.listenexpensetracker.data.model`
+* **包名**：`com.listen.expensetracker.data.model`
 * **方法**：
   * `fun getAllAccounts(): List<AccountTypeItem>`
   * `fun getAccountName(key: String): String`
@@ -117,7 +117,7 @@
   * `fun deleteAccount(key: String): Boolean`
 
 ### 3.4 `GoogleAuthManager` (Google 授权管理)
-* **包名**：`com.listen.listenexpensetracker.auth`
+* **包名**：`com.listen.expensetracker.auth`
 * **方法**：
   * `fun getClient(context: Context): GoogleSignInClient`
   * `fun getLastSignedInAccount(context: Context): GoogleSignInAccount?`
