@@ -1,6 +1,9 @@
 package com.listen.expensetracker.ui.screens
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -101,6 +104,38 @@ fun SettingsScreen(
     var showCategoryManageDialog by remember { mutableStateOf(false) }
     var showLogoutConfirmDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf(state.monthlyBudget.toString()) }
+
+    val appVersionText = remember {
+        try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            val vName = packageInfo.versionName ?: "0.0.1"
+            val vCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                packageInfo.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.versionCode.toLong()
+            }
+            "v$vName (Build $vCode)"
+        } catch (e: Exception) {
+            "v0.0.1 (Build 1)"
+        }
+    }
+
+    val openGooglePlay: () -> Unit = {
+        val packageName = context.packageName
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                setPackage("com.android.vending")
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(webIntent)
+        }
+    }
 
     // Google Sign-In Activity Result Launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -595,6 +630,29 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
+                        onClick = openGooglePlay,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                    ) {
+                        Text("🚀 " + StringsRes.get("check_update", lang), fontSize = 11.sp, maxLines = 1)
+                    }
+
+                    OutlinedButton(
+                        onClick = { showAboutDialog = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                    ) {
+                        Text("ℹ️ " + StringsRes.get("about_app", lang), fontSize = 11.sp, maxLines = 1)
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
                         onClick = onOpenApmInspector,
                         modifier = Modifier
                             .weight(1f)
@@ -604,20 +662,6 @@ fun SettingsScreen(
                     }
 
                     OutlinedButton(
-                        onClick = { showAboutDialog = true },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(36.dp)
-                    ) {
-                        Text(StringsRes.get("about_app", lang), fontSize = 11.sp, maxLines = 1)
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedButton(
                         onClick = { onIntent(TransactionsIntent.SeedDemoData) },
                         modifier = Modifier
                             .weight(1f)
@@ -625,16 +669,16 @@ fun SettingsScreen(
                     ) {
                         Text("🌱 填充数据", fontSize = 11.sp, maxLines = 1)
                     }
+                }
 
-                    Button(
-                        onClick = { showClearDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(36.dp)
-                    ) {
-                        Text(StringsRes.get("clear_all", lang), fontSize = 11.sp, color = Color.White, maxLines = 1)
-                    }
+                Button(
+                    onClick = { showClearDialog = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp)
+                ) {
+                    Text(StringsRes.get("clear_all", lang), fontSize = 11.sp, color = Color.White, maxLines = 1)
                 }
             }
         }
@@ -803,7 +847,7 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text("lExpense", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
-                    Text("版本: v0.0.1 (Build 2026.08)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text("当前版本: $appVersionText", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     Text("架构: MVI + Clean Architecture", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("核心 SDK: ListenArch & ListenUiComponent", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -813,6 +857,14 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showAboutDialog = false }) {
                     Text(StringsRes.get("btn_done", lang))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showAboutDialog = false
+                    openGooglePlay()
+                }) {
+                    Text(StringsRes.get("check_update", lang))
                 }
             }
         )
