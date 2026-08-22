@@ -1,0 +1,386 @@
+name: CI, Build & Google Play Deployment
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Build environment (prod, dev, mock)'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
+          - mock
+      force_build_apk:
+        description: 'Force build APK even if conditions not met'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check-conditions:
+    name: Check Build Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_build_apk: ${{ steps.check.outputs.should_build_apk }}
+      environment: ${{ steps.check.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Evaluate triggers and build conditions
+        id: check
+        run: |
+          SHOULD_BUILD_APK="false"
+          ENVIRONMENT="prod"
+
+          # 1. Check if force build via workflow_dispatch
+          if [[ "${{ github.event.inputs.force_build_apk }}" == "true" ]]; then
+            SHOULD_BUILD_APK="true"
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+            echo "Force build requested via dispatch"
+          fi
+
+          # 2. Check commit message for explicit keywords
+          if [[ "$SHOULD_BUILD_APK" == "false" ]]; then
+            COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+            if [[ "$COMMIT_MSG" == *"[build-apk]"* ]] || [[ "$COMMIT_MSG" == *"[apk]"* ]] || [[ "$COMMIT_MSG" == *"[deploy]"* ]] || [[ "$COMMIT_MSG" == *"[release]"* ]]; then
+              SHOULD_BUILD_APK="true"
+              echo "Build trigger tag found in commit message"
+            fi
+          fi
+
+          # 3. Check if manual workflow dispatch
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
+            SHOULD_BUILD_APK="true"
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+            echo "Manual workflow dispatch"
+          fi
+
+          # 4. Check if Pull Request
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
+            SHOULD_BUILD_APK="true"
+            echo "Pull request trigger"
+          fi
+
+          # 5. Check time interval for push events (> 2 hours)
+          if [[ "${{ github.event_name }}" == "push" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
+            echo "Checking last build time..."
+            LAST_BUILD=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs?event=push&status=success&per_page=1" | \
+              jq -r '.workflow_runs[0].created_at // ""')
+
+            if [[ -n "$LAST_BUILD" ]] && [[ "$LAST_BUILD" != "null" ]]; then
+              CURRENT_TIME=$(date -u +%s)
+              LAST_BUILD_TIME=$(date -d "$LAST_BUILD" -u +%s 2>/dev/null || echo 0)
+              TIME_DIFF=$(( (CURRENT_TIME - LAST_BUILD_TIME) / 3600 ))
+
+              echo "Last build: $LAST_BUILD"
+              echo "Time difference: $TIME_DIFF hours"
+
+              if [[ $TIME_DIFF -ge 2 ]]; then
+                SHOULD_BUILD_APK="true"
+                echo "Building due to time interval >= 2 hours"
+              fi
+            else
+              SHOULD_BUILD_APK="true"
+              echo "No previous successful build found"
+            fi
+          fi
+
+          echo "should_build_apk=$SHOULD_BUILD_APK" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "Evaluated: should_build_apk=$SHOULD_BUILD_APK, environment=$ENVIRONMENT"
+
+  build-apk:
+    name: Build & Test APK
+    needs: [check-conditions]
+    if: needs.check-conditions.outputs.should_build_apk == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ListenExpenseTracker
+        uses: actions/checkout@v4
+        with:
+          path: ListenExpenseTracker
+
+      - name: Checkout ListenArch SDK
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ListenArch
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          path: ListenArch
+
+      - name: Checkout ListenUiComponent SDK
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ListenUiComponent
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          path: ListenUiComponent
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Keystore & Signing
+        working-directory: ListenExpenseTracker
+        run: |
+          mkdir -p keystore
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding Keystore from secret..."
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > keystore/lExpense.jks
+            cat > keystore/keystore.properties << EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=lExpense.jks
+          EOF
+          else
+            echo "No ANDROID_KEYSTORE_BASE64 secret found, generating local ephemeral keystore for CI..."
+            keytool -genkeypair -v -keystore keystore/lExpense.jks -alias lExpense -keyalg RSA -keysize 2048 -validity 10000 -storepass ls88888888 -keypass ls88888888 -dname "CN=Listen, OU=Mobile, O=Listen, L=Tokyo, ST=Tokyo, C=JP"
+            cat > keystore/keystore.properties << EOF
+          storePassword=ls88888888
+          keyPassword=ls88888888
+          keyAlias=lExpense
+          storeFile=lExpense.jks
+          EOF
+          fi
+
+      - name: Setup google-services.json
+        working-directory: ListenExpenseTracker
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" ]; then
+            echo "Decoding google-services.json from secret..."
+            echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          fi
+
+      - name: Run Unit Tests & Build APKs
+        working-directory: ListenExpenseTracker
+        run: |
+          chmod +x gradlew
+          ./gradlew test jacocoTestReport assembleDebug assembleRelease
+
+      - name: Collect APK Info
+        id: apk_info
+        working-directory: ListenExpenseTracker
+        run: |
+          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          echo "debug_apk=$DEBUG_APK" >> $GITHUB_OUTPUT
+          echo "release_apk=$RELEASE_APK" >> $GITHUB_OUTPUT
+          if [[ -n "$RELEASE_APK" ]]; then
+            echo "apk_filename=$(basename $RELEASE_APK)" >> $GITHUB_OUTPUT
+            echo "apk_size=$(stat -c%s $RELEASE_APK)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lExpense-debug-apk
+          path: ListenExpenseTracker/${{ steps.apk_info.outputs.debug_apk }}
+          retention-days: 30
+
+      - name: Upload Release APK Artifact
+        if: steps.apk_info.outputs.release_apk != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: lExpense-release-apk
+          path: ListenExpenseTracker/${{ steps.apk_info.outputs.release_apk }}
+          retention-days: 30
+
+      - name: Generate Download Markdown Info
+        working-directory: ListenExpenseTracker
+        run: |
+          cat > download_info.md << EOF
+          # 📱 lExpense APK Build Information
+
+          ## Build Details
+          - **App**: lExpense
+          - **Branch**: ${{ github.ref_name }}
+          - **Commit**: ${{ github.sha }}
+          - **Build Time**: $(date -u)
+          - **Trigger**: ${{ github.event_name }}
+
+          ## Artifacts
+          - **Release APK**: \`${{ steps.apk_info.outputs.apk_filename }}\` (${{ steps.apk_info.outputs.apk_size }} bytes)
+          - Downloadable in GitHub Actions Artifacts tab for 30 days.
+          EOF
+
+      - name: Comment on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const downloadInfo = fs.readFileSync('ListenExpenseTracker/download_info.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📱 lExpense APK Ready for Download\n\n${downloadInfo}\n\n---\n🤖 Auto-generated by CI build workflow.`
+            });
+
+  update-version-json:
+    name: Auto Update version.json
+    needs: [check-conditions]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Checkout ListenExpenseTracker
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Generate pages/version.json
+        run: node tools/generate_version_json.js
+
+      - name: Commit and Push version.json
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add pages/version.json
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: auto-generate version.json [skip ci]"
+            git pull origin ${{ github.ref_name }} --rebase -X theirs
+            git push origin ${{ github.ref_name }}
+          fi
+
+  deploy-to-google-play:
+    name: Deploy to Google Play Internal Track
+    needs: [check-conditions, update-version-json]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ListenExpenseTracker
+        uses: actions/checkout@v4
+        with:
+          path: ListenExpenseTracker
+          ref: ${{ github.ref_name }}
+
+      - name: Checkout ListenArch SDK
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ListenArch
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          path: ListenArch
+
+      - name: Checkout ListenUiComponent SDK
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ListenUiComponent
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          path: ListenUiComponent
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Keystore & Signing
+        working-directory: ListenExpenseTracker
+        run: |
+          mkdir -p keystore
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > keystore/lExpense.jks
+            cat > keystore/keystore.properties << EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=lExpense.jks
+          EOF
+          else
+            echo "Error: ANDROID_KEYSTORE_BASE64 secret is not configured!"
+            exit 1
+          fi
+
+      - name: Setup google-services.json
+        working-directory: ListenExpenseTracker
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
+          fi
+
+      - name: Check if Version Already Uploaded to Google Play
+        id: check_version
+        working-directory: ListenExpenseTracker
+        env:
+          PLAY_SERVICE_ACCOUNT_KEY: ${{ secrets.PLAY_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_KEY" ]; then
+            echo "Warning: PLAY_SERVICE_ACCOUNT_KEY secret not found, skipping Google Play deployment."
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          LATEST_VERSION_CODE=$(node tools/get_play_version.js)
+          echo "Latest version code on Google Play: $LATEST_VERSION_CODE"
+          NEXT_VERSION_CODE=$(( LATEST_VERSION_CODE + 1 ))
+          echo "Next Version Code required: $NEXT_VERSION_CODE"
+
+          VNAME=$(grep 'val vName' app/build.gradle.kts | cut -d '"' -f 2)
+          echo "Current version in build.gradle.kts: $VNAME"
+
+          IFS='.' read -r -a parts <<< "$VNAME"
+          major=${parts[0]:-0}
+          minor=${parts[1]:-0}
+          patch=$(echo "${parts[2]:-0}" | tr -cd '0-9')
+          PROJECT_VERSION_CODE=$(( major * 10000 + minor * 100 + patch ))
+          echo "Calculated Project Version Code: $PROJECT_VERSION_CODE"
+
+          if [ $PROJECT_VERSION_CODE -lt $NEXT_VERSION_CODE ]; then
+            echo "Version code $PROJECT_VERSION_CODE already deployed. Skipping..."
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version code $PROJECT_VERSION_CODE is ready for deployment."
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Release AAB Bundle
+        if: steps.check_version.outputs.should_deploy == 'true'
+        working-directory: ListenExpenseTracker
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease
+
+      - name: Upload AAB to Google Play Internal Track
+        if: steps.check_version.outputs.should_deploy == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_KEY }}
+          packageName: com.listen.expensetracker
+          releaseFiles: ListenExpenseTracker/app/build/outputs/bundle/release/app-release.aab
+          tracks: internal
+          status: completed
+
+  skip-build:
+    name: Skip Build Notification
+    needs: [check-conditions]
+    if: needs.check-conditions.outputs.should_build_apk == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip APK build notification
+        run: |
+          echo "APK build skipped: Conditions not met (push interval < 2h and no commit tag)."
+          echo "To trigger build, add [build-apk], [apk], [deploy] or [release] to commit message, or trigger manually."
