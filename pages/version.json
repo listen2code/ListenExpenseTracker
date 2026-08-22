@@ -1,6 +1,6 @@
 {
-  "version": "0.0.1",
-  "buildNumber": 1,
+  "version": "0.0.2",
+  "buildNumber": 2,
   "url": "https://play.google.com/store/apps/details?id=com.listen.expensetracker",
   "changelog": {
     "zh": "初始发布版本 0.0.1：支持离线极速记账、多账户流水管理、收支双维度统计分析、Google 账户多端加密云备份与恢复。",
