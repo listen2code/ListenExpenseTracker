@@ -22,6 +22,12 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+  issues: write
+
 jobs:
   check-conditions:
     name: Check Build Conditions
@@ -33,6 +39,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Evaluate triggers and build conditions
@@ -109,6 +116,7 @@ jobs:
       - name: Checkout ListenExpenseTracker
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           path: ListenExpenseTracker
 
       - name: Checkout ListenArch SDK
@@ -239,6 +247,7 @@ jobs:
       - name: Checkout ListenExpenseTracker
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -256,7 +265,6 @@ jobs:
           git add pages/version.json
           if ! git diff-index --quiet HEAD; then
             git commit -m "chore: auto-generate version.json [skip ci]"
-            git pull origin ${{ github.ref_name }} --rebase -X theirs
             git push origin ${{ github.ref_name }}
           fi
 
@@ -270,6 +278,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ListenExpenseTracker
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref_name }}
 
       - name: Checkout ListenArch SDK
