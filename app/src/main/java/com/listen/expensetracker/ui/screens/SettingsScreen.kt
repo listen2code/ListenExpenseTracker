@@ -803,7 +803,7 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text("lExpense", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
-                    Text("版本: v1.0.0 (Build 2026.08)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text("版本: v0.0.1 (Build 2026.08)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     Text("架构: MVI + Clean Architecture", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("核心 SDK: ListenArch & ListenUiComponent", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))

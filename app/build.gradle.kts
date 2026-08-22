@@ -1,7 +1,16 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("jacoco")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore/keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -16,10 +25,40 @@ android {
         applicationId = "com.listen.expensetracker"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+
+        val vName = "0.0.1"
+        versionName = vName
+
+        // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
+        versionCode = try {
+            val parts = vName.split(".")
+            val major = parts.getOrNull(0)?.toInt() ?: 0
+            val minor = parts.getOrNull(1)?.toInt() ?: 0
+            val patch = parts.getOrNull(2)?.filter { it.isDigit() }?.toInt() ?: 0
+            major * 10000 + minor * 100 + patch
+        } catch (e: Exception) {
+            1
+        }
+
+        println(">>> Calculated Auto-Increment versionCode: $versionCode (versionName: $versionName)")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+
+                val storeFileName = keystoreProperties["storeFile"] as String?
+                if (storeFileName != null) {
+                    storeFile = rootProject.file("keystore/$storeFileName")
+                }
+
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
+        }
     }
 
     buildTypes {
@@ -34,6 +73,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
