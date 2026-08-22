@@ -242,7 +242,7 @@ jobs:
     name: Auto Update version.json
     needs: [check-conditions]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && needs.check-conditions.outputs.should_build_apk == 'true'
     steps:
       - name: Checkout ListenExpenseTracker
         uses: actions/checkout@v4
@@ -273,7 +273,7 @@ jobs:
   deploy-to-google-play:
     name: Deploy to Google Play Internal Track
     needs: [check-conditions, update-version-json]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.event_name == 'push' && needs.check-conditions.outputs.should_build_apk == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ListenExpenseTracker

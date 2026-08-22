@@ -104,3 +104,7 @@
   - [x] `TransactionsIntentEffectTest`
   - [x] `TransactionsUiStateTest`
   - [x] `TransactionSortOrderTest`
+
+## 需求池
+- [] **新增架构设计功能，展示当前APP的架构设计和技术栈**
+- [] **增加push功能，APP升级后，可以收到推送，点击后跳转到setting画面，触发检查更新逻辑**
