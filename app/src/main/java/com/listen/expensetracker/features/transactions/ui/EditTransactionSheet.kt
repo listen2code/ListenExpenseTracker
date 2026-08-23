@@ -51,8 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -332,6 +332,7 @@ fun EditTransactionSheet(
                         )
                     }
                 },
+                doneText = StringsRes.get("common_done", lang) + " ✓",
                 modifier = Modifier.fillMaxWidth()
             )
         }

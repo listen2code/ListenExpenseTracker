@@ -1,6 +1,6 @@
 package com.listen.expensetracker
 
-import com.listen.arch.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.theme.AccentColor

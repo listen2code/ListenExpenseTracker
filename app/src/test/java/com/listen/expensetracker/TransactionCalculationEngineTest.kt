@@ -1,6 +1,6 @@
 package com.listen.expensetracker
 
-import com.listen.arch.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import org.junit.Assert.assertEquals

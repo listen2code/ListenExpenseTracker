@@ -341,6 +341,7 @@ fun AddTransactionSheet(
                         )
                     }
                 },
+                doneText = StringsRes.get("common_done", lang) + " ✓",
                 modifier = Modifier.fillMaxWidth()
             )
         }

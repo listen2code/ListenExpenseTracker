@@ -1,7 +1,7 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
-import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.sync.SyncState
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment

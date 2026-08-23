@@ -7,13 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
-import com.listen.arch.data.backup.TransactionBackupManager
-import com.listen.arch.data.db.AppDatabase
-import com.listen.arch.data.db.TransactionEntity
-import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.sync.CloudSyncManager
+import com.listen.expensetracker.data.backup.TransactionBackupManager
+import com.listen.expensetracker.data.db.AppDatabase
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.apm.LogEntryUi
 import com.listen.uicomponent.theme.AccentColor
@@ -36,7 +36,7 @@ class TransactionsViewModel(
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
-    private val prefManager = BaseDataStoreManager(application)
+    private val prefManager = ExpenseDataStoreManager(application)
 
     val apmLogsUiFlow: StateFlow<List<LogEntryUi>> = ApmLogger.logsFlow.map { list ->
         list.map { entry ->
@@ -272,8 +272,8 @@ class TransactionsViewModel(
         applyFiltersAndCalculations(viewState.value.transactions)
     }
 
-    private fun updateMonthOffset(offsetDelta: Int) {
-        val newOffset = viewState.value.selectedMonthOffset + offsetDelta
+    private fun updateMonthOffset(delta: Int) {
+        val newOffset = viewState.value.selectedMonthOffset + delta
         updateState { copy(selectedMonthOffset = newOffset) }
         applyFiltersAndCalculations(viewState.value.transactions)
     }
@@ -330,7 +330,13 @@ class TransactionsViewModel(
         }
 
         viewModelScope.launch {
-            val res = CloudSyncManager.backupToCloud(viewState.value.transactions, email, traceId)
+            val jsonPayload = TransactionBackupManager.exportToJson(viewState.value.transactions)
+            val res = CloudSyncManager.backupToCloud(
+                payload = jsonPayload,
+                recordCount = viewState.value.transactions.size,
+                accountEmail = email,
+                traceId = traceId
+            )
             res.onSuccess { count ->
                 prefManager.setLastSyncTimestamp(System.currentTimeMillis())
                 emitEffect(TransactionsEffect.ShowToast("云端备份成功 (已备份 $count 条账单)"))
@@ -351,7 +357,8 @@ class TransactionsViewModel(
 
         viewModelScope.launch {
             val res = CloudSyncManager.restoreFromCloud(email, traceId)
-            res.onSuccess { list ->
+            res.onSuccess { payloadJson ->
+                val list = TransactionBackupManager.importFromJson(payloadJson)
                 if (list.isNotEmpty()) {
                     dao.insertTransactions(list)
                     emitEffect(TransactionsEffect.ShowToast("云端恢复成功 (共恢复 ${list.size} 条账单)"))

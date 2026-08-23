@@ -91,3 +91,15 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 1. 研发独立的 `MonthPickerDialog`：顶部 `< 2026年 >` 极速切年，下方 3x4 12 月份方块网格直选。
 2. 列表层通过 `groupBy { formatDayGroupHeader(it.timestamp) }` 实现按日自动聚合分组，并提供每日收支小计。
 3. 将条目图标与内边距压缩为 24dp/6dp，使信息密度提高 100%。
+
+·---
+
+## ADR-008: Listen 系列多 App 架构边界与通用库业务解耦 (Zero Business Coupling)
+
+### 背景 (Context)
+随着 Listen 产品矩阵（记账、资产管理、习惯打卡、备忘录等）的演进，旧版 `ListenArch` 与 `ListenUiComponent` 中混入了记账专属的 Room 实体（`TransactionEntity`）、数据库表、记账多语言文案与固定文案按键，导致通用库无法被其他 App 直接复用。
+
+### 决策 (Decision)
+1. **`ListenArch` 通用底座化**：移除所有 Room Entity/DAO/Database 与记账 CSV 导出，迁移至 `ListenExpenseTracker`；将 `CloudSyncManager` 改造为支持任意泛型/JSON 字符串的通用 Payload 传输引擎；`StringsRes` 仅保留系统级通用词并开放 `registerAppStrings()` 动态注册能力。
+2. **`ListenUiComponent` 纯粹化**：消除 UI 控件中的业务硬编码文案（如 `NumericKeypad` 的 `doneText` 参数化，`SearchBarInput` 默认通用占位符）。
+3. **`ListenExpenseTracker` 业务闭环**：通过 `ExpenseDataStoreManager`、`ExpenseStrings` 及 `data/db/` 完整承接领域模型与业务计算。

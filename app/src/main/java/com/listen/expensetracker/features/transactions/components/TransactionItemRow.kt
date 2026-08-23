@@ -28,7 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository

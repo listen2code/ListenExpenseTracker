@@ -50,9 +50,9 @@ graph TD
     UI -.-> Arch
 ```
 
-* **[ListenArch](file:///C:/Users/liste/Downloads/github/ListenArch)**：MVI 模式基类 (`BaseViewModel`)、Room 数据库、DataStore 偏好与 Google 账户管理器、APM 监控、TraceId 链路追踪、云端同步引擎与本地化字典。
-* **[ListenUiComponent](file:///C:/Users/liste/Downloads/github/ListenUiComponent)**：算术数字键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `BarChart`)、分段进度条、Material 3 主题系统、SurfaceCard 与 APM 日志浮窗。
-* **[ListenExpenseTracker](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker)**：主 App 业务编排、日聚合流水、年月选择器、Google 授权、多维统计、分类/账户管理与桌面小组件。
+* **[ListenArch](file:///C:/Users/liste/Downloads/github/ListenArch)**：MVI 模式基类 (`BaseViewModel`)、通用 DataStore 偏好 (`BaseDataStoreManager`)、APM 监控 (`ApmLogger`)、TraceId 链路追踪 (`TraceManager`)、通用 Payload 云端同步引擎 (`CloudSyncManager`) 与通用本地化引擎 (`StringsRes`)。
+* **[ListenUiComponent](file:///C:/Users/liste/Downloads/github/ListenUiComponent)**：通用算术数字键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `BarChart`)、通用分段进度条、Material 3 主题系统、SurfaceCard、SearchBarInput 与 APM 日志浮窗。
+* **[ListenExpenseTracker](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker)**：主 App 业务编排、Room 本地数据库 (`AppDatabase`, `TransactionDao`, `TransactionEntity`)、记账专属偏好 (`ExpenseDataStoreManager`)、记账多语言字典 (`ExpenseStrings`)、JSON/CSV 备份导入导出 (`TransactionBackupManager`)、Feature-First 业务页面与桌面小组件。
 
 ---
 

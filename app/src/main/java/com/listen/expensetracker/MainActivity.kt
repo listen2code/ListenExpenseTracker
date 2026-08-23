@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.listen.arch.apm.CrashHandler
 import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
 import com.listen.expensetracker.features.settings.ui.SettingsScreen
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        ExpenseStrings.init()
         CrashHandler.init(this)
 
         splashScreen.setKeepOnScreenCondition {

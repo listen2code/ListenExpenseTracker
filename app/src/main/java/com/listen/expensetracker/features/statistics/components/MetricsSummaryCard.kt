@@ -9,8 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
