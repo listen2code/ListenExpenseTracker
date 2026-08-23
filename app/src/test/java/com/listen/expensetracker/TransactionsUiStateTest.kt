@@ -1,6 +1,8 @@
 package com.listen.expensetracker
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.theme.AccentColor
@@ -13,7 +15,7 @@ import org.junit.Test
 class TransactionsUiStateTest {
 
     @Test
-    fun testDefaultStateValues() {
+    fun testTransactionsDefaultStateValues() {
         val state = TransactionsUiState()
         assertTrue(state.transactions.isEmpty())
         assertTrue(state.filteredTransactions.isEmpty())
@@ -30,11 +32,28 @@ class TransactionsUiStateTest {
         assertEquals(ThemeMode.SYSTEM, state.themeMode)
         assertEquals(AccentColor.EMERALD, state.accentColor)
         assertEquals(TransactionSortOrder.DATE_DESC, state.sortOrder)
-        assertEquals("EXPENSE", state.statisticsTab)
     }
 
     @Test
-    fun testStateCalculationsAndCopy() {
+    fun testStatisticsDefaultStateValues() {
+        val statsState = StatisticsUiState()
+        assertEquals("EXPENSE", statsState.statisticsTab)
+        assertEquals(0.0, statsState.totalExpense, 0.001)
+        assertTrue(statsState.categoryShares.isEmpty())
+        assertTrue(statsState.dailyTrendBars.isEmpty())
+    }
+
+    @Test
+    fun testSettingsDefaultStateValues() {
+        val settingsState = SettingsUiState()
+        assertEquals("zh", settingsState.language)
+        assertEquals(ThemeMode.SYSTEM, settingsState.themeMode)
+        assertEquals(AccentColor.EMERALD, settingsState.accentColor)
+        assertFalse(settingsState.isLoggedIn)
+    }
+
+    @Test
+    fun testTransactionsStateCalculationsAndCopy() {
         val tx1 = TransactionEntity(
             id = "1",
             type = "EXPENSE",

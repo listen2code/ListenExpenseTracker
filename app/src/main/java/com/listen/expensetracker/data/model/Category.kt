@@ -15,39 +15,43 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.listen.arch.i18n.StringsRes
 
 data class Category(
     val id: String,
-    val nameZh: String,
-    val nameEn: String,
-    val nameJa: String,
+    val nameKey: String,
+    val customName: String? = null,
     val icon: ImageVector,
     val colorHex: String,
     val type: String, // "EXPENSE" or "INCOME"
     val isSystem: Boolean = true
-)
+) {
+    fun getDisplayName(lang: String = "zh"): String {
+        return customName ?: StringsRes.get(nameKey, lang)
+    }
+}
 
 object CategoryRepository {
 
     private val defaultExpenseCategories = listOf(
-        Category("c_food", "餐饮", "Food", "外食", Icons.Default.Restaurant, "#EF4444", "EXPENSE", true),
-        Category("c_transport", "交通", "Transport", "交通", Icons.Default.DirectionsBus, "#3B82F6", "EXPENSE", true),
-        Category("c_shopping", "购物", "Shopping", "買い物", Icons.Default.ShoppingBag, "#EC4899", "EXPENSE", true),
-        Category("c_entertainment", "娱乐", "Entertainment", "娯楽", Icons.Default.SportsEsports, "#8B5CF6", "EXPENSE", true),
-        Category("c_housing", "居住", "Housing", "住居", Icons.Default.Home, "#F59E0B", "EXPENSE", true),
-        Category("c_medical", "医疗", "Medical", "医療", Icons.Default.LocalHospital, "#10B981", "EXPENSE", true),
-        Category("c_social", "人情", "Social", "交際費", Icons.Default.CardGiftcard, "#6366F1", "EXPENSE", true),
-        Category("c_pets", "宠物", "Pets", "ペット", Icons.Default.Pets, "#F97316", "EXPENSE", true),
-        Category("c_fitness", "运动健身", "Fitness", "フィットネス", Icons.Default.FitnessCenter, "#06B6D4", "EXPENSE", true),
-        Category("c_cafe", "咖啡饮品", "Cafe", "カフェ", Icons.Default.LocalCafe, "#84CC16", "EXPENSE", true),
-        Category("c_other_exp", "其他", "Other", "その他", Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
+        Category("c_food", "cat_food", null, Icons.Default.Restaurant, "#EF4444", "EXPENSE", true),
+        Category("c_transport", "cat_transport", null, Icons.Default.DirectionsBus, "#3B82F6", "EXPENSE", true),
+        Category("c_shopping", "cat_shopping", null, Icons.Default.ShoppingBag, "#EC4899", "EXPENSE", true),
+        Category("c_entertainment", "cat_entertainment", null, Icons.Default.SportsEsports, "#8B5CF6", "EXPENSE", true),
+        Category("c_housing", "cat_housing", null, Icons.Default.Home, "#F59E0B", "EXPENSE", true),
+        Category("c_medical", "cat_medical", null, Icons.Default.LocalHospital, "#10B981", "EXPENSE", true),
+        Category("c_social", "cat_social", null, Icons.Default.CardGiftcard, "#6366F1", "EXPENSE", true),
+        Category("c_pets", "cat_pets", null, Icons.Default.Pets, "#F97316", "EXPENSE", true),
+        Category("c_fitness", "cat_fitness", null, Icons.Default.FitnessCenter, "#06B6D4", "EXPENSE", true),
+        Category("c_cafe", "cat_cafe", null, Icons.Default.LocalCafe, "#84CC16", "EXPENSE", true),
+        Category("c_other_exp", "cat_other_exp", null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
     )
 
     private val defaultIncomeCategories = listOf(
-        Category("c_salary", "工资", "Salary", "給料", Icons.Default.AccountBalance, "#10B981", "INCOME", true),
-        Category("c_investment", "理财", "Investment", "投資", Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", "INCOME", true),
-        Category("c_gift", "礼金", "Gift", "祝儀", Icons.Default.CardGiftcard, "#F59E0B", "INCOME", true),
-        Category("c_other_inc", "其他", "Other", "その他", Icons.Default.MoreHoriz, "#6B7280", "INCOME", true)
+        Category("c_salary", "cat_salary", null, Icons.Default.AccountBalance, "#10B981", "INCOME", true),
+        Category("c_investment", "cat_investment", null, Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", "INCOME", true),
+        Category("c_gift", "cat_gift", null, Icons.Default.CardGiftcard, "#F59E0B", "INCOME", true),
+        Category("c_other_inc", "cat_other_inc", null, Icons.Default.MoreHoriz, "#6B7280", "INCOME", true)
     )
 
     private val customCategories = mutableListOf<Category>()
@@ -67,9 +71,8 @@ object CategoryRepository {
         val id = "cat_custom_" + System.currentTimeMillis()
         val cat = Category(
             id = id,
-            nameZh = name,
-            nameEn = name,
-            nameJa = name,
+            nameKey = "",
+            customName = name,
             icon = icon,
             colorHex = colorHex,
             type = type,
@@ -87,12 +90,12 @@ object CategoryRepository {
         val idx = customCategories.indexOfFirst { it.id == id }
         if (idx >= 0) {
             val item = customCategories[idx]
-            customCategories[idx] = item.copy(nameZh = newName, nameEn = newName, nameJa = newName)
+            customCategories[idx] = item.copy(customName = newName)
         }
     }
 
     fun getCategoryById(id: String): Category {
         return (expenseCategories + incomeCategories).find { it.id == id }
-            ?: Category("c_other_exp", "其他", "Other", "その他", Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
+            ?: Category("c_other_exp", "cat_other_exp", null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
     }
 }

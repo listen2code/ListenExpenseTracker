@@ -184,11 +184,7 @@ fun AddTransactionSheet(
                 items(categories) { cat ->
                     val isSelected = selectedCategory.id == cat.id
                     val catColor = parseHexColor(cat.colorHex)
-                    val catName = when (lang.lowercase()) {
-                        "en" -> cat.nameEn
-                        "ja" -> cat.nameJa
-                        else -> cat.nameZh
-                    }
+                    val catName = cat.getDisplayName(lang)
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
@@ -291,7 +287,7 @@ fun AddTransactionSheet(
             ) {
                 items(availableAccounts) { acct ->
                     val isSelected = selectedAccount == acct.key
-                    val acctName = AccountRepository.getAccountName(acct.key)
+                    val acctName = acct.getDisplayName(lang)
                     FilterChip(
                         selected = isSelected,
                         onClick = { selectedAccount = acct.key },
@@ -323,11 +319,7 @@ fun AddTransactionSheet(
                 onDonePress = {
                     val finalAmount = amountExpression.toDoubleOrNull() ?: 0.0
                     if (finalAmount > 0) {
-                        val catName = when (lang.lowercase()) {
-                            "en" -> selectedCategory.nameEn
-                            "ja" -> selectedCategory.nameJa
-                            else -> selectedCategory.nameZh
-                        }
+                        val catName = selectedCategory.getDisplayName(lang)
                         onSave(
                             type,
                             selectedCategory.id,

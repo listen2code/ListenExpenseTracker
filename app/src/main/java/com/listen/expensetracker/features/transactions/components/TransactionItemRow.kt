@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
@@ -46,6 +47,7 @@ import com.listen.uicomponent.theme.parseHexColor
  * @param hideAmount True if privacy masking is active
  * @param onClick Callback when the transaction row is tapped
  * @param onDelete Callback when swiped to delete
+ * @param lang Active language code
  * @param modifier Composable modifier
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +58,7 @@ fun TransactionItemRow(
     hideAmount: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    lang: String = "zh",
     modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
@@ -72,35 +75,28 @@ fun TransactionItemRow(
         state = dismissState,
         enableDismissFromStartToEnd = false,
         enableDismissFromEndToStart = true,
-        modifier = modifier.clip(RoundedCornerShape(AppDimens.CornerCard)),
         backgroundContent = {
-            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(ExpenseRed)
-                        .padding(end = AppDimens.SpaceSection),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.White,
-                        modifier = Modifier.size(AppDimens.IconSizeMedium)
-                    )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent)
+            val color = MaterialTheme.colorScheme.error
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(AppDimens.CornerCard))
+                    .background(color)
+                    .padding(horizontal = AppDimens.SpaceLarge),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = StringsRes.get("common_delete", lang),
+                    tint = MaterialTheme.colorScheme.onError
                 )
             }
-        }
+        },
+        modifier = modifier
     ) {
         SurfaceCard(
             cornerRadius = AppDimens.CornerCard,
-            contentPadding = AppDimens.SpaceMedium,
+            contentPadding = AppDimens.SpaceExtraSmall,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onClick() }
@@ -114,7 +110,7 @@ fun TransactionItemRow(
             ) {
                 val cat = CategoryRepository.getCategoryById(transaction.categoryId)
                 val color = parseHexColor(transaction.categoryColorHex)
-                val accountDisplay = AccountRepository.getAccountName(transaction.accountType)
+                val accountDisplay = AccountRepository.getAccountDisplayName(transaction.accountType, lang)
 
                 // Left Section: Category Icon, Name, Account Badge, Note
                 Row(

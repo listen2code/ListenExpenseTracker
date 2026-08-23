@@ -1,8 +1,11 @@
 package com.listen.expensetracker
 
+import com.listen.arch.mvi.CommonUiEffect
+import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsEffect
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -13,7 +16,7 @@ import org.junit.Test
 class TransactionsIntentEffectTest {
 
     @Test
-    fun testIntentInstantiations() {
+    fun testTransactionsIntentInstantiations() {
         val addIntent = TransactionsIntent.AddTransaction(
             type = "EXPENSE",
             categoryId = "c_food",
@@ -48,40 +51,61 @@ class TransactionsIntentEffectTest {
         val restoreIntent = TransactionsIntent.RestoreDeletedTransaction(tx)
         assertEquals("tx-update", restoreIntent.transaction.id)
 
-        val linkGoogleIntent = TransactionsIntent.LinkGoogleAccount("user@gmail.com", "Test User", "https://avatar.png")
-        assertEquals("user@gmail.com", linkGoogleIntent.email)
-        assertEquals("Test User", linkGoogleIntent.displayName)
-
-        val unlinkGoogleIntent = TransactionsIntent.UnlinkGoogleAccount
-        assertNotNull(unlinkGoogleIntent)
-
         val searchIntent = TransactionsIntent.SearchQueryChange("餐饮")
         assertEquals("餐饮", searchIntent.query)
 
         val sortIntent = TransactionsIntent.ChangeSortOrder(TransactionSortOrder.AMOUNT_DESC)
         assertEquals(TransactionSortOrder.AMOUNT_DESC, sortIntent.order)
+    }
 
-        val langIntent = TransactionsIntent.ChangeLanguage("ja")
+    @Test
+    fun testSettingsAndStatisticsIntents() {
+        val linkGoogleIntent = SettingsIntent.LinkGoogleAccount("user@gmail.com", "Test User", "https://avatar.png")
+        assertEquals("user@gmail.com", linkGoogleIntent.email)
+        assertEquals("Test User", linkGoogleIntent.displayName)
+
+        val unlinkGoogleIntent = SettingsIntent.UnlinkGoogleAccount
+        assertNotNull(unlinkGoogleIntent)
+
+        val langIntent = SettingsIntent.ChangeLanguage("ja")
         assertEquals("ja", langIntent.langCode)
 
-        val themeIntent = TransactionsIntent.ChangeThemeMode(ThemeMode.DARK)
+        val themeIntent = SettingsIntent.ChangeThemeMode(ThemeMode.DARK)
         assertEquals(ThemeMode.DARK, themeIntent.mode)
 
-        val accentIntent = TransactionsIntent.ChangeAccentColor(AccentColor.ROSE)
+        val accentIntent = SettingsIntent.ChangeAccentColor(AccentColor.ROSE)
         assertEquals(AccentColor.ROSE, accentIntent.accent)
+
+        val statsTabIntent = StatisticsIntent.ChangeStatisticsTab("INCOME")
+        assertEquals("INCOME", statsTabIntent.tab)
     }
 
     @Test
     fun testEffects() {
-        val toastEffect = TransactionsEffect.ShowToast("测试提示信息")
+        val toastEffect = CommonUiEffect.ShowToast("测试提示信息")
         assertEquals("测试提示信息", toastEffect.message)
 
-        val tx = TransactionEntity(id = "tx-undo", type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 20.0, note = "咖啡", accountType = "CASH")
-        val undoEffect = TransactionsEffect.ShowUndoSnackbar("已删除账单", tx)
-        assertEquals("已删除账单", undoEffect.message)
-        assertEquals("tx-undo", undoEffect.transaction.id)
+        var actionTriggered = false
+        val snackbarEffect = CommonUiEffect.ShowSnackbar("已删除账单", "撤销") { actionTriggered = true }
+        assertEquals("已删除账单", snackbarEffect.message)
+        assertEquals("撤销", snackbarEffect.actionLabel)
+        snackbarEffect.onAction?.invoke()
+        assertEquals(true, actionTriggered)
 
-        val addedSuccess = TransactionsEffect.TransactionAddedSuccess
-        assertNotNull(addedSuccess)
+        val shareEffect = CommonUiEffect.ShareText("Title", "Content")
+        assertEquals("Title", shareEffect.title)
+        assertEquals("Content", shareEffect.content)
+
+        val apmEffect = CommonUiEffect.OpenApmInspector
+        assertNotNull(apmEffect)
+    }
+
+    @Test
+    fun testNavTabs() {
+        val tabs = NavTab.entries
+        assertEquals(3, tabs.size)
+        assertEquals(NavTab.TRANSACTIONS, tabs[0])
+        assertEquals(NavTab.STATISTICS, tabs[1])
+        assertEquals(NavTab.SETTINGS, tabs[2])
     }
 }

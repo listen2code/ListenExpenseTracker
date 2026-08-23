@@ -98,11 +98,7 @@ fun CategoryManageDialog(
                 ) {
                     items(currentCategories) { cat ->
                         val color = parseHexColor(cat.colorHex)
-                        val catName = when (lang.lowercase()) {
-                            "en" -> cat.nameEn
-                            "ja" -> cat.nameJa
-                            else -> cat.nameZh
-                        }
+                        val catName = cat.getDisplayName(lang)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier

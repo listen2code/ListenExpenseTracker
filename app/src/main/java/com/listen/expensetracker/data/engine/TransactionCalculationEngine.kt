@@ -2,7 +2,6 @@ package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment
@@ -10,6 +9,27 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+data class CalculationResult(
+    val filteredTransactions: List<TransactionEntity>,
+    val totalExpense: Double,
+    val totalIncome: Double,
+    val netBalance: Double,
+    val monthlyBudget: Double,
+    val remainingBudget: Double,
+    val budgetUsageRatio: Float,
+    val isOverBudget: Boolean,
+    val categoryShares: List<PieChartItem>,
+    val progressSegments: List<ProgressSegment>,
+    val incomeCategoryShares: List<PieChartItem>,
+    val incomeProgressSegments: List<ProgressSegment>,
+    val dailyTrendBars: List<BarChartItem>,
+    val dailyAverageExpense: Double,
+    val dailyAverageIncome: Double,
+    val maxExpenseTransaction: TransactionEntity?,
+    val maxIncomeTransaction: TransactionEntity?,
+    val monthTitle: String
+)
 
 object TransactionCalculationEngine {
 
@@ -21,7 +41,7 @@ object TransactionCalculationEngine {
         budget: Double,
         sortOrder: TransactionSortOrder,
         currencySymbol: String = "￥"
-    ): TransactionsUiState {
+    ): CalculationResult {
         val cleanQuery = query.trim().lowercase()
         val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset)
 
@@ -65,13 +85,13 @@ object TransactionCalculationEngine {
         val trendBars = calculateRecentDaysTrend(finalSorted.filter { it.type == "EXPENSE" })
         val ratio = if (budget > 0) (totalExp / budget).toFloat() else 0f
 
-        return TransactionsUiState(
-            transactions = allList,
+        return CalculationResult(
             filteredTransactions = finalSorted,
             totalExpense = totalExp,
             totalIncome = totalInc,
             netBalance = totalInc - totalExp,
             monthlyBudget = budget,
+            remainingBudget = (budget - totalExp).coerceAtLeast(0.0),
             budgetUsageRatio = ratio,
             isOverBudget = totalExp > budget,
             categoryShares = expenseShares,
@@ -83,13 +103,7 @@ object TransactionCalculationEngine {
             dailyAverageIncome = dailyAvgInc,
             maxExpenseTransaction = maxExpenseTx,
             maxIncomeTransaction = maxIncomeTx,
-            monthTitle = title,
-            currencySymbol = currencySymbol,
-            searchQuery = query,
-            selectedAccountFilter = accountFilter,
-            selectedMonthOffset = currentOffset,
-            sortOrder = sortOrder,
-            isLoading = false
+            monthTitle = title
         )
     }
 

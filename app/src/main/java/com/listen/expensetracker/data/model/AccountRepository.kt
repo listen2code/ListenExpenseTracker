@@ -1,15 +1,25 @@
 package com.listen.expensetracker.data.model
 
+import com.listen.arch.i18n.StringsRes
+
 data class AccountTypeItem(
     val key: String,
-    val nameZh: String,
-    val isSystem: Boolean = false
-)
+    val nameKey: String = "",
+    val customName: String? = null,
+    val isSystem: Boolean = true
+) {
+    fun getDisplayName(lang: String = "zh"): String {
+        return customName ?: if (nameKey.isNotBlank()) StringsRes.get(nameKey, lang) else key
+    }
+}
 
 object AccountRepository {
-    private val defaultAccounts = mutableListOf(
-        AccountTypeItem(key = "CASH", nameZh = "现金", isSystem = true),
-        AccountTypeItem(key = "BANK", nameZh = "银行卡", isSystem = true)
+    const val ALL_ACCOUNTS_KEY = "ALL"
+
+    private val defaultAccounts = listOf(
+        AccountTypeItem(key = "CASH", nameKey = "filter_cash", isSystem = true),
+        AccountTypeItem(key = "BANK", nameKey = "filter_bank", isSystem = true),
+        AccountTypeItem(key = "CREDIT", nameKey = "filter_credit", isSystem = true)
     )
 
     private val customAccounts = mutableListOf<AccountTypeItem>()
@@ -18,9 +28,13 @@ object AccountRepository {
         return defaultAccounts + customAccounts
     }
 
+    fun getFilterKeys(): List<String> {
+        return listOf(ALL_ACCOUNTS_KEY) + getAllAccounts().map { it.key }
+    }
+
     fun addAccount(name: String): AccountTypeItem {
         val key = "ACC_" + System.currentTimeMillis()
-        val item = AccountTypeItem(key = key, nameZh = name, isSystem = false)
+        val item = AccountTypeItem(key = key, nameKey = "", customName = name, isSystem = false)
         customAccounts.add(item)
         return item
     }
@@ -32,11 +46,16 @@ object AccountRepository {
     fun updateAccount(key: String, newName: String) {
         val index = customAccounts.indexOfFirst { it.key == key }
         if (index >= 0) {
-            customAccounts[index] = customAccounts[index].copy(nameZh = newName)
+            customAccounts[index] = customAccounts[index].copy(customName = newName)
         }
     }
 
-    fun getAccountName(key: String): String {
-        return getAllAccounts().find { it.key == key }?.nameZh ?: key
+    fun getAccountDisplayName(key: String, lang: String = "zh"): String {
+        if (key == ALL_ACCOUNTS_KEY) return StringsRes.get("filter_all", lang)
+        return getAllAccounts().find { it.key == key }?.getDisplayName(lang) ?: key
+    }
+
+    fun getAccountName(key: String, lang: String = "zh"): String {
+        return getAccountDisplayName(key, lang)
     }
 }

@@ -30,6 +30,7 @@ object ExpenseStrings {
         "filter_wechat" to "微信",
         "filter_alipay" to "支付宝",
         "filter_bank" to "银行卡",
+        "filter_credit" to "信用卡",
         "filter_cash" to "现金",
         "sort_date_desc" to "时间最新",
         "sort_date_asc" to "时间最早",
@@ -64,16 +65,28 @@ object ExpenseStrings {
         "settings_custom_pref" to "个性化与偏好",
         "settings_category_manage" to "分类管理",
         "settings_data_manage" to "数据管理与导出",
-        "settings_system_ops" to "系统运维与测试",
-        "seed_data_btn" to "🌱 填充数据",
-        "seed_demo" to "填充测试账单",
         "clear_all" to "清空所有账单",
         "currency_dialog_title" to "选择记账币种",
         "currency_current" to "当前币种：",
         "manage_accounts_title" to "资产账户管理",
         "add_account" to "新增账户",
         "account_name_input" to "账户名称（如：信用卡、投资账户）",
-        "select_month_dialog" to "选择年月"
+        "select_month_dialog" to "选择年月",
+        "cat_food" to "餐饮",
+        "cat_transport" to "交通",
+        "cat_shopping" to "购物",
+        "cat_entertainment" to "娱乐",
+        "cat_housing" to "居住",
+        "cat_medical" to "医疗",
+        "cat_social" to "人情",
+        "cat_pets" to "宠物",
+        "cat_fitness" to "运动健身",
+        "cat_cafe" to "咖啡饮品",
+        "cat_other_exp" to "其他",
+        "cat_salary" to "工资",
+        "cat_investment" to "理财",
+        "cat_gift" to "礼金",
+        "cat_other_inc" to "其他"
     )
 
     private val enMap = mapOf(
@@ -91,6 +104,7 @@ object ExpenseStrings {
         "filter_wechat" to "WeChat",
         "filter_alipay" to "Alipay",
         "filter_bank" to "Card",
+        "filter_credit" to "Credit",
         "filter_cash" to "Cash",
         "sort_date_desc" to "Newest First",
         "sort_date_asc" to "Oldest First",
@@ -134,7 +148,22 @@ object ExpenseStrings {
         "manage_accounts_title" to "Manage Accounts",
         "add_account" to "Add Account",
         "account_name_input" to "Account Name (e.g. Credit Card)",
-        "select_month_dialog" to "Select Month"
+        "select_month_dialog" to "Select Month",
+        "cat_food" to "Food",
+        "cat_transport" to "Transport",
+        "cat_shopping" to "Shopping",
+        "cat_entertainment" to "Entertainment",
+        "cat_housing" to "Housing",
+        "cat_medical" to "Medical",
+        "cat_social" to "Social",
+        "cat_pets" to "Pets",
+        "cat_fitness" to "Fitness",
+        "cat_cafe" to "Cafe",
+        "cat_other_exp" to "Other",
+        "cat_salary" to "Salary",
+        "cat_investment" to "Investment",
+        "cat_gift" to "Gift",
+        "cat_other_inc" to "Other"
     )
 
     private val jaMap = mapOf(
@@ -152,6 +181,7 @@ object ExpenseStrings {
         "filter_wechat" to "WeChat",
         "filter_alipay" to "Alipay",
         "filter_bank" to "口座",
+        "filter_credit" to "クレカ",
         "filter_cash" to "現金",
         "sort_date_desc" to "日付（新しい順）",
         "sort_date_asc" to "日付（古い順）",
@@ -195,6 +225,21 @@ object ExpenseStrings {
         "manage_accounts_title" to "口座・資産管理",
         "add_account" to "口座を追加",
         "account_name_input" to "口座名（例：クレジットカード）",
-        "select_month_dialog" to "年月を選択"
+        "select_month_dialog" to "年月を選択",
+        "cat_food" to "外食",
+        "cat_transport" to "交通",
+        "cat_shopping" to "買い物",
+        "cat_entertainment" to "娯楽",
+        "cat_housing" to "住居",
+        "cat_medical" to "医療",
+        "cat_social" to "交際費",
+        "cat_pets" to "ペット",
+        "cat_fitness" to "フィットネス",
+        "cat_cafe" to "カフェ",
+        "cat_other_exp" to "その他",
+        "cat_salary" to "給料",
+        "cat_investment" to "投資",
+        "cat_gift" to "祝儀",
+        "cat_other_inc" to "その他"
     )
 }

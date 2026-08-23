@@ -27,33 +27,11 @@ ListenExpenseTracker 是一款**隐私优先、本地优先（Local-First）、�
 
 ---
 
-## 3. 架构分层与目录组织规范 (Feature-First)
+## 3. 架构分层与工程规范
 
-项目代码必须严格遵循 **Feature-First (按特性划分)** 的一级包结构：
-
-```
-app/src/main/java/com/listen/expensetracker/
-├── MainActivity.kt
-├── auth/                                  # 现代 Google Identity 认证体系
-├── data/                                  # 数据层（数据库、备份、偏好、多语言字典、计算引擎与常量）
-│   ├── backup/                            # 业务账单 JSON / CSV 导出与导入引擎
-│   ├── db/                                # Room 数据库单例、DAO 与 Entity 表结构
-│   ├── engine/                            # 纯函数账单与多维统计计算引擎
-│   ├── i18n/                              # ExpenseStrings 记账专属多语言字典
-│   ├── model/                             # Category, Account 常量与 AppDimens Token
-│   └── pref/                              # ExpenseDataStoreManager 偏好持久化
-└── features/                              # 核心业务特性层
-    ├── transactions/                      # 流水与记账
-    │   ├── components/
-    │   ├── ui/
-    │   └── viewmodel/
-    ├── statistics/                        # 多维统计与图表
-    │   ├── components/
-    │   └── ui/
-    └── settings/                          # 偏好、云同步与系统运维
-        ├── components/
-        └── ui/
-```
+- **目录结构与设计规范**：详见项目主文档 [README.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/README.md)（严格遵循 Feature-First 架构）。
+- **组件单一职责 (One Composable per File)**：
+  - 核心独立组件（如 Sheet、Dialog、复杂卡片、排行榜条目）原则上**一个主要 Composable 单独占用一个文件**，避免代码堆叠。
 
 ---
 
@@ -62,10 +40,10 @@ app/src/main/java/com/listen/expensetracker/
 为了防止代码臃肿与逻辑腐化，制定以下硬性代码规模阈值：
 
 1. **单文件行数限制**：
-   - 单个 Kotlin / UI 文件代码行数**不得超过 200 ~ 250 行**。
+   - 单个 Kotlin / UI 文件代码行数**严格控制在 200 ~ 250 行以内**。
    - 当单个文件行数逼近或超过 250 行时，**必须**按单一职责原则，将子区块、复杂卡片、弹窗对话框（Dialog / Sheet）或计算逻辑拆分为独立的组件文件（放入对应 Feature 的 `components/` 目录下）。
 2. **单个 Composable 函数行数限制**：
-   - 单个 Composable 函数**建议控制在 80 ~ 100 行以内**，复杂布局需分解为子 Composable，提高可读性与可测试性。
+   - 单个 Composable 函数**严格控制在 80 ~ 100 行以内**，复杂布局必须分解为子 Composable，提高可读性与可测试性。
 3. **ViewModel 与 UI 解耦**：
    - Screen 层只负责收集 State 和转发 Intent，不进行复杂的行级格式化与数据变换（由 CalculationEngine 或 Component 承接）。
 
@@ -99,8 +77,8 @@ app/src/main/java/com/listen/expensetracker/
 
 ## 8. 通用组件下沉与边界原则 (UIKit First)
 
-- 业务无关的图表、基础按键、卡片容器一律抽取并沉淀至 `ListenArch` 或 `ListenUiComponent` 模块中；
-- 沉淀至通用库时，**严禁引入宿主 App 的任何特定业务领域模型、专属数据表或写死文案**。
+- 业务无关的通用图表、基础按键、卡片容器一律抽取并沉淀至 `ListenArch` 或 `ListenUiComponent` 模块中；
+- 沉淀至通用库时，**严禁引入宿主 App 的任何特定业务领域模型、专属数据表或业务特定组件**（例如记账月份切换胶囊 `MonthNavigationCapsule` 属于记账专属交互，必须存放在宿主 App 的 `features/common/components/` 目录下，严禁污染通用 SDK）。
 
 ---
 
@@ -117,3 +95,44 @@ app/src/main/java/com/listen/expensetracker/
 3. **全量构建 / 发版发布 (Full Release & Integration Verification)**：
    - 范围：仅在**用户明确要求完整打包、准备发版发布、或排查 CI Release 专用报错时**才执行。
    - 验证动作：执行 `./gradlew test jacocoTestReport assembleRelease`。
+
+---
+
+## 10. 弹窗状态 MVI 化与纯净 UI 规范 (MVI Dialog State Management)
+
+- **严禁在 Composable 内部使用大量局部 `mutableStateOf` 标志位**（如 `var showAddSheet`, `var showMonthPicker` 等）控制弹窗显隐；
+- **必须在 Feature UiState 中定义专用的 `DialogState` 密封接口（Sealed Interface）**（例如 `activeDialog: TransactionsDialog?`），并通过 MVI Intent 触发打开与关闭；
+- **Composable 内部专注于可见视图的渲染**，在末尾通过专用的 `FeatureDialogHost(state, onIntent)` 进行声明式弹窗分发，保持 Composable 代码纯净度在 150 行以内。
+
+---
+
+## 11. 副作用集中收集器规范 (Centralized Effect Collector Hook)
+
+- 全项目所有 ViewModels 统一使用通用单次副作用 `ListenArch.CommonUiEffect`（支持 `ShowToast`、带 Action 回调的 `ShowSnackbar`、`ShareText`、`OpenApmInspector`）；
+- 在宿主层通过统一的 Composable 钩子（`CollectCommonUiEffects(vararg viewModels, snackbarHostState, ...)`）**一次性集中监听与分发**，**严禁在 Activity 或各个 Screen 中为某个 ViewModel 单独编写多余的 `LaunchedEffect` 监听代码**。
+
+---
+
+## 12. 页面容器状态提升规范 (Route vs Screen Pattern)
+
+为了兼顾 MainActivity/Navigation 的极简单行调用与 UI 预览（`@Preview`）/ 单元测试的完全解耦：
+- **`FeatureRoute` (Stateful 路由容器)**：负责获取 ViewModel 实例、收集 State 并分发 Intent，供 MainActivity 或 NavHost 一行代码挂载；
+- **`FeatureScreen` (Stateless 纯视图)**：只接收不可变 `State` 与 `onIntent: (Intent) -> Unit` 函数回调，不直接耦合具体的 ViewModel 实例，确保 100% 纯函数化、便于 Previews 与 UI 隔离测试。
+
+---
+
+## 13. 全局浮层与宿主层级规范 (Global AppOverlayHost Standard)
+
+- **严禁在 Activity 或顶层 UI 声明裸露的布尔标志位**（如 `var showApmSheet by remember { mutableStateOf(false) }`）配合 `if (flag)` 条件判断来控制全局浮层；
+- **全局浮层（APM 查看器、全局悬浮球、全局 HUD）统一由 `AppState` 中的 `AppOverlay` 密封接口（Sealed Interface）驱动**；
+- **必须在顶层容器（`ListenTheme` -> `Surface`）末尾声明式挂载 `<AppOverlayHost appState={appState} />`**：
+  - 确保全局浮层享有**天然最高 Z-Index 渲染层级**，覆盖在所有页面和底部导航栏之上；
+  - 业务页面滚动与输入重组不影响全局浮层，浮层状态变化也不触发业务页面重绘；
+  - 为未来演进为**全局可拖拽悬浮窗/悬浮球**提供标准底座支持。
+
+---
+
+## 14. 导航与标签类型安全规范 (Type-Safe Navigation Tab Standard)
+
+- **严禁使用裸露的整数索引（如 `0, 1, 2`）或魔数字符串控制底部导航栏（BottomBar）或多 Tab 切换**；
+- **必须在 `AppState` 中统一定义强类型的 `NavTab` 枚举或密封类**（包含 `route`、`labelKey`、`icon` 等元信息），由 `AppState.currentTab` 与 `AppState.switchTab(tab)` 进行类型安全的状态调度。

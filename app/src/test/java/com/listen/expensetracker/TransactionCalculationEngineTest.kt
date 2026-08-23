@@ -81,7 +81,7 @@ class TransactionCalculationEngineTest {
             sortOrder = TransactionSortOrder.DATE_DESC
         )
 
-        assertEquals(0, state.transactions.size)
+        assertEquals(0, state.filteredTransactions.size)
         assertEquals(0.0, state.totalExpense, 0.001)
         assertEquals(0.0, state.totalIncome, 0.001)
         assertEquals(0.0, state.netBalance, 0.001)

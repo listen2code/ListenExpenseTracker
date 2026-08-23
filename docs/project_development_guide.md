@@ -1,6 +1,6 @@
 # ListenExpenseTracker - 项目开发与架构设计指南
 
-本指南汇集了参考 `ListenPortfolio` 项目的软件工程哲学、架构规范与质量标准，作为 `ListenExpenseTracker`、`ListenArch` 与 `ListenUiComponent` 未来的编码与演进指导方针。
+本指南汇集了 Listen 系列软件工程哲学、架构规范与质量标准，作为 `ListenExpenseTracker`、`ListenArch` 与 `ListenUiComponent` 未来的编码与演进指导方针。
 
 ---
 

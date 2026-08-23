@@ -1,59 +1,39 @@
 package com.listen.expensetracker
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.listen.arch.apm.CrashHandler
 import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.core.effect.CollectCommonUiEffects
+import com.listen.expensetracker.core.overlay.AppOverlayHost
+import com.listen.expensetracker.core.state.AppOverlay
+import com.listen.expensetracker.core.state.ExpenseAppState
+import com.listen.expensetracker.core.state.NavTab
+import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.i18n.ExpenseStrings
-import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
-import com.listen.expensetracker.features.settings.ui.SettingsScreen
-import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
-import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsEffect
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
-import com.listen.uicomponent.apm.LogInspectorSheet
+import com.listen.expensetracker.features.settings.ui.SettingsRoute
+import com.listen.expensetracker.features.statistics.ui.StatisticsRoute
+import com.listen.expensetracker.features.transactions.ui.TransactionsRoute
 import com.listen.uicomponent.theme.ListenTheme
-import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: TransactionsViewModel by viewModels {
-        TransactionsViewModel.Factory(application)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -62,161 +42,83 @@ class MainActivity : ComponentActivity() {
         ExpenseStrings.init()
         CrashHandler.init(this)
 
-        splashScreen.setKeepOnScreenCondition {
-            viewModel.viewState.value.isLoading
-        }
-
         setContent {
-            val state by viewModel.viewState.collectAsState()
-            val apmLogs by viewModel.apmLogsUiFlow.collectAsState()
-            val snackbarHostState = remember { SnackbarHostState() }
+            // One-line registration for all ViewModels, Navigation Tabs, and State
+            val appState = rememberExpenseAppState()
+            val settingsState by appState.settingsViewModel.viewState.collectAsState()
+            val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
 
-            var showApmSheet by remember { mutableStateOf(false) }
-            var showImportSheet by remember { mutableStateOf(false) }
+            splashScreen.setKeepOnScreenCondition { transactionsState.isLoading }
 
-            LaunchedEffect(Unit) {
-                viewModel.viewEffect.collectLatest { effect ->
-                    when (effect) {
-                        is TransactionsEffect.ShowToast -> {
-                            Toast.makeText(this@MainActivity, effect.message, Toast.LENGTH_SHORT).show()
-                        }
-                        is TransactionsEffect.ShowUndoSnackbar -> {
-                            val res = snackbarHostState.showSnackbar(
-                                message = effect.message,
-                                actionLabel = "撤销",
-                                duration = SnackbarDuration.Short
-                            )
-                            if (res == SnackbarResult.ActionPerformed) {
-                                viewModel.handleIntent(TransactionsIntent.RestoreDeletedTransaction(effect.transaction))
-                            }
-                        }
-                        is TransactionsEffect.TransactionAddedSuccess -> {
-                            // Haptic feedback
-                        }
-                    }
-                }
-            }
+            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, APM)
+            CollectCommonUiEffects(
+                appState.transactionsViewModel,
+                appState.statisticsViewModel,
+                appState.settingsViewModel,
+                snackbarHostState = appState.snackbarHostState,
+                onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) }
+            )
 
             ListenTheme(
-                themeMode = state.themeMode,
-                accentColor = state.accentColor
+                themeMode = settingsState.themeMode,
+                accentColor = settingsState.accentColor
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     ListenExpenseTrackerApp(
-                        viewModel = viewModel,
-                        snackbarHostState = snackbarHostState,
-                        onOpenApm = { showApmSheet = true },
-                        onExportJson = {
-                            val json = viewModel.exportBackupJson()
-                            shareText(json, "分享 JSON 账单备份")
-                        },
-                        onExportCsv = {
-                            val csv = viewModel.exportBackupCsv()
-                            shareText(csv, "分享 CSV 账单表格")
-                        },
-                        onOpenImportSheet = { showImportSheet = true }
+                        appState = appState,
+                        onLaunchGooglePicker = {
+                            appState.settingsViewModel.launchGoogleAccountPicker(this@MainActivity)
+                        }
                     )
 
-                    if (showImportSheet) {
-                        ImportBackupSheet(
-                            onDismiss = { showImportSheet = false },
-                            onImport = { json ->
-                                viewModel.handleIntent(TransactionsIntent.ImportBackupData(json))
-                            },
-                            lang = state.language
-                        )
-                    }
-
-                    if (showApmSheet) {
-                        LogInspectorSheet(
-                            logs = apmLogs,
-                            onClearLogs = { viewModel.clearApmLogs() },
-                            onExportLogs = {
-                                val logText = apmLogs.joinToString("\n") { "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}" }
-                                shareText(logText, "分享 APM 日志")
-                            },
-                            onDismiss = { showApmSheet = false }
-                        )
-                    }
+                    // Top-level Declarative Overlay Host (0 boolean flags, 0 raw ifs)
+                    AppOverlayHost(appState = appState)
                 }
             }
         }
-    }
-
-    private fun shareText(content: String, chooserTitle: String) {
-        val sendIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, content)
-            type = "text/plain"
-        }
-        val shareIntent = Intent.createChooser(sendIntent, chooserTitle)
-        startActivity(shareIntent)
     }
 }
 
 @Composable
 fun ListenExpenseTrackerApp(
-    viewModel: TransactionsViewModel,
-    snackbarHostState: SnackbarHostState,
-    onOpenApm: () -> Unit,
-    onExportJson: () -> Unit,
-    onExportCsv: () -> Unit,
-    onOpenImportSheet: () -> Unit,
+    appState: ExpenseAppState,
+    onLaunchGooglePicker: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.viewState.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val lang = state.language
+    val settingsState by appState.settingsViewModel.viewState.collectAsState()
+    val lang = settingsState.language
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(appState.snackbarHostState) },
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Transactions") },
-                    label = { Text(StringsRes.get("nav_transactions", lang)) }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.PieChart, contentDescription = "Transactions") },
-                    label = { Text(StringsRes.get("nav_statistics", lang)) }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text(StringsRes.get("nav_settings", lang)) }
-                )
+                NavTab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        selected = appState.currentTab == tab,
+                        onClick = { appState.switchTab(tab) },
+                        icon = { Icon(tab.icon, contentDescription = StringsRes.get(tab.labelKey, lang)) },
+                        label = { Text(StringsRes.get(tab.labelKey, lang)) }
+                    )
+                }
             }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         val bottomPadding = innerPadding.calculateBottomPadding()
-        when (selectedTab) {
-            0 -> TransactionsScreen(
-                state = state,
-                onIntent = viewModel::handleIntent,
+        when (appState.currentTab) {
+            NavTab.TRANSACTIONS -> TransactionsRoute(
+                viewModel = appState.transactionsViewModel,
                 modifier = Modifier.padding(bottom = bottomPadding)
             )
-            1 -> StatisticsScreen(
-                state = state,
-                onIntent = viewModel::handleIntent,
+            NavTab.STATISTICS -> StatisticsRoute(
+                viewModel = appState.statisticsViewModel,
                 modifier = Modifier.padding(bottom = bottomPadding)
             )
-            2 -> SettingsScreen(
-                state = state,
-                onIntent = viewModel::handleIntent,
-                onOpenApmInspector = onOpenApm,
-                onExportJson = onExportJson,
-                onExportCsv = onExportCsv,
-                onOpenImportSheet = onOpenImportSheet,
-                modifier = Modifier
-                    .padding(bottom = bottomPadding)
-                    .statusBarsPadding()
+            NavTab.SETTINGS -> SettingsRoute(
+                viewModel = appState.settingsViewModel,
+                onLaunchGooglePicker = onLaunchGooglePicker,
+                modifier = Modifier.padding(bottom = bottomPadding)
             )
         }
     }
