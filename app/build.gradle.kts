@@ -26,7 +26,7 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        val vName = "0.0.2"
+        val vName = "0.0.3"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 

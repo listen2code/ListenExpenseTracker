@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.ListenExpenseTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Google Recommended Android 12+ Splash Screen Theme -->
+    <style name="Theme.ListenExpenseTracker.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0F172A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.ListenExpenseTracker</item>
+    </style>
 </resources>

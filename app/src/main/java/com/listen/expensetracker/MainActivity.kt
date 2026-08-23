@@ -7,8 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.PieChart
@@ -52,9 +55,14 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         CrashHandler.init(this)
+
+        splashScreen.setKeepOnScreenCondition {
+            viewModel.viewState.value.isLoading
+        }
 
         setContent {
             val state by viewModel.viewState.collectAsState()
@@ -170,7 +178,7 @@ fun ListenExpenseTrackerApp(
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.PieChart, contentDescription = "Statistics") },
+                    icon = { Icon(Icons.Default.PieChart, contentDescription = "Transactions") },
                     label = { Text(StringsRes.get("nav_statistics", lang)) }
                 )
                 NavigationBarItem(
@@ -181,12 +189,21 @@ fun ListenExpenseTrackerApp(
                 )
             }
         },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
-        val screenModifier = Modifier.padding(innerPadding)
+        val bottomPadding = innerPadding.calculateBottomPadding()
         when (selectedTab) {
-            0 -> TransactionsScreen(state = state, onIntent = viewModel::handleIntent, modifier = screenModifier)
-            1 -> StatisticsScreen(state = state, onIntent = viewModel::handleIntent, modifier = screenModifier)
+            0 -> TransactionsScreen(
+                state = state,
+                onIntent = viewModel::handleIntent,
+                modifier = Modifier.padding(bottom = bottomPadding)
+            )
+            1 -> StatisticsScreen(
+                state = state,
+                onIntent = viewModel::handleIntent,
+                modifier = Modifier.padding(bottom = bottomPadding)
+            )
             2 -> SettingsScreen(
                 state = state,
                 onIntent = viewModel::handleIntent,
@@ -194,7 +211,9 @@ fun ListenExpenseTrackerApp(
                 onExportJson = onExportJson,
                 onExportCsv = onExportCsv,
                 onOpenImportSheet = onOpenImportSheet,
-                modifier = screenModifier
+                modifier = Modifier
+                    .padding(bottom = bottomPadding)
+                    .statusBarsPadding()
             )
         }
     }

@@ -287,10 +287,11 @@ fun TransactionsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.netBalance)}",
+                                text = if (state.hideBalance) "••••••" else "$sym${String.format("%.2f", state.netBalance)}",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1
                             )
                         }
 
@@ -302,20 +303,22 @@ fun TransactionsScreen(
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(StringsRes.get("total_expense", lang), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
-                                    text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalExpense)}",
+                                    text = if (state.hideBalance) "••••" else "$sym${String.format("%.2f", state.totalExpense)}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = ExpenseRed
+                                    color = ExpenseRed,
+                                    maxLines = 1
                                 )
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(StringsRes.get("total_income", lang), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
-                                    text = if (state.hideBalance) "****" else "$sym${String.format("%.2f", state.totalIncome)}",
+                                    text = if (state.hideBalance) "••••" else "$sym${String.format("%.2f", state.totalIncome)}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = IncomeGreen
+                                    color = IncomeGreen,
+                                    maxLines = 1
                                 )
                             }
                         }
@@ -636,7 +639,7 @@ private fun UltraCompactTransactionItemRow(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f, fill = false)
+                    modifier = Modifier.weight(1f, fill = true)
                 ) {
                     // 24dp Ultra-Compact Category Icon
                     Box(
@@ -654,7 +657,7 @@ private fun UltraCompactTransactionItemRow(
                         )
                     }
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -662,12 +665,14 @@ private fun UltraCompactTransactionItemRow(
                             Text(
                                 text = transaction.categoryName,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                                fontSize = 13.sp,
+                                maxLines = 1
                             )
                             Text(
                                 text = "· $accountDisplay",
                                 fontSize = 9.sp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1
                             )
                         }
 
@@ -686,10 +691,11 @@ private fun UltraCompactTransactionItemRow(
                 val amountColor = if (transaction.type == "EXPENSE") ExpenseRed else IncomeGreen
 
                 Text(
-                    text = if (hideAmount) "****" else "$amountPrefix$currencySymbol${String.format("%.2f", transaction.amount)}",
+                    text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${String.format("%.2f", transaction.amount)}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = amountColor
+                    color = amountColor,
+                    maxLines = 1
                 )
             }
         }

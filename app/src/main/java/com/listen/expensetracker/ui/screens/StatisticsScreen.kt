@@ -223,7 +223,7 @@ fun StatisticsScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 BarChart(
                                     items = state.dailyTrendBars,
-                                    height = 120.dp
+                                    height = 136.dp
                                 )
                             }
                         }
