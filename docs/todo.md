@@ -106,6 +106,7 @@
   - [x] `TransactionSortOrderTest`
 
 ## 需求池
-- [] **新增架构设计功能，展示当前APP的架构设计和技术栈**
-- [] **增加push功能，APP升级后，可以收到推送，点击后跳转到setting画面，触发检查更新逻辑**
-- [] **目前APM 日志浮窗 (Log Overlay Inspector)，目前还没实现**
+- [ ] **新增架构设计功能，展示当前APP的架构设计和技术栈**
+- [ ] **增加push功能，APP升级后，可以收到推送，点击后跳转到setting画面，触发检查更新逻辑**
+- [ ] **目前APM 日志浮窗 (Log Overlay Inspector)，目前还没实现**
+- [ ] **CI/CD 增强：GitHub Actions `deploy` 任务执行成功后，自动发送邮件通知至 `listen2code@gmail.com`**
