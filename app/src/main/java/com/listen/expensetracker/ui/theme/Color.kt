@@ -1,7 +1,7 @@
 package com.listen.expensetracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
-import com.listen.expensetracker.data.model.AccentColor
+import com.listen.uicomponent.theme.AccentColor
 
 // Base Dark & Light Colors
 val DarkBackground = Color(0xFF121212)

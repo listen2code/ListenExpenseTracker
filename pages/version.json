@@ -1,10 +1,10 @@
 {
-  "version": "0.0.3",
-  "buildNumber": 3,
+  "version": "0.0.4",
+  "buildNumber": 4,
   "url": "https://play.google.com/store/apps/details?id=com.listen.expensetracker",
   "changelog": {
-    "zh": "初始发布版本 0.0.1：支持离线极速记账、多账户流水管理、收支双维度统计分析、Google 账户多端加密云备份与恢复。",
-    "en": "Initial release 0.0.1: Offline-first expense tracking, multi-account ledger, dual-mode statistics, Google Account cloud backup & restore.",
-    "ja": "初期リリース 0.0.1：オフライン優先家計簿、複数口座管理、収支統計分析、Google アカウントによるクラウドバックアップと復元に対応。"
+    "zh": "v0.0.4：Feature-First 模块化架构重构、单文件职责拆分（<=250行）、全面去除废弃 API 并接入现代 Google 认证体系、全量国际化字典扩充、消除金额跳闪与图表遮挡、追加 Android 12+ 原生 Splash 启动画面。",
+    "en": "v0.0.4: Feature-First modular refactoring, single-responsibility file splitting (<=250 lines), deprecated API replacement with modern Google Identity, full i18n expansion, UI jitter & chart clipping fixes, and Android 12+ Splash Screen integration.",
+    "ja": "v0.0.4：Feature-First モジュール化リファクタリング、単一責任ファイル分割（<=250行）、非推奨API刷新と最新Google認証対応、全画面多言語化、金额チラつきとチャート表示崩れの解消、Android 12+ Splash Screen追加。"
   }
 }

@@ -2,7 +2,7 @@ package com.listen.expensetracker
 
 import com.listen.arch.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
-import com.listen.expensetracker.ui.state.TransactionSortOrder
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

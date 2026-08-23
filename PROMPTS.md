@@ -1,4 +1,4 @@
-# ListenExpenseTracker - AI 协作提示词
+# ListenExpenseTracker - AI 协作提示词与工程规范
 
 ## 1. 你的角色
 
@@ -9,11 +9,12 @@
 - 当需求含糊、假设可疑、改动成本高、会影响架构边界时，先提出少量高价值澄清问题。
 - 如果发现我的判断可能有偏差，请明确指出原因，但不要为了“挑战而挑战”。
 
-## 2. 项目真实定位
+---
+
+## 2. 项目定位与核心技术栈
 
 ListenExpenseTracker 是一款**隐私优先、本地优先（Local-First）、无服务器架构（Serverless）**的 Android 原生记账工具应用。
 
-核心技术选型与架构原则：
 - **UI & 交互**：Jetpack Compose + Material 3 Design (支持 Dynamic Color、深浅色模式与自定义强调色切换)。
 - **开发语言与异步**：Kotlin + Coroutines + Flow。
 - **本地持久化**：Room Database + DataStore Preferences。
@@ -21,56 +22,70 @@ ListenExpenseTracker 是一款**隐私优先、本地优先（Local-First）、�
 - **账户与云端同步**：支持未登录离线全功能使用 (Guest Mode)；支持 Google 账号登录并通过 **Google Drive REST API (`appDataFolder`)** 实现无服务器云端数据备份与恢复。
 - **国际化 (i18n)**：支持 简体中文 (zh-CN)、English (en-US)、日本語 (ja-JP) 三种语言一键动态切换。
 
-## 3. 现状与目标态的处理规则
+---
 
-- README 主文只应描述**已实现能力**，或**明确标注的目标态**。
-- `docs/` 中的 spec、设计稿、路线图、实验方案，**默认不代表已经实现**。
-- 如果文档、提示词、历史描述与代码实现冲突，优先相信代码，并指出文档可能过时。
-- 严禁擅自引入需要搭建独立后端 API 服务器的技术方案。
+## 3. 架构分层与目录组织规范 (Feature-First)
 
-## 4. 信息源优先级
+项目代码必须严格遵循 **Feature-First (按特性划分)** 的一级包结构：
 
-当多个信息源冲突时，按以下优先级判断：
+```
+app/src/main/java/com/listen/expensetracker/
+├── MainActivity.kt
+├── auth/                                  # 身份认证与安全凭据
+├── data/                                  # 数据模型、计算引擎与常量 Token
+│   ├── engine/
+│   └── model/
+│       └── Constants.kt                   # 尺寸、间距、数值 Token
+└── features/                              # 核心特性业务层
+    ├── transactions/                      # 流水与记账
+    │   ├── components/
+    │   ├── ui/
+    │   └── viewmodel/
+    ├── statistics/                        # 多维统计与图表
+    │   ├── components/
+    │   └── ui/
+    └── settings/                          # 偏好、云同步与系统运维
+        ├── components/
+        └── ui/
+```
 
-1. 实际代码与 Gradle 构建配置 (`app/build.gradle.kts`)
-2. 测试与 Android 配置文件
-3. 当前 README.md
-4. `docs/todo.md`
-5. 其他 `docs/` 设计文档与历史说明
-6. 本提示词
+---
 
-如果你不确定，请明确说不确定，不要编造实现状态。
+## 4. 单文件行数限制与单一职责规范 (CRITICAL RULE)
 
-## 5. 开发与改动规则
+为了防止代码臃肿与逻辑腐化，制定以下硬性代码规模阈值：
 
-- 只修改与当前任务直接相关的文件。
-- 不要顺手做大范围格式化、重命名或风格清洗，除非我明确要求。
-- 代码标识符、类名、变量名与日志保持标准英文命名；文档与 UI 提示文字支持多语言收口。
-- 界面设计必须遵循 Material 3 Design 指南，注重极简优雅、流畅过渡动画与手势响应。
+1. **单文件行数限制**：
+   - 单个 Kotlin / UI 文件代码行数**不得超过 200 ~ 250 行**。
+   - 当单个文件行数逼近或超过 250 行时，**必须**按单一职责原则，将子区块、复杂卡片、弹窗对话框（Dialog / Sheet）或计算逻辑拆分为独立的组件文件（放入对应 Feature 的 `components/` 目录下）。
+2. **单个 Composable 函数行数限制**：
+   - 单个 Composable 函数**建议控制在 80 ~ 100 行以内**，复杂布局需分解为子 Composable，提高可读性与可测试性。
+3. **ViewModel 与 UI 解耦**：
+   - Screen 层只负责收集 State 和转发 Intent，不进行复杂的行级格式化与数据变换（由 CalculationEngine 或 Component 承接）。
 
-## 6. 技术约束与实现偏好
+---
 
-- **通用组件与设计系统 (UIKit First)**：UI 画面与 View 层代码需保持短小精悍，复杂或可复用的子 UI 模块必须按单一职责抽取至组件文件（如 `ui/components/` 或 Feature 对应的 `components/` 目录下），避免单文件超长逻辑堆叠。
-- **主题与颜色规范**：禁止在 UI 中硬编码原始颜色（如 `Color(0xFF123456)`），必须统一使用 `MaterialTheme.colorScheme` 或定义好的主题 Accent Color Token。
-- **国际化与多语言**：所有界面展示文本必须通过字符串资源或统一的 LocaleManager 管理，禁止把中/英/日文固定硬编码在 Compose 控件中。
-- **响应式布局与防溢出规则**：在 `Row` / `Column` 容器中嵌套动态文本或按钮时，注意加设限宽与 `TextOverflow.Ellipsis`；保障在不同屏幕尺寸及小屏设备上的视觉防抖与防遮挡。
-- **第三方库引入原则**：优先选择 Compose 官方生态库与社区主流活跃库（如 Accompanist, Coil, MPAndroidChart/PatrykGoworowski/Vico 等）；严禁引入已废弃或停更的过时库。
+## 5. 语言与注释规范
 
-## 7. 阅读顺序建议
+- **代码内注释 (In-code Comments)**：必须使用**详尽清晰的英文注释 (Detailed English Comments)**。重点解释 Compose 状态重组边界、MVI Intent 流转、生命周期避让、Insets 处理和异步协同原理，便于学习与规范统一。
+- **文档与说明 (Documentation)**：所有 Markdown 说明文档（如 `README.md`、`docs/` 设计稿、`walkthrough.md`、`PROMPTS.md`）一律使用**中文**进行详实阐述。
 
-如果你刚进入新会话，或者上下文刚被清空，请先执行以下最小启动步骤：
+---
 
-1. 阅读本文件，理解角色、架构边界和判断规则。
-2. 阅读 `app/build.gradle.kts`，确认当前项目依赖与 Android target API。
-3. 阅读 `README.md`，确认当前已实现能力与模块划分。
-4. 只在与任务直接相关时，再阅读对应代码。
+## 6. 国际化与硬编码消灭规范
 
-## 8. 输出要求
+- **字符串国际化 (No Hardcoded Strings)**：禁止在 Composable UI 中硬编码任何用户可见的中/英/日文字符串。所有展示文本必须通过 `ListenArch` 的 `StringsRes.get(key, lang)` 进行三语收口。
+- **数值与尺寸 Token 化 (No Magic Numbers)**：禁止在 UI 中散落硬编码尺寸（如 `8.dp`、`16.sp`）或颜色 Hex（如 `Color(0xFF123456)`）。必须统一使用 `AppDimens` 常量、`MaterialTheme.colorScheme` 或定义好的主题 Token。
 
-你的回答应尽量具备以下特征：
+---
 
-- 先给结论，再给依据。
-- 区分“已确认事实”和“推断”。
-- 明确指出风险、边界和未验证点。
-- 对多步任务给出可执行的下一步建议。
-- 如果可以直接落地，就不要只停留在概念建议。
+## 7. 废弃 API 禁用与现代化规范
+
+- **禁止使用已废弃的 Google Auth API**：严禁使用 `com.google.android.gms.auth.api.signin.GoogleSignIn` 和 `GoogleSignInClient`，统一使用现代 Google Identity Services API (`com.google.android.gms.auth.api.identity.Identity`) 或 AndroidX Credential Manager。
+- **图标与 Compose API 现代化**：严禁使用带废弃标记的 Material Icons（如 `Icons.Filled.Logout`，统一采用 `Icons.AutoMirrored.Filled.Logout`）。
+
+---
+
+## 8. 通用组件下沉原则 (UIKit First)
+
+- 业务无关的图表、高频弹窗、基础按键、卡片容器一律优先抽取并沉淀至 `ListenArch` 或 `ListenUiComponent` 模块中，跨应用复用。

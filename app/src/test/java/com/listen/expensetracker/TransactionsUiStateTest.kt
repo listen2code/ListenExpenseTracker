@@ -1,8 +1,8 @@
 package com.listen.expensetracker
 
 import com.listen.arch.data.db.TransactionEntity
-import com.listen.expensetracker.ui.state.TransactionSortOrder
-import com.listen.expensetracker.ui.state.TransactionsUiState
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import org.junit.Assert.assertEquals

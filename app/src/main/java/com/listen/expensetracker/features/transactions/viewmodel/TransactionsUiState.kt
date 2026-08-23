@@ -1,4 +1,4 @@
-package com.listen.expensetracker.ui.state
+package com.listen.expensetracker.features.transactions.viewmodel
 
 import com.listen.arch.data.db.TransactionEntity
 import com.listen.arch.sync.SyncState
@@ -8,13 +8,20 @@ import com.listen.uicomponent.components.ProgressSegment
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
-enum class TransactionSortOrder(val displayName: String) {
-    DATE_DESC("时间最新"),
-    DATE_ASC("时间最早"),
-    AMOUNT_DESC("金额降序"),
-    AMOUNT_ASC("金额升序")
+/**
+ * Sorting order enumeration for transactions list.
+ */
+enum class TransactionSortOrder(val displayNameKey: String) {
+    DATE_DESC("sort_date_desc"),
+    DATE_ASC("sort_date_asc"),
+    AMOUNT_DESC("sort_amount_desc"),
+    AMOUNT_ASC("sort_amount_asc")
 }
 
+/**
+ * Immutable UI State representing the complete presentation state of the application.
+ * Follows Unidirectional Data Flow (UDF) / MVI architecture.
+ */
 data class TransactionsUiState(
     val transactions: List<TransactionEntity> = emptyList(),
     val filteredTransactions: List<TransactionEntity> = emptyList(),
@@ -41,17 +48,20 @@ data class TransactionsUiState(
     val googleDisplayName: String? = null,
     val googleAvatarUrl: String? = null,
     val searchQuery: String = "",
-    val selectedAccountFilter: String = "ALL", // "ALL", "BANK", "CASH", etc.
-    val selectedMonthOffset: Int = 0, // 0 = current month, -1 = last month, etc.
+    val selectedAccountFilter: String = "ALL",
+    val selectedMonthOffset: Int = 0,
     val monthTitle: String = "本月",
     val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
-    val statisticsTab: String = "EXPENSE", // "EXPENSE" or "INCOME"
+    val statisticsTab: String = "EXPENSE",
     val currencySymbol: String = "￥",
     val language: String = "zh",
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accentColor: AccentColor = AccentColor.EMERALD
 )
 
+/**
+ * User Intents triggering state mutations in MVI architecture.
+ */
 sealed interface TransactionsIntent {
     data object LoadData : TransactionsIntent
     data class AddTransaction(
@@ -92,6 +102,9 @@ sealed interface TransactionsIntent {
     data class ChangeAccentColor(val accent: AccentColor) : TransactionsIntent
 }
 
+/**
+ * Single-event side effects emitted by the ViewModel for UI presentation.
+ */
 sealed interface TransactionsEffect {
     data class ShowToast(val message: String) : TransactionsEffect
     data class ShowUndoSnackbar(val message: String, val transaction: TransactionEntity) : TransactionsEffect

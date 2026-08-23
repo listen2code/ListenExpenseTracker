@@ -1,8 +1,8 @@
 package com.listen.expensetracker.data.engine
 
 import com.listen.arch.data.db.TransactionEntity
-import com.listen.expensetracker.ui.state.TransactionSortOrder
-import com.listen.expensetracker.ui.state.TransactionsUiState
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment

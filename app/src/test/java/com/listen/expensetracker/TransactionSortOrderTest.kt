@@ -1,6 +1,6 @@
 package com.listen.expensetracker
 
-import com.listen.expensetracker.ui.state.TransactionSortOrder
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -16,9 +16,9 @@ class TransactionSortOrderTest {
         assertTrue(orders.contains(TransactionSortOrder.AMOUNT_DESC))
         assertTrue(orders.contains(TransactionSortOrder.AMOUNT_ASC))
 
-        assertEquals("时间最新", TransactionSortOrder.DATE_DESC.displayName)
-        assertEquals("时间最早", TransactionSortOrder.DATE_ASC.displayName)
-        assertEquals("金额降序", TransactionSortOrder.AMOUNT_DESC.displayName)
-        assertEquals("金额升序", TransactionSortOrder.AMOUNT_ASC.displayName)
+        assertEquals("sort_date_desc", TransactionSortOrder.DATE_DESC.displayNameKey)
+        assertEquals("sort_date_asc", TransactionSortOrder.DATE_ASC.displayNameKey)
+        assertEquals("sort_amount_desc", TransactionSortOrder.AMOUNT_DESC.displayNameKey)
+        assertEquals("sort_amount_asc", TransactionSortOrder.AMOUNT_ASC.displayNameKey)
     }
 }

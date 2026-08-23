@@ -1,4 +1,4 @@
-package com.listen.expensetracker.ui.viewmodel
+package com.listen.expensetracker.features.transactions.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
@@ -14,10 +14,6 @@ import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.sync.CloudSyncManager
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
-import com.listen.expensetracker.ui.state.TransactionSortOrder
-import com.listen.expensetracker.ui.state.TransactionsEffect
-import com.listen.expensetracker.ui.state.TransactionsIntent
-import com.listen.expensetracker.ui.state.TransactionsUiState
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.apm.LogEntryUi
 import com.listen.uicomponent.theme.AccentColor
@@ -31,11 +27,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+/**
+ * Central MVI ViewModel managing state, persistent Room DB transactions, and preference storage.
+ */
 class TransactionsViewModel(
     private val application: Application
-) : BaseViewModel<TransactionsUiState, TransactionsIntent, TransactionsEffect>(
-    initialState = TransactionsUiState()
-) {
+) : BaseViewModel<TransactionsUiState, TransactionsIntent, TransactionsEffect>(TransactionsUiState()) {
+
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
     private val prefManager = BaseDataStoreManager(application)
@@ -49,7 +47,7 @@ class TransactionsViewModel(
                 channelName = entry.channel.name,
                 tag = entry.tag,
                 message = entry.message,
-                traceId = entry.traceId,
+                traceId = entry.traceId ?: "",
                 stackTrace = entry.stackTrace
             )
         }
@@ -186,7 +184,6 @@ class TransactionsViewModel(
             currencySymbol = viewState.value.currencySymbol
         )
 
-        // Update Launcher Widget
         val todayCal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
@@ -200,25 +197,15 @@ class TransactionsViewModel(
         } catch (_: Exception) {}
 
         updateState {
-            copy(
-                transactions = calculated.transactions,
-                filteredTransactions = calculated.filteredTransactions,
-                totalExpense = calculated.totalExpense,
-                totalIncome = calculated.totalIncome,
-                netBalance = calculated.netBalance,
-                remainingBudget = (monthlyBudget - calculated.totalExpense).coerceAtLeast(0.0),
-                categoryShares = calculated.categoryShares,
-                progressSegments = calculated.progressSegments,
-                incomeCategoryShares = calculated.incomeCategoryShares,
-                incomeProgressSegments = calculated.incomeProgressSegments,
-                dailyTrendBars = calculated.dailyTrendBars,
-                dailyAverageExpense = calculated.dailyAverageExpense,
-                dailyAverageIncome = calculated.dailyAverageIncome,
-                maxExpenseTransaction = calculated.maxExpenseTransaction,
-                maxIncomeTransaction = calculated.maxIncomeTransaction,
-                budgetUsageRatio = calculated.budgetUsageRatio,
-                isOverBudget = calculated.isOverBudget,
-                monthTitle = calculated.monthTitle,
+            calculated.copy(
+                language = language,
+                themeMode = themeMode,
+                accentColor = accentColor,
+                hideBalance = hideBalance,
+                syncState = syncState,
+                googleAccountEmail = googleAccountEmail,
+                googleDisplayName = googleDisplayName,
+                googleAvatarUrl = googleAvatarUrl,
                 isLoading = false
             )
         }
@@ -226,7 +213,7 @@ class TransactionsViewModel(
 
     private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) {
         viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) { _ ->
                 val entity = TransactionEntity(
                     type = intent.type,
                     categoryId = intent.categoryId,
@@ -247,30 +234,28 @@ class TransactionsViewModel(
 
     private fun updateTransaction(transaction: TransactionEntity, traceId: String) {
         viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) { _ ->
                 dao.insertTransaction(transaction)
             }
-            emitEffect(TransactionsEffect.ShowToast("账单已更新"))
+            emitEffect(TransactionsEffect.ShowToast("账单明细已更新"))
         }
     }
 
     private fun deleteTransaction(id: String, traceId: String) {
         viewModelScope.launch {
-            val toDelete = viewState.value.transactions.find { it.id == id }
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
-                dao.deleteTransactionById(id)
-            }
-            if (toDelete != null) {
-                emitEffect(TransactionsEffect.ShowUndoSnackbar("已删除账单", toDelete))
-            } else {
-                emitEffect(TransactionsEffect.ShowToast("已删除账单"))
+            val target = viewState.value.transactions.find { it.id == id }
+            if (target != null) {
+                TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) { _ ->
+                    dao.deleteTransactionById(id)
+                }
+                emitEffect(TransactionsEffect.ShowUndoSnackbar("已删除 1 笔账单", target))
             }
         }
     }
 
     private fun restoreDeletedTransaction(transaction: TransactionEntity, traceId: String) {
         viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) { _ ->
                 dao.insertTransaction(transaction)
             }
             emitEffect(TransactionsEffect.ShowToast("已撤销删除并恢复账单"))
@@ -359,7 +344,7 @@ class TransactionsViewModel(
         val email = viewState.value.googleAccountEmail
         if (email.isNullOrBlank()) {
             viewModelScope.launch {
-                emitEffect(TransactionsEffect.ShowToast("请先连携 Google 账户以从云端恢复数据！"))
+                emitEffect(TransactionsEffect.ShowToast("请先连携 Google 账户以使用云端恢复！"))
             }
             return
         }
@@ -367,9 +352,12 @@ class TransactionsViewModel(
         viewModelScope.launch {
             val res = CloudSyncManager.restoreFromCloud(email, traceId)
             res.onSuccess { list ->
-                dao.insertTransactions(list)
-                prefManager.setLastSyncTimestamp(System.currentTimeMillis())
-                emitEffect(TransactionsEffect.ShowToast("云端恢复成功 (已恢复 ${list.size} 条账单)"))
+                if (list.isNotEmpty()) {
+                    dao.insertTransactions(list)
+                    emitEffect(TransactionsEffect.ShowToast("云端恢复成功 (共恢复 ${list.size} 条账单)"))
+                } else {
+                    emitEffect(TransactionsEffect.ShowToast("云端未找到备份数据"))
+                }
             }.onFailure { err ->
                 emitEffect(TransactionsEffect.ShowToast("云端恢复失败: ${err.message}"))
             }
@@ -381,7 +369,7 @@ class TransactionsViewModel(
             try {
                 val importedList = TransactionBackupManager.importFromJson(json)
                 if (importedList.isNotEmpty()) {
-                    TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "ImportBackupData", traceId = traceId) {
+                    TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "ImportBackupData", traceId = traceId) { _ ->
                         dao.insertTransactions(importedList)
                     }
                     emitEffect(TransactionsEffect.ShowToast("成功导入 ${importedList.size} 条账单！"))
@@ -397,11 +385,10 @@ class TransactionsViewModel(
 
     private fun seedDemoData(traceId: String) {
         viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "SeedDemoData", traceId = traceId) {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "SeedDemoData", traceId = traceId) { _ ->
                 val now = System.currentTimeMillis()
                 val oneDay = 86400000L
                 val demoList = listOf(
-                    // Current Month - Today & Recent
                     TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 38.0, note = "午餐老碗牛肉面", accountType = "CASH", timestamp = now - 7200000),
                     TransactionEntity(type = "EXPENSE", categoryId = "c_cafe", categoryName = "咖啡饮品", categoryIcon = "c_cafe", categoryColorHex = "#84CC16", amount = 22.0, note = "冰美式咖啡", accountType = "CASH", timestamp = now - 14400000),
                     TransactionEntity(type = "EXPENSE", categoryId = "c_transport", categoryName = "交通", categoryIcon = "c_transport", categoryColorHex = "#3B82F6", amount = 6.0, note = "地铁通勤", accountType = "BANK", timestamp = now - 28800000),
@@ -416,23 +403,17 @@ class TransactionsViewModel(
                     TransactionEntity(type = "EXPENSE", categoryId = "c_housing", categoryName = "居住", categoryIcon = "c_housing", categoryColorHex = "#F59E0B", amount = 3500.0, note = "月度房租物业费", accountType = "BANK", timestamp = now - oneDay * 8),
                     TransactionEntity(type = "EXPENSE", categoryId = "c_social", categoryName = "人情", categoryIcon = "c_social", categoryColorHex = "#6366F1", amount = 500.0, note = "朋友婚礼礼金", accountType = "BANK", timestamp = now - oneDay * 10),
                     TransactionEntity(type = "INCOME", categoryId = "c_gift", categoryName = "礼金", categoryIcon = "c_gift", categoryColorHex = "#F59E0B", amount = 888.0, note = "长辈生日红包", accountType = "CASH", timestamp = now - oneDay * 12),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 499.0, note = "机械键盘与鼠标", accountType = "BANK", timestamp = now - oneDay * 15),
-
-                    // Previous Month (30-45 days ago)
-                    TransactionEntity(type = "INCOME", categoryId = "c_salary", categoryName = "工资", categoryIcon = "c_salary", categoryColorHex = "#10B981", amount = 15000.0, note = "上月薪资", accountType = "BANK", timestamp = now - oneDay * 35),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_housing", categoryName = "居住", categoryIcon = "c_housing", categoryColorHex = "#F59E0B", amount = 3500.0, note = "上月房租", accountType = "BANK", timestamp = now - oneDay * 36),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_food", categoryName = "餐饮", categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 320.0, note = "周末家庭聚餐", accountType = "BANK", timestamp = now - oneDay * 38),
-                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 650.0, note = "换季服饰采购", accountType = "BANK", timestamp = now - oneDay * 42)
+                    TransactionEntity(type = "EXPENSE", categoryId = "c_shopping", categoryName = "购物", categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 499.0, note = "机械键盘与鼠标", accountType = "BANK", timestamp = now - oneDay * 15)
                 )
                 dao.insertTransactions(demoList)
             }
-            emitEffect(TransactionsEffect.ShowToast("成功填充 19 条多周期、全场景精细测试账单！"))
+            emitEffect(TransactionsEffect.ShowToast("成功填充测试账单！"))
         }
     }
 
     private fun clearAllData(traceId: String) {
         viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "ClearAllData", traceId = traceId) {
+            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "ClearAllData", traceId = traceId) { _ ->
                 dao.clearAll()
             }
             emitEffect(TransactionsEffect.ShowToast("已清空所有账单"))
@@ -449,10 +430,6 @@ class TransactionsViewModel(
 
     fun clearApmLogs() {
         ApmLogger.clear()
-    }
-
-    fun exportApmLogs(): String {
-        return ApmLogger.exportPlainText()
     }
 
     private fun toggleHideBalance(hide: Boolean) {

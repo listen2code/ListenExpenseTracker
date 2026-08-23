@@ -37,13 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.listen.arch.apm.CrashHandler
 import com.listen.arch.i18n.StringsRes
-import com.listen.expensetracker.ui.screens.ImportBackupSheet
-import com.listen.expensetracker.ui.screens.SettingsScreen
-import com.listen.expensetracker.ui.screens.StatisticsScreen
-import com.listen.expensetracker.ui.screens.TransactionsScreen
-import com.listen.expensetracker.ui.state.TransactionsEffect
-import com.listen.expensetracker.ui.state.TransactionsIntent
-import com.listen.expensetracker.ui.viewmodel.TransactionsViewModel
+import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
+import com.listen.expensetracker.features.settings.ui.SettingsScreen
+import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
+import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsEffect
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import com.listen.uicomponent.apm.LogInspectorSheet
 import com.listen.uicomponent.theme.ListenTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -118,9 +118,10 @@ class MainActivity : ComponentActivity() {
                     if (showImportSheet) {
                         ImportBackupSheet(
                             onDismiss = { showImportSheet = false },
-                            onConfirmImport = { json ->
+                            onImport = { json ->
                                 viewModel.handleIntent(TransactionsIntent.ImportBackupData(json))
-                            }
+                            },
+                            lang = state.language
                         )
                     }
 
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
                             logs = apmLogs,
                             onClearLogs = { viewModel.clearApmLogs() },
                             onExportLogs = {
-                                val logText = viewModel.exportApmLogs()
+                                val logText = apmLogs.joinToString("\n") { "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}" }
                                 shareText(logText, "分享 APM 日志")
                             },
                             onDismiss = { showApmSheet = false }

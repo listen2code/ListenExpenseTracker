@@ -6,8 +6,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.listen.expensetracker.data.model.AccentColor
-import com.listen.expensetracker.data.model.ThemeMode
+import com.listen.uicomponent.theme.AccentColor
+import com.listen.uicomponent.theme.ThemeMode
 
 @Composable
 fun ListenExpenseTrackerTheme(
