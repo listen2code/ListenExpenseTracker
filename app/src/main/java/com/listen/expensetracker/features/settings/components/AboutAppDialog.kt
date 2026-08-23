@@ -47,16 +47,11 @@ fun AboutAppDialog(
     val context = LocalContext.current
     val (versionName, versionCode) = try {
         val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        val vName = pInfo.versionName ?: "0.0.2"
-        val vCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            pInfo.longVersionCode
-        } else {
-            @Suppress("DEPRECATION")
-            pInfo.versionCode.toLong()
-        }
+        val vName = pInfo.versionName ?: "0.0.4"
+        val vCode = androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(pInfo)
         Pair(vName, vCode)
     } catch (_: Exception) {
-        Pair("0.0.2", 200L)
+        Pair("0.0.4", 4L)
     }
 
     AlertDialog(

@@ -23,7 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "listen_expense_tracker.db"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(true)
                     .build()
                     .also { instance = it }
             }

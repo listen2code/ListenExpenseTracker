@@ -59,15 +59,14 @@ fun TransactionItemRow(
     modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissVal ->
-            if (dismissVal == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else {
-                false
-            }
-        }
+        positionalThreshold = { totalDistance -> totalDistance * 0.7f }
     )
+
+    androidx.compose.runtime.LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete()
+        }
+    }
 
     SwipeToDismissBox(
         state = dismissState,

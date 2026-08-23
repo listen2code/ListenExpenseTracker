@@ -1,57 +1,96 @@
 package com.listen.expensetracker.auth
 
 import android.content.Context
-import android.content.Intent
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.identity.SignInCredential
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 /**
- * Modern Google Identity Services Authentication Manager.
- * Replaces deprecated legacy GoogleSignIn and GoogleSignInClient with official Google Identity API.
+ * Clean data model representing authenticated Google account user profile.
+ */
+data class GoogleUserProfile(
+    val email: String,
+    val displayName: String?,
+    val avatarUrl: String?,
+    val idToken: String?
+)
+
+/**
+ * Modern AndroidX Credential Manager Authentication Engine.
+ * Fully conforms to Google's latest Credential Manager and Google Identity specs with ZERO deprecated APIs.
  */
 object GoogleAuthManager {
 
     /**
-     * Obtains the modern Google Identity SignInClient instance.
+     * Obtains the official AndroidX CredentialManager instance.
      *
      * @param context Context reference
-     * @return Google Identity SignInClient
+     * @return CredentialManager instance
      */
-    fun getSignInClient(context: Context): SignInClient {
-        return Identity.getSignInClient(context)
+    fun getCredentialManager(context: Context): CredentialManager {
+        return CredentialManager.create(context)
     }
 
     /**
-     * Parses the modern SignInCredential result returned from Google Identity Sign-In Intent.
+     * Builds modern GetGoogleIdOption for Google Identity sign-in.
      *
-     * @param context Context reference
-     * @param data Intent data returned from Activity result launcher
-     * @return Result containing parsed SignInCredential or detailed failure
+     * @param serverClientId Optional OAuth 2.0 Web Client ID
+     * @return Configured GetGoogleIdOption
      */
-    fun parseSignInCredential(context: Context, data: Intent?): Result<SignInCredential> {
+    fun buildGoogleIdOption(serverClientId: String = ""): GetGoogleIdOption {
+        val builder = GetGoogleIdOption.Builder()
+            .setAutoSelectEnabled(false)
+        if (serverClientId.isNotBlank()) {
+            builder.setServerClientId(serverClientId)
+        }
+        return builder.build()
+    }
+
+    /**
+     * Builds the unified GetCredentialRequest incorporating Google Identity options.
+     *
+     * @param serverClientId Optional OAuth 2.0 Web Client ID
+     * @return Configured GetCredentialRequest
+     */
+    fun buildGetCredentialRequest(serverClientId: String = ""): GetCredentialRequest {
+        return GetCredentialRequest.Builder()
+            .addCredentialOption(buildGoogleIdOption(serverClientId))
+            .build()
+    }
+
+    /**
+     * Parses the modern GoogleIdTokenCredential returned from AndroidX CredentialManager.
+     *
+     * @param response GetCredentialResponse from CredentialManager.getCredential()
+     * @return Result containing parsed GoogleUserProfile or detailed failure
+     */
+    fun parseGoogleIdCredential(response: GetCredentialResponse): Result<GoogleUserProfile> {
         return try {
-            if (data == null) {
-                return Result.failure(IllegalArgumentException("Sign-in result intent data is null"))
-            }
-            val credential = getSignInClient(context).getSignInCredentialFromIntent(data)
-            Result.success(credential)
+            val credential = response.credential
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            val profile = GoogleUserProfile(
+                email = googleIdTokenCredential.id,
+                displayName = googleIdTokenCredential.displayName,
+                avatarUrl = googleIdTokenCredential.profilePictureUri?.toString(),
+                idToken = googleIdTokenCredential.idToken
+            )
+            Result.success(profile)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Signs out the user from Google Identity Services.
+     * Clears all credential state and signs out the user.
      *
      * @param context Context reference
-     * @param onComplete Callback invoked when sign-out completes
      */
-    fun signOut(context: Context, onComplete: () -> Unit = {}) {
+    suspend fun clearCredentials(context: Context) {
         try {
-            getSignInClient(context).signOut().addOnCompleteListener { onComplete() }
-        } catch (_: Exception) {
-            onComplete()
-        }
+            getCredentialManager(context).clearCredentialState(ClearCredentialStateRequest())
+        } catch (_: Exception) {}
     }
 }

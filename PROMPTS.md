@@ -85,10 +85,15 @@ app/src/main/java/com/listen/expensetracker/
 
 ---
 
-## 7. 废弃 API 禁用与现代化规范
+## 7. 废弃 API 严格禁用与零 @Suppress 规范 (Zero-Deprecation Rule)
 
-- **禁止使用已废弃的 Google Auth API**：严禁使用 `com.google.android.gms.auth.api.signin.GoogleSignIn` 和 `GoogleSignInClient`，统一使用现代 Google Identity Services API (`com.google.android.gms.auth.api.identity.Identity`) 或 AndroidX Credential Manager。
-- **图标与 Compose API 现代化**：严禁使用带废弃标记的 Material Icons（如 `Icons.Filled.Logout`，统一采用 `Icons.AutoMirrored.Filled.Logout`）。
+- **严禁使用 `@Suppress("DEPRECATION")` 掩盖废弃警告**：
+  - 遇到编译器 Deprecation 警告时，**严禁通过添加 `@Suppress("DEPRECATION")`（无论是文件级还是方法级）来掩盖问题**。
+  - **必须主动调研并升级为 Google/Android 官方推荐的最新的、非废弃的 API 或方案**（例如：版本号获取使用 `PackageInfoCompat.getLongVersionCode`，手势滑动使用 `LaunchedEffect(dismissState.currentValue)`，身份验证使用官方最新的 AndroidX `CredentialManager` 与 `googleid` 库）。
+- **废弃 API 现代化改造基线**：
+  - 严禁使用已废弃的旧版 Google Auth API（如 `GoogleSignIn`、`GoogleSignInClient`、`SignInCredential`），全面采用官方 AndroidX `CredentialManager`。
+  - 严禁使用带废弃标记的 Material Icons（如 `Icons.Filled.Logout`，统一采用 `Icons.AutoMirrored.Filled.Logout`）。
+  - Room 迁移必须使用现代重载 `fallbackToDestructiveMigration(true)`。
 
 ---
 
@@ -96,3 +101,19 @@ app/src/main/java/com/listen/expensetracker/
 
 - 业务无关的图表、基础按键、卡片容器一律抽取并沉淀至 `ListenArch` 或 `ListenUiComponent` 模块中；
 - 沉淀至通用库时，**严禁引入宿主 App 的任何特定业务领域模型、专属数据表或写死文案**。
+
+---
+
+## 9. 验证效率与任务分级规范 (Verification Efficiency & Tiered Testing Rule)
+
+为了保障极速响应与高效协作，**严禁在每次微小改动后无脑执行耗时极长（数分钟）的全量测试 + 覆盖率 + Release 打包**。必须按改动规模分级执行验证：
+
+1. **轻量修改 / 局部微调 (Minor Tweaks / UI / Strings / Config)**：
+   - 范围：文案调整、颜色间距微调、小组件修改、配置修改等。
+   - 验证动作：**仅做极速编译语法检查 (`./gradlew compileDebugKotlin`) 或不执行耗时构建**，追求秒级响应，不让用户等待。
+2. **中大型修改 / 核心业务变更 (Feature Additions / Refactoring / Logic Changes)**：
+   - 范围：新增业务功能、跨文件架构重构、数据库或计算引擎逻辑变更。
+   - 验证动作：**仅执行单元测试与编译检查 (`./gradlew test compileDebugKotlin`)**，确保业务逻辑正确、无编译错误即可。
+3. **全量构建 / 发版发布 (Full Release & Integration Verification)**：
+   - 范围：仅在**用户明确要求完整打包、准备发版发布、或排查 CI Release 专用报错时**才执行。
+   - 验证动作：执行 `./gradlew test jacocoTestReport assembleRelease`。

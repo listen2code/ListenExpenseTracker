@@ -208,31 +208,27 @@ jobs:
             echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > app/google-services.json
           fi
 
-      - name: Run Unit Tests & Build APKs
+      - name: Run Unit Tests & Test Coverage
         working-directory: ListenExpenseTracker
         run: |
           chmod +x gradlew
-          ./gradlew test jacocoTestReport assembleDebug assembleRelease
+          ./gradlew test jacocoTestReport
+
+      - name: Build Release APK
+        working-directory: ListenExpenseTracker
+        run: |
+          ./gradlew assembleRelease
 
       - name: Collect APK Info
         id: apk_info
         working-directory: ListenExpenseTracker
         run: |
-          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
-          echo "debug_apk=$DEBUG_APK" >> $GITHUB_OUTPUT
           echo "release_apk=$RELEASE_APK" >> $GITHUB_OUTPUT
           if [[ -n "$RELEASE_APK" ]]; then
             echo "apk_filename=$(basename $RELEASE_APK)" >> $GITHUB_OUTPUT
             echo "apk_size=$(stat -c%s $RELEASE_APK)" >> $GITHUB_OUTPUT
           fi
-
-      - name: Upload Debug APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lExpense-debug-apk
-          path: ListenExpenseTracker/${{ steps.apk_info.outputs.debug_apk }}
-          retention-days: 30
 
       - name: Upload Release APK Artifact
         if: steps.apk_info.outputs.release_apk != ''
