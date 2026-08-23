@@ -96,12 +96,21 @@ object TransactionBackupManager {
             .replace("\\t", "\t")
     }
 
-    fun exportToCsv(transactions: List<TransactionEntity>): String {
+    fun exportToCsv(transactions: List<TransactionEntity>, lang: String = "zh"): String {
         val sb = StringBuilder()
-        sb.append("ID,类型,分类,金额,账户,备注,时间\n")
+        val header = when (lang.lowercase()) {
+            "en" -> "ID,Type,Category,Amount,Account,Note,Date\n"
+            "ja" -> "ID,種類,カテゴリー,金額,口座,メモ,日時\n"
+            else -> "ID,类型,分类,金额,账户,备注,时间\n"
+        }
+        sb.append(header)
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         transactions.forEach { tx ->
-            val typeStr = if (tx.type == "EXPENSE") "支出" else "收入"
+            val typeStr = when (lang.lowercase()) {
+                "en" -> if (tx.type == "EXPENSE") "Expense" else "Income"
+                "ja" -> if (tx.type == "EXPENSE") "支出" else "収入"
+                else -> if (tx.type == "EXPENSE") "支出" else "收入"
+            }
             val timeStr = sdf.format(Date(tx.timestamp))
             val cleanNote = tx.note.replace(",", " ")
             sb.append("${tx.id},$typeStr,${tx.categoryName},${tx.amount},${tx.accountType},$cleanNote,$timeStr\n")

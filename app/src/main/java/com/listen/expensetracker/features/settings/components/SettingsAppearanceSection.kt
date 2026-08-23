@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,7 +20,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -30,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -69,7 +74,7 @@ fun SettingsAppearanceSection(
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )
                 Text(
-                    text = StringsRes.get("settings_appearance", lang),
+                    text = AppStrings.settings_appearance.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle
                 )
@@ -78,7 +83,7 @@ fun SettingsAppearanceSection(
             // Theme Mode Segmented Switch
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = StringsRes.get("settings_theme_mode", lang),
+                    text = AppStrings.settings_theme_mode.tr(lang),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -86,9 +91,9 @@ fun SettingsAppearanceSection(
 
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     val modes = listOf(
-                        ThemeMode.LIGHT to StringsRes.get("theme_light", lang),
-                        ThemeMode.DARK to StringsRes.get("theme_dark", lang),
-                        ThemeMode.SYSTEM to StringsRes.get("theme_system", lang)
+                        ThemeMode.LIGHT to AppStrings.theme_light.tr(lang),
+                        ThemeMode.DARK to AppStrings.theme_dark.tr(lang),
+                        ThemeMode.SYSTEM to AppStrings.theme_system.tr(lang)
                     )
 
                     modes.forEachIndexed { index, (mode, label) ->
@@ -106,7 +111,7 @@ fun SettingsAppearanceSection(
             // Accent Color Selection Row
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = StringsRes.get("settings_accent_color", lang),
+                    text = AppStrings.settings_accent_color.tr(lang),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -149,17 +154,17 @@ fun SettingsAppearanceSection(
                 }
             }
 
-            // Currency & Language Selectors
+            // Currency & Language Selectors with Single-Line AutoResize Protection
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
-                OutlinedButton(
+                CommonButton(
+                    text = "${AppStrings.settings_currency.tr(lang)} ($currencySymbol)",
                     onClick = onOpenCurrencyDialog,
+                    style = CommonButtonStyle.Outlined,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text("${StringsRes.get("settings_currency", lang)} ($currencySymbol)", fontSize = AppDimens.TextSmall)
-                }
+                )
 
                 val currentLangLabel = when (language) {
                     "en" -> "English"
@@ -167,7 +172,8 @@ fun SettingsAppearanceSection(
                     else -> "简体中文"
                 }
 
-                OutlinedButton(
+                CommonButton(
+                    text = "${AppStrings.settings_language.tr(lang)}: $currentLangLabel",
                     onClick = {
                         val next = when (language) {
                             "zh" -> "en"
@@ -176,10 +182,9 @@ fun SettingsAppearanceSection(
                         }
                         onLanguageChange(next)
                     },
+                    style = CommonButtonStyle.Outlined,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text("${StringsRes.get("settings_language", lang)}: $currentLangLabel", fontSize = AppDimens.TextSmall)
-                }
+                )
             }
         }
     }

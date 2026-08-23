@@ -1,6 +1,11 @@
 package com.listen.expensetracker.features.transactions.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,20 +66,25 @@ fun BalanceOverviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = StringsRes.get("balance_title", lang),
+                    text = AppStrings.balance_title.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = if (hideBalance) "••••••" else "$currencySymbol${"%.2f".format(netBalance)}",
-                    fontSize = AppDimens.TextDisplay,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1
-                )
+                Box(
+                    modifier = androidx.compose.ui.Modifier.height(30.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(netBalance)}",
+                        fontSize = AppDimens.TextDisplay,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1
+                    )
+                }
             }
 
-            // Middle Row: Total Expense & Total Income breakdown
+            // Middle Row: Total Expense & Total Income breakdown (Always visible)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,12 +95,12 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = StringsRes.get("total_expense", lang),
+                        text = AppStrings.total_expense.tr(lang),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalExpense)}",
+                        text = "$currencySymbol${"%.2f".format(totalExpense)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = ExpenseRed,
@@ -103,12 +113,12 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = StringsRes.get("total_income", lang),
+                        text = AppStrings.total_income.tr(lang),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalIncome)}",
+                        text = "$currencySymbol${"%.2f".format(totalIncome)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = IncomeGreen,

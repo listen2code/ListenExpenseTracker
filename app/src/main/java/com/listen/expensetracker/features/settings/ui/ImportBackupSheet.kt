@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,10 +38,10 @@ import com.listen.expensetracker.data.model.AppDimens
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportBackupSheet(
+    modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
     onImport: (String) -> Unit,
     lang: String = "zh",
-    modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var jsonText by remember { mutableStateOf("") }
@@ -54,7 +58,7 @@ fun ImportBackupSheet(
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
         ) {
             Text(
-                text = StringsRes.get("import_json", lang),
+                text = AppStrings.import_json.tr(lang),
                 fontWeight = FontWeight.Bold,
                 fontSize = AppDimens.TextHeader
             )
@@ -79,7 +83,7 @@ fun ImportBackupSheet(
                     shape = RoundedCornerShape(AppDimens.CornerButton),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(StringsRes.get("btn_cancel", lang))
+                    Text(AppStrings.btn_cancel.tr(lang))
                 }
 
                 Button(
@@ -93,7 +97,7 @@ fun ImportBackupSheet(
                     shape = RoundedCornerShape(AppDimens.CornerButton),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(StringsRes.get("btn_done", lang))
+                    Text(AppStrings.btn_done.tr(lang))
                 }
             }
 

@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -83,23 +87,23 @@ fun AboutAppDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
                 Text(
-                    text = "${StringsRes.get("app_version_label", lang)}: v$versionName (Build $versionCode)",
+                    text = "${AppStrings.app_version_label.tr(lang)}: v$versionName (Build $versionCode)",
                     fontSize = AppDimens.TextBody,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "${StringsRes.get("app_architecture_label", lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
+                    text = "${AppStrings.app_architecture_label.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${StringsRes.get("app_core_sdk_label", lang)}: ListenArch, ListenUiComponent",
+                    text = "${AppStrings.app_core_sdk_label.tr(lang)}: ListenArch, ListenUiComponent",
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = StringsRes.get("app_features_desc", lang),
+                    text = AppStrings.app_features_desc.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 16.sp
@@ -118,15 +122,11 @@ fun AboutAppDialog(
                 ) {
                     Icon(Icons.Default.SystemUpdate, contentDescription = "Update", modifier = Modifier.size(AppDimens.IconSizeMedium))
                     Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text(StringsRes.get("check_update", lang), fontSize = AppDimens.TextBody)
+                    Text(AppStrings.check_update.tr(lang), fontSize = AppDimens.TextBody)
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(StringsRes.get("btn_done", lang))
-            }
-        }
+        confirmButton = {}
     )
 }
 

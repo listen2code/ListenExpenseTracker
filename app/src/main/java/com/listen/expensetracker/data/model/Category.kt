@@ -1,5 +1,8 @@
 package com.listen.expensetracker.data.model
 
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalance
@@ -27,31 +30,31 @@ data class Category(
     val isSystem: Boolean = true
 ) {
     fun getDisplayName(lang: String = "zh"): String {
-        return customName ?: StringsRes.get(nameKey, lang)
+        return customName ?: nameKey.tr(lang)
     }
 }
 
 object CategoryRepository {
 
     private val defaultExpenseCategories = listOf(
-        Category("c_food", "cat_food", null, Icons.Default.Restaurant, "#EF4444", "EXPENSE", true),
-        Category("c_transport", "cat_transport", null, Icons.Default.DirectionsBus, "#3B82F6", "EXPENSE", true),
-        Category("c_shopping", "cat_shopping", null, Icons.Default.ShoppingBag, "#EC4899", "EXPENSE", true),
-        Category("c_entertainment", "cat_entertainment", null, Icons.Default.SportsEsports, "#8B5CF6", "EXPENSE", true),
-        Category("c_housing", "cat_housing", null, Icons.Default.Home, "#F59E0B", "EXPENSE", true),
-        Category("c_medical", "cat_medical", null, Icons.Default.LocalHospital, "#10B981", "EXPENSE", true),
-        Category("c_social", "cat_social", null, Icons.Default.CardGiftcard, "#6366F1", "EXPENSE", true),
-        Category("c_pets", "cat_pets", null, Icons.Default.Pets, "#F97316", "EXPENSE", true),
-        Category("c_fitness", "cat_fitness", null, Icons.Default.FitnessCenter, "#06B6D4", "EXPENSE", true),
-        Category("c_cafe", "cat_cafe", null, Icons.Default.LocalCafe, "#84CC16", "EXPENSE", true),
-        Category("c_other_exp", "cat_other_exp", null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
+        Category("c_food", AppStrings.cat_food, null, Icons.Default.Restaurant, "#EF4444", "EXPENSE", true),
+        Category("c_transport", AppStrings.cat_transport, null, Icons.Default.DirectionsBus, "#3B82F6", "EXPENSE", true),
+        Category("c_shopping", AppStrings.cat_shopping, null, Icons.Default.ShoppingBag, "#EC4899", "EXPENSE", true),
+        Category("c_entertainment", AppStrings.cat_entertainment, null, Icons.Default.SportsEsports, "#8B5CF6", "EXPENSE", true),
+        Category("c_housing", AppStrings.cat_housing, null, Icons.Default.Home, "#F59E0B", "EXPENSE", true),
+        Category("c_medical", AppStrings.cat_medical, null, Icons.Default.LocalHospital, "#10B981", "EXPENSE", true),
+        Category("c_social", AppStrings.cat_social, null, Icons.Default.CardGiftcard, "#6366F1", "EXPENSE", true),
+        Category("c_pets", AppStrings.cat_pets, null, Icons.Default.Pets, "#F97316", "EXPENSE", true),
+        Category("c_fitness", AppStrings.cat_fitness, null, Icons.Default.FitnessCenter, "#06B6D4", "EXPENSE", true),
+        Category("c_cafe", AppStrings.cat_cafe, null, Icons.Default.LocalCafe, "#84CC16", "EXPENSE", true),
+        Category("c_other_exp", AppStrings.cat_other_exp, null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
     )
 
     private val defaultIncomeCategories = listOf(
-        Category("c_salary", "cat_salary", null, Icons.Default.AccountBalance, "#10B981", "INCOME", true),
-        Category("c_investment", "cat_investment", null, Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", "INCOME", true),
-        Category("c_gift", "cat_gift", null, Icons.Default.CardGiftcard, "#F59E0B", "INCOME", true),
-        Category("c_other_inc", "cat_other_inc", null, Icons.Default.MoreHoriz, "#6B7280", "INCOME", true)
+        Category("c_salary", AppStrings.cat_salary, null, Icons.Default.AccountBalance, "#10B981", "INCOME", true),
+        Category("c_investment", AppStrings.cat_investment, null, Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", "INCOME", true),
+        Category("c_gift", AppStrings.cat_gift, null, Icons.Default.CardGiftcard, "#F59E0B", "INCOME", true),
+        Category("c_other_inc", AppStrings.cat_other_inc, null, Icons.Default.MoreHoriz, "#6B7280", "INCOME", true)
     )
 
     private val customCategories = mutableListOf<Category>()

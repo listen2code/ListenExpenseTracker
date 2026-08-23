@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,7 +90,7 @@ fun SettingsCloudSection(
                     )
                 }
                 Text(
-                    text = StringsRes.get("settings_cloud", lang),
+                    text = AppStrings.settings_cloud.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle
                 )
@@ -155,10 +159,10 @@ fun SettingsCloudSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val statusText = when (syncState.status) {
-                        SyncStatus.SYNCING -> StringsRes.get("cloud_status_syncing", lang)
-                        SyncStatus.SUCCESS -> StringsRes.get("cloud_status_success", lang)
-                        SyncStatus.ERROR -> StringsRes.get("cloud_status_error", lang)
-                        SyncStatus.IDLE -> StringsRes.get("cloud_status_idle", lang)
+                        SyncStatus.SYNCING -> AppStrings.cloud_status_syncing.tr(lang)
+                        SyncStatus.SUCCESS -> AppStrings.cloud_status_success.tr(lang)
+                        SyncStatus.ERROR -> AppStrings.cloud_status_error.tr(lang)
+                        SyncStatus.IDLE -> AppStrings.cloud_status_idle.tr(lang)
                     }
                     val statusColor = when (syncState.status) {
                         SyncStatus.SYNCING -> MaterialTheme.colorScheme.primary
@@ -184,7 +188,7 @@ fun SettingsCloudSection(
 
                     if (syncState.lastSyncTimestamp > 0) {
                         Text(
-                            text = "${StringsRes.get("cloud_last_sync", lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
+                            text = "${AppStrings.cloud_last_sync.tr(lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
                             fontSize = AppDimens.TextMicro,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -204,7 +208,7 @@ fun SettingsCloudSection(
                     ) {
                         Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(AppDimens.IconSizeMedium))
                         Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                        Text(StringsRes.get("cloud_backup_btn", lang), fontSize = AppDimens.TextBody)
+                        Text(AppStrings.cloud_backup_btn.tr(lang), fontSize = AppDimens.TextBody)
                     }
 
                     OutlinedButton(
@@ -215,13 +219,13 @@ fun SettingsCloudSection(
                     ) {
                         Icon(Icons.Default.CloudDownload, contentDescription = "Restore", modifier = Modifier.size(AppDimens.IconSizeMedium))
                         Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                        Text(StringsRes.get("cloud_restore_btn", lang), fontSize = AppDimens.TextBody)
+                        Text(AppStrings.cloud_restore_btn.tr(lang), fontSize = AppDimens.TextBody)
                     }
                 }
             } else {
                 // Not Logged In State
                 Text(
-                    text = StringsRes.get("google_login_required", lang),
+                    text = AppStrings.google_login_required.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -229,12 +233,15 @@ fun SettingsCloudSection(
                 Button(
                     onClick = onLoginGoogle,
                     shape = RoundedCornerShape(AppDimens.CornerButton),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(AppDimens.IconSizeMedium))
                     Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text(StringsRes.get("google_login_btn", lang), color = Color.White, fontWeight = FontWeight.Bold, fontSize = AppDimens.TextBody)
+                    Text(AppStrings.google_login_btn.tr(lang), fontWeight = FontWeight.Bold, fontSize = AppDimens.TextBody)
                 }
             }
         }

@@ -23,7 +23,8 @@ import kotlinx.coroutines.flow.collectLatest
 fun CollectCommonUiEffects(
     vararg viewModels: BaseViewModel<*, *, CommonUiEffect>,
     snackbarHostState: SnackbarHostState,
-    onOpenApm: () -> Unit = {}
+    onOpenApm: () -> Unit = {},
+    onLaunchGoogleSignIn: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -49,6 +50,9 @@ fun CollectCommonUiEffects(
                     }
                     is CommonUiEffect.OpenApmInspector -> {
                         onOpenApm()
+                    }
+                    is CommonUiEffect.LaunchGoogleSignIn -> {
+                        onLaunchGoogleSignIn()
                     }
                     is CommonUiEffect.NavigateTo -> {
                         // Navigation handled by routing if needed

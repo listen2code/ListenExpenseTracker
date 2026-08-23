@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,15 +35,13 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     state: SettingsUiState,
     onIntent: (SettingsIntent) -> Unit,
-    onLaunchGooglePicker: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lang = state.language
     val sym = state.currencySymbol
-    val scope = rememberCoroutineScope()
 
     BaseScreenScaffold(
-        title = StringsRes.get("settings_title", lang),
+        title = AppStrings.settings_title.tr(lang),
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
@@ -55,9 +57,7 @@ fun SettingsScreen(
                     googleAccountEmail = state.googleAccountEmail,
                     googleDisplayName = state.googleDisplayName,
                     syncState = state.syncState,
-                    onLoginGoogle = {
-                        scope.launch { onLaunchGooglePicker() }
-                    },
+                    onLoginGoogle = { onIntent(SettingsIntent.TriggerGoogleSignIn) },
                     onLogoutGoogle = { onIntent(SettingsIntent.UnlinkGoogleAccount) },
                     onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },

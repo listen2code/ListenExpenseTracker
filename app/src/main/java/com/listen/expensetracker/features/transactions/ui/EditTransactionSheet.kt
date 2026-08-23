@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -71,13 +75,13 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionSheet(
+    modifier: Modifier = Modifier,
     transaction: TransactionEntity,
     currencySymbol: String,
     onDismiss: () -> Unit,
     onSave: (TransactionEntity) -> Unit,
     onDelete: () -> Unit,
     lang: String = "zh",
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -121,7 +125,7 @@ fun EditTransactionSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = StringsRes.get("edit_transaction_title", lang),
+                    text = AppStrings.edit_transaction_title.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextHeader
                 )
@@ -142,7 +146,7 @@ fun EditTransactionSheet(
                     shape = SegmentedButtonDefaults.itemShape(0, 2)
                 ) {
                     Text(
-                        text = StringsRes.get("type_expense", lang),
+                        text = AppStrings.type_expense.tr(lang),
                         color = if (type == "EXPENSE") ExpenseRed else Color.Unspecified,
                         fontWeight = if (type == "EXPENSE") FontWeight.Bold else FontWeight.Normal
                     )
@@ -153,7 +157,7 @@ fun EditTransactionSheet(
                     shape = SegmentedButtonDefaults.itemShape(1, 2)
                 ) {
                     Text(
-                        text = StringsRes.get("type_income", lang),
+                        text = AppStrings.type_income.tr(lang),
                         color = if (type == "INCOME") IncomeGreen else Color.Unspecified,
                         fontWeight = if (type == "INCOME") FontWeight.Bold else FontWeight.Normal
                     )
@@ -238,7 +242,7 @@ fun EditTransactionSheet(
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    placeholder = { Text(StringsRes.get("search_placeholder", lang), fontSize = AppDimens.TextBody) },
+                    placeholder = { Text(AppStrings.search_placeholder.tr(lang), fontSize = AppDimens.TextBody) },
                     singleLine = true,
                     shape = RoundedCornerShape(AppDimens.CornerButton),
                     modifier = Modifier.weight(1f)
@@ -324,7 +328,7 @@ fun EditTransactionSheet(
                         )
                     }
                 },
-                doneText = StringsRes.get("common_done", lang) + " ✓",
+                doneText = AppStrings.common_done.tr(lang) + " ✓",
                 modifier = Modifier.fillMaxWidth()
             )
         }

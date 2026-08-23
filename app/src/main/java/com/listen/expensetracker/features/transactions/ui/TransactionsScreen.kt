@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -93,7 +97,7 @@ fun TransactionsScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = StringsRes.get("btn_add_transaction", lang))
+                Icon(Icons.Default.Add, contentDescription = AppStrings.btn_add_transaction.tr(lang))
             }
         },
         modifier = modifier
@@ -110,7 +114,7 @@ fun TransactionsScreen(
                 SearchBarInput(
                     query = state.searchQuery,
                     onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
-                    placeholder = StringsRes.get("search_placeholder", lang),
+                    placeholder = AppStrings.search_placeholder.tr(lang),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -141,14 +145,14 @@ fun TransactionsScreen(
                             )
                         }
 
-                        // Add Custom Account Button
+                        // Manage Custom Accounts Button
                         IconButton(
-                            onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddAccount)) },
+                            onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.ManageAccount)) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = StringsRes.get("add_account", lang),
+                                contentDescription = AppStrings.manage_accounts_title.tr(lang),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -170,7 +174,7 @@ fun TransactionsScreen(
                         ) {
                             TransactionSortOrder.entries.forEach { order ->
                                 DropdownMenuItem(
-                                    text = { Text(StringsRes.get(order.displayNameKey, lang)) },
+                                    text = { Text(order.displayNameKey.tr(lang)) },
                                     onClick = {
                                         onIntent(TransactionsIntent.ChangeSortOrder(order))
                                         showSortMenu = false
@@ -201,7 +205,7 @@ fun TransactionsScreen(
             if (groupedTransactions.isEmpty()) {
                 item(key = "empty_transactions_view") {
                     EmptyStateView(
-                        message = StringsRes.get("empty_transactions", lang),
+                        message = AppStrings.empty_transactions.tr(lang),
                         modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                     )
                 }

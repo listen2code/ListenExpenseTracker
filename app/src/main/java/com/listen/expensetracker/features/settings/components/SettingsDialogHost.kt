@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -69,12 +73,12 @@ fun SettingsDialogHost(
             var budgetInput by remember { mutableStateOf(state.monthlyBudget.toInt().toString()) }
             AlertDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = { Text(StringsRes.get("budget_dialog_title", lang), fontWeight = FontWeight.Bold) },
+                title = { Text(AppStrings.budget_dialog_title.tr(lang), fontWeight = FontWeight.Bold) },
                 text = {
                     OutlinedTextField(
                         value = budgetInput,
                         onValueChange = { budgetInput = it },
-                        label = { Text(StringsRes.get("monthly_budget", lang)) },
+                        label = { Text(AppStrings.monthly_budget.tr(lang)) },
                         singleLine = true,
                         shape = RoundedCornerShape(AppDimens.CornerButton),
                         modifier = Modifier.fillMaxWidth()
@@ -89,12 +93,12 @@ fun SettingsDialogHost(
                         },
                         shape = RoundedCornerShape(AppDimens.CornerButton)
                     ) {
-                        Text(StringsRes.get("btn_save", lang))
+                        Text(AppStrings.btn_save.tr(lang))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { onIntent(SettingsIntent.DismissDialog) }) {
-                        Text(StringsRes.get("btn_cancel", lang))
+                        Text(AppStrings.btn_cancel.tr(lang))
                     }
                 }
             )
@@ -102,8 +106,8 @@ fun SettingsDialogHost(
         is SettingsDialog.ClearConfirm -> {
             AlertDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = { Text(StringsRes.get("confirm_clear_title", lang), fontWeight = FontWeight.Bold, color = ExpenseRed) },
-                text = { Text(StringsRes.get("confirm_clear_desc", lang)) },
+                title = { Text(AppStrings.confirm_clear_title.tr(lang), fontWeight = FontWeight.Bold, color = ExpenseRed) },
+                text = { Text(AppStrings.confirm_clear_desc.tr(lang)) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -113,12 +117,12 @@ fun SettingsDialogHost(
                         colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed),
                         shape = RoundedCornerShape(AppDimens.CornerButton)
                     ) {
-                        Text(StringsRes.get("btn_delete", lang))
+                        Text(AppStrings.btn_delete.tr(lang))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { onIntent(SettingsIntent.DismissDialog) }) {
-                        Text(StringsRes.get("btn_cancel", lang))
+                        Text(AppStrings.btn_cancel.tr(lang))
                     }
                 }
             )

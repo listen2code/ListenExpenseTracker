@@ -1,5 +1,7 @@
 package com.listen.expensetracker
 
+import com.listen.arch.i18n.tr
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.listen.arch.apm.CrashHandler
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.core.effect.CollectCommonUiEffects
@@ -33,6 +36,7 @@ import com.listen.expensetracker.features.settings.ui.SettingsScreen
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
 import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 import com.listen.uicomponent.theme.ListenTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -51,13 +55,18 @@ class MainActivity : ComponentActivity() {
 
             splashScreen.setKeepOnScreenCondition { transactionsState.isLoading }
 
-            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, APM)
+            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, APM, Google Login)
             CollectCommonUiEffects(
                 appState.transactionsViewModel,
                 appState.statisticsViewModel,
                 appState.settingsViewModel,
                 snackbarHostState = appState.snackbarHostState,
-                onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) }
+                onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
+                onLaunchGoogleSignIn = {
+                    lifecycleScope.launch {
+                        appState.settingsViewModel.launchGoogleAccountPicker(this@MainActivity)
+                    }
+                }
             )
 
             ListenTheme(
@@ -65,12 +74,7 @@ class MainActivity : ComponentActivity() {
                 accentColor = settingsState.accentColor
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    App(
-                        appState = appState,
-                        onLaunchGooglePicker = {
-                            appState.settingsViewModel.launchGoogleAccountPicker(this@MainActivity)
-                        }
-                    )
+                    App(appState = appState)
 
                     // Top-level Declarative Overlay Host (0 boolean flags, 0 raw ifs)
                     AppOverlayHost(appState = appState)
@@ -83,7 +87,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App(
     appState: ExpenseAppState,
-    onLaunchGooglePicker: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val settingsState by appState.settingsViewModel.viewState.collectAsState()
@@ -97,8 +100,8 @@ fun App(
                     NavigationBarItem(
                         selected = appState.currentTab == tab,
                         onClick = { appState.switchTab(tab) },
-                        icon = { Icon(tab.icon, contentDescription = StringsRes.get(tab.labelKey, lang)) },
-                        label = { Text(StringsRes.get(tab.labelKey, lang)) }
+                        icon = { Icon(tab.icon, contentDescription = tab.labelKey.tr(lang)) },
+                        label = { Text(tab.labelKey.tr(lang)) }
                     )
                 }
             }
@@ -126,7 +129,6 @@ fun App(
                 SettingsScreen(
                     state = state,
                     onIntent = onIntent,
-                    onLaunchGooglePicker = onLaunchGooglePicker,
                     modifier = screenModifier
                 )
             }

@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
@@ -54,13 +59,13 @@ import com.listen.uicomponent.theme.parseHexColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItemRow(
+    modifier: Modifier = Modifier,
     transaction: TransactionEntity,
     currencySymbol: String,
     hideAmount: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     lang: String = "zh",
-    modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { totalDistance -> totalDistance * 0.7f }
@@ -88,7 +93,7 @@ fun TransactionItemRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = StringsRes.get("common_delete", lang),
+                    contentDescription = AppStrings.common_delete.tr(lang),
                     tint = MaterialTheme.colorScheme.onError
                 )
             }
@@ -135,7 +140,7 @@ fun TransactionItemRow(
                         )
                     }
 
-                    Column(modifier = Modifier.weight(1f, fill = false)) {
+                    Column(modifier = Modifier.weight(1f, fill = true)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
@@ -158,8 +163,8 @@ fun TransactionItemRow(
                             Text(
                                 text = transaction.note,
                                 fontSize = AppDimens.TextMicro,
-                                maxLines = 1,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 14.sp
                             )
                         }
                     }

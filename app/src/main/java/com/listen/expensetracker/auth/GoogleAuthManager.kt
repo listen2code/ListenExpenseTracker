@@ -24,6 +24,9 @@ data class GoogleUserProfile(
  */
 object GoogleAuthManager {
 
+    // Default Web Client ID fallback for development & testing
+    private const val DEFAULT_WEB_CLIENT_ID = "619077977461-listen-expense-tracker-web.apps.googleusercontent.com"
+
     /**
      * Obtains the official AndroidX CredentialManager instance.
      *
@@ -41,12 +44,12 @@ object GoogleAuthManager {
      * @return Configured GetGoogleIdOption
      */
     fun buildGoogleIdOption(serverClientId: String = ""): GetGoogleIdOption {
-        val builder = GetGoogleIdOption.Builder()
+        val clientId = serverClientId.ifBlank { DEFAULT_WEB_CLIENT_ID }
+        return GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId(clientId)
             .setAutoSelectEnabled(false)
-        if (serverClientId.isNotBlank()) {
-            builder.setServerClientId(serverClientId)
-        }
-        return builder.build()
+            .build()
     }
 
     /**
@@ -78,7 +81,7 @@ object GoogleAuthManager {
                 idToken = googleIdTokenCredential.idToken
             )
             Result.success(profile)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Result.failure(e)
         }
     }
@@ -91,6 +94,6 @@ object GoogleAuthManager {
     suspend fun clearCredentials(context: Context) {
         try {
             getCredentialManager(context).clearCredentialState(ClearCredentialStateRequest())
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
     }
 }

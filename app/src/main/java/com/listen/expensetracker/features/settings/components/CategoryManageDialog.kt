@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,13 +63,17 @@ fun CategoryManageDialog(
 ) {
     var activeType by remember { mutableStateOf(type) }
     var showAddDialog by remember { mutableStateOf(false) }
-    val currentCategories = if (activeType == "EXPENSE") CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
+    var refreshKey by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+
+    val currentCategories = remember(activeType, refreshKey) {
+        if (activeType == "EXPENSE") CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Column {
-                Text(StringsRes.get("settings_category_manage", lang), fontWeight = FontWeight.Bold, fontSize = AppDimens.TextHeader)
+                Text(AppStrings.settings_category_manage.tr(lang), fontWeight = FontWeight.Bold, fontSize = AppDimens.TextHeader)
                 Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
@@ -73,14 +81,14 @@ fun CategoryManageDialog(
                         onClick = { activeType = "EXPENSE" },
                         shape = SegmentedButtonDefaults.itemShape(0, 2)
                     ) {
-                        Text(StringsRes.get("type_expense", lang), fontSize = AppDimens.TextBody)
+                        Text(AppStrings.type_expense.tr(lang), fontSize = AppDimens.TextBody)
                     }
                     SegmentedButton(
                         selected = activeType == "INCOME",
                         onClick = { activeType = "INCOME" },
                         shape = SegmentedButtonDefaults.itemShape(1, 2)
                     ) {
-                        Text(StringsRes.get("type_income", lang), fontSize = AppDimens.TextBody)
+                        Text(AppStrings.type_income.tr(lang), fontSize = AppDimens.TextBody)
                     }
                 }
             }
@@ -96,7 +104,7 @@ fun CategoryManageDialog(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
                     modifier = Modifier.height(200.dp)
                 ) {
-                    items(currentCategories) { cat ->
+                    items(currentCategories, key = { it.id }) { cat ->
                         val color = parseHexColor(cat.colorHex)
                         val catName = cat.getDisplayName(lang)
                         Column(
@@ -119,6 +127,7 @@ fun CategoryManageDialog(
                                 IconButton(
                                     onClick = {
                                         CategoryRepository.deleteCategory(cat.id)
+                                        refreshKey++
                                         onCategoriesChanged()
                                     },
                                     modifier = Modifier.size(20.dp)
@@ -135,13 +144,13 @@ fun CategoryManageDialog(
             TextButton(onClick = { showAddDialog = true }) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                     Icon(Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                    Text(StringsRes.get("btn_add_transaction", lang))
+                    Text(AppStrings.btn_add_transaction.tr(lang))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(StringsRes.get("btn_done", lang))
+                Text(AppStrings.btn_done.tr(lang))
             }
         }
     )
@@ -172,13 +181,13 @@ private fun AddCustomCategoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(StringsRes.get("settings_category_manage", lang), fontWeight = FontWeight.Bold) },
+        title = { Text(AppStrings.settings_category_manage.tr(lang), fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceLarge)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text(StringsRes.get("search_placeholder", lang)) },
+                    placeholder = { Text(AppStrings.search_placeholder.tr(lang)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -221,12 +230,12 @@ private fun AddCustomCategoryDialog(
                     }
                 }
             ) {
-                Text(StringsRes.get("btn_save", lang), fontWeight = FontWeight.Bold)
+                Text(AppStrings.btn_save.tr(lang), fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(StringsRes.get("btn_cancel", lang))
+                Text(AppStrings.btn_cancel.tr(lang))
             }
         }
     )

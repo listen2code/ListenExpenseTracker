@@ -40,10 +40,11 @@ object TransactionCalculationEngine {
         accountFilter: String,
         budget: Double,
         sortOrder: TransactionSortOrder,
-        currencySymbol: String = "￥"
+        currencySymbol: String = "￥",
+        lang: String = "zh"
     ): CalculationResult {
         val cleanQuery = query.trim().lowercase()
-        val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset)
+        val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset, lang)
 
         val monthFilteredList = if (currentOffset == 0 && cleanQuery.isBlank() && accountFilter == "ALL") {
             allList
@@ -146,7 +147,7 @@ object TransactionCalculationEngine {
         return result
     }
 
-    fun getMonthRangeAndTitle(offset: Int): Triple<Long, Long, String> {
+    fun getMonthRangeAndTitle(offset: Int, lang: String = "zh"): Triple<Long, Long, String> {
         val cal = Calendar.getInstance()
         cal.add(Calendar.MONTH, offset)
         cal.set(Calendar.DAY_OF_MONTH, 1)
@@ -160,8 +161,18 @@ object TransactionCalculationEngine {
         cal.add(Calendar.MILLISECOND, -1)
         val endTs = cal.timeInMillis
 
-        val sdf = SimpleDateFormat("yyyy年MM月", Locale.getDefault())
-        val title = if (offset == 0) "本月 (${sdf.format(Date(startTs))})" else sdf.format(Date(startTs))
+        val sdf = when (lang.lowercase()) {
+            "en" -> SimpleDateFormat("MMM yyyy", Locale.ENGLISH)
+            "ja" -> SimpleDateFormat("yyyy年MM月", Locale.JAPANESE)
+            else -> SimpleDateFormat("yyyy年MM月", Locale.CHINESE)
+        }
+        val currentPrefix = when (lang.lowercase()) {
+            "en" -> "This Month"
+            "ja" -> "今月"
+            else -> "本月"
+        }
+        val formatted = sdf.format(Date(startTs))
+        val title = if (offset == 0) "$currentPrefix ($formatted)" else formatted
 
         return Triple(startTs, endTs, title)
     }

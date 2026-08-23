@@ -1,5 +1,9 @@
 package com.listen.expensetracker.data.model
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import com.listen.arch.i18n.StringsRes
 
 data class AccountTypeItem(
@@ -9,7 +13,7 @@ data class AccountTypeItem(
     val isSystem: Boolean = true
 ) {
     fun getDisplayName(lang: String = "zh"): String {
-        return customName ?: if (nameKey.isNotBlank()) StringsRes.get(nameKey, lang) else key
+        return customName ?: if (nameKey.isNotBlank()) nameKey.tr(lang) else key
     }
 }
 
@@ -17,9 +21,9 @@ object AccountRepository {
     const val ALL_ACCOUNTS_KEY = "ALL"
 
     private val defaultAccounts = listOf(
-        AccountTypeItem(key = "CASH", nameKey = "filter_cash", isSystem = true),
-        AccountTypeItem(key = "BANK", nameKey = "filter_bank", isSystem = true),
-        AccountTypeItem(key = "CREDIT", nameKey = "filter_credit", isSystem = true)
+        AccountTypeItem(key = "CASH", nameKey = AppStrings.filter_cash, isSystem = true),
+        AccountTypeItem(key = "BANK", nameKey = AppStrings.filter_bank, isSystem = true),
+        AccountTypeItem(key = "CREDIT", nameKey = AppStrings.filter_credit, isSystem = true)
     )
 
     private val customAccounts = mutableListOf<AccountTypeItem>()
@@ -51,7 +55,7 @@ object AccountRepository {
     }
 
     fun getAccountDisplayName(key: String, lang: String = "zh"): String {
-        if (key == ALL_ACCOUNTS_KEY) return StringsRes.get("filter_all", lang)
+        if (key == ALL_ACCOUNTS_KEY) return AppStrings.filter_all.tr(lang)
         return getAllAccounts().find { it.key == key }?.getDisplayName(lang) ?: key
     }
 

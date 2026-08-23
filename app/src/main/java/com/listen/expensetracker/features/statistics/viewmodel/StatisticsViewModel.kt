@@ -43,8 +43,18 @@ class StatisticsViewModel(
                     applyCalculations(allList)
                 }
             }
+            is StatisticsIntent.SetMonthOffset -> {
+                updateState { copy(selectedMonthOffset = intent.offset) }
+                viewModelScope.launch {
+                    val allList = dao.getAllTransactions()
+                    applyCalculations(allList)
+                }
+            }
             is StatisticsIntent.ChangeStatisticsTab -> {
                 updateState { copy(statisticsTab = intent.tab) }
+            }
+            is StatisticsIntent.ToggleHideAmount -> {
+                updateState { copy(hideAmount = intent.hide) }
             }
             is StatisticsIntent.OpenMonthPicker -> updateState { copy(showMonthPicker = true) }
             is StatisticsIntent.DismissMonthPicker -> updateState { copy(showMonthPicker = false) }
@@ -55,6 +65,8 @@ class StatisticsViewModel(
         viewModelScope.launch {
             prefManager.languageFlow.collectLatest { lang ->
                 updateState { copy(language = lang) }
+                val allList = dao.getAllTransactions()
+                applyCalculations(allList)
             }
         }
         viewModelScope.launch {
@@ -105,7 +117,8 @@ class StatisticsViewModel(
             accountFilter = "ALL",
             budget = currentState.monthlyBudget,
             sortOrder = com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder.DATE_DESC,
-            currencySymbol = currentState.currencySymbol
+            currencySymbol = currentState.currencySymbol,
+            lang = currentState.language
         )
 
         updateState {

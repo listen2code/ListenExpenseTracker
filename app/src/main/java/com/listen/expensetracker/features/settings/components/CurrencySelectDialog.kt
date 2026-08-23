@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,7 +50,7 @@ fun CurrencySelectDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = StringsRes.get("currency_dialog_title", lang),
+                text = AppStrings.currency_dialog_title.tr(lang),
                 fontWeight = FontWeight.Bold,
                 fontSize = AppDimens.TextHeader
             )
@@ -87,7 +91,7 @@ fun CurrencySelectDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(StringsRes.get("btn_cancel", lang))
+                Text(AppStrings.btn_cancel.tr(lang))
             }
         }
     )

@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
+import com.listen.arch.i18n.StringsRes
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.AppDatabase
@@ -58,6 +63,10 @@ class TransactionsViewModel(
                 updateState { copy(selectedMonthOffset = newOffset) }
                 recalculate()
             }
+            is TransactionsIntent.SetMonthOffset -> {
+                updateState { copy(selectedMonthOffset = intent.offset) }
+                recalculate()
+            }
             is TransactionsIntent.ChangeSortOrder -> {
                 updateState { copy(sortOrder = intent.order) }
                 recalculate()
@@ -71,6 +80,7 @@ class TransactionsViewModel(
         viewModelScope.launch {
             prefManager.languageFlow.collectLatest { lang ->
                 updateState { copy(language = lang) }
+                recalculate()
             }
         }
         viewModelScope.launch {
@@ -136,7 +146,8 @@ class TransactionsViewModel(
             accountFilter = currentState.selectedAccountFilter,
             budget = currentState.monthlyBudget,
             sortOrder = currentState.sortOrder,
-            currencySymbol = currentState.currencySymbol
+            currencySymbol = currentState.currencySymbol,
+            lang = currentState.language
         )
 
         updateState {
@@ -156,32 +167,33 @@ class TransactionsViewModel(
         }
     }
 
-    private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) {
+    private fun addTransaction(
+        intent: TransactionsIntent.AddTransaction,
+        traceId: String
+    ) {
         viewModelScope.launch {
+            val entity = TransactionEntity(
+                type = intent.type,
+                categoryId = intent.categoryId,
+                categoryName = intent.categoryName,
+                categoryIcon = intent.categoryIcon,
+                categoryColorHex = intent.categoryColorHex,
+                amount = intent.amount,
+                note = intent.note,
+                accountType = intent.accountType,
+                timestamp = intent.timestamp
+            )
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) {
-                val entity = TransactionEntity(
-                    type = intent.type,
-                    categoryId = intent.categoryId,
-                    categoryName = intent.categoryName,
-                    categoryIcon = intent.categoryIcon,
-                    categoryColorHex = intent.categoryColorHex,
-                    amount = intent.amount,
-                    note = intent.note,
-                    accountType = intent.accountType,
-                    timestamp = intent.timestamp
-                )
                 dao.insertTransaction(entity)
             }
-            emitEffect(CommonUiEffect.ShowToast("账单已成功记录"))
         }
     }
 
-    private fun updateTransaction(tx: TransactionEntity, traceId: String) {
+    private fun updateTransaction(transaction: TransactionEntity, traceId: String) {
         viewModelScope.launch {
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) {
-                dao.updateTransaction(tx)
+                dao.updateTransaction(transaction)
             }
-            emitEffect(CommonUiEffect.ShowToast("账单明细已更新"))
         }
     }
 
@@ -192,9 +204,10 @@ class TransactionsViewModel(
                 TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
                     dao.deleteTransaction(entity)
                 }
+                val lang = currentState.language
                 emitEffect(CommonUiEffect.ShowSnackbar(
-                    message = "已删除 1 笔明细",
-                    actionLabel = "撤销",
+                    message = AppStrings.undo_delete_toast.tr(lang),
+                    actionLabel = AppStrings.undo_action_label.tr(lang),
                     onAction = {
                         handleIntent(TransactionsIntent.RestoreDeletedTransaction(entity))
                     }
@@ -208,7 +221,7 @@ class TransactionsViewModel(
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
                 dao.insertTransaction(tx)
             }
-            emitEffect(CommonUiEffect.ShowToast("已恢复删除的账单"))
+            emitEffect(CommonUiEffect.ShowToast(AppStrings.undo_success_toast.tr(currentState.language)))
         }
     }
 

@@ -44,6 +44,7 @@ sealed interface SettingsIntent {
     data class ChangeAccentColor(val accent: AccentColor) : SettingsIntent
     data class ChangeCurrencySymbol(val symbol: String) : SettingsIntent
     data class UpdateMonthlyBudget(val budget: Double) : SettingsIntent
+    data object TriggerGoogleSignIn : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent
     data object UnlinkGoogleAccount : SettingsIntent
     data object TriggerCloudBackup : SettingsIntent

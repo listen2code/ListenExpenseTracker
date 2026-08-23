@@ -35,6 +35,7 @@ data class StatisticsUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accentColor: AccentColor = AccentColor.EMERALD,
     val showMonthPicker: Boolean = false,
+    val hideAmount: Boolean = false,
     val isLoading: Boolean = false
 )
 
@@ -43,7 +44,9 @@ data class StatisticsUiState(
  */
 sealed interface StatisticsIntent {
     data class ChangeMonthOffset(val offsetDelta: Int) : StatisticsIntent
+    data class SetMonthOffset(val offset: Int) : StatisticsIntent
     data class ChangeStatisticsTab(val tab: String) : StatisticsIntent
+    data class ToggleHideAmount(val hide: Boolean) : StatisticsIntent
     data object OpenMonthPicker : StatisticsIntent
     data object DismissMonthPicker : StatisticsIntent
 }

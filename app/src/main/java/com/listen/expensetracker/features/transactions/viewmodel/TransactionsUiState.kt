@@ -21,7 +21,7 @@ sealed interface TransactionsDialog {
     data object AddTransaction : TransactionsDialog
     data class EditTransaction(val transaction: TransactionEntity) : TransactionsDialog
     data object MonthPicker : TransactionsDialog
-    data object AddAccount : TransactionsDialog
+    data object ManageAccount : TransactionsDialog
 }
 
 /**
@@ -74,6 +74,7 @@ sealed interface TransactionsIntent {
     data class SearchQueryChange(val query: String) : TransactionsIntent
     data class FilterAccountChange(val accountType: String) : TransactionsIntent
     data class ChangeMonthOffset(val offsetDelta: Int) : TransactionsIntent
+    data class SetMonthOffset(val offset: Int) : TransactionsIntent
     data class ChangeSortOrder(val order: TransactionSortOrder) : TransactionsIntent
     data class OpenDialog(val dialog: TransactionsDialog) : TransactionsIntent
     data object DismissDialog : TransactionsIntent

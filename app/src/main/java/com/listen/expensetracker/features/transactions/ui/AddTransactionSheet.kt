@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -71,6 +75,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionSheet(
+    modifier: Modifier = Modifier,
     currencySymbol: String,
     onDismiss: () -> Unit,
     onSave: (
@@ -85,7 +90,6 @@ fun AddTransactionSheet(
         timestamp: Long
     ) -> Unit,
     lang: String = "zh",
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -131,7 +135,7 @@ fun AddTransactionSheet(
                     shape = SegmentedButtonDefaults.itemShape(0, 2)
                 ) {
                     Text(
-                        text = StringsRes.get("type_expense", lang),
+                        text = AppStrings.type_expense.tr(lang),
                         color = if (type == "EXPENSE") ExpenseRed else Color.Unspecified,
                         fontWeight = if (type == "EXPENSE") FontWeight.Bold else FontWeight.Normal
                     )
@@ -142,7 +146,7 @@ fun AddTransactionSheet(
                     shape = SegmentedButtonDefaults.itemShape(1, 2)
                 ) {
                     Text(
-                        text = StringsRes.get("type_income", lang),
+                        text = AppStrings.type_income.tr(lang),
                         color = if (type == "INCOME") IncomeGreen else Color.Unspecified,
                         fontWeight = if (type == "INCOME") FontWeight.Bold else FontWeight.Normal
                     )
@@ -234,7 +238,7 @@ fun AddTransactionSheet(
                         ) {
                             Icon(Icons.Default.Add, contentDescription = "Add Category", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                         }
-                        Text(StringsRes.get("settings_category_manage", lang), fontSize = AppDimens.TextMicro, color = MaterialTheme.colorScheme.primary)
+                        Text(AppStrings.settings_category_manage.tr(lang), fontSize = AppDimens.TextMicro, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -248,7 +252,7 @@ fun AddTransactionSheet(
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    placeholder = { Text(StringsRes.get("search_placeholder", lang), fontSize = AppDimens.TextBody) },
+                    placeholder = { Text(AppStrings.search_placeholder.tr(lang), fontSize = AppDimens.TextBody) },
                     singleLine = true,
                     shape = RoundedCornerShape(AppDimens.CornerButton),
                     modifier = Modifier.weight(1f)
@@ -333,7 +337,7 @@ fun AddTransactionSheet(
                         )
                     }
                 },
-                doneText = StringsRes.get("common_done", lang) + " ✓",
+                doneText = AppStrings.common_done.tr(lang) + " ✓",
                 modifier = Modifier.fillMaxWidth()
             )
         }

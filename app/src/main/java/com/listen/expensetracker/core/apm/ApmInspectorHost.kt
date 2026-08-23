@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.listen.arch.apm.ApmLogger
+import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.core.effect.shareSystemText
 import com.listen.uicomponent.apm.LogEntryUi
 import com.listen.uicomponent.apm.LogInspectorSheet
@@ -15,15 +16,15 @@ import com.listen.uicomponent.apm.LogInspectorSheet
  * Automatically subscribes to ApmLogger logsFlow, maps entries to UI models, handles log clearing and export,
  * and displays the LogInspectorSheet.
  *
- * Ready for future extension into a floating bubble overlay or gesture-triggered debug assistant.
- *
  * @param visible True if the APM inspector should be displayed
  * @param onDismiss Callback when the inspector is dismissed
+ * @param lang ISO Language code
  */
 @Composable
 fun ApmInspectorHost(
     visible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    lang: String = "zh"
 ) {
     if (!visible) return
 
@@ -45,6 +46,12 @@ fun ApmInspectorHost(
         }
     }
 
+    val shareTitle = when (lang) {
+        "en" -> "Share APM Logs"
+        "ja" -> "APM ログを共有"
+        else -> "分享 APM 日志"
+    }
+
     LogInspectorSheet(
         logs = apmLogs,
         onClearLogs = { ApmLogger.clear() },
@@ -52,8 +59,9 @@ fun ApmInspectorHost(
             val logText = apmLogs.joinToString("\n") {
                 "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}"
             }
-            shareSystemText(context, logText, "分享 APM 日志")
+            shareSystemText(context, logText, shareTitle)
         },
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        lang = lang
     )
 }

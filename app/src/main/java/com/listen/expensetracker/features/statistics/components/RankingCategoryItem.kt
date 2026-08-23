@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +31,8 @@ import com.listen.uicomponent.theme.parseHexColor
 fun RankingCategoryItem(
     share: PieChartItem,
     currencySymbol: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hideAmount: Boolean = false
 ) {
     val color = parseHexColor(share.colorHex)
 
@@ -73,7 +73,7 @@ fun RankingCategoryItem(
             ) {
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "$currencySymbol${"%.2f".format(share.value)}",
+                        text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
                         fontWeight = FontWeight.Bold,
                         fontSize = AppDimens.TextSubtitle,
                         maxLines = 1

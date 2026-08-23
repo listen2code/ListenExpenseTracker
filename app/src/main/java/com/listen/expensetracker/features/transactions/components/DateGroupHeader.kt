@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,14 +72,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = "${StringsRes.get("type_expense", lang)} $currencySymbol${"%.2f".format(dayExpense)}",
+                    text = "${AppStrings.type_expense.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = "${StringsRes.get("type_income", lang)} $currencySymbol${"%.2f".format(dayIncome)}",
+                    text = "${AppStrings.type_income.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

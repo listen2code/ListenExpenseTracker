@@ -1,7 +1,7 @@
 package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.runtime.Composable
-import com.listen.expensetracker.features.settings.components.MonthPickerDialog
+import com.listen.expensetracker.features.common.components.MonthPickerDialog
 import com.listen.expensetracker.features.transactions.ui.AddTransactionSheet
 import com.listen.expensetracker.features.transactions.ui.EditTransactionSheet
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
@@ -52,17 +52,17 @@ fun TransactionsDialogHost(
             MonthPickerDialog(
                 currentOffset = state.selectedMonthOffset,
                 onOffsetSelected = { offset ->
-                    onIntent(TransactionsIntent.ChangeMonthOffset(offset - state.selectedMonthOffset))
+                    onIntent(TransactionsIntent.SetMonthOffset(offset))
                     onIntent(TransactionsIntent.DismissDialog)
                 },
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
                 lang = lang
             )
         }
-        is TransactionsDialog.AddAccount -> {
-            AddAccountDialog(
+        is TransactionsDialog.ManageAccount -> {
+            AccountManageDialog(
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
-                onAccountAdded = { newKey ->
+                onAccountChanged = { newKey ->
                     onIntent(TransactionsIntent.FilterAccountChange(newKey))
                 },
                 lang = lang

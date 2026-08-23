@@ -1,36 +1,41 @@
 package com.listen.expensetracker.features.statistics.ui
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
 import com.listen.expensetracker.features.statistics.components.MetricsSummaryCard
 import com.listen.expensetracker.features.statistics.components.RankingCategoryItem
 import com.listen.expensetracker.features.statistics.components.StatisticsDialogHost
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
-import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.uicomponent.charts.BarChart
 import com.listen.uicomponent.charts.DonutChart
 import com.listen.uicomponent.components.BaseScreenScaffold
 import com.listen.uicomponent.components.EmptyStateView
-import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
 import com.listen.uicomponent.components.SegmentedProgressBar
 import com.listen.uicomponent.components.SurfaceCard
 
@@ -61,6 +66,15 @@ fun StatisticsScreen(
                 onTitleClick = { onIntent(StatisticsIntent.OpenMonthPicker) }
             )
         },
+        actions = {
+            IconButton(onClick = { onIntent(StatisticsIntent.ToggleHideAmount(!state.hideAmount)) }) {
+                Icon(
+                    imageVector = if (state.hideAmount) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = "Toggle Amount",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
@@ -83,7 +97,7 @@ fun StatisticsScreen(
                         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
                     ) {
                         Text(
-                            StringsRes.get("tab_expense_analysis", lang),
+                            AppStrings.tab_expense_analysis.tr(lang),
                             fontSize = AppDimens.TextBody,
                             fontWeight = if (isExpenseTab) FontWeight.Bold else FontWeight.Normal
                         )
@@ -94,7 +108,7 @@ fun StatisticsScreen(
                         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
                     ) {
                         Text(
-                            StringsRes.get("tab_income_analysis", lang),
+                            AppStrings.tab_income_analysis.tr(lang),
                             fontSize = AppDimens.TextBody,
                             fontWeight = if (!isExpenseTab) FontWeight.Bold else FontWeight.Normal
                         )
@@ -107,15 +121,15 @@ fun StatisticsScreen(
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     if (activeShares.isEmpty() || totalAmount <= 0.0) {
                         EmptyStateView(
-                            message = if (isExpenseTab) StringsRes.get("empty_month_expense", lang) else StringsRes.get("empty_month_income", lang),
+                            message = if (isExpenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                         )
                     } else {
                         DonutChart(
                             items = activeShares,
                             totalValue = totalAmount,
-                            centerTitle = if (isExpenseTab) StringsRes.get("total_expense", lang) else StringsRes.get("total_income", lang),
-                            centerValueText = "$sym${"%.2f".format(totalAmount)}",
+                            centerTitle = if (isExpenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
+                            centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(totalAmount)}",
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
                         )
                         SegmentedProgressBar(
@@ -133,7 +147,7 @@ fun StatisticsScreen(
                 item(key = "trend_chart_card") {
                     SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = StringsRes.get("trend_7days", lang),
+                            text = AppStrings.trend_7days.tr(lang),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -141,7 +155,7 @@ fun StatisticsScreen(
                         )
                         BarChart(
                             items = state.dailyTrendBars,
-                            height = AppDimens.ChartHeightStandard,
+                            trackHeight = AppDimens.ChartHeightStandard,
                             barWidth = AppDimens.ChartBarWidth,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -157,7 +171,8 @@ fun StatisticsScreen(
                     maxTransaction = if (isExpenseTab) state.maxExpenseTransaction else state.maxIncomeTransaction,
                     currencySymbol = sym,
                     lang = lang,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    hideAmount = state.hideAmount
                 )
             }
 
@@ -165,7 +180,7 @@ fun StatisticsScreen(
             if (activeShares.isNotEmpty()) {
                 item(key = "ranking_header") {
                     Text(
-                        text = if (isExpenseTab) StringsRes.get("expense_ranking", lang) else StringsRes.get("income_ranking", lang),
+                        text = if (isExpenseTab) AppStrings.expense_ranking.tr(lang) else AppStrings.income_ranking.tr(lang),
                         fontWeight = FontWeight.Bold,
                         fontSize = AppDimens.TextTitle,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -177,7 +192,8 @@ fun StatisticsScreen(
                     RankingCategoryItem(
                         share = item,
                         currencySymbol = sym,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        hideAmount = state.hideAmount
                     )
                 }
             }

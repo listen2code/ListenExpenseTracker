@@ -1,29 +1,32 @@
 package com.listen.expensetracker.features.settings.components
 
+import com.listen.arch.i18n.tr
+
+import com.listen.expensetracker.data.i18n.AppStrings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
-import com.listen.uicomponent.theme.ExpenseRed
 
 /**
  * APM Observability, Testing Seeds, and About App Section Card.
@@ -55,57 +58,51 @@ fun SettingsApmSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = StringsRes.get("settings_system_ops", lang),
+                    text = AppStrings.settings_system_ops.tr(lang),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
             // APM Inspector Button
-            OutlinedButton(
+            CommonButton(
+                text = AppStrings.apm_inspector.tr(lang),
                 onClick = onOpenApmInspector,
-                shape = RoundedCornerShape(AppDimens.CornerButton),
+                style = CommonButtonStyle.Outlined,
+                icon = { Icon(Icons.Default.BugReport, contentDescription = "APM", modifier = Modifier.size(AppDimens.IconSizeMedium)) },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.BugReport, contentDescription = "APM", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                Text(StringsRes.get("apm_inspector", lang), fontSize = AppDimens.TextBody)
-            }
+            )
 
             // Seed & Clear Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
-                OutlinedButton(
+                CommonButton(
+                    text = AppStrings.seed_data_btn.tr(lang),
                     onClick = onSeedDemoData,
-                    shape = RoundedCornerShape(AppDimens.CornerButton),
+                    style = CommonButtonStyle.Outlined,
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(StringsRes.get("seed_data_btn", lang), fontSize = AppDimens.TextSmall)
-                }
+                )
 
-                OutlinedButton(
+                CommonButton(
+                    text = AppStrings.clear_all.tr(lang),
                     onClick = onConfirmClearAll,
-                    shape = RoundedCornerShape(AppDimens.CornerButton),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ExpenseRed),
+                    style = CommonButtonStyle.Danger,
+                    icon = { Icon(Icons.Default.DeleteSweep, contentDescription = "Clear", modifier = Modifier.size(AppDimens.IconSizeMedium)) },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.DeleteSweep, contentDescription = "Clear", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                    Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text(StringsRes.get("clear_all", lang), fontSize = AppDimens.TextSmall)
-                }
+                )
             }
 
             // About App Button
-            OutlinedButton(
+            CommonButton(
+                text = AppStrings.about_app.tr(lang),
                 onClick = onOpenAboutDialog,
-                shape = RoundedCornerShape(AppDimens.CornerButton),
+                style = CommonButtonStyle.Outlined,
+                icon = { Icon(Icons.Default.Info, contentDescription = "About", modifier = Modifier.size(AppDimens.IconSizeMedium)) },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Info, contentDescription = "About", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                Text(StringsRes.get("about_app", lang), fontSize = AppDimens.TextBody)
-            }
+            )
         }
     }
 }
