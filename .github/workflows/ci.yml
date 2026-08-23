@@ -42,17 +42,33 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
       - name: Evaluate triggers and build conditions
         id: check
+        env:
+          PLAY_SERVICE_ACCOUNT_KEY: ${{ secrets.PLAY_SERVICE_ACCOUNT_KEY }}
         run: |
           SHOULD_BUILD_APK="false"
           ENVIRONMENT="prod"
+
+          # Calculate local project versionCode
+          VNAME=$(grep 'val vName' app/build.gradle.kts | cut -d '"' -f 2 || echo "0.0.0")
+          IFS='.' read -r -a parts <<< "$VNAME"
+          major=${parts[0]:-0}
+          minor=${parts[1]:-0}
+          patch=$(echo "${parts[2]:-0}" | tr -cd '0-9')
+          PROJECT_VERSION_CODE=$(( major * 10000 + minor * 100 + patch ))
+          echo "Project versionName: $VNAME, Calculated Project versionCode: $PROJECT_VERSION_CODE"
 
           # 1. Check if force build via workflow_dispatch
           if [[ "${{ github.event.inputs.force_build_apk }}" == "true" ]]; then
             SHOULD_BUILD_APK="true"
             ENVIRONMENT="${{ github.event.inputs.environment }}"
-            echo "Force build requested via dispatch"
+            echo "Trigger: Force build requested via dispatch"
           fi
 
           # 2. Check commit message for explicit keywords
@@ -60,24 +76,44 @@ jobs:
             COMMIT_MSG=$(git log -1 --pretty=format:"%s")
             if [[ "$COMMIT_MSG" == *"[build-apk]"* ]] || [[ "$COMMIT_MSG" == *"[apk]"* ]] || [[ "$COMMIT_MSG" == *"[deploy]"* ]] || [[ "$COMMIT_MSG" == *"[release]"* ]]; then
               SHOULD_BUILD_APK="true"
-              echo "Build trigger tag found in commit message"
+              echo "Trigger: Build trigger tag found in commit message ($COMMIT_MSG)"
             fi
           fi
 
-          # 3. Check if manual workflow dispatch
+          # 3. Check if build.gradle.kts version code was bumped in recent commits
+          if [[ "$SHOULD_BUILD_APK" == "false" ]] && git rev-parse HEAD~1 >/dev/null 2>&1; then
+            if git diff HEAD~1 HEAD -- app/build.gradle.kts | grep -E '^\+[ ]*(val vName|versionCode|versionName)' >/dev/null; then
+              SHOULD_BUILD_APK="true"
+              echo "Trigger: app/build.gradle.kts version bumped in commit"
+            fi
+          fi
+
+          # 4. Check if project version code is strictly greater than Google Play latest version
+          if [[ "$SHOULD_BUILD_APK" == "false" ]]; then
+            if [ -n "$PLAY_SERVICE_ACCOUNT_KEY" ]; then
+              LATEST_PLAY_VERSION=$(node tools/get_play_version.js 2>/dev/null || echo 0)
+              echo "Google Play latest version code: $LATEST_PLAY_VERSION"
+              if [[ "$PROJECT_VERSION_CODE" -gt "$LATEST_PLAY_VERSION" ]]; then
+                SHOULD_BUILD_APK="true"
+                echo "Trigger: Project versionCode ($PROJECT_VERSION_CODE) is greater than Google Play ($LATEST_PLAY_VERSION)"
+              fi
+            fi
+          fi
+
+          # 5. Check if manual workflow dispatch
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
             SHOULD_BUILD_APK="true"
             ENVIRONMENT="${{ github.event.inputs.environment }}"
-            echo "Manual workflow dispatch"
+            echo "Trigger: Manual workflow dispatch"
           fi
 
-          # 4. Check if Pull Request
+          # 6. Check if Pull Request
           if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
             SHOULD_BUILD_APK="true"
-            echo "Pull request trigger"
+            echo "Trigger: Pull request event"
           fi
 
-          # 5. Check time interval for push events (> 2 hours)
+          # 7. Check time interval for push events (>= 2 hours)
           if [[ "${{ github.event_name }}" == "push" ]] && [[ "$SHOULD_BUILD_APK" == "false" ]]; then
             echo "Checking last build time..."
             LAST_BUILD=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -94,17 +130,17 @@ jobs:
 
               if [[ $TIME_DIFF -ge 2 ]]; then
                 SHOULD_BUILD_APK="true"
-                echo "Building due to time interval >= 2 hours"
+                echo "Trigger: Push time interval >= 2 hours"
               fi
             else
               SHOULD_BUILD_APK="true"
-              echo "No previous successful build found"
+              echo "Trigger: No previous successful build found"
             fi
           fi
 
           echo "should_build_apk=$SHOULD_BUILD_APK" >> $GITHUB_OUTPUT
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-          echo "Evaluated: should_build_apk=$SHOULD_BUILD_APK, environment=$ENVIRONMENT"
+          echo "Evaluated result: should_build_apk=$SHOULD_BUILD_APK, environment=$ENVIRONMENT"
 
   build-apk:
     name: Build & Test APK

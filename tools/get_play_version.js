@@ -6,16 +6,16 @@ const packageName = 'com.listen.expensetracker';
 const trackName = 'internal';
 
 if (!serviceAccountJson) {
-  console.error("Error: PLAY_SERVICE_ACCOUNT_KEY env is missing");
-  process.exit(1);
+  console.log("0");
+  process.exit(0);
 }
 
 let serviceAccount;
 try {
   serviceAccount = JSON.parse(serviceAccountJson);
 } catch (e) {
-  console.error("Error: Failed to parse service account JSON", e);
-  process.exit(1);
+  console.log("0");
+  process.exit(0);
 }
 
 function request(options, postData) {
