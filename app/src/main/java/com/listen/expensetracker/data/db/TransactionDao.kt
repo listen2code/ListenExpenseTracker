@@ -22,9 +22,6 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
     suspend fun getTransactionById(id: String): TransactionEntity?
 
-    @Query("SELECT * FROM transactions WHERE timestamp BETWEEN :startTimestamp AND :endTimestamp ORDER BY timestamp DESC")
-    fun getTransactionsByDateRangeFlow(startTimestamp: Long, endTimestamp: Long): Flow<List<TransactionEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
 
@@ -42,7 +39,4 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
-
-    @Query("DELETE FROM transactions")
-    suspend fun clearAll()
 }

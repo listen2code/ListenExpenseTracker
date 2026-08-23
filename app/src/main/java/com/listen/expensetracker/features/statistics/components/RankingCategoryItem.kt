@@ -73,13 +73,13 @@ fun RankingCategoryItem(
             ) {
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "$currencySymbol${String.format("%.2f", share.value)}",
+                        text = "$currencySymbol${"%.2f".format(share.value)}",
                         fontWeight = FontWeight.Bold,
                         fontSize = AppDimens.TextSubtitle,
                         maxLines = 1
                     )
                     Text(
-                        text = "${String.format("%.1f", share.percentage * 100)}%",
+                        text = "${"%.1f".format(share.percentage * 100)}%",
                         fontSize = AppDimens.TextMicro,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1

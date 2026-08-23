@@ -66,7 +66,7 @@ fun BalanceOverviewCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = if (hideBalance) "••••••" else "$currencySymbol${String.format("%.2f", netBalance)}",
+                    text = if (hideBalance) "••••••" else "$currencySymbol${"%.2f".format(netBalance)}",
                     fontSize = AppDimens.TextDisplay,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -90,7 +90,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (hideBalance) "••••" else "$currencySymbol${String.format("%.2f", totalExpense)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalExpense)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = ExpenseRed,
@@ -108,7 +108,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (hideBalance) "••••" else "$currencySymbol${String.format("%.2f", totalIncome)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalIncome)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = IncomeGreen,
@@ -133,7 +133,7 @@ fun BalanceOverviewCard(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
                 Text(
-                    text = "${String.format("%.0f", budgetUsageRatio * 100)}%",
+                    text = "${"%.0f".format(budgetUsageRatio * 100)}%",
                     fontSize = AppDimens.TextMicro,
                     color = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1

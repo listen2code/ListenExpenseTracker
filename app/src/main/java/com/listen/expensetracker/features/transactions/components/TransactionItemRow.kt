@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -169,7 +170,7 @@ fun TransactionItemRow(
                 val amountColor = if (transaction.type == "EXPENSE") ExpenseRed else IncomeGreen
 
                 Text(
-                    text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${String.format("%.2f", transaction.amount)}",
+                    text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${"%.2f".format(transaction.amount)}",
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextSubtitle,
                     color = amountColor,

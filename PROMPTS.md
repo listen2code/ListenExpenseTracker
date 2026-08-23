@@ -136,3 +136,20 @@ ListenExpenseTracker 是一款**隐私优先、本地优先（Local-First）、�
 
 - **严禁使用裸露的整数索引（如 `0, 1, 2`）或魔数字符串控制底部导航栏（BottomBar）或多 Tab 切换**；
 - **必须在 `AppState` 中统一定义强类型的 `NavTab` 枚举或密封类**（包含 `route`、`labelKey`、`icon` 等元信息），由 `AppState.currentTab` 与 `AppState.switchTab(tab)` 进行类型安全的状态调度。
+
+---
+
+## 15. Kotlin 惯用字符串格式化规范 (Kotlin Idiomatic String Formatting Rule)
+
+- **严禁使用 Java 静态方法风格的 `String.format("...", args)`**；
+- **统一使用 Kotlin 原生 String 扩展函数 `"...".format(args)`**（例如 `"%.2f".format(amount)`、`"%02d".format(day)`），保持代码风格的地道、优雅与简洁。
+
+---
+
+## 16. Compose Modifier 参数顺序规范 (Compose Modifier Parameter Ordering Standard)
+
+根据 Android Jetpack Compose 官方 API 设计准则与 Compose Lint（`ModifierParameter` 规则）：
+- **所有发射 Layout 的 Composable 函数均应接收 `modifier: Modifier = Modifier` 参数**；
+- **`modifier` 参数必须作为“第一个可选参数”（First Optional Parameter）**（即紧跟在所有无默认值的必填形参之后，放置在所有有默认值的可选形参之前）；
+- **若组件无任何必填参数（所有参数均有默认值），`modifier: Modifier = Modifier` 必须放在最前面的第一个参数**；
+- **尾部 Lambda（如 `content: @Composable () -> Unit`）必须保持在参数列表的最末尾**。

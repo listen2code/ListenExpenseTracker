@@ -19,5 +19,5 @@ data class TransactionEntity(
     val amount: Double,
     val timestamp: Long = System.currentTimeMillis(),
     val note: String = "",
-    val accountType: String = "WECHAT"
+    val accountType: String = "CASH"
 )

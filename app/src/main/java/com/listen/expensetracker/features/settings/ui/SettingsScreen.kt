@@ -29,9 +29,9 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun SettingsRoute(
+    modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = viewModel(),
-    onLaunchGooglePicker: suspend () -> Unit,
-    modifier: Modifier = Modifier
+    onLaunchGooglePicker: suspend () -> Unit
 ) {
     val state by viewModel.viewState.collectAsState()
     SettingsScreen(

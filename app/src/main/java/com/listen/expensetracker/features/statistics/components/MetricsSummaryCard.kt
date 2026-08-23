@@ -45,7 +45,7 @@ fun MetricsSummaryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "$currencySymbol${String.format("%.2f", dailyAverage)}",
+                    text = "$currencySymbol${"%.2f".format(dailyAverage)}",
                     fontSize = AppDimens.TextTitle,
                     fontWeight = FontWeight.Bold,
                     color = if (isExpenseTab) ExpenseRed else IncomeGreen,
@@ -60,7 +60,7 @@ fun MetricsSummaryCard(
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                val maxDisplay = maxTransaction?.let { "$currencySymbol${String.format("%.2f", it.amount)} (${it.categoryName})" } ?: "无"
+                val maxDisplay = maxTransaction?.let { "$currencySymbol${"%.2f".format(it.amount)} (${it.categoryName})" } ?: "无"
                 Text(
                     text = maxDisplay,
                     fontSize = AppDimens.TextTitle,

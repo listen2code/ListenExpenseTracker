@@ -56,8 +56,8 @@ import com.listen.uicomponent.components.SearchBarInput
  */
 @Composable
 fun TransactionsRoute(
+    modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel = viewModel(),
-    modifier: Modifier = Modifier
 ) {
     val state by viewModel.viewState.collectAsState()
     TransactionsScreen(

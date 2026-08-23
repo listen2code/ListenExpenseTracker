@@ -39,8 +39,8 @@ import com.listen.uicomponent.components.SurfaceCard
  */
 @Composable
 fun StatisticsRoute(
+    modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel = viewModel(),
-    modifier: Modifier = Modifier
 ) {
     val state by viewModel.viewState.collectAsState()
     StatisticsScreen(
@@ -131,7 +131,7 @@ fun StatisticsScreen(
                             items = activeShares,
                             totalValue = totalAmount,
                             centerTitle = if (isExpenseTab) StringsRes.get("total_expense", lang) else StringsRes.get("total_income", lang),
-                            centerValueText = "$sym${String.format("%.2f", totalAmount)}",
+                            centerValueText = "$sym${"%.2f".format(totalAmount)}",
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
                         )
                         SegmentedProgressBar(

@@ -24,11 +24,11 @@ import java.util.Calendar
  */
 fun formatDayGroupHeader(timestamp: Long): String {
     val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-    val day = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))
+    val day = "%02d".format(cal.get(Calendar.DAY_OF_MONTH))
     val weekdays = arrayOf("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六")
     val weekday = weekdays[cal.get(Calendar.DAY_OF_WEEK) - 1]
     val year = cal.get(Calendar.YEAR)
-    val month = String.format("%02d", cal.get(Calendar.MONTH) + 1)
+    val month = "%02d".format(cal.get(Calendar.MONTH) + 1)
     return "$day $weekday $year.$month"
 }
 
@@ -68,14 +68,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = "${StringsRes.get("type_expense", lang)} $currencySymbol${String.format("%.2f", dayExpense)}",
+                    text = "${StringsRes.get("type_expense", lang)} $currencySymbol${"%.2f".format(dayExpense)}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = "${StringsRes.get("type_income", lang)} $currencySymbol${String.format("%.2f", dayIncome)}",
+                    text = "${StringsRes.get("type_income", lang)} $currencySymbol${"%.2f".format(dayIncome)}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

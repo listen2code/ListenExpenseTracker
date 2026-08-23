@@ -90,7 +90,7 @@ fun EditTransactionSheet(
     var selectedCategory by remember(categories) {
         mutableStateOf(categories.find { it.id == transaction.categoryId } ?: categories.first())
     }
-    var amountExpression by remember { mutableStateOf(String.format("%.2f", transaction.amount)) }
+    var amountExpression by remember { mutableStateOf("%.2f".format(transaction.amount)) }
     var note by remember { mutableStateOf(transaction.note) }
     val availableAccounts = remember { AccountRepository.getAllAccounts() }
     var selectedAccount by remember { mutableStateOf(transaction.accountType) }

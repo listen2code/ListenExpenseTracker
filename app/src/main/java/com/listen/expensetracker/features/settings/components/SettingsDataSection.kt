@@ -75,7 +75,7 @@ fun SettingsDataSection(
                 ) {
                     Icon(Icons.Default.Savings, contentDescription = "Budget", modifier = Modifier.size(AppDimens.IconSizeMedium))
                     Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text("${StringsRes.get("monthly_budget", lang)}: $currencySymbol${String.format("%.0f", monthlyBudget)}", fontSize = AppDimens.TextSmall, maxLines = 1)
+                    Text("${StringsRes.get("monthly_budget", lang)}: $currencySymbol${"%.0f".format(monthlyBudget)}", fontSize = AppDimens.TextSmall, maxLines = 1)
                 }
 
                 OutlinedButton(

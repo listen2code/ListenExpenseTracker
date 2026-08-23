@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
                 accentColor = settingsState.accentColor
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    ListenExpenseTrackerApp(
+                    App(
                         appState = appState,
                         onLaunchGooglePicker = {
                             appState.settingsViewModel.launchGoogleAccountPicker(this@MainActivity)
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ListenExpenseTrackerApp(
+fun App(
     appState: ExpenseAppState,
     onLaunchGooglePicker: suspend () -> Unit,
     modifier: Modifier = Modifier

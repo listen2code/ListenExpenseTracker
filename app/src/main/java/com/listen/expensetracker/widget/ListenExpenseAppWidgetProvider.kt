@@ -27,7 +27,7 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, ListenExpenseAppWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
-            val formatted = "$currencySymbol${String.format("%.2f", todayExpense)}"
+            val formatted = "$currencySymbol${"%.2f".format(todayExpense)}"
 
             for (appWidgetId in appWidgetIds) {
                 updateWidgetView(context, appWidgetManager, appWidgetId, formatted)
