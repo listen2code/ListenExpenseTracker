@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
     id("jacoco")
 }
 
@@ -26,7 +27,7 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        val vName = "0.0.5"
+        val vName = "0.0.6"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
@@ -100,6 +101,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
