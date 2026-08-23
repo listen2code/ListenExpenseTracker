@@ -35,22 +35,6 @@ import com.listen.uicomponent.components.SegmentedProgressBar
 import com.listen.uicomponent.components.SurfaceCard
 
 /**
- * Stateful entry route for Statistics Screen.
- */
-@Composable
-fun StatisticsRoute(
-    modifier: Modifier = Modifier,
-    viewModel: StatisticsViewModel = viewModel(),
-) {
-    val state by viewModel.viewState.collectAsState()
-    StatisticsScreen(
-        state = state,
-        onIntent = viewModel::handleIntent,
-        modifier = modifier
-    )
-}
-
-/**
  * Pure Stateless Statistics Screen displaying Donut Chart, Segmented Progress,
  * 7-Day Trend Bar Chart, Key Metrics, and Category Rankings.
  */

@@ -52,22 +52,6 @@ import com.listen.uicomponent.components.EmptyStateView
 import com.listen.uicomponent.components.SearchBarInput
 
 /**
- * Stateful entry route for Transactions Screen.
- */
-@Composable
-fun TransactionsRoute(
-    modifier: Modifier = Modifier,
-    viewModel: TransactionsViewModel = viewModel(),
-) {
-    val state by viewModel.viewState.collectAsState()
-    TransactionsScreen(
-        state = state,
-        onIntent = viewModel::handleIntent,
-        modifier = modifier
-    )
-}
-
-/**
  * Pure Stateless Transactions Screen orchestrating Month Navigation, Account Filters,
  * Balance Overview, and Grouped Transaction Items.
  */

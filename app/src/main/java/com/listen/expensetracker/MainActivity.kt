@@ -23,14 +23,15 @@ import com.listen.arch.apm.CrashHandler
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.core.effect.CollectCommonUiEffects
 import com.listen.expensetracker.core.overlay.AppOverlayHost
+import com.listen.expensetracker.core.route.CommonRoute
 import com.listen.expensetracker.core.state.AppOverlay
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.i18n.ExpenseStrings
-import com.listen.expensetracker.features.settings.ui.SettingsRoute
-import com.listen.expensetracker.features.statistics.ui.StatisticsRoute
-import com.listen.expensetracker.features.transactions.ui.TransactionsRoute
+import com.listen.expensetracker.features.settings.ui.SettingsScreen
+import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
+import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 import com.listen.uicomponent.theme.ListenTheme
 
 class MainActivity : ComponentActivity() {
@@ -105,21 +106,30 @@ fun App(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
-        val bottomPadding = innerPadding.calculateBottomPadding()
+        val screenModifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         when (appState.currentTab) {
-            NavTab.TRANSACTIONS -> TransactionsRoute(
-                viewModel = appState.transactionsViewModel,
-                modifier = Modifier.padding(bottom = bottomPadding)
-            )
-            NavTab.STATISTICS -> StatisticsRoute(
-                viewModel = appState.statisticsViewModel,
-                modifier = Modifier.padding(bottom = bottomPadding)
-            )
-            NavTab.SETTINGS -> SettingsRoute(
-                viewModel = appState.settingsViewModel,
-                onLaunchGooglePicker = onLaunchGooglePicker,
-                modifier = Modifier.padding(bottom = bottomPadding)
-            )
+            NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
+                TransactionsScreen(
+                    state = state,
+                    onIntent = onIntent,
+                    modifier = screenModifier
+                )
+            }
+            NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
+                StatisticsScreen(
+                    state = state,
+                    onIntent = onIntent,
+                    modifier = screenModifier
+                )
+            }
+            NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
+                SettingsScreen(
+                    state = state,
+                    onIntent = onIntent,
+                    onLaunchGooglePicker = onLaunchGooglePicker,
+                    modifier = screenModifier
+                )
+            }
         }
     }
 }

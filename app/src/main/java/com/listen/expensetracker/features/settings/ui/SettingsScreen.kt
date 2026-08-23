@@ -25,24 +25,6 @@ import com.listen.uicomponent.components.BaseScreenScaffold
 import kotlinx.coroutines.launch
 
 /**
- * Stateful entry route for Settings Screen.
- */
-@Composable
-fun SettingsRoute(
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = viewModel(),
-    onLaunchGooglePicker: suspend () -> Unit
-) {
-    val state by viewModel.viewState.collectAsState()
-    SettingsScreen(
-        state = state,
-        onIntent = viewModel::handleIntent,
-        onLaunchGooglePicker = onLaunchGooglePicker,
-        modifier = modifier
-    )
-}
-
-/**
  * Pure Stateless Settings Screen cleanly orchestrating Cloud Sync, Appearance, Data Management, and System Ops.
  */
 @Composable
