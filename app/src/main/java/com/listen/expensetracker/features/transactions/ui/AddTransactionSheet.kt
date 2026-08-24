@@ -304,12 +304,14 @@ fun AddTransactionSheet(
                 }
             }
 
-            // Keypad Component
+            // Keypad Component (Option A 4x3)
             NumericKeypad(
                 onKeyPress = { key ->
-                    if (amountExpression == "0" && key != ".") {
+                    if (key == "." && amountExpression.contains(".")) {
+                        // Ignore secondary decimal points
+                    } else if (amountExpression == "0" && key != ".") {
                         amountExpression = key
-                    } else if (amountExpression.length < 12) {
+                    } else if (amountExpression.length < 10) {
                         amountExpression += key
                     }
                 },
