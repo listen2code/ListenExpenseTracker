@@ -408,8 +408,11 @@ class SettingsViewModel(
             }.onFailure { err ->
                 emitEffect(CommonUiEffect.ShowToast("Google 授权解析失败: ${err.message}"))
             }
+        } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+            // 用户主动取消/关闭弹窗，不弹出错误提示
         } catch (e: Throwable) {
-            emitEffect(CommonUiEffect.ShowToast("Google 登录已取消或暂未配置 Google 凭据服务"))
+            com.listen.arch.apm.ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")
+            emitEffect(CommonUiEffect.ShowToast("Google 登录未成功 (${e.javaClass.simpleName}): ${e.message}"))
         }
     }
 

@@ -79,21 +79,28 @@ sequenceDiagram
 
 ### 2.3 创建凭据 (OAuth 客户端 ID)
 
-必须创建 **2 个** OAuth 客户端 ID：
+必须创建 **2 类** OAuth 客户端 ID：
 
-#### 1. Android 客户端 ID（用于设备端安全鉴权）
+#### 1. Android 客户端 ID（用于设备端安全鉴权，Debug 与 Release 各建一个）
 - 点击 **「+ 创建凭据」** $\rightarrow$ **「OAuth 客户端 ID」**；
 - 应用类型选择：**Android**；
 - 软件包名称：`com.listen.expensetracker`；
-- SHA-1 证书指纹：
-  - 本机 Debug 指纹：`D3:FC:90:5E:5D:05:C5:F8:0B:63:70:DD:C4:11:71:72:D3:02:3B:09`；
+- **SHA-1 证书指纹提取命令**：
+  - **Debug 指纹**：
+    ```bash
+    keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+    ```
+  - **Release 指纹**：
+    ```bash
+    keytool -list -v -keystore <path-to-your-release-keystore> -alias <your-alias>
+    ```
   *(注：如果页面出现“此客户端不是 Google Play 商店应用”的提示，属于说明性提示，无需理会，直接点击页面底部的「创建」即可)*。
 
 #### 2. Web 应用程序客户端 ID（用于签发 ID Token 与 Drive 令牌）
 - 再次点击 **「+ 创建凭据」** $\rightarrow$ **「OAuth 客户端 ID」**；
 - 应用类型选择：**Web 应用程序 (Web application)**；
 - 名称：`lExpense Web Client`（其他选填项留空）；
-- 点击「创建」，复制生成的 Web 客户端 ID（格式如：`1069102462195-dbs5gu3p6nf64jqou8f29g7vhb8e1s6m.apps.googleusercontent.com`）。
+- 点击「创建」，复制生成的 Web 客户端 ID（格式如：`<YOUR_CLIENT_ID>.apps.googleusercontent.com`），并配置到 `GoogleAuthManager` 中。
 
 ---
 

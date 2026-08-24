@@ -30,10 +30,13 @@
 -keep class com.listen.uicomponent.charts.** { *; }
 -keep class com.listen.uicomponent.components.** { *; }
 
-# 5. Google Play Services Auth 登录 SDK
--keep class com.google.android.gms.auth.api.signin.** { *; }
+# 5. Google Play Services Auth & Credential Manager SDK
+-keep class androidx.credentials.** { *; }
+-keep class com.google.android.libraries.identity.googleid.** { *; }
+-keep class com.google.android.gms.auth.** { *; }
 -keep class com.google.android.gms.common.api.** { *; }
--keep interface com.google.android.gms.auth.api.signin.** { *; }
+-dontwarn androidx.credentials.**
+-dontwarn com.google.android.libraries.identity.googleid.**
 -dontwarn com.google.android.gms.**
 
 # 6. Jetpack Compose 运行时与状态
