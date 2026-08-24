@@ -24,8 +24,8 @@ data class GoogleUserProfile(
  */
 object GoogleAuthManager {
 
-    // Default Web Client ID fallback for development & testing
-    private const val DEFAULT_WEB_CLIENT_ID = "619077977461-listen-expense-tracker-web.apps.googleusercontent.com"
+    // Configured Google Cloud OAuth 2.0 Web Client ID
+    private const val DEFAULT_WEB_CLIENT_ID = "1069102462195-dbs5gu3p6nf64jqou8f29g7vhb8e1s6m.apps.googleusercontent.com"
 
     /**
      * Obtains the official AndroidX CredentialManager instance.

@@ -113,3 +113,14 @@ sequenceDiagram
 1. **Room SQLite**：`TransactionEntity` 存储全部单笔账单流水，`TransactionDao` 提供响应式 Flow 监听；
 2. **DataStore Preferences**：`ExpenseDataStoreManager` 承载用户个性化偏好（语言、主题、主色调、月预算、币种符号）；
 3. **TransactionCalculationEngine**：纯 Kotlin 高性能数据计算引擎，负责内存多维过滤（按月份、账户、搜索关键字）、收支聚合、预算消耗比率测算，与 UI 完全解耦。
+
+---
+
+## 4. Google 身份鉴权与 Google Drive 云同步架构
+
+系统采用 **Google Identity + Google Drive REST API v3** 无服务器直连方案：
+1. **认证层 (`GoogleAuthManager`)**：基于 Android 官方最新的 `androidx.credentials.CredentialManager`，通过 Web Client ID 获得安全的 ID Token 与用户信息，账号状态经由 `DataStore` 安全持久化；
+2. **存储层 (`GoogleDriveService`)**：基于轻量级 HTTP 请求调用 Google Drive REST API v3，在用户个人 Google 云盘根目录下通过 `multipart/related` 自动维护加密备份文件 `lexpense_backup.json`；
+3. **动态提权机制**：拦截 `UserRecoverableAuthException` 并自动调起 Google 原生授权面板，获得用户明确同意后无缝执行多端云备份与快照恢复；
+4. **架构详述**：参见专属文档 [Google 登录与 Drive 同步全指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)。
+

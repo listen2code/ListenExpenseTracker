@@ -1,14 +1,16 @@
 package com.listen.expensetracker.features.settings.components
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,19 +19,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.listen.arch.i18n.StringsRes
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 
 /**
  * Dedicated Dialog Host for Settings Feature.
- * Encapsulates presentation and intent dispatching for budget, categories, currency, clear confirmation, and backup import.
+ * Encapsulates presentation and intent dispatching for budget, categories, currency, clear confirmation, backup import, and syncing HUD.
  */
 @Composable
 fun SettingsDialogHost(
@@ -134,5 +141,36 @@ fun SettingsDialogHost(
             )
         }
         null -> Unit
+    }
+
+    // Global Syncing HUD Dialog
+    if (state.isOperating) {
+        Dialog(
+            onDismissRequest = {}
+        ) {
+            SurfaceCard(
+                cornerRadius = AppDimens.CornerCard,
+                contentPadding = AppDimens.SpaceLarge
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AppDimens.SpaceMedium)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(36.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = AppStrings.cloud_status_syncing.tr(lang),
+                        fontSize = AppDimens.TextBody,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
     }
 }

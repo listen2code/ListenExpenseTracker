@@ -7,10 +7,10 @@
 ## 🌟 核心特性与产品能力
 
 1. **Local-First 离线优先极速记账**：基于 Room SQLite 提供 Flow 响应式数据流，毫秒级冷启动、离线读写与本地全量持久化。
-2. **Google 官方原生账户连携与云端备份恢复**：
+2. **Google 官方原生账户连携与 Google Drive 云端实时备份恢复**：
    - 接入官方最新的 **AndroidX `CredentialManager`**，调起系统原生半屏 Google 账户选择面板（直接授权本机登录的 Google 账户）。
-   - 用户画像与邮箱安全持久化，账号状态在应用重启后自动保持连携。
-   - 多账户独立快照隔离存储，云端备份携带 MD5 校验和与 APM 链路耗时打点，支持一键无损云端恢复。
+   - **Google Drive REST API v3 真实直连**：一键将加密账单快照 (`lexpense_backup.json`) 备份至个人的 Google 云端硬盘，并支持跨设备一键还原。
+   - 多账户独立隔离存储，云端备份携带 MD5 校验和与 APM 链路耗时打点。详细配置见 [Google 登录与 Drive 同步指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)。
 3. **高信息密度流水明细与日聚合视图**：
    - 流水列表按日自动分组 (`20 星期四 2026.08`) 并实时汇总每日总支出与总收入。
    - 极致紧凑的 24dp 圆形分类图标与微型内边距，单屏展示信息量翻倍。
@@ -118,6 +118,7 @@ app/src/main/java/com/listen/expensetracker/
 | 文档路径 | 核心内容 |
 | :--- | :--- |
 | [docs/project_development_guide.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/project_development_guide.md) | 项目开发指南、工程规范与代码风格基线 |
+| [docs/google_auth_and_drive_sync_guide.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md) | Google 登录与 Google Drive 云端同步配置与开发全指南 |
 | [docs/api_reference.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/api_reference.md) | 全模块 API、DAO、DataStore Flow、Google Auth 与 SDK 接口手册 |
 | [docs/architecture_decision_records.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/architecture_decision_records.md) | 架构决策记录 (ADR-001 ~ ADR-009) 与技术选型权衡 |
 | [docs/apm_performance_monitoring_design.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/apm_performance_monitoring_design.md) | APM 性能监控与可观测性设计规范 |

@@ -198,16 +198,28 @@ class SettingsViewModel(
                 emitEffect(CommonUiEffect.ShowToast(AppStrings.login_google_required_toast.tr(lang)))
                 return@launch
             }
-            val allList = dao.getAllTransactions()
-            val payload = TransactionBackupManager.exportToJson(allList)
-            val res = CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
-            res.onSuccess { count ->
-                prefManager.setLastSyncTimestamp(System.currentTimeMillis())
-                val msg = AppStrings.backup_success_toast.tr(lang).format(count)
-                emitEffect(CommonUiEffect.ShowToast(msg))
-            }.onFailure { err ->
-                val msg = AppStrings.backup_failed_toast.tr(lang).format(err.message ?: "Unknown")
-                emitEffect(CommonUiEffect.ShowToast(msg))
+            updateState { copy(isOperating = true) }
+            try {
+                val allList = dao.getAllTransactions()
+                val payload = TransactionBackupManager.exportToJson(allList)
+                val token = com.listen.expensetracker.data.cloud.GoogleDriveService.getAccessToken(application, email)
+                val driveResult = com.listen.expensetracker.data.cloud.GoogleDriveService.uploadBackup(token, payload, traceId)
+                driveResult.onSuccess { fileId ->
+                    val now = System.currentTimeMillis()
+                    prefManager.setLastSyncTimestamp(now)
+                    CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
+                    emitEffect(CommonUiEffect.ShowToast("已成功备份至 Google Drive 云端硬盘 (${allList.size} 条)"))
+                }.onFailure { err ->
+                    CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
+                    emitEffect(CommonUiEffect.ShowToast("Google Drive 上传异常: ${err.message}"))
+                }
+            } catch (e: Throwable) {
+                val allList = dao.getAllTransactions()
+                val payload = TransactionBackupManager.exportToJson(allList)
+                CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
+                emitEffect(CommonUiEffect.ShowToast("已备份至本地快照 (Drive 凭据待授权: ${e.message})"))
+            } finally {
+                updateState { copy(isOperating = false) }
             }
         }
     }
@@ -220,19 +232,45 @@ class SettingsViewModel(
                 emitEffect(CommonUiEffect.ShowToast(AppStrings.login_google_required_toast.tr(lang)))
                 return@launch
             }
-            val res = CloudSyncManager.restoreFromCloud(email, traceId)
-            res.onSuccess { payload ->
-                val list = TransactionBackupManager.importFromJson(payload)
-                if (list.isNotEmpty()) {
-                    dao.insertTransactions(list)
-                    val msg = AppStrings.restore_success_toast.tr(lang).format(list.size)
-                    emitEffect(CommonUiEffect.ShowToast(msg))
-                } else {
-                    emitEffect(CommonUiEffect.ShowToast(AppStrings.restore_empty_toast.tr(lang)))
+            updateState { copy(isOperating = true) }
+            try {
+                val token = com.listen.expensetracker.data.cloud.GoogleDriveService.getAccessToken(application, email)
+                val driveResult = com.listen.expensetracker.data.cloud.GoogleDriveService.downloadBackup(token, traceId)
+                driveResult.onSuccess { payload ->
+                    val list = TransactionBackupManager.importFromJson(payload)
+                    if (list.isNotEmpty()) {
+                        dao.insertTransactions(list)
+                        val now = System.currentTimeMillis()
+                        prefManager.setLastSyncTimestamp(now)
+                        emitEffect(CommonUiEffect.ShowToast("已从 Google Drive 成功恢复 ${list.size} 条账单"))
+                    } else {
+                        emitEffect(CommonUiEffect.ShowToast(AppStrings.restore_empty_toast.tr(lang)))
+                    }
+                }.onFailure { driveErr ->
+                    val fallbackRes = CloudSyncManager.restoreFromCloud(email, traceId)
+                    fallbackRes.onSuccess { payload ->
+                        val list = TransactionBackupManager.importFromJson(payload)
+                        if (list.isNotEmpty()) {
+                            dao.insertTransactions(list)
+                            emitEffect(CommonUiEffect.ShowToast("已从快照恢复 ${list.size} 条账单"))
+                        }
+                    }.onFailure {
+                        emitEffect(CommonUiEffect.ShowToast("云端恢复失败: ${driveErr.message}"))
+                    }
                 }
-            }.onFailure { err ->
-                val msg = AppStrings.restore_failed_toast.tr(lang).format(err.message ?: "Unknown")
-                emitEffect(CommonUiEffect.ShowToast(msg))
+            } catch (e: Throwable) {
+                val fallbackRes = CloudSyncManager.restoreFromCloud(email, traceId)
+                fallbackRes.onSuccess { payload ->
+                    val list = TransactionBackupManager.importFromJson(payload)
+                    if (list.isNotEmpty()) {
+                        dao.insertTransactions(list)
+                        emitEffect(CommonUiEffect.ShowToast("已从快照恢复 ${list.size} 条账单"))
+                    }
+                }.onFailure {
+                    emitEffect(CommonUiEffect.ShowToast("恢复失败: ${e.message}"))
+                }
+            } finally {
+                updateState { copy(isOperating = false) }
             }
         }
     }

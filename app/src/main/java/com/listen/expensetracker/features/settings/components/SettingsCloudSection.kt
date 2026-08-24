@@ -57,7 +57,8 @@ fun SettingsCloudSection(
     onTriggerBackup: () -> Unit,
     onTriggerRestore: () -> Unit,
     lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isOperating: Boolean = false
 ) {
     val isLoggedIn = !googleAccountEmail.isNullOrBlank()
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
@@ -189,12 +190,23 @@ fun SettingsCloudSection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
                 ) {
+                    val isBusy = isOperating || syncState.status == SyncStatus.SYNCING
                     CommonButton(
-                        text = AppStrings.cloud_backup_btn.tr(lang),
+                        text = if (isBusy) AppStrings.cloud_status_syncing.tr(lang) else AppStrings.cloud_backup_btn.tr(lang),
                         onClick = onTriggerBackup,
-                        enabled = syncState.status != SyncStatus.SYNCING,
+                        enabled = !isBusy,
                         style = CommonButtonStyle.Primary,
-                        icon = { Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(16.dp)) },
+                        icon = {
+                            if (isBusy) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(16.dp))
+                            }
+                        },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
                     )
@@ -202,7 +214,7 @@ fun SettingsCloudSection(
                     CommonButton(
                         text = AppStrings.cloud_restore_btn.tr(lang),
                         onClick = onTriggerRestore,
-                        enabled = syncState.status != SyncStatus.SYNCING,
+                        enabled = !isBusy,
                         style = CommonButtonStyle.Outlined,
                         icon = { Icon(Icons.Default.CloudDownload, contentDescription = "Restore", modifier = Modifier.size(16.dp)) },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),

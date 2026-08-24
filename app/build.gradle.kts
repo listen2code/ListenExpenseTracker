@@ -27,7 +27,7 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        val vName = "0.0.9"
+        val vName = "0.0.10"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
@@ -106,6 +106,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)

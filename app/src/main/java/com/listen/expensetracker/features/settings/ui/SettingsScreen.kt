@@ -61,7 +61,8 @@ fun SettingsScreen(
                     onLogoutGoogle = { onIntent(SettingsIntent.UnlinkGoogleAccount) },
                     onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
-                    lang = lang
+                    lang = lang,
+                    isOperating = state.isOperating
                 )
             }
 
