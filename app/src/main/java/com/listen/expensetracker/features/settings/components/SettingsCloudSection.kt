@@ -1,15 +1,11 @@
 package com.listen.expensetracker.features.settings.components
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,13 +16,10 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,10 +28,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
+import com.listen.arch.i18n.tr
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
@@ -48,6 +45,7 @@ import java.util.Locale
 
 /**
  * Cloud Sync and Google Account Settings Card.
+ * Fully conforms to theme primary accent colors and dynamic typography.
  */
 @Composable
 fun SettingsCloudSection(
@@ -70,29 +68,20 @@ fun SettingsCloudSection(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
-            // Header
+            // Header with theme-adaptive primary tint
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF4285F4)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Google",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.CloudUpload,
+                    contentDescription = "Cloud",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(AppDimens.IconSizeMedium)
+                )
                 Text(
                     text = AppStrings.settings_cloud.tr(lang),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = AppDimens.TextTitle
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
 
@@ -120,7 +109,7 @@ fun SettingsCloudSection(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = (googleDisplayName?.firstOrNull() ?: googleAccountEmail?.firstOrNull() ?: 'G').uppercase(),
+                                text = (googleDisplayName?.firstOrNull() ?: googleAccountEmail.firstOrNull() ?: 'G').uppercase(),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = AppDimens.TextTitle
@@ -134,7 +123,7 @@ fun SettingsCloudSection(
                                 maxLines = 1
                             )
                             Text(
-                                text = googleAccountEmail ?: "",
+                                text = googleAccountEmail,
                                 fontSize = AppDimens.TextMicro,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1
@@ -200,49 +189,41 @@ fun SettingsCloudSection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
                 ) {
-                    Button(
+                    CommonButton(
+                        text = AppStrings.cloud_backup_btn.tr(lang),
                         onClick = onTriggerBackup,
                         enabled = syncState.status != SyncStatus.SYNCING,
-                        shape = RoundedCornerShape(AppDimens.CornerButton),
+                        style = CommonButtonStyle.Primary,
+                        icon = { Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(16.dp)) },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                        Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                        Text(AppStrings.cloud_backup_btn.tr(lang), fontSize = AppDimens.TextBody)
-                    }
+                    )
 
-                    OutlinedButton(
+                    CommonButton(
+                        text = AppStrings.cloud_restore_btn.tr(lang),
                         onClick = onTriggerRestore,
                         enabled = syncState.status != SyncStatus.SYNCING,
-                        shape = RoundedCornerShape(AppDimens.CornerButton),
+                        style = CommonButtonStyle.Outlined,
+                        icon = { Icon(Icons.Default.CloudDownload, contentDescription = "Restore", modifier = Modifier.size(16.dp)) },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.CloudDownload, contentDescription = "Restore", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                        Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                        Text(AppStrings.cloud_restore_btn.tr(lang), fontSize = AppDimens.TextBody)
-                    }
+                    )
                 }
             } else {
                 // Not Logged In State
-                Text(
+                CommonText(
                     text = AppStrings.google_login_required.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Button(
+                CommonButton(
+                    text = AppStrings.google_login_btn.tr(lang),
                     onClick = onLoginGoogle,
-                    shape = RoundedCornerShape(AppDimens.CornerButton),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
+                    style = CommonButtonStyle.Primary,
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(18.dp)) },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                    Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text(AppStrings.google_login_btn.tr(lang), fontWeight = FontWeight.Bold, fontSize = AppDimens.TextBody)
-                }
+                )
             }
         }
     }
