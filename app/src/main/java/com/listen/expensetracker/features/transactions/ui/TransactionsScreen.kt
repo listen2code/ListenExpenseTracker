@@ -4,6 +4,8 @@ import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -119,7 +121,7 @@ fun TransactionsScreen(
                 )
             }
 
-            // Account Filter Chips & Sort Order Dropdown
+            // Horizontally Scrollable Account Filter Chips & Fixed Sort Order Trigger
             item(key = "filters_and_sort") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -127,6 +129,9 @@ fun TransactionsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -148,7 +153,7 @@ fun TransactionsScreen(
                         // Manage Custom Accounts Button
                         IconButton(
                             onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.ManageAccount)) },
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -159,8 +164,8 @@ fun TransactionsScreen(
                         }
                     }
 
-                    // Sort Order Menu Trigger
-                    Box {
+                    // Sort Order Menu Trigger (Fixed on the right)
+                    Box(modifier = Modifier.padding(start = AppDimens.SpaceSmall)) {
                         IconButton(onClick = { showSortMenu = true }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Sort,
@@ -230,7 +235,7 @@ fun TransactionsScreen(
                             currencySymbol = sym,
                             hideAmount = state.hideBalance,
                             onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.EditTransaction(tx))) },
-                            onDelete = { onIntent(TransactionsIntent.DeleteTransaction(tx.id)) },
+                            onLongClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.ConfirmDelete(tx))) },
                             lang = lang
                         )
                     }

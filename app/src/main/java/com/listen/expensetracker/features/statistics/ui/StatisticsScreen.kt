@@ -32,8 +32,8 @@ import com.listen.expensetracker.features.statistics.components.RankingCategoryI
 import com.listen.expensetracker.features.statistics.components.StatisticsDialogHost
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
-import com.listen.uicomponent.charts.BarChart
 import com.listen.uicomponent.charts.DonutChart
+import com.listen.uicomponent.charts.LineChart
 import com.listen.uicomponent.components.BaseScreenScaffold
 import com.listen.uicomponent.components.EmptyStateView
 import com.listen.uicomponent.components.SegmentedProgressBar
@@ -41,7 +41,7 @@ import com.listen.uicomponent.components.SurfaceCard
 
 /**
  * Pure Stateless Statistics Screen displaying Donut Chart, Segmented Progress,
- * 7-Day Trend Bar Chart, Key Metrics, and Category Rankings.
+ * Month Daily Trend Line Chart, Key Metrics, and Category Rankings.
  */
 @Composable
 fun StatisticsScreen(
@@ -142,21 +142,20 @@ fun StatisticsScreen(
                 }
             }
 
-            // 7-Day Trend Bar Chart (Expense Only)
-            if (isExpenseTab && state.dailyTrendBars.isNotEmpty()) {
+            // Month Daily Trend Line Chart (Expense Only)
+            if (isExpenseTab && state.dailyTrendPoints.isNotEmpty()) {
                 item(key = "trend_chart_card") {
                     SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = AppStrings.trend_7days.tr(lang),
+                            text = AppStrings.trend_month_daily.tr(lang),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
                         )
-                        BarChart(
-                            items = state.dailyTrendBars,
-                            trackHeight = AppDimens.ChartHeightStandard,
-                            barWidth = AppDimens.ChartBarWidth,
+                        LineChart(
+                            points = state.dailyTrendPoints,
+                            chartHeight = AppDimens.ChartHeightStandard,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

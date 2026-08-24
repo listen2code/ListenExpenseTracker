@@ -3,6 +3,7 @@ package com.listen.expensetracker.data.engine
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.BarChartItem
+import com.listen.uicomponent.charts.LineChartPoint
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment
 import java.text.SimpleDateFormat
@@ -24,6 +25,7 @@ data class CalculationResult(
     val incomeCategoryShares: List<PieChartItem>,
     val incomeProgressSegments: List<ProgressSegment>,
     val dailyTrendBars: List<BarChartItem>,
+    val dailyTrendPoints: List<LineChartPoint>,
     val dailyAverageExpense: Double,
     val dailyAverageIncome: Double,
     val maxExpenseTransaction: TransactionEntity?,
@@ -84,6 +86,7 @@ object TransactionCalculationEngine {
         val dailyAvgInc = if (daysInMonth > 0) totalInc / daysInMonth else 0.0
 
         val trendBars = calculateRecentDaysTrend(finalSorted.filter { it.type == "EXPENSE" })
+        val trendPoints = calculateMonthDailyTrend(finalSorted.filter { it.type == "EXPENSE" }, currentOffset)
         val ratio = if (budget > 0) (totalExp / budget).toFloat() else 0f
 
         return CalculationResult(
@@ -100,6 +103,7 @@ object TransactionCalculationEngine {
             incomeCategoryShares = incomeShares,
             incomeProgressSegments = incomeSegments,
             dailyTrendBars = trendBars,
+            dailyTrendPoints = trendPoints,
             dailyAverageExpense = dailyAvgExp,
             dailyAverageIncome = dailyAvgInc,
             maxExpenseTransaction = maxExpenseTx,
@@ -141,6 +145,40 @@ object TransactionCalculationEngine {
                     label = dayKey,
                     value = sum,
                     colorHex = "#3B82F6"
+                )
+            )
+        }
+        return result
+    }
+
+    fun calculateMonthDailyTrend(
+        expenses: List<TransactionEntity>,
+        offset: Int
+    ): List<LineChartPoint> {
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.MONTH, offset)
+        val maxDaysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val limitDay = if (offset == 0) {
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDaysInMonth)
+        } else if (offset < 0) {
+            maxDaysInMonth
+        } else {
+            1
+        }
+
+        val dayGroups = expenses.groupBy {
+            val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            c.get(Calendar.DAY_OF_MONTH)
+        }
+
+        val result = mutableListOf<LineChartPoint>()
+        for (day in 1..limitDay) {
+            val sum = dayGroups[day]?.sumOf { it.amount } ?: 0.0
+            result.add(
+                LineChartPoint(
+                    label = "$day",
+                    value = sum,
+                    subLabel = "$day"
                 )
             )
         }

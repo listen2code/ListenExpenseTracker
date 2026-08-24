@@ -20,6 +20,7 @@ enum class TransactionSortOrder(val displayNameKey: String) {
 sealed interface TransactionsDialog {
     data object AddTransaction : TransactionsDialog
     data class EditTransaction(val transaction: TransactionEntity) : TransactionsDialog
+    data class ConfirmDelete(val transaction: TransactionEntity) : TransactionsDialog
     data object MonthPicker : TransactionsDialog
     data object ManageAccount : TransactionsDialog
 }

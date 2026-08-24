@@ -23,13 +23,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+
 /**
  * Month Navigation Capsule component for ListenExpenseTracker.
  * Displays previous/next buttons and a clickable center month title in a pill container.
+ * Supports horizontal swipe gestures (swipe left for next month, swipe right for previous month).
  *
  * @param monthTitle Display text for the active month (e.g., "本月 (2026年08月)")
- * @param onPreviousMonth Callback triggered when tapping previous button
- * @param onNextMonth Callback triggered when tapping next button
+ * @param onPreviousMonth Callback triggered when tapping previous button or swiping right
+ * @param onNextMonth Callback triggered when tapping next button or swiping left
  * @param onTitleClick Callback triggered when tapping the center title (e.g., open MonthPickerDialog)
  * @param modifier Composable modifier
  */
@@ -41,10 +49,33 @@ fun MonthNavigationCapsule(
     onTitleClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var dragAccumulator by remember { mutableFloatStateOf(0f) }
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragStart = { dragAccumulator = 0f },
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        dragAccumulator += dragAmount
+                    },
+                    onDragEnd = {
+                        val thresholdPx = 50f
+                        if (dragAccumulator > thresholdPx) {
+                            onPreviousMonth()
+                        } else if (dragAccumulator < -thresholdPx) {
+                            onNextMonth()
+                        }
+                        dragAccumulator = 0f
+                    },
+                    onDragCancel = {
+                        dragAccumulator = 0f
+                    }
+                )
+            }
             .padding(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Row(

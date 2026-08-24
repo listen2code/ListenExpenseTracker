@@ -1,40 +1,27 @@
 package com.listen.expensetracker.features.transactions.components
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
@@ -46,17 +33,17 @@ import com.listen.uicomponent.theme.parseHexColor
 
 /**
  * Ultra-Compact Transaction Item Row Component.
- * Supports swipe-to-delete gesture, category icon badge, and privacy amount masking.
+ * Supports single-tap to edit, long-press to delete, category icon badge, and privacy amount masking.
  *
  * @param transaction Transaction data entity
  * @param currencySymbol Active currency symbol
  * @param hideAmount True if privacy masking is active
  * @param onClick Callback when the transaction row is tapped
- * @param onDelete Callback when swiped to delete
+ * @param onLongClick Callback when the transaction row is long pressed
  * @param lang Active language code
  * @param modifier Composable modifier
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionItemRow(
     modifier: Modifier = Modifier,
@@ -64,124 +51,94 @@ fun TransactionItemRow(
     currencySymbol: String,
     hideAmount: Boolean,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
-    lang: String = "zh",
+    onLongClick: () -> Unit,
+    lang: String = "zh"
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        positionalThreshold = { totalDistance -> totalDistance * 0.7f }
-    )
-
-    androidx.compose.runtime.LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            onDelete()
-        }
-    }
-
-    SwipeToDismissBox(
-        state = dismissState,
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
-        backgroundContent = {
-            val color = MaterialTheme.colorScheme.error
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(AppDimens.CornerCard))
-                    .background(color)
-                    .padding(horizontal = AppDimens.SpaceLarge),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = AppStrings.common_delete.tr(lang),
-                    tint = MaterialTheme.colorScheme.onError
-                )
-            }
-        },
+    SurfaceCard(
+        cornerRadius = AppDimens.CornerCard,
+        contentPadding = AppDimens.SpaceExtraSmall,
         modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(AppDimens.CornerCard))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
-        SurfaceCard(
-            cornerRadius = AppDimens.CornerCard,
-            contentPadding = AppDimens.SpaceExtraSmall,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClick() }
+                .padding(horizontal = AppDimens.SpaceExtraSmall, vertical = AppDimens.SpaceExtraSmall),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppDimens.SpaceExtraSmall, vertical = AppDimens.SpaceExtraSmall),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val cat = CategoryRepository.getCategoryById(transaction.categoryId)
-                val color = parseHexColor(transaction.categoryColorHex)
-                val accountDisplay = AccountRepository.getAccountDisplayName(transaction.accountType, lang)
+            val cat = CategoryRepository.getCategoryById(transaction.categoryId)
+            val color = parseHexColor(transaction.categoryColorHex)
+            val accountDisplay = AccountRepository.getAccountDisplayName(transaction.accountType, lang)
 
-                // Left Section: Category Icon, Name, Account Badge, Note
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
-                    modifier = Modifier.weight(1f, fill = true)
+            // Left Section: Category Icon, Name, Account Badge, Note
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
+                modifier = Modifier.weight(1f, fill = true)
+            ) {
+                // Category Icon Bubble
+                Box(
+                    modifier = Modifier
+                        .size(AppDimens.IconSizeLarge)
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Category Icon Bubble
-                    Box(
-                        modifier = Modifier
-                            .size(AppDimens.IconSizeLarge)
-                            .clip(CircleShape)
-                            .background(color.copy(alpha = 0.16f)),
-                        contentAlignment = Alignment.Center
+                    Icon(
+                        imageVector = cat.icon,
+                        contentDescription = transaction.categoryName,
+                        tint = color,
+                        modifier = Modifier.size(AppDimens.IconSizeSmall)
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f, fill = true)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                     ) {
-                        Icon(
-                            imageVector = cat.icon,
-                            contentDescription = transaction.categoryName,
-                            tint = color,
-                            modifier = Modifier.size(AppDimens.IconSizeSmall)
+                        Text(
+                            text = transaction.categoryName,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = AppDimens.TextSubtitle,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "· $accountDisplay",
+                            fontSize = AppDimens.TextMicro,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
                         )
                     }
 
-                    Column(modifier = Modifier.weight(1f, fill = true)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
-                        ) {
-                            Text(
-                                text = transaction.categoryName,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = AppDimens.TextSubtitle,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = "· $accountDisplay",
-                                fontSize = AppDimens.TextMicro,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1
-                            )
-                        }
-
-                        if (transaction.note.isNotBlank()) {
-                            Text(
-                                text = transaction.note,
-                                fontSize = AppDimens.TextMicro,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                lineHeight = 14.sp
-                            )
-                        }
+                    if (transaction.note.isNotBlank()) {
+                        Text(
+                            text = transaction.note,
+                            fontSize = AppDimens.TextMicro,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 14.sp
+                        )
                     }
                 }
-
-                // Right Section: Signed Currency Amount
-                val amountPrefix = if (transaction.type == "EXPENSE") "-" else "+"
-                val amountColor = if (transaction.type == "EXPENSE") ExpenseRed else IncomeGreen
-
-                Text(
-                    text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${"%.2f".format(transaction.amount)}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = AppDimens.TextSubtitle,
-                    color = amountColor,
-                    maxLines = 1
-                )
             }
+
+            // Right Section: Signed Currency Amount
+            val amountPrefix = if (transaction.type == "EXPENSE") "-" else "+"
+            val amountColor = if (transaction.type == "EXPENSE") ExpenseRed else IncomeGreen
+
+            Text(
+                text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${"%.2f".format(transaction.amount)}",
+                fontWeight = FontWeight.Bold,
+                fontSize = AppDimens.TextSubtitle,
+                color = amountColor,
+                maxLines = 1
+            )
         }
     }
 }

@@ -27,6 +27,7 @@ object AccountRepository {
     )
 
     private val customAccounts = mutableListOf<AccountTypeItem>()
+    var onAccountsChangedListener: ((String) -> Unit)? = null
 
     fun getAllAccounts(): List<AccountTypeItem> {
         return defaultAccounts + customAccounts
@@ -40,17 +41,21 @@ object AccountRepository {
         val key = "ACC_" + System.currentTimeMillis()
         val item = AccountTypeItem(key = key, nameKey = "", customName = name, isSystem = false)
         customAccounts.add(item)
+        notifyChanged()
         return item
     }
 
     fun deleteAccount(key: String): Boolean {
-        return customAccounts.removeAll { it.key == key }
+        val removed = customAccounts.removeAll { it.key == key }
+        if (removed) notifyChanged()
+        return removed
     }
 
     fun updateAccount(key: String, newName: String) {
         val index = customAccounts.indexOfFirst { it.key == key }
         if (index >= 0) {
             customAccounts[index] = customAccounts[index].copy(customName = newName)
+            notifyChanged()
         }
     }
 
@@ -61,5 +66,35 @@ object AccountRepository {
 
     fun getAccountName(key: String, lang: String = "zh"): String {
         return getAccountDisplayName(key, lang)
+    }
+
+    fun serializeCustomAccounts(): String {
+        val items = customAccounts.map { acct ->
+            val safeKey = acct.key.replace("\"", "\\\"")
+            val safeName = (acct.customName ?: "").replace("\"", "\\\"")
+            "{\"key\":\"$safeKey\",\"customName\":\"$safeName\"}"
+        }
+        return "[${items.joinToString(",")}]"
+    }
+
+    fun deserializeCustomAccounts(json: String) {
+        if (json.isBlank()) return
+        try {
+            val loaded = mutableListOf<AccountTypeItem>()
+            val regex = Regex("""\{"key":"(.*?)","customName":"(.*?)"\}""")
+            regex.findAll(json).forEach { match ->
+                val key = match.groupValues[1].replace("\\\"", "\"")
+                val name = match.groupValues[2].replace("\\\"", "\"")
+                if (key.isNotBlank() && name.isNotBlank()) {
+                    loaded.add(AccountTypeItem(key = key, nameKey = "", customName = name, isSystem = false))
+                }
+            }
+            customAccounts.clear()
+            customAccounts.addAll(loaded)
+        } catch (_: Exception) {}
+    }
+
+    private fun notifyChanged() {
+        onAccountsChangedListener?.invoke(serializeCustomAccounts())
     }
 }

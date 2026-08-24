@@ -128,6 +128,7 @@ class StatisticsViewModel(
                 incomeCategoryShares = calculated.incomeCategoryShares,
                 incomeProgressSegments = calculated.incomeProgressSegments,
                 dailyTrendBars = calculated.dailyTrendBars,
+                dailyTrendPoints = calculated.dailyTrendPoints,
                 totalExpense = calculated.totalExpense,
                 totalIncome = calculated.totalIncome,
                 netBalance = calculated.netBalance,

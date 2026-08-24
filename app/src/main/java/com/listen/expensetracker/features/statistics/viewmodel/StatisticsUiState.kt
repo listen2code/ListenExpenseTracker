@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.statistics.viewmodel
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.uicomponent.charts.BarChartItem
+import com.listen.uicomponent.charts.LineChartPoint
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment
 import com.listen.uicomponent.theme.AccentColor
@@ -16,6 +17,7 @@ data class StatisticsUiState(
     val incomeCategoryShares: List<PieChartItem> = emptyList(),
     val incomeProgressSegments: List<ProgressSegment> = emptyList(),
     val dailyTrendBars: List<BarChartItem> = emptyList(),
+    val dailyTrendPoints: List<LineChartPoint> = emptyList(),
     val totalExpense: Double = 0.0,
     val totalIncome: Double = 0.0,
     val netBalance: Double = 0.0,

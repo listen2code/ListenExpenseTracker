@@ -20,6 +20,7 @@ import com.listen.expensetracker.auth.GoogleAuthManager
 import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -27,6 +28,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
+
+private data class DemoTemplate(
+    val categoryId: String,
+    val categoryNameKey: String,
+    val notes: List<String>,
+    val minAmount: Int,
+    val maxAmount: Int,
+    val colorHex: String
+)
 
 /**
  * ViewModel dedicated to user preferences, cloud sync, Google authentication, and data operations.
@@ -230,16 +240,81 @@ class SettingsViewModel(
     private fun seedDemoData(traceId: String) {
         viewModelScope.launch {
             val lang = currentState.language
-            val now = System.currentTimeMillis()
-            val day = 86400000L
-            val demoList = listOf(
-                TransactionEntity(id = UUID.randomUUID().toString(), type = "EXPENSE", categoryId = "c_food", categoryName = AppStrings.cat_food.tr(lang), categoryIcon = "c_food", categoryColorHex = "#EF4444", amount = 42.0, timestamp = now - 20000, note = "Lunch Bento", accountType = "WECHAT"),
-                TransactionEntity(id = UUID.randomUUID().toString(), type = "EXPENSE", categoryId = "c_transport", categoryName = AppStrings.cat_transport.tr(lang), categoryIcon = "c_transport", categoryColorHex = "#3B82F6", amount = 6.0, timestamp = now - 40000, note = "Metro Train", accountType = "ALIPAY"),
-                TransactionEntity(id = UUID.randomUUID().toString(), type = "EXPENSE", categoryId = "c_cafe", categoryName = AppStrings.cat_cafe.tr(lang), categoryIcon = "c_cafe", categoryColorHex = "#84CC16", amount = 28.0, timestamp = now - day, note = "Latte Coffee", accountType = "WECHAT"),
-                TransactionEntity(id = UUID.randomUUID().toString(), type = "INCOME", categoryId = "c_salary", categoryName = AppStrings.cat_salary.tr(lang), categoryIcon = "c_salary", categoryColorHex = "#10B981", amount = 15000.0, timestamp = now - day * 2, note = "Monthly Salary", accountType = "BANK"),
-                TransactionEntity(id = UUID.randomUUID().toString(), type = "EXPENSE", categoryId = "c_shopping", categoryName = AppStrings.cat_shopping.tr(lang), categoryIcon = "c_shopping", categoryColorHex = "#EC4899", amount = 199.0, timestamp = now - day * 3, note = "Uniqlo Clothes", accountType = "ALIPAY")
+            val cal = java.util.Calendar.getInstance()
+            val currentDay = cal.get(java.util.Calendar.DAY_OF_MONTH)
+            val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
+
+            val expenseTemplates = listOf(
+                DemoTemplate("c_food", AppStrings.cat_food, listOf("午餐便当", "麻辣烫", "日料寿喜烧", "麦当劳套餐", "火锅聚餐", "早点豆浆油条", "牛排晚餐", "精酿啤酒馆"), 18, 360, "#EF4444"),
+                DemoTemplate("c_transport", AppStrings.cat_transport, listOf("地铁出行", "打车回家", "公交车", "滴滴快车", "加油充值", "停车费"), 4, 220, "#3B82F6"),
+                DemoTemplate("c_cafe", AppStrings.cat_cafe, listOf("星巴克拿铁", "喜茶多肉葡萄", "瑞幸生椰拿铁", "Manner澳白", "一点点奶茶"), 12, 48, "#84CC16"),
+                DemoTemplate("c_shopping", AppStrings.cat_shopping, listOf("优衣库服饰", "网购日用品", "数码配件", "超市大采购", "降噪耳机", "护肤品"), 39, 699, "#EC4899"),
+                DemoTemplate("c_entertainment", AppStrings.cat_entertainment, listOf("电影票", "Steam游戏", "剧本杀", "音乐会门票", "KTV唱歌"), 45, 380, "#8B5CF6"),
+                DemoTemplate("c_fitness", AppStrings.cat_fitness, listOf("羽毛球包场", "游泳馆门票", "蛋白粉补给", "运动跑鞋"), 30, 450, "#F59E0B"),
+                DemoTemplate("c_pets", AppStrings.cat_pets, listOf("猫粮罐头", "宠物驱虫", "猫砂补货", "洗澡美容"), 35, 300, "#14B8A6"),
+                DemoTemplate("c_medical", AppStrings.cat_medical, listOf("感冒药", "口腔检查洗牙", "维生素补剂"), 20, 280, "#06B6D4")
             )
-            dao.insertTransactions(demoList)
+
+            val incomeTemplates = listOf(
+                DemoTemplate("c_salary", AppStrings.cat_salary, listOf("月度薪酬发放", "绩效奖金"), 12000, 26000, "#10B981"),
+                DemoTemplate("c_investment", AppStrings.cat_investment, listOf("基金定投收益", "理财结息", "股票分红"), 300, 3500, "#6366F1"),
+                DemoTemplate("c_gift", AppStrings.cat_gift, listOf("生日红包", "长辈过节礼金", "抽奖红包"), 200, 1000, "#F43F5E")
+            )
+
+            val count = kotlin.random.Random.nextInt(12, 18)
+            val generated = mutableListOf<TransactionEntity>()
+
+            // 1. Generate 1-2 Income transactions
+            val incomeItem = incomeTemplates.random()
+            val incAmt = kotlin.random.Random.nextInt(incomeItem.minAmount, incomeItem.maxAmount).toDouble()
+            val incDay = kotlin.random.Random.nextInt(1, currentDay.coerceAtLeast(2))
+            val incCal = java.util.Calendar.getInstance().apply {
+                set(java.util.Calendar.DAY_OF_MONTH, incDay)
+                set(java.util.Calendar.HOUR_OF_DAY, kotlin.random.Random.nextInt(9, 18))
+                set(java.util.Calendar.MINUTE, kotlin.random.Random.nextInt(0, 59))
+            }
+            generated.add(
+                TransactionEntity(
+                    id = UUID.randomUUID().toString(),
+                    type = "INCOME",
+                    categoryId = incomeItem.categoryId,
+                    categoryName = incomeItem.categoryNameKey.tr(lang),
+                    categoryIcon = incomeItem.categoryId,
+                    categoryColorHex = incomeItem.colorHex,
+                    amount = incAmt,
+                    timestamp = incCal.timeInMillis,
+                    note = incomeItem.notes.random(),
+                    accountType = "BANK"
+                )
+            )
+
+            // 2. Generate varied Expense transactions
+            for (i in 1 until count) {
+                val exp = expenseTemplates.random()
+                val amt = kotlin.random.Random.nextInt(exp.minAmount, exp.maxAmount).toDouble()
+                val expDay = kotlin.random.Random.nextInt(1, (currentDay + 1).coerceAtLeast(2))
+                val expCal = java.util.Calendar.getInstance().apply {
+                    set(java.util.Calendar.DAY_OF_MONTH, expDay)
+                    set(java.util.Calendar.HOUR_OF_DAY, kotlin.random.Random.nextInt(7, 23))
+                    set(java.util.Calendar.MINUTE, kotlin.random.Random.nextInt(0, 59))
+                }
+                generated.add(
+                    TransactionEntity(
+                        id = UUID.randomUUID().toString(),
+                        type = "EXPENSE",
+                        categoryId = exp.categoryId,
+                        categoryName = exp.categoryNameKey.tr(lang),
+                        categoryIcon = exp.categoryId,
+                        categoryColorHex = exp.colorHex,
+                        amount = amt,
+                        timestamp = expCal.timeInMillis,
+                        note = exp.notes.random(),
+                        accountType = accounts.random()
+                    )
+                )
+            }
+
+            dao.insertTransactions(generated)
             emitEffect(CommonUiEffect.ShowToast(AppStrings.seed_data_success_toast.tr(lang)))
         }
     }

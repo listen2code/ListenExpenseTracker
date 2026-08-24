@@ -251,6 +251,17 @@ class TransactionCalculationEngineTest {
     }
 
     @Test
+    fun testMonthDailyTrendCalculation() {
+        val expenses = sampleTransactions.filter { it.type == "EXPENSE" }
+        val points = TransactionCalculationEngine.calculateMonthDailyTrend(expenses, 0)
+        assertTrue(points.isNotEmpty())
+        points.forEach { pt ->
+            assertNotNull(pt.label)
+            assertTrue(pt.value >= 0.0)
+        }
+    }
+
+    @Test
     fun testMonthRangeAndDaysInMonth() {
         val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(0)
         assertTrue(startTs < endTs)

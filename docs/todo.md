@@ -102,8 +102,13 @@
   - [x] `AccountRepositoryTest`
   - [x] `TransactionCalculationEngineTest`
   - [x] `TransactionsIntentEffectTest`
-  - [x] `TransactionsUiStateTest`
-  - [x] `TransactionSortOrderTest`
+- [x] **v0.0.9 体验与功能专项升级 (100% Completed)**
+  - [x] 近 7 日图表重构升级为从当月 1 日至今的月度日走势平滑折线图 (`LineChart`)
+  - [x] 流水页面移除左滑删除，改成长按条目呼出确认对话框 (`ConfirmDelete`) 进行安全删除
+  - [x] 流水与统计画面年月导航胶囊支持左右滑动手势切换月份 (50px 灵敏阈值)
+  - [x] 账户选择栏支持横向滑动，同时最右侧排序筛选按钮吸顶固定
+  - [x] 资产账户管理 Dialog 现代化卡片式重构与美化，并实现账户在 DataStore 的持久化
+  - [x] 演练数据生成升级为全随机化算法，每次点击生成不同真实场景账单
 
 ## 需求池
 - [ ] **新增架构设计功能，展示当前APP的架构设计和技术栈**

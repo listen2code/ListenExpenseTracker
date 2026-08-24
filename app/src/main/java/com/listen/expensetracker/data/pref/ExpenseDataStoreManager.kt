@@ -19,6 +19,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
     companion object {
         val KEY_CURRENCY_SYMBOL = stringPreferencesKey("expense_currency_symbol")
         val KEY_MONTHLY_BUDGET = doublePreferencesKey("expense_monthly_budget")
+        val KEY_CUSTOM_ACCOUNTS = stringPreferencesKey("expense_custom_accounts")
     }
 
     val currencySymbolFlow: Flow<String> = context.archDataStore.data.map { prefs ->
@@ -29,11 +30,19 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         prefs[KEY_MONTHLY_BUDGET] ?: 5000.0
     }
 
+    val customAccountsFlow: Flow<String> = context.archDataStore.data.map { prefs ->
+        prefs[KEY_CUSTOM_ACCOUNTS] ?: ""
+    }
+
     suspend fun setCurrencySymbol(symbol: String) {
         context.archDataStore.edit { prefs -> prefs[KEY_CURRENCY_SYMBOL] = symbol }
     }
 
     suspend fun setMonthlyBudget(budget: Double) {
         context.archDataStore.edit { prefs -> prefs[KEY_MONTHLY_BUDGET] = budget }
+    }
+
+    suspend fun setCustomAccountsJson(json: String) {
+        context.archDataStore.edit { prefs -> prefs[KEY_CUSTOM_ACCOUNTS] = json }
     }
 }

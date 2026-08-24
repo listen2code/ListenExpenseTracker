@@ -57,4 +57,16 @@ class AccountRepositoryTest {
     fun testGetAccountNameFallback() {
         assertEquals("未知账户", AccountRepository.getAccountDisplayName("未知账户", "zh"))
     }
+
+    @Test
+    fun testSerializeAndDeserializeCustomAccounts() {
+        AccountRepository.addAccount("支付宝余额宝")
+        val json = AccountRepository.serializeCustomAccounts()
+        assertTrue(json.contains("支付宝余额宝"))
+
+        // Reset and reload
+        AccountRepository.deserializeCustomAccounts(json)
+        val accounts = AccountRepository.getAllAccounts()
+        assertTrue(accounts.any { it.customName == "支付宝余额宝" })
+    }
 }

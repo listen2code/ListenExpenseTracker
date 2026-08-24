@@ -17,6 +17,7 @@ import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.AccentColor
@@ -37,6 +38,9 @@ class TransactionsViewModel(
 
     init {
         ApmLogger.i(tag = "VM", message = "TransactionsViewModel initialized")
+        AccountRepository.onAccountsChangedListener = { json ->
+            viewModelScope.launch { prefManager.setCustomAccountsJson(json) }
+        }
         observeSettings()
         observeTransactions()
     }
@@ -103,6 +107,12 @@ class TransactionsViewModel(
         viewModelScope.launch {
             prefManager.monthlyBudgetFlow.collectLatest { budget ->
                 updateState { copy(monthlyBudget = budget) }
+                recalculate()
+            }
+        }
+        viewModelScope.launch {
+            prefManager.customAccountsFlow.collectLatest { json ->
+                AccountRepository.deserializeCustomAccounts(json)
                 recalculate()
             }
         }

@@ -41,6 +41,7 @@ class TransactionsUiStateTest {
         assertEquals(0.0, statsState.totalExpense, 0.001)
         assertTrue(statsState.categoryShares.isEmpty())
         assertTrue(statsState.dailyTrendBars.isEmpty())
+        assertTrue(statsState.dailyTrendPoints.isEmpty())
     }
 
     @Test
