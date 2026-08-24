@@ -5,6 +5,7 @@ import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -125,19 +126,21 @@ fun StatisticsScreen(
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                         )
                     } else {
-                        DonutChart(
-                            items = activeShares,
-                            totalValue = totalAmount,
-                            centerTitle = if (isExpenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
-                            centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(totalAmount)}",
-                            modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
-                        )
-                        SegmentedProgressBar(
-                            segments = activeSegments,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = AppDimens.SpaceSmall)
-                        )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            DonutChart(
+                                items = activeShares,
+                                totalValue = totalAmount,
+                                centerTitle = if (isExpenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
+                                centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(totalAmount)}",
+                                modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
+                            )
+                            SegmentedProgressBar(
+                                segments = activeSegments,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = AppDimens.SpaceSmall)
+                            )
+                        }
                     }
                 }
             }
@@ -146,18 +149,20 @@ fun StatisticsScreen(
             if (isExpenseTab && state.dailyTrendPoints.isNotEmpty()) {
                 item(key = "trend_chart_card") {
                     SurfaceCard(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = AppStrings.trend_month_daily.tr(lang),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = AppDimens.TextTitle,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
-                        )
-                        LineChart(
-                            points = state.dailyTrendPoints,
-                            chartHeight = AppDimens.ChartHeightStandard,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = AppStrings.trend_month_daily.tr(lang),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = AppDimens.TextTitle,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
+                            )
+                            LineChart(
+                                points = state.dailyTrendPoints,
+                                chartHeight = AppDimens.ChartHeightStandard,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
