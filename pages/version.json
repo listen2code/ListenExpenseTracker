@@ -1,6 +1,6 @@
 {
-  "version": "0.0.12",
-  "buildNumber": 12,
+  "version": "0.0.13",
+  "buildNumber": 13,
   "url": "https://play.google.com/store/apps/details?id=com.listen.expensetracker",
   "changelog": {
     "zh": "v0.0.4：Feature-First 模块化架构重构、单文件职责拆分（<=250行）、全面去除废弃 API 并接入现代 Google 认证体系、全量国际化字典扩充、消除金额跳闪与图表遮挡、追加 Android 12+ 原生 Splash 启动画面。",
