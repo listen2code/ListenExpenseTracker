@@ -197,6 +197,10 @@ jobs:
             echo "storeFile=lExpense.jks" >> keystore/keystore.properties
           fi
 
+          echo "================ Keystore Certificate Fingerprints ================"
+          keytool -list -v -keystore keystore/lExpense.jks -storepass "${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'ls88888888' }}" | grep -E '(Alias name|SHA1:|SHA256:)' || true
+          echo "==================================================================="
+
       - name: Setup google-services.json
         working-directory: ListenExpenseTracker
         run: |
@@ -225,6 +229,14 @@ jobs:
           if [[ -n "$RELEASE_APK" ]]; then
             echo "apk_filename=$(basename $RELEASE_APK)" >> $GITHUB_OUTPUT
             echo "apk_size=$(stat -c%s $RELEASE_APK)" >> $GITHUB_OUTPUT
+
+            echo "================ Built APK Signing Certificate ================"
+            APK_CERT_OUTPUT=$(keytool -printcert -jarfile "$RELEASE_APK" || true)
+            echo "$APK_CERT_OUTPUT"
+            APK_SHA1=$(echo "$APK_CERT_OUTPUT" | grep -i "SHA1:" | head -n 1 | awk '{print $2}')
+            echo "APK SHA1 Fingerprint: $APK_SHA1"
+            echo "apk_sha1=$APK_SHA1" >> $GITHUB_OUTPUT
+            echo "================================================================"
           fi
 
       - name: Upload Release APK Artifact
@@ -247,6 +259,7 @@ jobs:
           - **Commit**: ${{ github.sha }}
           - **Build Time**: $(date -u)
           - **Trigger**: ${{ github.event_name }}
+          - **APK SHA1 Fingerprint**: \`${{ steps.apk_info.outputs.apk_sha1 }}\`
 
           ## Artifacts
           - **Release APK**: \`${{ steps.apk_info.outputs.apk_filename }}\` (${{ steps.apk_info.outputs.apk_size }} bytes)
