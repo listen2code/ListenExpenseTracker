@@ -117,41 +117,24 @@ fun AddTransactionSheet(
         else -> 30.sp
     }
 
-    ModalBottomSheet(
+    val typeOptions = listOf(AppStrings.type_expense.tr(lang), AppStrings.type_income.tr(lang))
+
+    com.listen.uicomponent.components.CommonBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AppDimens.SpaceSection, vertical = AppDimens.SpaceSmall)
+            modifier = Modifier.fillMaxWidth()
         ) {
             // Expense / Income Segmented Switch
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = type == "EXPENSE",
-                    onClick = { type = "EXPENSE" },
-                    shape = SegmentedButtonDefaults.itemShape(0, 2)
-                ) {
-                    Text(
-                        text = AppStrings.type_expense.tr(lang),
-                        color = if (type == "EXPENSE") ExpenseRed else Color.Unspecified,
-                        fontWeight = if (type == "EXPENSE") FontWeight.Bold else FontWeight.Normal
-                    )
+            com.listen.uicomponent.components.CommonSegmentedControl(
+                items = typeOptions,
+                selectedIndex = if (type == "EXPENSE") 0 else 1,
+                onIndexChange = { index ->
+                    type = if (index == 0) "EXPENSE" else "INCOME"
                 }
-                SegmentedButton(
-                    selected = type == "INCOME",
-                    onClick = { type = "INCOME" },
-                    shape = SegmentedButtonDefaults.itemShape(1, 2)
-                ) {
-                    Text(
-                        text = AppStrings.type_income.tr(lang),
-                        color = if (type == "INCOME") IncomeGreen else Color.Unspecified,
-                        fontWeight = if (type == "INCOME") FontWeight.Bold else FontWeight.Normal
-                    )
-                }
-            }
+            )
 
             Spacer(modifier = Modifier.height(AppDimens.SpaceStandard))
 

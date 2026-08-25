@@ -87,34 +87,15 @@ fun StatisticsScreen(
         ) {
             // Expense vs Income Segmented Toggle
             item(key = "tab_toggle") {
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = AppDimens.SpaceExtraSmall)
-                ) {
-                    SegmentedButton(
-                        selected = isExpenseTab,
-                        onClick = { onIntent(StatisticsIntent.ChangeStatisticsTab("EXPENSE")) },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                    ) {
-                        Text(
-                            AppStrings.tab_expense_analysis.tr(lang),
-                            fontSize = AppDimens.TextBody,
-                            fontWeight = if (isExpenseTab) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                    SegmentedButton(
-                        selected = !isExpenseTab,
-                        onClick = { onIntent(StatisticsIntent.ChangeStatisticsTab("INCOME")) },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                    ) {
-                        Text(
-                            AppStrings.tab_income_analysis.tr(lang),
-                            fontSize = AppDimens.TextBody,
-                            fontWeight = if (!isExpenseTab) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                }
+                val tabs = listOf(AppStrings.tab_expense_analysis.tr(lang), AppStrings.tab_income_analysis.tr(lang))
+                com.listen.uicomponent.components.CommonSegmentedControl(
+                    items = tabs,
+                    selectedIndex = if (isExpenseTab) 0 else 1,
+                    onIndexChange = { index ->
+                        onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) "EXPENSE" else "INCOME"))
+                    },
+                    modifier = Modifier.padding(vertical = AppDimens.SpaceExtraSmall)
+                )
             }
 
             // Donut Chart & Segmented Progress Card

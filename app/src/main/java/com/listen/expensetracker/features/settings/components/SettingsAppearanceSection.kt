@@ -89,23 +89,17 @@ fun SettingsAppearanceSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    val modes = listOf(
-                        ThemeMode.LIGHT to AppStrings.theme_light.tr(lang),
-                        ThemeMode.DARK to AppStrings.theme_dark.tr(lang),
-                        ThemeMode.SYSTEM to AppStrings.theme_system.tr(lang)
-                    )
+                val modes = listOf(
+                    ThemeMode.LIGHT to AppStrings.theme_light.tr(lang),
+                    ThemeMode.DARK to AppStrings.theme_dark.tr(lang),
+                    ThemeMode.SYSTEM to AppStrings.theme_system.tr(lang)
+                )
 
-                    modes.forEachIndexed { index, (mode, label) ->
-                        SegmentedButton(
-                            selected = themeMode == mode,
-                            onClick = { onChangeThemeMode(mode) },
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size)
-                        ) {
-                            Text(text = label, fontSize = AppDimens.TextSmall)
-                        }
-                    }
-                }
+                com.listen.uicomponent.components.CommonSegmentedControl(
+                    items = modes.map { it.second },
+                    selectedIndex = modes.indexOfFirst { it.first == themeMode }.coerceAtLeast(0),
+                    onIndexChange = { index -> onChangeThemeMode(modes[index].first) }
+                )
             }
 
             // Accent Color Selection Row

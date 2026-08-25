@@ -134,12 +134,23 @@
 
 - **严禁随意手写原生 Material3 基础组件与临时排版**（如裸写 `AlertDialog`、`OutlinedTextField`、`Button`、或手拼居中 Icon+Text 的空状态）；
 - **全项目必须优先使用 `ListenUiComponent` 统一收口的通用组件套件**：
-  1. `CommonButton`：统一不同交互风格（Primary, Secondary, Tonal, Outlined, Danger, Text）与 Loading 旋转状态；
+  1. `CommonButton`：统一不同交互风格（Primary, Secondary, Tonal, Outlined, Danger, Text）、前置图标与 Loading 旋转状态；
   2. `CommonDialog`：统一对话框圆角（16.dp）、标题字阶、Elevation 与插槽布局；
   3. `CommonEditText`：统一输入框圆角（12.dp）、内置一键清空（ClearButton）、错误提示态与焦点背景；
   4. `CommonEmpty`：统一全局缺省/空状态图文排版与占位高度；
   5. `CommonLoading`：统一全局/局部加载菊花与动画指示；
-  6. `CommonText`：统一字体排版、字阶收口与文本溢出自适应缩放（AutoResize）。
+  6. `CommonText`：统一字体排版、字阶收口与文本溢出自适应缩放（AutoResize）；
+  7. `CommonSnackbar`：统一悬浮胶囊 Toast，支持 Success, Error, Warning, Info 四大语义与 Action 按钮；
+  8. `CommonBanner`：统一顶部常驻/可交互通知横幅，支持展开/收起动画与关闭操作；
+  9. `CommonBadge`：统一状态微型徽标与标签芯片（带点/图标/多色风格）；
+  10. `CommonListItem`：统一列表项/设置行（左侧图标/头像 + 主副标题 + 右侧 Chevron 箭头/自定义内容 + 下分割线）；
+  11. `CommonSwitchRow`：统一整行可点击触发切换的 Switch 交互行；
+  12. `CommonSegmentedControl`：统一 iOS 风格带弹性动画滑块背景的分段胶囊选择器；
+  13. `CommonBottomSheet`：统一 24.dp 圆角底部抽屉，内置 Header 标题、确认按钮与软键盘安全避让；
+  14. `CommonSkeleton` / `shimmer()`：统一骨架屏微光扫光加载占位组件；
+  15. `CommonError`：统一居中异常图文与点击重试页；
+  16. `CommonList`：统一自动调度 Loading -> Error -> Empty -> Content 的多状态列表容器；
+  17. `CommonDivider`：统一 0.5.dp 细线与左右缩进分割线。
 
 ---
 
