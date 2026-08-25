@@ -183,21 +183,18 @@ jobs:
           if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
             echo "Decoding Keystore from secret..."
             echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > keystore/lExpense.jks
-            cat > keystore/keystore.properties << EOF
-          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          storeFile=lExpense.jks
-          EOF
+            echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" > keystore/keystore.properties
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore/keystore.properties
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> keystore/keystore.properties
+            echo "storeFile=lExpense.jks" >> keystore/keystore.properties
+            echo "Keystore configured successfully from secrets."
           else
             echo "No ANDROID_KEYSTORE_BASE64 secret found, generating local ephemeral keystore for CI..."
             keytool -genkeypair -v -keystore keystore/lExpense.jks -alias lExpense -keyalg RSA -keysize 2048 -validity 10000 -storepass ls88888888 -keypass ls88888888 -dname "CN=Listen, OU=Mobile, O=Listen, L=Tokyo, ST=Tokyo, C=JP"
-            cat > keystore/keystore.properties << EOF
-          storePassword=ls88888888
-          keyPassword=ls88888888
-          keyAlias=lExpense
-          storeFile=lExpense.jks
-          EOF
+            echo "storePassword=ls88888888" > keystore/keystore.properties
+            echo "keyPassword=ls88888888" >> keystore/keystore.properties
+            echo "keyAlias=lExpense" >> keystore/keystore.properties
+            echo "storeFile=lExpense.jks" >> keystore/keystore.properties
           fi
 
       - name: Setup google-services.json
@@ -346,13 +343,13 @@ jobs:
         run: |
           mkdir -p keystore
           if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding Keystore from secret..."
             echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > keystore/lExpense.jks
-            cat > keystore/keystore.properties << EOF
-          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          storeFile=lExpense.jks
-          EOF
+            echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" > keystore/keystore.properties
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore/keystore.properties
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> keystore/keystore.properties
+            echo "storeFile=lExpense.jks" >> keystore/keystore.properties
+            echo "Keystore configured successfully for Google Play release."
           else
             echo "Error: ANDROID_KEYSTORE_BASE64 secret is not configured!"
             exit 1
