@@ -2,18 +2,13 @@ package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,7 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.listen.arch.i18n.tr
@@ -31,12 +26,18 @@ import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonDialog
+import com.listen.uicomponent.components.CommonEditText
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 
 /**
  * Dedicated Dialog Host for Settings Feature.
- * Encapsulates presentation and intent dispatching for budget, categories, currency, clear confirmation, backup import, and syncing HUD.
+ * Encapsulates presentation and intent dispatching for budget, categories, currency, clear confirmation,
+ * logout confirmation, backup import, and syncing HUD using standardized ListenUiComponent elements.
  */
 @Composable
 fun SettingsDialogHost(
@@ -78,61 +79,92 @@ fun SettingsDialogHost(
         }
         is SettingsDialog.MonthlyBudget -> {
             var budgetInput by remember { mutableStateOf(state.monthlyBudget.toInt().toString()) }
-            AlertDialog(
+            CommonDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = { Text(AppStrings.budget_dialog_title.tr(lang), fontWeight = FontWeight.Bold) },
-                text = {
-                    OutlinedTextField(
-                        value = budgetInput,
-                        onValueChange = { budgetInput = it },
-                        label = { Text(AppStrings.monthly_budget.tr(lang)) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(AppDimens.CornerButton),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
+                title = AppStrings.budget_dialog_title.tr(lang),
                 confirmButton = {
-                    Button(
+                    CommonButton(
+                        text = AppStrings.btn_save.tr(lang),
                         onClick = {
                             val amount = budgetInput.toDoubleOrNull() ?: state.monthlyBudget
                             onIntent(SettingsIntent.UpdateMonthlyBudget(amount))
                             onIntent(SettingsIntent.DismissDialog)
                         },
-                        shape = RoundedCornerShape(AppDimens.CornerButton)
-                    ) {
-                        Text(AppStrings.btn_save.tr(lang))
-                    }
+                        style = CommonButtonStyle.Primary
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = { onIntent(SettingsIntent.DismissDialog) }) {
-                        Text(AppStrings.btn_cancel.tr(lang))
-                    }
+                    CommonButton(
+                        text = AppStrings.btn_cancel.tr(lang),
+                        onClick = { onIntent(SettingsIntent.DismissDialog) },
+                        style = CommonButtonStyle.Text
+                    )
                 }
-            )
+            ) {
+                CommonEditText(
+                    value = budgetInput,
+                    onValueChange = { budgetInput = it },
+                    label = AppStrings.monthly_budget.tr(lang),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+            }
         }
         is SettingsDialog.ClearConfirm -> {
-            AlertDialog(
+            CommonDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = { Text(AppStrings.confirm_clear_title.tr(lang), fontWeight = FontWeight.Bold, color = ExpenseRed) },
-                text = { Text(AppStrings.confirm_clear_desc.tr(lang)) },
+                title = AppStrings.confirm_clear_title.tr(lang),
                 confirmButton = {
-                    Button(
+                    CommonButton(
+                        text = AppStrings.btn_delete.tr(lang),
                         onClick = {
                             onIntent(SettingsIntent.ClearAllData)
                             onIntent(SettingsIntent.DismissDialog)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed),
-                        shape = RoundedCornerShape(AppDimens.CornerButton)
-                    ) {
-                        Text(AppStrings.btn_delete.tr(lang))
-                    }
+                        style = CommonButtonStyle.Danger
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = { onIntent(SettingsIntent.DismissDialog) }) {
-                        Text(AppStrings.btn_cancel.tr(lang))
-                    }
+                    CommonButton(
+                        text = AppStrings.btn_cancel.tr(lang),
+                        onClick = { onIntent(SettingsIntent.DismissDialog) },
+                        style = CommonButtonStyle.Outlined
+                    )
                 }
-            )
+            ) {
+                CommonText(
+                    text = AppStrings.confirm_clear_desc.tr(lang),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        is SettingsDialog.LogoutConfirm -> {
+            CommonDialog(
+                onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
+                title = AppStrings.google_logout_confirm_title.tr(lang),
+                confirmButton = {
+                    CommonButton(
+                        text = AppStrings.google_logout_btn.tr(lang),
+                        onClick = {
+                            onIntent(SettingsIntent.UnlinkGoogleAccount)
+                            onIntent(SettingsIntent.DismissDialog)
+                        },
+                        style = CommonButtonStyle.Danger
+                    )
+                },
+                dismissButton = {
+                    CommonButton(
+                        text = AppStrings.btn_cancel.tr(lang),
+                        onClick = { onIntent(SettingsIntent.DismissDialog) },
+                        style = CommonButtonStyle.Outlined
+                    )
+                }
+            ) {
+                CommonText(
+                    text = AppStrings.google_logout_confirm_desc.tr(lang),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         is SettingsDialog.AboutApp -> {
             AboutAppDialog(
@@ -145,9 +177,7 @@ fun SettingsDialogHost(
 
     // Global Syncing HUD Dialog
     if (state.isOperating) {
-        Dialog(
-            onDismissRequest = {}
-        ) {
+        Dialog(onDismissRequest = {}) {
             SurfaceCard(
                 cornerRadius = AppDimens.CornerCard,
                 contentPadding = AppDimens.SpaceLarge
@@ -163,10 +193,9 @@ fun SettingsDialogHost(
                         modifier = Modifier.size(36.dp),
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Text(
+                    CommonText(
                         text = AppStrings.cloud_status_syncing.tr(lang),
                         fontSize = AppDimens.TextBody,
-                        fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

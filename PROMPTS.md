@@ -127,3 +127,26 @@
 - **`modifier` 参数必须作为“第一个可选参数”（First Optional Parameter）**（即紧跟在所有无默认值的必填形参之后，放置在所有有默认值的可选形参之前）；
 - **若组件无任何必填参数（所有参数均有默认值），`modifier: Modifier = Modifier` 必须放在最前面的第一个参数**；
 - **尾部 Lambda（如 `content: @Composable () -> Unit`）必须保持在参数列表的最末尾**。
+
+---
+
+## 14. 通用基础组件库优先使用规范 (Common Components First Rule)
+
+- **严禁随意手写原生 Material3 基础组件与临时排版**（如裸写 `AlertDialog`、`OutlinedTextField`、`Button`、或手拼居中 Icon+Text 的空状态）；
+- **全项目必须优先使用 `ListenUiComponent` 统一收口的通用组件套件**：
+  1. `CommonButton`：统一不同交互风格（Primary, Secondary, Tonal, Outlined, Danger, Text）与 Loading 旋转状态；
+  2. `CommonDialog`：统一对话框圆角（16.dp）、标题字阶、Elevation 与插槽布局；
+  3. `CommonEditText`：统一输入框圆角（12.dp）、内置一键清空（ClearButton）、错误提示态与焦点背景；
+  4. `CommonEmpty`：统一全局缺省/空状态图文排版与占位高度；
+  5. `CommonLoading`：统一全局/局部加载菊花与动画指示；
+  6. `CommonText`：统一字体排版、字阶收口与文本溢出自适应缩放（AutoResize）。
+
+---
+
+## 15. 破坏性与凭据解绑操作二次确认规范 (Destructive Action Confirmation Standard)
+
+- **严禁单次点击直接执行不可逆破坏性或凭据解绑动作**（如：退出 Google 账户、解绑云端同步、清空全部账单数据、删除自定义账户/分类、删除单条账单）；
+- **所有此类高危操作必须通过统一的 `CommonDialog` 唤起二次确认弹窗**：
+  - 弹窗内容必须清晰阐明操作后果（例如提示“退出后将无法自动同步云端数据”）；
+  - 确认按钮必须使用 `CommonButtonStyle.Danger`（警告/危险红色调）；
+  - 取消按钮必须使用 `CommonButtonStyle.Outlined` 或 `CommonButtonStyle.Text`，确保交互预期安全明确。

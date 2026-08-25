@@ -100,6 +100,8 @@ object AppStrings {
     const val google_login_required = "google_login_required"
     const val google_login_btn = "google_login_btn"
     const val google_logout_btn = "google_logout_btn"
+    const val google_logout_confirm_title = "google_logout_confirm_title"
+    const val google_logout_confirm_desc = "google_logout_confirm_desc"
     const val google_logged_in = "google_logged_in"
     const val google_link_title = "google_link_title"
     const val google_link_desc = "google_link_desc"

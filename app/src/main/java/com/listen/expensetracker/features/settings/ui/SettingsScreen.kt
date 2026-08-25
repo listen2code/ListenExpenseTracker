@@ -58,7 +58,7 @@ fun SettingsScreen(
                     googleDisplayName = state.googleDisplayName,
                     syncState = state.syncState,
                     onLoginGoogle = { onIntent(SettingsIntent.TriggerGoogleSignIn) },
-                    onLogoutGoogle = { onIntent(SettingsIntent.UnlinkGoogleAccount) },
+                    onLogoutGoogle = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.LogoutConfirm)) },
                     onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
                     lang = lang,

@@ -54,7 +54,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiS
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
 import com.listen.uicomponent.components.BaseScreenScaffold
-import com.listen.uicomponent.components.EmptyStateView
+import com.listen.uicomponent.components.CommonEmpty
 import com.listen.uicomponent.components.SearchBarInput
 
 /**
@@ -209,7 +209,7 @@ fun TransactionsScreen(
             // Grouped Transactions List
             if (groupedTransactions.isEmpty()) {
                 item(key = "empty_transactions_view") {
-                    EmptyStateView(
+                    CommonEmpty(
                         message = AppStrings.empty_transactions.tr(lang),
                         modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                     )

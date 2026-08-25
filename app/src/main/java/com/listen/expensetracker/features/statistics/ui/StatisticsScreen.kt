@@ -36,7 +36,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.uicomponent.charts.DonutChart
 import com.listen.uicomponent.charts.LineChart
 import com.listen.uicomponent.components.BaseScreenScaffold
-import com.listen.uicomponent.components.EmptyStateView
+import com.listen.uicomponent.components.CommonEmpty
 import com.listen.uicomponent.components.SegmentedProgressBar
 import com.listen.uicomponent.components.SurfaceCard
 
@@ -121,7 +121,7 @@ fun StatisticsScreen(
             item(key = "donut_chart_card") {
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     if (activeShares.isEmpty() || totalAmount <= 0.0) {
-                        EmptyStateView(
+                        CommonEmpty(
                             message = if (isExpenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                         )

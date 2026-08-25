@@ -1,9 +1,5 @@
 package com.listen.expensetracker.features.settings.components
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -16,16 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,10 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.StringsRes
-import com.listen.expensetracker.data.model.AppDimens
 import androidx.core.net.toUri
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonDialog
+import com.listen.uicomponent.components.CommonText
 
 /**
  * About Application Dialog displaying dynamic package version info and Google Play update trigger.
@@ -57,77 +52,77 @@ fun AboutAppDialog(
         Pair("0.0.4", 4L)
     }
 
-    AlertDialog(
+    CommonDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
+        title = "lExpense",
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
+                Icon(
+                    imageVector = Icons.Default.AccountBalanceWallet,
+                    contentDescription = "lExpense",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
+        confirmButton = {
+            CommonButton(
+                text = AppStrings.btn_done.tr(lang),
+                onClick = onDismiss,
+                style = CommonButtonStyle.Text
+            )
+        }
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
+            CommonText(
+                text = "${AppStrings.app_version_label.tr(lang)}: v$versionName (Build $versionCode)",
+                fontSize = AppDimens.TextBody,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            CommonText(
+                text = "${AppStrings.app_architecture_label.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
+                fontSize = AppDimens.TextSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            CommonText(
+                text = "${AppStrings.app_core_sdk_label.tr(lang)}: ListenArch, ListenUiComponent",
+                fontSize = AppDimens.TextSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            CommonText(
+                text = AppStrings.app_features_desc.tr(lang),
+                fontSize = AppDimens.TextSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
+
+            // Check for Updates on Google Play Button
+            CommonButton(
+                text = AppStrings.check_update.tr(lang),
+                onClick = {
+                    openGooglePlay(context)
+                    onDismiss()
+                },
+                style = CommonButtonStyle.Primary,
+                icon = {
                     Icon(
-                        imageVector = Icons.Default.AccountBalanceWallet,
-                        contentDescription = "lExpense",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        imageVector = Icons.Default.SystemUpdate,
+                        contentDescription = "Update",
+                        modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
-                }
-                Column {
-                    Text("lExpense", fontWeight = FontWeight.Bold, fontSize = AppDimens.TextHeader)
-                    Text("ListenExpenseTracker", fontSize = AppDimens.TextMicro, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
-                Text(
-                    text = "${AppStrings.app_version_label.tr(lang)}: v$versionName (Build $versionCode)",
-                    fontSize = AppDimens.TextBody,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "${AppStrings.app_architecture_label.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
-                    fontSize = AppDimens.TextSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "${AppStrings.app_core_sdk_label.tr(lang)}: ListenArch, ListenUiComponent",
-                    fontSize = AppDimens.TextSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = AppStrings.app_features_desc.tr(lang),
-                    fontSize = AppDimens.TextSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 16.sp
-                )
-
-                Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
-
-                // Check for Updates on Google Play Button
-                Button(
-                    onClick = {
-                        openGooglePlay(context)
-                        onDismiss()
-                    },
-                    shape = RoundedCornerShape(AppDimens.CornerButton),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.SystemUpdate, contentDescription = "Update", modifier = Modifier.size(AppDimens.IconSizeMedium))
-                    Spacer(modifier = Modifier.size(AppDimens.SpaceSmall))
-                    Text(AppStrings.check_update.tr(lang), fontSize = AppDimens.TextBody)
-                }
-            }
-        },
-        confirmButton = {}
-    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 /**

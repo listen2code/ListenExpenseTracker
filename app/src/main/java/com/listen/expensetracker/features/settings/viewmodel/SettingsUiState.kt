@@ -12,6 +12,7 @@ sealed interface SettingsDialog {
     data object CategoryManage : SettingsDialog
     data object CurrencySelect : SettingsDialog
     data object ClearConfirm : SettingsDialog
+    data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
     data object ImportBackup : SettingsDialog
 }

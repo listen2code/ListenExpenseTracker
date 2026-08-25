@@ -239,12 +239,11 @@ fun EditTransactionSheet(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
+                com.listen.uicomponent.components.CommonEditText(
                     value = note,
                     onValueChange = { note = it },
-                    placeholder = { Text(AppStrings.search_placeholder.tr(lang), fontSize = AppDimens.TextBody) },
+                    placeholder = AppStrings.search_placeholder.tr(lang),
                     singleLine = true,
-                    shape = RoundedCornerShape(AppDimens.CornerButton),
                     modifier = Modifier.weight(1f)
                 )
 
