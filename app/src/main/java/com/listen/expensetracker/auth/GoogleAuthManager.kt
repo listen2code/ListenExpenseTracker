@@ -25,7 +25,7 @@ data class GoogleUserProfile(
 object GoogleAuthManager {
 
     // Configured Google Cloud OAuth 2.0 Web Client ID
-    private const val DEFAULT_WEB_CLIENT_ID = "1069102462195-dbs5gu3p6nf64jqou8f29g7vhb8e1s6m.apps.googleusercontent.com"
+    private const val DEFAULT_WEB_CLIENT_ID = "1069102462195-rjdheb5uqeb64o02ucan0lc65r0ammn6.apps.googleusercontent.com"
 
     /**
      * Obtains the official AndroidX CredentialManager instance.
