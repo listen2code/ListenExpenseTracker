@@ -231,9 +231,18 @@ jobs:
             echo "apk_size=$(stat -c%s $RELEASE_APK)" >> $GITHUB_OUTPUT
 
             echo "================ Built APK Signing Certificate ================"
-            APK_CERT_OUTPUT=$(keytool -printcert -jarfile "$RELEASE_APK" || true)
-            echo "$APK_CERT_OUTPUT"
-            APK_SHA1=$(echo "$APK_CERT_OUTPUT" | grep -i "SHA1:" | head -n 1 | awk '{print $2}')
+            APKSIGNER_BIN=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)
+            if [ -n "$APKSIGNER_BIN" ]; then
+              echo "Using apksigner at: $APKSIGNER_BIN"
+              APK_CERT_OUTPUT=$("$APKSIGNER_BIN" verify --print-certs "$RELEASE_APK" || true)
+              echo "$APK_CERT_OUTPUT"
+              APK_SHA1=$(echo "$APK_CERT_OUTPUT" | grep -i "SHA-1 digest:" | head -n 1 | awk '{print $NF}')
+            else
+              echo "apksigner not found, falling back to keytool..."
+              APK_CERT_OUTPUT=$(keytool -printcert -jarfile "$RELEASE_APK" || true)
+              echo "$APK_CERT_OUTPUT"
+              APK_SHA1=$(echo "$APK_CERT_OUTPUT" | grep -i "SHA1:" | head -n 1 | awk '{print $2}')
+            fi
             echo "APK SHA1 Fingerprint: $APK_SHA1"
             echo "apk_sha1=$APK_SHA1" >> $GITHUB_OUTPUT
             echo "================================================================"

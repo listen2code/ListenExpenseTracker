@@ -27,7 +27,7 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        val vName = "0.0.15"
+        val vName = "0.0.16"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
@@ -58,6 +58,8 @@ android {
                 }
 
                 storePassword = keystoreProperties["storePassword"] as String?
+                enableV1Signing = true
+                enableV2Signing = true
             }
         }
     }
