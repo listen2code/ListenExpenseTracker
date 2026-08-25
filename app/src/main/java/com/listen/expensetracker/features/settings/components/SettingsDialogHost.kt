@@ -22,7 +22,6 @@ import androidx.compose.ui.window.Dialog
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
-import com.listen.expensetracker.features.settings.ui.ImportBackupSheet
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
@@ -32,12 +31,11 @@ import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
-import com.listen.uicomponent.theme.ExpenseRed
 
 /**
  * Dedicated Dialog Host for Settings Feature.
  * Encapsulates presentation and intent dispatching for budget, categories, currency, clear confirmation,
- * logout confirmation, backup import, and syncing HUD using standardized ListenUiComponent elements.
+ * logout confirmation, and syncing HUD using standardized ListenUiComponent elements.
  */
 @Composable
 fun SettingsDialogHost(
@@ -48,16 +46,6 @@ fun SettingsDialogHost(
     val sym = state.currencySymbol
 
     when (state.activeDialog) {
-        is SettingsDialog.ImportBackup -> {
-            ImportBackupSheet(
-                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
-                onImport = { json ->
-                    onIntent(SettingsIntent.ImportBackupData(json))
-                    onIntent(SettingsIntent.DismissDialog)
-                },
-                lang = lang
-            )
-        }
         is SettingsDialog.CurrencySelect -> {
             CurrencySelectDialog(
                 currentSymbol = sym,
@@ -73,21 +61,22 @@ fun SettingsDialogHost(
             CategoryManageDialog(
                 type = "EXPENSE",
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
-                onCategoriesChanged = {},
+                onCategoriesChanged = { /* Handled reactively */ },
                 lang = lang
             )
         }
         is SettingsDialog.MonthlyBudget -> {
-            var budgetInput by remember { mutableStateOf(state.monthlyBudget.toInt().toString()) }
+            var budgetInput by remember { mutableStateOf("%.0f".format(state.monthlyBudget)) }
+
             CommonDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.budget_dialog_title.tr(lang),
+                title = AppStrings.monthly_budget.tr(lang),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.btn_save.tr(lang),
+                        text = AppStrings.btn_done.tr(lang),
                         onClick = {
-                            val amount = budgetInput.toDoubleOrNull() ?: state.monthlyBudget
-                            onIntent(SettingsIntent.UpdateMonthlyBudget(amount))
+                            val budget = budgetInput.toDoubleOrNull() ?: state.monthlyBudget
+                            onIntent(SettingsIntent.UpdateMonthlyBudget(budget))
                             onIntent(SettingsIntent.DismissDialog)
                         },
                         style = CommonButtonStyle.Primary

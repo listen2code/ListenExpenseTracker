@@ -1,32 +1,28 @@
 package com.listen.expensetracker.features.settings.ui
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.listen.arch.i18n.StringsRes
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
-import com.listen.expensetracker.features.settings.components.SettingsAppearanceSection
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
+import com.listen.expensetracker.features.settings.components.SettingsAppearanceSection
 import com.listen.expensetracker.features.settings.components.SettingsCloudSection
 import com.listen.expensetracker.features.settings.components.SettingsDataSection
 import com.listen.expensetracker.features.settings.components.SettingsDialogHost
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
-import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
-import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Pure Stateless Settings Screen cleanly orchestrating Cloud Sync, Appearance, Data Management, and System Ops.
@@ -39,6 +35,20 @@ fun SettingsScreen(
 ) {
     val lang = state.language
     val sym = state.currencySymbol
+
+    // File-based JSON Export launcher
+    val exportJsonLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { onIntent(SettingsIntent.ExportJsonToFile(it)) }
+    }
+
+    // File-based JSON Import launcher
+    val importJsonLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { onIntent(SettingsIntent.ImportJsonFromFile(it)) }
+    }
 
     BaseScreenScaffold(
         title = AppStrings.settings_title.tr(lang),
@@ -81,16 +91,20 @@ fun SettingsScreen(
                 )
             }
 
-            // 3. Local Data Management Section
+            // 3. Local Data Management Section (File-based JSON Export & Import)
             item(key = "data_section") {
                 SettingsDataSection(
                     monthlyBudget = state.monthlyBudget,
                     currencySymbol = sym,
                     onOpenBudgetDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
                     onOpenCategoryDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
-                    onExportJson = { onIntent(SettingsIntent.ShareBackupJson) },
-                    onExportCsv = { onIntent(SettingsIntent.ShareBackupCsv) },
-                    onOpenImportSheet = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ImportBackup)) },
+                    onExportJson = {
+                        val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
+                        exportJsonLauncher.launch(fileName)
+                    },
+                    onImportJson = {
+                        importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+                    },
                     lang = lang
                 )
             }

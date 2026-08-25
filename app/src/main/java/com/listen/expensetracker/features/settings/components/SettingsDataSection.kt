@@ -1,9 +1,5 @@
 package com.listen.expensetracker.features.settings.components
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -31,7 +28,7 @@ import com.listen.uicomponent.components.SurfaceCard
 
 /**
  * Local Data Management, Backup, Budget, and Category Settings Card.
- * Uses CommonButton with AutoResizeText to ensure no unwanted text wrapping on narrow screens.
+ * Exclusively provides file-based JSON export & import.
  */
 @Composable
 fun SettingsDataSection(
@@ -40,8 +37,7 @@ fun SettingsDataSection(
     onOpenBudgetDialog: () -> Unit,
     onOpenCategoryDialog: () -> Unit,
     onExportJson: () -> Unit,
-    onExportCsv: () -> Unit,
-    onOpenImportSheet: () -> Unit,
+    onImportJson: () -> Unit,
     lang: String,
     modifier: Modifier = Modifier
 ) {
@@ -92,35 +88,26 @@ fun SettingsDataSection(
                 )
             }
 
-            // Export & Import Buttons Row (With AutoResize text protection)
+            // File-based JSON Export & Import Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
                     text = AppStrings.export_json.tr(lang),
                     onClick = onExportJson,
                     style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(14.dp)) },
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                    modifier = Modifier.weight(1f)
-                )
-
-                CommonButton(
-                    text = AppStrings.export_csv.tr(lang),
-                    onClick = onExportCsv,
-                    style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export CSV", modifier = Modifier.size(14.dp)) },
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(16.dp)) },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 )
 
                 CommonButton(
                     text = AppStrings.import_json.tr(lang),
-                    onClick = onOpenImportSheet,
+                    onClick = onImportJson,
                     style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(14.dp)) },
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                    icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(16.dp)) },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 )
             }

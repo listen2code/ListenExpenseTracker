@@ -111,9 +111,8 @@ class SettingsViewModel(
             is SettingsIntent.TriggerCloudRestore -> triggerCloudRestore(traceId)
             is SettingsIntent.SeedDemoData -> seedDemoData(traceId)
             is SettingsIntent.ClearAllData -> clearAllData(traceId)
-            is SettingsIntent.ImportBackupData -> importBackupData(intent.json, traceId)
-            is SettingsIntent.ShareBackupJson -> shareBackupJson()
-            is SettingsIntent.ShareBackupCsv -> shareBackupCsv()
+            is SettingsIntent.ExportJsonToFile -> exportJsonToFile(intent.uri)
+            is SettingsIntent.ImportJsonFromFile -> importJsonFromFile(intent.uri)
             is SettingsIntent.TriggerGoogleSignIn -> emitEffect(CommonUiEffect.LaunchGoogleSignIn)
             is SettingsIntent.OpenApmInspector -> emitEffect(CommonUiEffect.OpenApmInspector)
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
@@ -365,31 +364,39 @@ class SettingsViewModel(
         }
     }
 
-    private fun importBackupData(json: String, traceId: String) {
-        viewModelScope.launch {
-            val list = TransactionBackupManager.importFromJson(json)
-            if (list.isNotEmpty()) {
-                dao.insertTransactions(list)
-                emitEffect(CommonUiEffect.ShowToast("成功导入 ${list.size} 条账单数据"))
-            } else {
-                emitEffect(CommonUiEffect.ShowToast("JSON 数据格式解析失败或为空"))
+    private fun exportJsonToFile(uri: android.net.Uri) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val lang = currentState.language
+            try {
+                val allList = dao.getAllTransactions()
+                val json = TransactionBackupManager.exportToJson(allList)
+                application.contentResolver.openOutputStream(uri)?.use { os ->
+                    os.write(json.toByteArray(Charsets.UTF_8))
+                }
+                emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "Successfully exported ${allList.size} records to JSON file" else "已成功导出 ${allList.size} 条账单至 JSON 文件"))
+            } catch (e: Throwable) {
+                emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "Export failed: ${e.message}" else "导出 JSON 文件失败: ${e.message}"))
             }
         }
     }
 
-    private fun shareBackupJson() {
-        viewModelScope.launch {
-            val allList = dao.getAllTransactions()
-            val json = TransactionBackupManager.exportToJson(allList)
-            emitEffect(CommonUiEffect.ShareText("lExpense 账单数据导出 (JSON)", json))
-        }
-    }
-
-    private fun shareBackupCsv() {
-        viewModelScope.launch {
-            val allList = dao.getAllTransactions()
-            val csv = TransactionBackupManager.exportToCsv(allList)
-            emitEffect(CommonUiEffect.ShareText("lExpense 账单数据导出 (CSV)", csv))
+    private fun importJsonFromFile(uri: android.net.Uri) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val lang = currentState.language
+            try {
+                val json = application.contentResolver.openInputStream(uri)?.use { ins ->
+                    ins.bufferedReader(Charsets.UTF_8).readText()
+                } ?: ""
+                val list = TransactionBackupManager.importFromJson(json)
+                if (list.isNotEmpty()) {
+                    dao.insertTransactions(list)
+                    emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "Successfully imported ${list.size} records" else "成功导入 ${list.size} 条账单数据"))
+                } else {
+                    emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "JSON content is empty or invalid" else "JSON 文件内容解析失败或为空"))
+                }
+            } catch (e: Throwable) {
+                emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "Import failed: ${e.message}" else "导入 JSON 文件失败: ${e.message}"))
+            }
         }
     }
 

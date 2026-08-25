@@ -1,5 +1,6 @@
 package com.listen.expensetracker.features.settings.viewmodel
 
+import android.net.Uri
 import com.listen.arch.sync.SyncState
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -14,7 +15,6 @@ sealed interface SettingsDialog {
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
-    data object ImportBackup : SettingsDialog
 }
 
 /**
@@ -52,9 +52,8 @@ sealed interface SettingsIntent {
     data object TriggerCloudRestore : SettingsIntent
     data object SeedDemoData : SettingsIntent
     data object ClearAllData : SettingsIntent
-    data class ImportBackupData(val json: String) : SettingsIntent
-    data object ShareBackupJson : SettingsIntent
-    data object ShareBackupCsv : SettingsIntent
+    data class ExportJsonToFile(val uri: Uri) : SettingsIntent
+    data class ImportJsonFromFile(val uri: Uri) : SettingsIntent
     data object OpenApmInspector : SettingsIntent
     data class OpenDialog(val dialog: SettingsDialog) : SettingsIntent
     data object DismissDialog : SettingsIntent
