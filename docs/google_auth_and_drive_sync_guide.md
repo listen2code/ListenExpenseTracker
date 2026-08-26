@@ -1,6 +1,6 @@
 # Google 账号登录与 Google Drive 云端同步开发与操作指南
 
-本文档系统性记录 **ListenExpenseTracker (lExpense)** 中集成 **Google 原生账号登录（AndroidX Credential Manager）** 与 **Google Drive REST API v3 云端硬盘备份恢复** 的完整实现细节、架构设计与云端控制台操作步骤。
+本文档系统性记录 **ListenExpenseTracker (lExpense)** 中集成 **Google 原生账号登录（AndroidX Credential Manager）** 与 **Google Drive REST API v3 云端硬盘备份恢复** 的完整实现细节、架构设计、Google Play App Signing 双层密钥体系与云端控制台排错指南。
 
 ---
 
@@ -60,94 +60,80 @@ sequenceDiagram
 
 ---
 
-## 2. Google Cloud Console 控制台配置全步骤
+## 2. Google Cloud Console 凭据全矩阵配置（核心重点）
 
-### 2.1 启用 Google Drive API
-1. 访问 [Google Cloud Console](https://console.cloud.google.com/) 并进入对应项目；
-2. 导航至 **「API 与服务 (APIs & Services)」** $\rightarrow$ **「库 (Library)」**；
-3. 搜索 **`Google Drive API`** 并点击 **「启用 (Enable)」**。
+### 2.1 客户端 ID 配置核心原则
+1. **代码中仅配置 1 个 Web 客户端 ID**：
+   - 在 [`GoogleAuthManager.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/auth/GoogleAuthManager.kt) 中，`DEFAULT_WEB_CLIENT_ID` 必须配置为 **【Web 应用程序 (Web application)】** 类型的 OAuth 客户端 ID（用于获取 Audience / ID Token）。
+2. **所有 Android 客户端 ID 仅需在 Google Cloud Console 中注册，代码中无需声明**：
+   - 手机端底层的 Google Play Services 在调用登录时，会自动从手机系统层提取当前安装包的 `包名`（`com.listen.expensetracker`）和 `实际签名 SHA-1`，并在云端自动匹配放行。
 
-### 2.2 配置 OAuth 同意屏幕 (OAuth consent screen)
-1. 进入 **「API 与服务」** $\rightarrow$ **「OAuth 同意屏幕」**；
-2. 用户类型选择 **「外部 (External)」**，点击「创建」；
-3. 填写应用名称（如 `lExpense`）和开发者联系邮箱；
-4. **添加范围 (Scopes)**：
-   - 点击 **「添加或移除范围 (Add or remove scopes)」**；
-   - 勾选 **`https://www.googleapis.com/auth/drive.file`**（允许应用查看和管理其自行创建的 Google 云端硬盘文件）；
-5. **添加测试用户 (Test Users)**：
-   - 在开发/测试阶段，在 **「测试用户」** 列表中添加用于登录测试的 Google 邮箱（例如 `yourname@gmail.com`）。
+### 2.2 Google Cloud Console 必须配置的 4 个 Android 客户端 ID 矩阵
 
-### 2.3 创建凭据 (OAuth 客户端 ID)
+为了确保在 **本地开发、CI 自动化打包、Google Play 内测分发、Google Play 正式上架** 4 大场景下 Google 登录均 100% 成功，必须在 [Google Cloud Console 凭据列表](https://console.cloud.google.com/apis/credentials) 的**同一个项目**下配置以下客户端：
 
-必须创建 **2 类** OAuth 客户端 ID：
-
-#### 1. Android 客户端 ID（用于设备端安全鉴权，Debug 与 Release 各建一个）
-- 点击 **「+ 创建凭据」** $\rightarrow$ **「OAuth 客户端 ID」**；
-- 应用类型选择：**Android**；
-- 软件包名称：`com.listen.expensetracker`；
-- **SHA-1 证书指纹提取命令**：
-  - **Debug 指纹**：
-    ```bash
-    keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-    ```
-  - **Release 指纹**：
-    ```bash
-    keytool -list -v -keystore <path-to-your-release-keystore> -alias <your-alias>
-    ```
-  *(注：如果页面出现“此客户端不是 Google Play 商店应用”的提示，属于说明性提示，无需理会，直接点击页面底部的「创建」即可)*。
-
-#### 2. Web 应用程序客户端 ID（用于签发 ID Token 与 Drive 令牌）
-- 再次点击 **「+ 创建凭据」** $\rightarrow$ **「OAuth 客户端 ID」**；
-- 应用类型选择：**Web 应用程序 (Web application)**；
-- 名称：`lExpense Web Client`（其他选填项留空）；
-- 点击「创建」，复制生成的 Web 客户端 ID（格式如：`<YOUR_CLIENT_ID>.apps.googleusercontent.com`），并配置到 `GoogleAuthManager` 中。
+| 客户端名称 | 应用类型 | 包名 | SHA-1 证书指纹 | 对应生效环境 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Android - Play 当前密钥** | Android | `com.listen.expensetracker` | `B7:DD:48:E4:59:98:8C:B4:7B:42:B8:D7:D9:50:61:14:75:A5:45:08` | Google Play 商店正式版本 / 升级后版本 |
+| **Android - Play 历史/内测密钥** | Android | `com.listen.expensetracker` | `31:3A:36:A4:C4:60:30:31:06:AF:95:CE:6D:81:6B:7B:BB:8C:35:A1` | Google Play 内部测试 / 内部应用分享 / 存量设备 |
+| **Android - Release 上传密钥** | Android | `com.listen.expensetracker` | `38:71:09:AA:CE:E2:54:5B:9E:3A:F8:1F:54:38:99:CD:CD:E1:E9:93` | 本地 Release 打包 / GitHub Actions CI 直装 APK (`lExpense.jks`) |
+| **Android - Debug 本地调试** | Android | `com.listen.expensetracker` | `D3:FC:90:5E:5D:05:C5:F8:0B:63:70:DD:C4:11:71:72:D3:02:3B:09` | Android Studio 开发者电脑直接 Run (`debug.keystore`) |
+| **Web - 核心签发受众** | Web 应用程序 | - | `1069102462195-rjdheb5uqeb64o02ucan0lc65r0ammn6.apps.googleusercontent.com` | 代码中 `GoogleAuthManager` 统一填入此 ID |
 
 ---
 
-## 3. Android 核心代码实现架构
+## 3. Google Play App Signing 双层签名机制深度解析
 
-### 3.1 依赖项配置 (`app/build.gradle.kts`)
-```kotlin
-dependencies {
-    // 现代凭据管理器与 Google Identity
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+Google Play 采用**上传密钥 (Upload Key)** 与 **应用签名密钥 (App Signing Key)** 分离机制：
+
+```mermaid
+flowchart TD
+    A["开发者本地 / CI 构建"] -->|使用【上传密钥】(38:71:09...) 签名| B["打包成 AAB 上传到 Google Play"]
+    B --> C{"Google Play 校验身份"}
+    C -->|校验成功，剥离上传签名| D["Google Play 云端安全硬件模块 (HSM)"]
+    D -->|使用【应用签名密钥 / 轮换密钥】重新签名| E["生成最终分发 APK"]
+    E --> F["用户手机从 Google Play / 内部测试安装"]
     
-    // Google Play Auth (用于获取 Google Drive OAuth 2.0 Access Token)
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
-}
+    style A fill:#e1f5fe,stroke:#03a9f4
+    style D fill:#fff3e0,stroke:#ff9800
+    style F fill:#e8f5e9,stroke:#4caf50
 ```
 
-### 3.2 权限声明 (`AndroidManifest.xml`)
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-</manifest>
-```
-
-### 3.3 核心类文件与职责
-
-| 文件路径 | 核心职责 |
-| :--- | :--- |
-| [`GoogleAuthManager.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/auth/GoogleAuthManager.kt) | 封装 AndroidX Credential Manager，配置 `GetGoogleIdOption` 与 Web Client ID，解析登录返回的 `GoogleUserProfile`。 |
-| [`GoogleDriveService.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/data/cloud/GoogleDriveService.kt) | Google Drive REST API v3 轻量级客户端。负责获取 OAuth Bearer Token、搜索 `lexpense_backup.json`、Multipart 文件上传、PATCH 更新与 GET 下载，并捕获 `UserRecoverableAuthException` 动态拉起授权弹窗。 |
-| [`SettingsViewModel.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/features/settings/viewmodel/SettingsViewModel.kt) | 编排 MVI 业务流程，调用 `TransactionBackupManager` 序列化数据并联动 `GoogleDriveService` 执行真实云端备份与恢复。 |
-| [`SettingsCloudSection.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/features/settings/components/SettingsCloudSection.kt) | 纯声明式 UI 卡片，展示 Google 账号头像、同步状态指标、备份与恢复按钮，并自适应主题强调色。 |
+1. **上传密钥 (Upload Key)**：
+   - 对应代码库中的 `keystore/lExpense.jks`（SHA-1: `38:71:09...`）；
+   - **作用**：仅作为向 Google Play 上传 AAB 时的身份凭据。
+2. **应用签名密钥 (App Signing Key)**：
+   - 由 Google Play 在云端托管管理；
+   - **作用**：实际安装在用户手机上的 APK 携带的真实签名；
+   - **历史密钥 (Previous Key)** 与 **当前密钥 (Current Key)** 均需加入 Google Cloud Console 以保证版本迁移平滑过渡。
 
 ---
 
-## 4. 常见问题排查与 FAQ
+## 4. 常见排错指南：`No credentials available` 深度诊断
 
-### Q1: 点击备份时提示 `missing INTERNET permission`？
-- **原因**：应用未在 `AndroidManifest.xml` 中声明网络访问权限。
-- **解决**：在 Manifest 文件中加入 `<uses-permission android:name="android.permission.INTERNET" />`。
+当用户点击 Google 登录提示 `No credentials available` 时，按以下 5 步逐一排查：
 
-### Q2: 点击备份时提示“请在弹出的 Google 授权窗口中点击允许”？
-- **原因**：Google 安全机制规定，首次访问云端硬盘文件时，需要用户显式确认 Drive 授权。
-- **解决**：系统会自动弹出 Google 官方授权对话框，点击「允许」后再次点击备份即可。
+### 步骤 1：排查当前手机 APK 的真实 SHA-1 与包名绑定
+- **原因**：Google OAuth 规则是 **`包名` + `SHA-1` 双重强绑定**。如果 Google Cloud Console 中未录入当前 APK 签名的 SHA-1，或包名有误，就会返回此错误。
+- **提取真机 SHA-1 命令**：
+  ```powershell
+  adb shell pm path com.listen.expensetracker
+  adb pull <extracted-path>/base.apk temp.apk
+  apksigner verify --print-certs temp.apk
+  ```
 
-### Q3: Google Drive 网页端在哪里查看备份文件？
-- 登录 [Google Drive 网页端](https://drive.google.com/)；
-- 在顶部搜索栏输入 **`lexpense_backup.json`** 即可查看；文件采用标准 JSON 格式，可随时下载核对。
+### 步骤 2：检查是否为 Google Play 控制台的传统密钥
+- 在 Google Play Console $\rightarrow$ 【设置】 $\rightarrow$ 【应用完整性】 $\rightarrow$ 【应用签名】中：
+  - 复制 **【传统密钥】** 与 **【之前的应用签名密钥】** 下的 SHA-1；
+  - 切勿复制后量子加密密钥。
+
+### 步骤 3：清除手机端 Google Play 服务本地失败缓存
+- **原因**：当首次登录因凭据未生效失败后，手机端 Google Play 服务会在本地将“无凭据”状态缓存数十分钟。
+- **解决**：手机进入 `设置` $\rightarrow$ `应用管理` $\rightarrow$ `Google Play 服务` $\rightarrow$ `存储和缓存` $\rightarrow$ 点击 **「清除缓存」**，然后划掉杀掉 lExpense 重新打开。
+
+### 步骤 4：检查 OAuth 同意屏幕的“测试用户”名单
+- **原因**：当 Google Cloud Console 的 OAuth 同意屏幕发布状态为 **“测试中 (Testing)”** 时，任何不在「测试用户」列表中的 Google 邮箱都会被静默拦截。
+- **解决**：进入 Google Cloud Console $\rightarrow$ 【OAuth 同意屏幕】 $\rightarrow$ 【测试用户】，添加测试用的 Gmail 邮箱。
+
+### 步骤 5：等待全球 CDN 生效延迟（5 ~ 15 分钟）
+- 新建或修改 OAuth Client ID 后，Google 全球分布式认证集群需要 5~15 分钟完成同步。
