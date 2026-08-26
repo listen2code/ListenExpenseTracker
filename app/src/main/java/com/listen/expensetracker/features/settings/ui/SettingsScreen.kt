@@ -66,6 +66,7 @@ fun SettingsScreen(
                 SettingsCloudSection(
                     googleAccountEmail = state.googleAccountEmail,
                     googleDisplayName = state.googleDisplayName,
+                    googleAvatarUrl = state.googleAvatarUrl,
                     syncState = state.syncState,
                     onLoginGoogle = { onIntent(SettingsIntent.TriggerGoogleSignIn) },
                     onLogoutGoogle = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.LogoutConfirm)) },

@@ -26,8 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.listen.arch.i18n.tr
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
@@ -45,12 +49,13 @@ import java.util.Locale
 
 /**
  * Cloud Sync and Google Account Settings Card.
- * Fully conforms to theme primary accent colors and dynamic typography.
+ * Displays user profile avatar, display name, email, and Google Drive sync indicators.
  */
 @Composable
 fun SettingsCloudSection(
     googleAccountEmail: String?,
     googleDisplayName: String?,
+    googleAvatarUrl: String? = null,
     syncState: SyncState,
     onLoginGoogle: () -> Unit,
     onLogoutGoogle: () -> Unit,
@@ -102,20 +107,36 @@ fun SettingsCloudSection(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = (googleDisplayName?.firstOrNull() ?: googleAccountEmail.firstOrNull() ?: 'G').uppercase(),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = AppDimens.TextTitle
+                        // Google Avatar (Network profile picture or initial letter fallback)
+                        if (!googleAvatarUrl.isNullOrBlank()) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(googleAvatarUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Google Avatar",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
                             )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = (googleDisplayName?.firstOrNull() ?: googleAccountEmail.firstOrNull() ?: 'G').uppercase(),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = AppDimens.TextTitle
+                                )
+                            }
                         }
+
                         Column {
                             Text(
                                 text = googleDisplayName ?: "Google User",
