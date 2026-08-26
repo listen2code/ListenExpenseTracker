@@ -26,7 +26,7 @@
   - [x] `BaseDataStoreManager` 语言 (zh/en/ja)、主题模式 (Light/Dark/System)、AccentColor、多币种符号 (￥/$/€/£/円)、月度预算持久化 Flow
   - [x] Google 账户登录状态、邮箱、用户名与头像 URL 持久化 Flow
 - [x] **MVI 架构基类与错误收敛实装 (ListenArch)**
-  - [x] `BaseViewModel<ViewState, UserIntent, ViewEffect>` 核心基类 (`handleIntent`, `updateState`, `emitEffect`)
+  - [x] `BaseViewModel<State, Intent, Effect>` 核心基类 (`handleIntent`, `updateState`, `emitEffect`)
   - [x] `ResultExtensions.kt` Kotlin 原生 `Result<T>` 函数式异常处理模型
   - [x] `LocaleManager` 多语言调度器与 `StringsRes` 字典系统
 - [x] **通用 UI 组件与设计系统实装 (ListenUiComponent)**
@@ -50,16 +50,14 @@
   - [x] 搜索关键字与账户类型过滤 Filter Chips，支持 `+` 管理账户
   - [x] 4 维流水排序引擎 (时间最新/时间最早/金额降序/金额升序)
   - [x] 明细列表按日分组 (`formatDayGroupHeader`) 与每日收支汇总 Header
-  - [x] 24dp 极致紧凑流水条目与 70% 深度防误触 Swipe-to-Delete 滑动删除
-  - [x] 底部 Snackbar 4 秒内一键“撤销 (Undo)”误删账单
-  - [x] 10.dp 几何精确对齐，彻底消除圆角红边渗透
+  - [x] 长按流水条目呼出确认对话框 (`ConfirmDelete`) 进行安全删除
   - [x] 超薄响应式结余卡片与眼睛一键隐额切换
   - [x] 月度预算监控与剩余预算计算、进度条超支告警指示
 - [x] **多维统计图表与排行榜 (StatisticsScreen)**
   - [x] 支出 / 收入双维度一键分析切换 (Segmented Toggle)
   - [x] 同步顶部年月胶囊切换 Header
   - [x] Canvas 环形占比图与分段比例条
-  - [x] 7 日消费趋势柱状图走势
+  - [x] 月度日走势平滑折线图 (`LineChart`)
   - [x] 日均支出/收入、单笔最大支出/收入核心指标卡片
   - [x] 支出/收入分类排行榜
 - [x] **偏好设置与数据运维 (SettingsScreen)**

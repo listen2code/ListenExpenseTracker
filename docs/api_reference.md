@@ -6,15 +6,15 @@
 
 ## 1. `ListenArch` 核心接口与模块
 
-### 1.1 `BaseViewModel<ViewState, UserIntent, ViewEffect>`
+### 1.1 `BaseViewModel<State, Intent, Effect>`
 * **包名**：`com.listen.arch.mvi`
 * **职责**：MVI 模式抽象基类，规范单向数据流。
 * **方法**：
-  * `val viewState: StateFlow<ViewState>`：只读 UI 状态流。
-  * `val viewEffect: Flow<ViewEffect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
-  * `fun handleIntent(intent: UserIntent)`：接收并处理外部意图。
-  * `protected fun updateState(reducer: ViewState.() -> ViewState)`：原子更新状态。
-  * `protected suspend fun emitEffect(effect: ViewEffect)`：发射单次事件。
+  * `val viewState: StateFlow<State>`：只读 UI 状态流。
+  * `val viewEffect: Flow<Effect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
+  * `fun handleIntent(intent: Intent)`：接收并处理外部意图。
+  * `protected fun updateState(reducer: State.() -> State)`：原子更新状态。
+  * `protected suspend fun emitEffect(effect: Effect)`：发射单次事件。
 
 ### 1.2 `TransactionDao` (Room DAO)
 * **包名**：`com.listen.arch.data.db`
@@ -118,8 +118,12 @@
 
 ### 3.4 `GoogleAuthManager` (Google 授权管理)
 * **包名**：`com.listen.expensetracker.auth`
+* **技术栈**：AndroidX `CredentialManager` + Google Identity `GoogleIdTokenCredential`（现代零废弃 API）
 * **方法**：
-  * `fun getClient(context: Context): GoogleSignInClient`
-  * `fun getLastSignedInAccount(context: Context): GoogleSignInAccount?`
-  * `fun parseSignInResult(data: Intent?): Result<GoogleSignInAccount>`
-  * `fun signOut(context: Context, onComplete: () -> Unit)`
+  * `fun getCredentialManager(context: Context): CredentialManager`：获取 AndroidX CredentialManager 实例。
+  * `fun buildGoogleIdOption(serverClientId: String = ""): GetGoogleIdOption`：构建 Google Identity 登录选项配置。
+  * `fun buildGetCredentialRequest(serverClientId: String = ""): GetCredentialRequest`：构建统一凭据请求。
+  * `fun parseGoogleIdCredential(response: GetCredentialResponse): Result<GoogleUserProfile>`：解析 CredentialManager 返回的 `GoogleIdTokenCredential`，提取用户邮箱、显示名称、头像 URL 与 IdToken。
+  * `suspend fun clearCredentials(context: Context)`：清除所有凭据状态并登出用户。
+* **数据模型**：
+  * `GoogleUserProfile(email, displayName, avatarUrl, idToken)`：认证成功后的用户资料数据类。

@@ -14,8 +14,7 @@
 3. **高信息密度流水明细与日聚合视图**：
    - 流水列表按日自动分组 (`20 星期四 2026.08`) 并实时汇总每日总支出与总收入。
    - 极致紧凑的 24dp 圆形分类图标与微型内边距，单屏展示信息量翻倍。
-   - 左滑删除 70% 深度防误触，支持 **底部 Snackbar 4 秒内一键撤销 (Undo)** 恢复误删账单。
-   - 前景白色卡片与背景删除层 10.dp 几何精确贴合，彻底杜绝圆角红边渗透。
+   - 长按流水条目呼出确认对话框 (`ConfirmDelete`) 进行安全删除，防止误触。
 4. **专属年月快速选择器 (`MonthPickerDialog`)**：
    - 独立的年份 `< 2026年 >` 快速切换与 3x4 12 月份方块网格，单次点击直达目标月份，彻底告别冗长的日历选择。
    - 流水与统计页面均集成超轻量居中时间胶囊 (`[ < 2026年08月 > ]`)。
@@ -25,7 +24,7 @@
    - 账户类型（微信/支付宝/银行卡/现金）支持动态拓展与过滤。
 6. **多维统计图表与月度预算看板**：
    - 支出 / 收入双模式一键分析切换 (Segmented Toggle)。
-   - 自定义 Canvas 环形占比图 (`DonutChart`)、垂直走势柱状图 (`BarChart`) 与分段比例条 (`SegmentedProgressBar`)。
+   - 自定义 Canvas 环形占比图 (`DonutChart`)、月度日走势平滑折线图 (`LineChart`) 与分段比例条 (`SegmentedProgressBar`)。
    - 实时计算月度预算消耗比例与剩余预算额度，提供动态超支告警。
 7. **全场景多语言与多币种符号体系**：
    - 内置 `StringsRes` / `ExpenseStrings` 动态本地化字典，无需重启应用即时切换中/英/日三语。
@@ -75,7 +74,7 @@ UIPkg ..> ArchPkg
 ```
 
 * **[ListenArch](file:///C:/Users/liste/Downloads/github/ListenArch)**：MVI 模式基类 (`BaseViewModel`, `CommonUiEffect`)、通用 DataStore 存储 (`BaseDataStoreManager`)、APM 监控 (`ApmLogger`)、TraceId 链路追踪 (`TraceManager`)、通用 Payload 云端同步引擎 (`CloudSyncManager`) 与通用本地化引擎 (`StringsRes`)。
-* **[ListenUiComponent](file:///C:/Users/liste/Downloads/github/ListenUiComponent)**：通用算术数字键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `BarChart`)、通用分段进度条、Material 3 主题系统、`BaseScreenScaffold` 顶部栏与 APM 日志浮窗。
+* **[ListenUiComponent](file:///C:/Users/liste/Downloads/github/ListenUiComponent)**：通用数字输入键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `LineChart`, `BarChart`)、通用分段进度条、Material 3 主题系统、`BaseScreenScaffold` 顶部栏与 APM 日志浮窗。
 * **[ListenExpenseTracker](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker)**：主 App 业务编排、Room 本地数据库 (`AppDatabase`, `TransactionDao`, `TransactionEntity`)、记账专属偏好 (`ExpenseDataStoreManager`)、记账多语言字典 (`ExpenseStrings`)、JSON/CSV 备份导入导出 (`TransactionBackupManager`)、Feature-First 独立 ViewModel 业务页面与桌面小组件。
 
 ---
