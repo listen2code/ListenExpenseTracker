@@ -20,7 +20,7 @@ graph TD
 | 模块名称 | 职责定位 | 包含的核心内容 | 依赖与边界约束 |
 | :--- | :--- | :--- | :--- |
 | **`ListenArch`** | 底层架构技术底座 | MVI `BaseViewModel` 状态机、APM 内存日志、`TraceManager` 链路打点、`CrashHandler` 崩溃捕获、`BaseDataStoreManager`、`CommonUiEffect`、`StringsRes` 调度引擎 | **零业务耦合**。严禁包含任何特定业务实体、数据表或业务文案。 |
-| **`ListenUiComponent`** | 通用视觉与交互 UIKit | `DonutChart` / `BarChart` 通用图表、`NumericKeypad` 通用数字键盘、`SurfaceCard`、`SearchBarInput`、`SegmentedProgressBar`、`BaseScreenScaffold`、`LogInspectorSheet` | **纯视觉组件库**。严禁包含任何业务领域模型或写死业务逻辑。 |
+| **`ListenUiComponent`** | 通用视觉与交互 UIKit | `DonutChart` / `BarChart` / `LineChart` 通用图表、`NumericKeypad` 通用数字键盘、`SurfaceCard`、`SearchBarInput`、`SegmentedProgressBar`、`BaseScreenScaffold`、`LogInspectorSheet` | **纯视觉组件库**。严禁包含任何业务领域模型或写死业务逻辑。 |
 | **`ListenExpenseTracker`** | 业务宿主 App | `TransactionEntity` / `TransactionDao` / `AppDatabase`、`ExpenseDataStoreManager`、`ExpenseStrings` 业务字典、`TransactionCalculationEngine`、流水/统计/设置 Feature 页面 | 承载记账业务的全部领域逻辑、交互编排与持久化。 |
 
 ---

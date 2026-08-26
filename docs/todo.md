@@ -62,7 +62,7 @@
   - [x] 支出/收入分类排行榜
 - [x] **偏好设置与数据运维 (SettingsScreen)**
   - [x] 5 大现代卡片分组架构（云端、个性化、预算、数据、系统）
-  - [x] 深度接入 Google Play Services Auth SDK 真实账户连携与状态持久化
+  - [x] 深度接入 AndroidX CredentialManager 真实 Google 账户连携与状态持久化
   - [x] 多账户隔离云端快照同步与一键恢复
   - [x] 深浅主题与 6+ 强调色调色盘切换
   - [x] 币种弹窗切换与中英日多语言切换

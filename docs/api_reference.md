@@ -11,39 +11,51 @@
 * **职责**：MVI 模式抽象基类，规范单向数据流。
 * **方法**：
   * `val viewState: StateFlow<State>`：只读 UI 状态流。
-  * `val viewEffect: Flow<Effect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
+  * `val viewEffect: SharedFlow<Effect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
   * `fun handleIntent(intent: Intent)`：接收并处理外部意图。
   * `protected fun updateState(reducer: State.() -> State)`：原子更新状态。
-  * `protected suspend fun emitEffect(effect: Effect)`：发射单次事件。
+  * `protected fun emitEffect(effect: Effect)`：发射单次事件（内部通过 `viewModelScope.launch` 异步发射）。
+  * `protected fun emitEffect(builder: () -> Effect)`：通过构建器 Lambda 发射单次事件。
 
 ### 1.2 `TransactionDao` (Room DAO)
-* **包名**：`com.listen.arch.data.db`
+* **包名**：`com.listen.expensetracker.data.db`
 * **方法**：
   * `fun getAllTransactionsFlow(): Flow<List<TransactionEntity>>`
-  * `fun getTransactionsByDateRangeFlow(start: Long, end: Long): Flow<List<TransactionEntity>>`
+  * `suspend fun getAllTransactions(): List<TransactionEntity>`
+  * `suspend fun getTransactionById(id: String): TransactionEntity?`
   * `suspend fun insertTransaction(transaction: TransactionEntity)`
   * `suspend fun insertTransactions(transactions: List<TransactionEntity>)`
+  * `suspend fun updateTransaction(transaction: TransactionEntity)`
+  * `suspend fun deleteTransaction(transaction: TransactionEntity)`
   * `suspend fun deleteTransactionById(id: String)`
-  * `suspend fun clearAll()`
+  * `suspend fun deleteAll()`
 
-### 1.3 `BaseDataStoreManager`
-* **包名**：`com.listen.arch.data.pref`
-* **属性 Flow**：
+### 1.3 `BaseDataStoreManager` (通用配置基类) + `ExpenseDataStoreManager` (记账专属扩展)
+* **基类包名**：`com.listen.arch.data.pref`
+* **子类包名**：`com.listen.expensetracker.data.pref`
+* **基类属性 Flow（`BaseDataStoreManager`）**：
   * `languageFlow: Flow<String>` (zh/en/ja)
   * `themeModeFlow: Flow<String>` (LIGHT/DARK/SYSTEM)
   * `accentColorFlow: Flow<String>` (EMERALD/SAPPHIRE/AMBER/ROSE/VIOLET/SLATE)
-  * `currencySymbolFlow: Flow<String>` (￥/$/€/£/円)
-  * `monthlyBudgetFlow: Flow<Double>`
   * `isLoggedInFlow: Flow<Boolean>`
   * `userEmailFlow: Flow<String>`
   * `userDisplayNameFlow: Flow<String>`
   * `userAvatarUrlFlow: Flow<String>`
   * `lastSyncTimestampFlow: Flow<Long>`
-* **更新方法**：
-  * `suspend fun setLoggedIn(isLoggedIn: Boolean, userEmail: String, displayName: String, avatarUrl: String)`
-  * `suspend fun setMonthlyBudget(budget: Double)`
-  * `suspend fun setCurrencySymbol(symbol: String)`
+* **子类扩展属性 Flow（`ExpenseDataStoreManager`）**：
+  * `currencySymbolFlow: Flow<String>` (￥/$/€/£/円)
+  * `monthlyBudgetFlow: Flow<Double>`
+  * `customAccountsFlow: Flow<String>`
+* **基类更新方法**：
   * `suspend fun setLanguage(langCode: String)`
+  * `suspend fun setThemeMode(mode: String)`
+  * `suspend fun setAccentColor(accent: String)`
+  * `suspend fun setLoggedIn(isLoggedIn: Boolean, userEmail: String = "", displayName: String = "", avatarUrl: String = "")`
+  * `suspend fun setLastSyncTimestamp(timestamp: Long)`
+* **子类更新方法**：
+  * `suspend fun setCurrencySymbol(symbol: String)`
+  * `suspend fun setMonthlyBudget(budget: Double)`
+  * `suspend fun setCustomAccountsJson(json: String)`
 
 ### 1.4 `CloudSyncManager` (Google 账号隔离云同步引擎)
 * **包名**：`com.listen.arch.sync`

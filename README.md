@@ -50,7 +50,7 @@ package "ListenExpenseTracker (主 App 业务宿主)" as AppPkg {
 }
 
 package "ListenUiComponent (通用 UI 与图表库 SDK)" as UIPkg {
-  [Charts (DonutChart, BarChart)] as Charts
+  [Charts (DonutChart, BarChart, LineChart)] as Charts
   [Keypad (NumericKeypad)] as Keypad
   [Theme & Design Tokens] as Theme
   [BaseScreenScaffold] as Scaffold
@@ -87,6 +87,12 @@ UIPkg ..> ArchPkg
 app/src/main/java/com/listen/expensetracker/
 ├── MainActivity.kt                         # 单 Activity 宿主与导航脚手架
 ├── auth/                                   # 现代 Google Credential Manager 认证
+├── core/                                   # 应用核心装配层
+│   ├── apm/                               # ApmInspectorHost APM 浮窗宿主
+│   ├── effect/                            # CommonUiEffectCollector 通用副作用分发
+│   ├── overlay/                           # AppOverlayHost 全局浮层管理
+│   ├── route/                             # CommonRoute 导航路由常量
+│   └── state/                             # ExpenseAppState 应用级状态
 ├── data/                                   # 数据层
 │   ├── backup/                             # 账单 JSON / CSV 导出与导入引擎
 │   ├── db/                                 # Room 数据库单例、DAO 与 Entity 表结构
