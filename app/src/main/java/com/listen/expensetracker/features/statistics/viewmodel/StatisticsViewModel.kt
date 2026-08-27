@@ -123,6 +123,7 @@ class StatisticsViewModel(
 
         updateState {
             copy(
+                allTransactions = allList,
                 categoryShares = calculated.categoryShares,
                 progressSegments = calculated.progressSegments,
                 incomeCategoryShares = calculated.incomeCategoryShares,

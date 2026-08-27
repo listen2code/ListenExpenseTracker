@@ -12,6 +12,7 @@ import com.listen.uicomponent.theme.ThemeMode
  * Immutable UI State representing the multi-dimensional statistics and financial analytics presentation.
  */
 data class StatisticsUiState(
+    val allTransactions: List<TransactionEntity> = emptyList(),
     val categoryShares: List<PieChartItem> = emptyList(),
     val progressSegments: List<ProgressSegment> = emptyList(),
     val incomeCategoryShares: List<PieChartItem> = emptyList(),

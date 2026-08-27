@@ -48,11 +48,7 @@ object TransactionCalculationEngine {
         val cleanQuery = query.trim().lowercase()
         val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset, lang)
 
-        val monthFilteredList = if (currentOffset == 0 && cleanQuery.isBlank() && accountFilter == "ALL") {
-            allList
-        } else {
-            allList.filter { it.timestamp in startTs..endTs }
-        }
+        val monthFilteredList = allList.filter { it.timestamp in startTs..endTs }
 
         val matchedFiltered = monthFilteredList.filter { item ->
             val matchesQuery = cleanQuery.isEmpty() ||

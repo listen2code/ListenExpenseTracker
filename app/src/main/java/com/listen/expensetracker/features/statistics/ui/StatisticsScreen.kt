@@ -1,48 +1,42 @@
 package com.listen.expensetracker.features.statistics.ui
 
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
-import com.listen.expensetracker.features.statistics.components.MetricsSummaryCard
-import com.listen.expensetracker.features.statistics.components.RankingCategoryItem
+import com.listen.expensetracker.features.statistics.components.StatisticsContentList
 import com.listen.expensetracker.features.statistics.components.StatisticsDialogHost
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
-import com.listen.uicomponent.charts.DonutChart
-import com.listen.uicomponent.charts.LineChart
 import com.listen.uicomponent.components.BaseScreenScaffold
-import com.listen.uicomponent.components.CommonEmpty
-import com.listen.uicomponent.components.SegmentedProgressBar
-import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.components.CommonSegmentedControl
+import kotlinx.coroutines.launch
+
+private const val PAGER_BASE_INDEX = 600
+private const val PAGER_PAGE_COUNT = 1200
 
 /**
- * Pure Stateless Statistics Screen displaying Donut Chart, Segmented Progress,
- * Month Daily Trend Line Chart, Key Metrics, and Category Rankings.
+ * Pure Stateless Statistics Screen.
+ * The Expense/Income Segmented Toggle stays pinned at top, while the Donut Chart,
+ * Trend Chart, Metrics, and Category Rankings glide smoothly in a horizontal PageView underneath with real-time month calculation.
  */
 @Composable
 fun StatisticsScreen(
@@ -51,19 +45,52 @@ fun StatisticsScreen(
     modifier: Modifier = Modifier
 ) {
     val lang = state.language
-    val sym = state.currencySymbol
-
+    val coroutineScope = rememberCoroutineScope()
     val isExpenseTab = state.statisticsTab == "EXPENSE"
-    val activeShares = if (isExpenseTab) state.categoryShares else state.incomeCategoryShares
-    val activeSegments = if (isExpenseTab) state.progressSegments else state.incomeProgressSegments
-    val totalAmount = if (isExpenseTab) state.totalExpense else state.totalIncome
+
+    val pagerState = rememberPagerState(
+        initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
+        pageCount = { PAGER_PAGE_COUNT }
+    )
+
+    // Dynamically compute the month header title in real-time as the user swipes
+    val activeOffset = pagerState.currentPage - PAGER_BASE_INDEX
+    val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
+        TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
+    }
+
+    // Synchronize external month changes (MonthPickerDialog, etc.) with smooth page scroll
+    LaunchedEffect(state.selectedMonthOffset) {
+        val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
+        if (pagerState.currentPage != targetPage) {
+            pagerState.animateScrollToPage(targetPage)
+        }
+    }
+
+    // Synchronize settled page changes with ViewModel state
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page ->
+            val offset = page - PAGER_BASE_INDEX
+            if (offset != state.selectedMonthOffset) {
+                onIntent(StatisticsIntent.SetMonthOffset(offset))
+            }
+        }
+    }
 
     BaseScreenScaffold(
         titleSlot = {
             MonthNavigationCapsule(
-                monthTitle = state.monthTitle,
-                onPreviousMonth = { onIntent(StatisticsIntent.ChangeMonthOffset(-1)) },
-                onNextMonth = { onIntent(StatisticsIntent.ChangeMonthOffset(1)) },
+                monthTitle = currentMonthTitle,
+                onPreviousMonth = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                },
+                onNextMonth = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                },
                 onTitleClick = { onIntent(StatisticsIntent.OpenMonthPicker) }
             )
         },
@@ -78,109 +105,35 @@ fun StatisticsScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = AppDimens.SpaceLarge),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
         ) {
-            // Expense vs Income Segmented Toggle
-            item(key = "tab_toggle") {
-                val tabs = listOf(AppStrings.tab_expense_analysis.tr(lang), AppStrings.tab_income_analysis.tr(lang))
-                com.listen.uicomponent.components.CommonSegmentedControl(
-                    items = tabs,
-                    selectedIndex = if (isExpenseTab) 0 else 1,
-                    onIndexChange = { index ->
-                        onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) "EXPENSE" else "INCOME"))
-                    },
-                    modifier = Modifier.padding(vertical = AppDimens.SpaceExtraSmall)
+            // 1. Pinned Top Expense vs Income Segmented Toggle (Stationary)
+            val tabs = listOf(AppStrings.tab_expense_analysis.tr(lang), AppStrings.tab_income_analysis.tr(lang))
+            CommonSegmentedControl(
+                items = tabs,
+                selectedIndex = if (isExpenseTab) 0 else 1,
+                onIndexChange = { index ->
+                    onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) "EXPENSE" else "INCOME"))
+                },
+                modifier = Modifier
+                    .padding(horizontal = AppDimens.SpaceLarge)
+                    .padding(bottom = AppDimens.SpaceExtraSmall)
+            )
+
+            // 2. Horizontal PageView Slider with month-specific analytics calculation
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                val pageOffset = page - PAGER_BASE_INDEX
+                StatisticsContentList(
+                    state = state,
+                    monthOffset = pageOffset,
+                    onIntent = onIntent
                 )
-            }
-
-            // Donut Chart & Segmented Progress Card
-            item(key = "donut_chart_card") {
-                SurfaceCard(modifier = Modifier.fillMaxWidth()) {
-                    if (activeShares.isEmpty() || totalAmount <= 0.0) {
-                        CommonEmpty(
-                            message = if (isExpenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
-                            modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
-                        )
-                    } else {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            DonutChart(
-                                items = activeShares,
-                                totalValue = totalAmount,
-                                centerTitle = if (isExpenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
-                                centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(totalAmount)}",
-                                modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
-                            )
-                            SegmentedProgressBar(
-                                segments = activeSegments,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = AppDimens.SpaceSmall)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Month Daily Trend Line Chart (Expense Only)
-            if (isExpenseTab && state.dailyTrendPoints.isNotEmpty()) {
-                item(key = "trend_chart_card") {
-                    SurfaceCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = AppStrings.trend_month_daily.tr(lang),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = AppDimens.TextTitle,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
-                            )
-                            LineChart(
-                                points = state.dailyTrendPoints,
-                                chartHeight = AppDimens.ChartHeightStandard,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Key Metrics Summary Card
-            item(key = "metrics_card") {
-                MetricsSummaryCard(
-                    isExpenseTab = isExpenseTab,
-                    dailyAverage = if (isExpenseTab) state.dailyAverageExpense else state.dailyAverageIncome,
-                    maxTransaction = if (isExpenseTab) state.maxExpenseTransaction else state.maxIncomeTransaction,
-                    currencySymbol = sym,
-                    lang = lang,
-                    modifier = Modifier.fillMaxWidth(),
-                    hideAmount = state.hideAmount
-                )
-            }
-
-            // Category Breakdown Ranking List
-            if (activeShares.isNotEmpty()) {
-                item(key = "ranking_header") {
-                    Text(
-                        text = if (isExpenseTab) AppStrings.expense_ranking.tr(lang) else AppStrings.income_ranking.tr(lang),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = AppDimens.TextTitle,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(top = AppDimens.SpaceSmall)
-                    )
-                }
-
-                items(activeShares, key = { it.label }) { item ->
-                    RankingCategoryItem(
-                        share = item,
-                        currencySymbol = sym,
-                        modifier = Modifier.fillMaxWidth(),
-                        hideAmount = state.hideAmount
-                    )
-                }
             }
         }
     }
