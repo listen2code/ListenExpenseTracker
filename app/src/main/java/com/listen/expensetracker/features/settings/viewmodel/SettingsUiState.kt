@@ -26,6 +26,8 @@ data class SettingsUiState(
     val accentColor: AccentColor = AccentColor.EMERALD,
     val currencySymbol: String = "￥",
     val monthlyBudget: Double = 5000.0,
+    val autoBackupDrive: Boolean = true,
+    val autoBackupWifiOnly: Boolean = false,
     val syncState: SyncState = SyncState(),
     val googleAccountEmail: String? = null,
     val googleDisplayName: String? = null,
@@ -45,6 +47,8 @@ sealed interface SettingsIntent {
     data class ChangeAccentColor(val accent: AccentColor) : SettingsIntent
     data class ChangeCurrencySymbol(val symbol: String) : SettingsIntent
     data class UpdateMonthlyBudget(val budget: Double) : SettingsIntent
+    data class ToggleAutoBackupDrive(val enabled: Boolean) : SettingsIntent
+    data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
     data object TriggerGoogleSignIn : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent
     data object UnlinkGoogleAccount : SettingsIntent

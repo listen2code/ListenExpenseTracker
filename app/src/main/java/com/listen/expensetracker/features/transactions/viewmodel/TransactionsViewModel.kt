@@ -123,6 +123,7 @@ class TransactionsViewModel(
             dao.getAllTransactionsFlow().collectLatest { allList ->
                 applyCalculations(allList)
                 updateWidgets(allList)
+                com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }
     }

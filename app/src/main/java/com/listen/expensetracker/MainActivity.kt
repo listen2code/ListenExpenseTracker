@@ -82,6 +82,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStop() {
+        super.onStop()
+        com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
+    }
 }
 
 @Composable

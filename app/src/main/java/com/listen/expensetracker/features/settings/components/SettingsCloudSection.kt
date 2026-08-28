@@ -47,18 +47,25 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+
 /**
  * Cloud Sync and Google Account Settings Card.
- * Displays user profile avatar, display name, email, and Google Drive sync indicators.
+ * Displays user profile avatar, display name, email, auto-backup toggles, and Google Drive sync indicators.
  */
 @Composable
 fun SettingsCloudSection(
     googleAccountEmail: String?,
     googleDisplayName: String?,
     googleAvatarUrl: String? = null,
+    autoBackupDrive: Boolean = true,
+    autoBackupWifiOnly: Boolean = false,
     syncState: SyncState,
     onLoginGoogle: () -> Unit,
     onLogoutGoogle: () -> Unit,
+    onToggleAutoBackupDrive: (Boolean) -> Unit = {},
+    onToggleAutoBackupWifiOnly: (Boolean) -> Unit = {},
     onTriggerBackup: () -> Unit,
     onTriggerRestore: () -> Unit,
     lang: String,
@@ -159,6 +166,57 @@ fun SettingsCloudSection(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Logout",
                             tint = ExpenseRed
+                        )
+                    }
+                }
+
+                // Auto-Backup to Google Drive Switch Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = AppDimens.SpaceMedium)) {
+                        Text(
+                            text = AppStrings.auto_backup_drive_title.tr(lang),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = AppStrings.auto_backup_drive_desc.tr(lang),
+                            fontSize = AppDimens.TextMicro,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = autoBackupDrive,
+                        onCheckedChange = onToggleAutoBackupDrive,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+
+                // Wi-Fi Only Switch Row (Conditional on Auto Backup enabled)
+                if (autoBackupDrive) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = AppStrings.auto_backup_wifi_only_title.tr(lang),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Switch(
+                            checked = autoBackupWifiOnly,
+                            onCheckedChange = onToggleAutoBackupWifiOnly,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary
+                            )
                         )
                     }
                 }

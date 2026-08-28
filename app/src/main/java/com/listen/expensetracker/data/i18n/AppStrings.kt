@@ -89,6 +89,9 @@ object AppStrings {
     const val import_json = "import_json"
 
     // Cloud & Google Auth
+    const val auto_backup_drive_title = "auto_backup_drive_title"
+    const val auto_backup_drive_desc = "auto_backup_drive_desc"
+    const val auto_backup_wifi_only_title = "auto_backup_wifi_only_title"
     const val cloud_status_idle = "cloud_status_idle"
     const val cloud_status_syncing = "cloud_status_syncing"
     const val cloud_status_success = "cloud_status_success"

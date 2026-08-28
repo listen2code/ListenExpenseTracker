@@ -89,6 +89,21 @@ class SettingsViewModel(
                     updateState { copy(monthlyBudget = intent.budget) }
                 }
             }
+            is SettingsIntent.ToggleAutoBackupDrive -> {
+                viewModelScope.launch {
+                    prefManager.setAutoBackupDrive(intent.enabled)
+                    updateState { copy(autoBackupDrive = intent.enabled) }
+                    if (intent.enabled) {
+                        com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 1000L)
+                    }
+                }
+            }
+            is SettingsIntent.ToggleAutoBackupWifiOnly -> {
+                viewModelScope.launch {
+                    prefManager.setAutoBackupWifiOnly(intent.enabled)
+                    updateState { copy(autoBackupWifiOnly = intent.enabled) }
+                }
+            }
             is SettingsIntent.LinkGoogleAccount -> {
                 viewModelScope.launch {
                     prefManager.setLoggedIn(
@@ -98,6 +113,7 @@ class SettingsViewModel(
                         avatarUrl = intent.avatarUrl ?: ""
                     )
                     emitEffect(CommonUiEffect.ShowToast("Google 账号已成功连携: ${intent.email}"))
+                    com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 2000L)
                 }
             }
             is SettingsIntent.UnlinkGoogleAccount -> {
@@ -146,6 +162,16 @@ class SettingsViewModel(
         viewModelScope.launch {
             prefManager.monthlyBudgetFlow.collectLatest { budget ->
                 updateState { copy(monthlyBudget = budget) }
+            }
+        }
+        viewModelScope.launch {
+            prefManager.autoBackupDriveFlow.collectLatest { enabled ->
+                updateState { copy(autoBackupDrive = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            prefManager.autoBackupWifiOnlyFlow.collectLatest { enabled ->
+                updateState { copy(autoBackupWifiOnly = enabled) }
             }
         }
     }
