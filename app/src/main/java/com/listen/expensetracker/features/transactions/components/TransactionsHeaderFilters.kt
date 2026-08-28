@@ -34,6 +34,18 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsInt
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.uicomponent.components.SearchBarInput
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+
 /**
  * Pinned Top Search Bar and Account Filter Row for Transactions Screen.
  * Stays stationary while the balance card and transaction list glide underneath in HorizontalPager.
@@ -47,6 +59,7 @@ fun TransactionsHeaderFilters(
     modifier: Modifier = Modifier
 ) {
     val lang = state.language
+    var accountKeyToDelete by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -77,14 +90,14 @@ fun TransactionsHeaderFilters(
                 filterKeys.forEach { acctKey ->
                     val isSelected = state.selectedAccountFilter == acctKey
                     val label = AccountRepository.getAccountDisplayName(acctKey, lang)
-                    FilterChip(
+                    val isCustom = acctKey != "ALL" && acctKey != "CASH" && acctKey != "BANK" && acctKey != "CREDIT"
+
+                    AccountFilterChipItem(
                         selected = isSelected,
+                        label = label,
+                        isCustom = isCustom,
                         onClick = { onIntent(TransactionsIntent.FilterAccountChange(acctKey)) },
-                        label = { Text(label, fontSize = AppDimens.TextMicro) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        onLongClick = { accountKeyToDelete = acctKey }
                     )
                 }
 
@@ -126,6 +139,63 @@ fun TransactionsHeaderFilters(
                     }
                 }
             }
+        }
+    }
+
+    // Delete Account Confirmation Dialog on Long Press
+    accountKeyToDelete?.let { keyToDelete ->
+        AccountDeleteConfirmDialog(
+            accountName = AccountRepository.getAccountDisplayName(keyToDelete, lang),
+            onDismiss = { accountKeyToDelete = null },
+            onConfirm = {
+                AccountRepository.deleteAccount(keyToDelete)
+                if (state.selectedAccountFilter == keyToDelete) {
+                    onIntent(TransactionsIntent.FilterAccountChange("ALL"))
+                }
+                accountKeyToDelete = null
+            },
+            lang = lang
+        )
+    }
+}
+
+/**
+ * Account filter chip supporting normal click and long-press for custom accounts.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AccountFilterChipItem(
+    selected: Boolean,
+    label: String,
+    isCustom: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    val containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    val labelColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val borderColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+
+    Surface(
+        shape = RoundedCornerShape(AppDimens.CornerButton),
+        color = containerColor,
+        border = BorderStroke(1.dp, borderColor),
+        modifier = Modifier
+            .clip(RoundedCornerShape(AppDimens.CornerButton))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = if (isCustom) onLongClick else null
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                fontSize = AppDimens.TextMicro,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = labelColor
+            )
         }
     }
 }

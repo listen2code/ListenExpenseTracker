@@ -22,7 +22,7 @@ class AppStringsTest {
     @Test
     fun testAccountsAndFiltersStrings() {
         assertEquals("filter_all", AppStrings.filter_all)
-        assertEquals("filter_wechat", AppStrings.filter_wechat)
+        assertEquals("filter_cash", AppStrings.filter_cash)
         assertEquals("sort_date_desc", AppStrings.sort_date_desc)
     }
 

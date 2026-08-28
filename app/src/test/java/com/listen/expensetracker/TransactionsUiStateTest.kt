@@ -64,7 +64,7 @@ class TransactionsUiStateTest {
             categoryColorHex = "#EF4444",
             amount = 3000.0,
             note = "大餐",
-            accountType = "WECHAT"
+            accountType = "CASH"
         )
         val tx2 = TransactionEntity(
             id = "2",

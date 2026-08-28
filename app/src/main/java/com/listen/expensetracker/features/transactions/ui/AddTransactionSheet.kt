@@ -1,13 +1,14 @@
 package com.listen.expensetracker.features.transactions.ui
 
 import com.listen.arch.i18n.tr
-
 import com.listen.expensetracker.data.i18n.AppStrings
-
 import android.app.DatePickerDialog
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -57,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AccountRepository
+import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.settings.components.CategoryManageDialog
@@ -72,7 +75,8 @@ import java.util.Locale
 /**
  * Bottom Sheet for creating a new transaction with custom keypad and category picker.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AddTransactionSheet(
     modifier: Modifier = Modifier,
@@ -104,8 +108,10 @@ fun AddTransactionSheet(
     var selectedCategory by remember(categories) { mutableStateOf(categories.first()) }
     var amountExpression by remember { mutableStateOf("0") }
     var note by remember { mutableStateOf("") }
-    val availableAccounts = remember { AccountRepository.getAllAccounts() }
+    var accountVersion by remember { mutableIntStateOf(0) }
+    val availableAccounts = remember(accountVersion) { AccountRepository.getAllAccounts() }
     var selectedAccount by remember { mutableStateOf(availableAccounts.firstOrNull()?.key ?: "CASH") }
+    var accountToDelete by remember { mutableStateOf<AccountTypeItem?>(null) }
     var selectedTimestamp by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showCategoryManageDialog by remember { mutableStateOf(false) }
 
@@ -271,18 +277,36 @@ fun AddTransactionSheet(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
                 modifier = Modifier.fillMaxWidth().padding(vertical = AppDimens.SpaceSmall)
             ) {
-                items(availableAccounts) { acct ->
+                items(availableAccounts, key = { it.key }) { acct ->
                     val isSelected = selectedAccount == acct.key
                     val acctName = acct.getDisplayName(lang)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { selectedAccount = acct.key },
-                        label = { Text(acctName, fontSize = AppDimens.TextSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    )
+                    val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    val labelColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+
+                    Surface(
+                        shape = RoundedCornerShape(AppDimens.CornerButton),
+                        color = containerColor,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, borderColor),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(AppDimens.CornerButton))
+                            .combinedClickable(
+                                onClick = { selectedAccount = acct.key },
+                                onLongClick = if (!acct.isSystem) ({ accountToDelete = acct }) else null
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = acctName,
+                                fontSize = AppDimens.TextSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = labelColor
+                            )
+                        }
+                    }
                 }
             }
 
@@ -332,6 +356,23 @@ fun AddTransactionSheet(
             type = type,
             onDismiss = { showCategoryManageDialog = false },
             onCategoriesChanged = { categoryVersion++ },
+            lang = lang
+        )
+    }
+
+    // Delete Account Confirmation Dialog on Long Press
+    accountToDelete?.let { acct ->
+        com.listen.expensetracker.features.transactions.components.AccountDeleteConfirmDialog(
+            accountName = acct.getDisplayName(lang),
+            onDismiss = { accountToDelete = null },
+            onConfirm = {
+                AccountRepository.deleteAccount(acct.key)
+                accountVersion++
+                if (selectedAccount == acct.key) {
+                    selectedAccount = "CASH"
+                }
+                accountToDelete = null
+            },
             lang = lang
         )
     }

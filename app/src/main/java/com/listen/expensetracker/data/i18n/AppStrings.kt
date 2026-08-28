@@ -23,11 +23,9 @@ object AppStrings {
 
     // Accounts & Filters
     const val filter_all = "filter_all"
-    const val filter_wechat = "filter_wechat"
-    const val filter_alipay = "filter_alipay"
+    const val filter_cash = "filter_cash"
     const val filter_bank = "filter_bank"
     const val filter_credit = "filter_credit"
-    const val filter_cash = "filter_cash"
     const val sort_date_desc = "sort_date_desc"
     const val sort_date_asc = "sort_date_asc"
     const val sort_amount_desc = "sort_amount_desc"
@@ -124,7 +122,15 @@ object AppStrings {
     // Dialogs & Prompts
     const val manage_accounts_title = "manage_accounts_title"
     const val add_account = "add_account"
+    const val edit_account = "edit_account"
     const val account_name_input = "account_name_input"
+    const val system_accounts_section = "system_accounts_section"
+    const val custom_accounts_section = "custom_accounts_section"
+    const val custom_accounts_empty = "custom_accounts_empty"
+    const val account_badge_system = "account_badge_system"
+    const val account_badge_custom = "account_badge_custom"
+    const val delete_account_confirm_title = "delete_account_confirm_title"
+    const val delete_account_confirm_desc = "delete_account_confirm_desc"
     const val select_month_dialog = "select_month_dialog"
     const val currency_dialog_title = "currency_dialog_title"
     const val currency_current = "currency_current"

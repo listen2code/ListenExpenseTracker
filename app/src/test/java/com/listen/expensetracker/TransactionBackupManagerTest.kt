@@ -21,7 +21,7 @@ class TransactionBackupManagerTest {
                 categoryColorHex = "#EF4444",
                 amount = 128.5,
                 note = "聚餐测试",
-                accountType = "WECHAT",
+                accountType = "CASH",
                 timestamp = 1723900000000L
             ),
             TransactionEntity(
@@ -67,13 +67,13 @@ class TransactionBackupManagerTest {
                 categoryColorHex = "#3B82F6",
                 amount = 15.0,
                 note = "打车",
-                accountType = "ALIPAY",
+                accountType = "CREDIT",
                 timestamp = 1723900000000L
             )
         )
 
         val csv = TransactionBackupManager.exportToCsv(sampleList)
         assertTrue(csv.startsWith("ID,类型,分类,金额,账户,备注,时间"))
-        assertTrue(csv.contains("tx-200,支出,交通,15.0,ALIPAY,打车"))
+        assertTrue(csv.contains("tx-200,支出,交通,15.0,CREDIT,打车"))
     }
 }

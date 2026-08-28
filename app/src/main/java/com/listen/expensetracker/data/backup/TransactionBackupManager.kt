@@ -55,7 +55,7 @@ object TransactionBackupManager {
                     categoryColorHex = map["categoryColorHex"] ?: "#6B7280",
                     amount = map["amount"]?.toDoubleOrNull() ?: 0.0,
                     note = map["note"] ?: "",
-                    accountType = map["accountType"] ?: "WECHAT",
+                    accountType = map["accountType"] ?: "CASH",
                     timestamp = map["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
                 )
                 list.add(tx)

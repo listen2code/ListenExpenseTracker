@@ -25,11 +25,11 @@ class TransactionsIntentEffectTest {
             categoryColorHex = "#EF4444",
             amount = 55.0,
             note = "午餐测试",
-            accountType = "WECHAT",
+            accountType = "CASH",
             timestamp = 1723900000000L
         )
         assertEquals(55.0, addIntent.amount, 0.001)
-        assertEquals("WECHAT", addIntent.accountType)
+        assertEquals("CASH", addIntent.accountType)
 
         val tx = TransactionEntity(
             id = "tx-update",

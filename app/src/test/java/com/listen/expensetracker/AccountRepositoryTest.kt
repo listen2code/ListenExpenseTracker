@@ -36,17 +36,17 @@ class AccountRepositoryTest {
 
     @Test
     fun testAddEditDeleteCustomAccount() {
-        val created = AccountRepository.addAccount("理财通")
+        val created = AccountRepository.addAccount("交通卡")
         assertNotNull(created.key)
-        assertEquals("理财通", created.getDisplayName("zh"))
+        assertEquals("交通卡", created.getDisplayName("zh"))
         assertFalse(created.isSystem)
 
         // Get Name
-        assertEquals("理财通", AccountRepository.getAccountDisplayName(created.key, "zh"))
+        assertEquals("交通卡", AccountRepository.getAccountDisplayName(created.key, "zh"))
 
         // Update Name
-        AccountRepository.updateAccount(created.key, "微信理财通")
-        assertEquals("微信理财通", AccountRepository.getAccountDisplayName(created.key, "zh"))
+        AccountRepository.updateAccount(created.key, "八达通")
+        assertEquals("八达通", AccountRepository.getAccountDisplayName(created.key, "zh"))
 
         // Delete Account
         val deleted = AccountRepository.deleteAccount(created.key)
@@ -60,13 +60,13 @@ class AccountRepositoryTest {
 
     @Test
     fun testSerializeAndDeserializeCustomAccounts() {
-        AccountRepository.addAccount("支付宝余额宝")
+        AccountRepository.addAccount("理财账户")
         val json = AccountRepository.serializeCustomAccounts()
-        assertTrue(json.contains("支付宝余额宝"))
+        assertTrue(json.contains("理财账户"))
 
         // Reset and reload
         AccountRepository.deserializeCustomAccounts(json)
         val accounts = AccountRepository.getAllAccounts()
-        assertTrue(accounts.any { it.customName == "支付宝余额宝" })
+        assertTrue(accounts.any { it.customName == "理财账户" })
     }
 }
