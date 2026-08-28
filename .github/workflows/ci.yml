@@ -290,7 +290,7 @@ jobs:
             });
 
       - name: Send Email Notification on CI Build Success
-        if: success() && secrets.MAIL_USERNAME != '' && secrets.MAIL_PASSWORD != ''
+        if: success()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER || 'smtp.gmail.com' }}
@@ -492,7 +492,7 @@ jobs:
           status: completed
 
       - name: Send Email Notification on Google Play Deployment
-        if: success() && steps.check_version.outputs.should_deploy == 'true' && secrets.MAIL_USERNAME != '' && secrets.MAIL_PASSWORD != ''
+        if: success() && steps.check_version.outputs.should_deploy == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.MAIL_SERVER || 'smtp.gmail.com' }}
