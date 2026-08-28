@@ -24,6 +24,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_AUTO_BACKUP_DRIVE = booleanPreferencesKey("expense_auto_backup_drive")
         val KEY_AUTO_BACKUP_WIFI_ONLY = booleanPreferencesKey("expense_auto_backup_wifi_only")
         val KEY_LAST_BACKUP_HASH = stringPreferencesKey("expense_last_backup_hash")
+        val KEY_DEVELOPER_MODE = booleanPreferencesKey("expense_developer_mode")
     }
 
     val currencySymbolFlow: Flow<String> = context.archDataStore.data.map { prefs ->
@@ -50,6 +51,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         prefs[KEY_LAST_BACKUP_HASH] ?: ""
     }
 
+    val isDeveloperModeFlow: Flow<Boolean> = context.archDataStore.data.map { prefs ->
+        prefs[KEY_DEVELOPER_MODE] ?: false
+    }
+
     suspend fun setCurrencySymbol(symbol: String) {
         context.archDataStore.edit { prefs -> prefs[KEY_CURRENCY_SYMBOL] = symbol }
     }
@@ -72,5 +77,9 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
 
     suspend fun setLastBackupHash(hash: String) {
         context.archDataStore.edit { prefs -> prefs[KEY_LAST_BACKUP_HASH] = hash }
+    }
+
+    suspend fun setDeveloperMode(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_DEVELOPER_MODE] = enabled }
     }
 }

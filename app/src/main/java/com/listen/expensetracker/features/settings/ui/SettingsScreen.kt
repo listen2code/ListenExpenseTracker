@@ -16,6 +16,7 @@ import com.listen.expensetracker.features.settings.components.SettingsAppearance
 import com.listen.expensetracker.features.settings.components.SettingsCloudSection
 import com.listen.expensetracker.features.settings.components.SettingsDataSection
 import com.listen.expensetracker.features.settings.components.SettingsDialogHost
+import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
@@ -114,12 +115,23 @@ fun SettingsScreen(
                 )
             }
 
-            // 4. System Ops & APM Observability Section
-            item(key = "apm_section") {
-                SettingsApmSection(
-                    onOpenApmInspector = { onIntent(SettingsIntent.OpenApmInspector) },
-                    onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData) },
-                    onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
+            // 4. System Ops & APM Observability Section (Developer Mode only)
+            if (state.isDeveloperMode) {
+                item(key = "apm_section") {
+                    SettingsApmSection(
+                        onOpenApmInspector = { onIntent(SettingsIntent.OpenApmInspector) },
+                        onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData) },
+                        onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
+                        lang = lang
+                    )
+                }
+            }
+
+            // 5. Version Footer (Rapid 5x taps trigger Developer Mode)
+            item(key = "version_footer") {
+                SettingsVersionFooter(
+                    isDeveloperMode = state.isDeveloperMode,
+                    onToggleDeveloperMode = { onIntent(SettingsIntent.ToggleDeveloperMode(it)) },
                     onOpenAboutDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) },
                     lang = lang
                 )

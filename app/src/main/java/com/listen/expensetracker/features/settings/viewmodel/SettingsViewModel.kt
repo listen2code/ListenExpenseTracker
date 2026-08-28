@@ -104,6 +104,19 @@ class SettingsViewModel(
                     updateState { copy(autoBackupWifiOnly = intent.enabled) }
                 }
             }
+            is SettingsIntent.ToggleDeveloperMode -> {
+                viewModelScope.launch {
+                    prefManager.setDeveloperMode(intent.enabled)
+                    updateState { copy(isDeveloperMode = intent.enabled) }
+                    val lang = currentState.language
+                    val msg = if (intent.enabled) {
+                        AppStrings.developer_mode_enabled.tr(lang)
+                    } else {
+                        AppStrings.developer_mode_disabled.tr(lang)
+                    }
+                    emitEffect(CommonUiEffect.ShowToast(msg))
+                }
+            }
             is SettingsIntent.LinkGoogleAccount -> {
                 viewModelScope.launch {
                     prefManager.setLoggedIn(
@@ -172,6 +185,11 @@ class SettingsViewModel(
         viewModelScope.launch {
             prefManager.autoBackupWifiOnlyFlow.collectLatest { enabled ->
                 updateState { copy(autoBackupWifiOnly = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            prefManager.isDeveloperModeFlow.collectLatest { enabled ->
+                updateState { copy(isDeveloperMode = enabled) }
             }
         }
     }

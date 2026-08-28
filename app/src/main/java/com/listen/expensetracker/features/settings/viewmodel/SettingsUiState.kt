@@ -35,7 +35,8 @@ data class SettingsUiState(
     val isLoggedIn: Boolean = false,
     val lastSyncTimestamp: Long = 0L,
     val activeDialog: SettingsDialog? = null,
-    val isOperating: Boolean = false
+    val isOperating: Boolean = false,
+    val isDeveloperMode: Boolean = false
 )
 
 /**
@@ -49,6 +50,7 @@ sealed interface SettingsIntent {
     data class UpdateMonthlyBudget(val budget: Double) : SettingsIntent
     data class ToggleAutoBackupDrive(val enabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
+    data class ToggleDeveloperMode(val enabled: Boolean) : SettingsIntent
     data object TriggerGoogleSignIn : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent
     data object UnlinkGoogleAccount : SettingsIntent

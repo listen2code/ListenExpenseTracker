@@ -145,6 +145,10 @@ object AppStrings {
     const val undo_delete_toast = "undo_delete_toast"
     const val undo_action_label = "undo_action_label"
     const val undo_success_toast = "undo_success_toast"
+    const val developer_mode_enabled = "developer_mode_enabled"
+    const val developer_mode_disabled = "developer_mode_disabled"
+    const val developer_mode_steps = "developer_mode_steps"
+    const val developer_mode_badge = "developer_mode_badge"
 
     // Categories
     const val cat_food = "cat_food"

@@ -36,7 +36,6 @@ fun SettingsApmSection(
     onOpenApmInspector: () -> Unit,
     onSeedDemoData: () -> Unit,
     onConfirmClearAll: () -> Unit,
-    onOpenAboutDialog: () -> Unit,
     lang: String,
     modifier: Modifier = Modifier
 ) {
@@ -95,14 +94,6 @@ fun SettingsApmSection(
                 )
             }
 
-            // About App Button
-            CommonButton(
-                text = AppStrings.about_app.tr(lang),
-                onClick = onOpenAboutDialog,
-                style = CommonButtonStyle.Outlined,
-                icon = { Icon(Icons.Default.Info, contentDescription = "About", modifier = Modifier.size(AppDimens.IconSizeMedium)) },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
