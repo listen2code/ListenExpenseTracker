@@ -100,6 +100,7 @@ fun App(
     modifier: Modifier = Modifier
 ) {
     val settingsState by appState.settingsViewModel.viewState.collectAsState()
+    val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
     val lang = settingsState.language
 
     // Double-tap tracking on active navigation tab (threshold: 350ms)
@@ -169,7 +170,7 @@ fun App(
                     SettingsScreen(
                         state = state,
                         onIntent = onIntent,
-                        targetMonthOffset = appState.activeMonthOffset,
+                        targetMonthOffset = transactionsState.selectedMonthOffset,
                         scrollToTopFlow = scrollToTopFlow,
                         modifier = screenModifier
                     )

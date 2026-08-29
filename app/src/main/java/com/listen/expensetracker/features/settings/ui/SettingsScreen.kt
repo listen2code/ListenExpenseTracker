@@ -9,10 +9,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
+import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
@@ -42,6 +44,9 @@ fun SettingsScreen(
 ) {
     val lang = state.language
     val sym = state.currencySymbol
+    val (_, _, currentMonthTitle) = remember(targetMonthOffset, lang) {
+        TransactionCalculationEngine.getMonthRangeAndTitle(targetMonthOffset, lang)
+    }
 
     val listState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -140,6 +145,7 @@ fun SettingsScreen(
                         onOpenApmInspector = { onIntent(SettingsIntent.OpenApmInspector) },
                         onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
+                        targetMonthTitle = currentMonthTitle,
                         lang = lang
                     )
                 }

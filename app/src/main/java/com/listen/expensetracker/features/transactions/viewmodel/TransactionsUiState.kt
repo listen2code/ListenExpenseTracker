@@ -79,4 +79,5 @@ sealed interface TransactionsIntent {
     data class ChangeSortOrder(val order: TransactionSortOrder) : TransactionsIntent
     data class OpenDialog(val dialog: TransactionsDialog) : TransactionsIntent
     data object DismissDialog : TransactionsIntent
+    data class SeedDemoData(val monthOffset: Int) : TransactionsIntent
 }

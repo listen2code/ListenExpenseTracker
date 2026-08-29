@@ -16,6 +16,7 @@ import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
@@ -77,6 +78,7 @@ class TransactionsViewModel(
             }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
+            is TransactionsIntent.SeedDemoData -> seedDemoData(intent.monthOffset)
         }
     }
 
@@ -233,6 +235,16 @@ class TransactionsViewModel(
                 dao.insertTransaction(tx)
             }
             emitEffect(CommonUiEffect.ShowToast(AppStrings.undo_success_toast.tr(currentState.language)))
+        }
+    }
+
+    private fun seedDemoData(monthOffset: Int) {
+        viewModelScope.launch {
+            val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
+            val generated = DemoDataEngine.generate(monthOffset, currentState.language, accounts)
+            dao.insertTransactions(generated)
+            val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, currentState.language)
+            emitEffect(CommonUiEffect.ShowToast(AppStrings.seed_month_success_toast.tr(currentState.language).format(title, generated.size)))
         }
     }
 

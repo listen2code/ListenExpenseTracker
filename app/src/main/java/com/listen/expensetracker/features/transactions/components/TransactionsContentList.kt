@@ -1,6 +1,7 @@
 package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +22,8 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
+import com.listen.uicomponent.components.CommonButton
+import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonEmpty
 
 /**
@@ -100,10 +104,20 @@ fun TransactionsContentList(
         // Grouped Transactions List
         if (groupedTransactions.isEmpty()) {
             item(key = "empty_transactions_view") {
-                CommonEmpty(
-                    message = AppStrings.empty_transactions.tr(lang),
-                    modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppDimens.SpaceSection),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+                ) {
+                    CommonEmpty(message = AppStrings.empty_transactions.tr(lang))
+                    CommonButton(
+                        text = AppStrings.seed_month_demo_data.tr(lang),
+                        style = CommonButtonStyle.Tonal,
+                        onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
+                    )
+                }
             }
         } else {
             groupedTransactions.forEach { (dateHeader, txList) ->

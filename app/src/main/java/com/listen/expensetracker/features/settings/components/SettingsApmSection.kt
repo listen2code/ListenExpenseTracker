@@ -37,7 +37,8 @@ fun SettingsApmSection(
     onSeedDemoData: () -> Unit,
     onConfirmClearAll: () -> Unit,
     lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    targetMonthTitle: String = ""
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -76,8 +77,13 @@ fun SettingsApmSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
+                val seedBtnText = if (targetMonthTitle.isNotBlank()) {
+                    "${AppStrings.seed_data_btn.tr(lang)} ($targetMonthTitle)"
+                } else {
+                    AppStrings.seed_data_btn.tr(lang)
+                }
                 CommonButton(
-                    text = AppStrings.seed_data_btn.tr(lang),
+                    text = seedBtnText,
                     onClick = onSeedDemoData,
                     style = CommonButtonStyle.Outlined,
                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
