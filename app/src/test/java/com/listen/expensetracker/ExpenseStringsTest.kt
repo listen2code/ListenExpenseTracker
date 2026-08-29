@@ -22,6 +22,10 @@ class ExpenseStringsTest {
         assertEquals("Total Expense", ExpenseStrings.get("total_expense", "en"))
         assertEquals("支出合計", ExpenseStrings.get("total_expense", "ja"))
 
+        assertEquals("搜索分类或备注...", ExpenseStrings.get("search_placeholder", "zh"))
+        assertEquals("Search category or note...", ExpenseStrings.get("search_placeholder", "en"))
+        assertEquals("カテゴリーやメモを検索...", ExpenseStrings.get("search_placeholder", "ja"))
+
         // Common strings fallback
         assertEquals("确定", ExpenseStrings.get("common_ok", "zh"))
         assertEquals("OK", ExpenseStrings.get("common_ok", "en"))

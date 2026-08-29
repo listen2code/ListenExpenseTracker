@@ -25,6 +25,7 @@ object ExpenseStrings {
         AppStrings.monthly_budget to "月预算",
         AppStrings.used_budget to "已用",
         AppStrings.over_budget to "已超支",
+        AppStrings.search_placeholder to "搜索分类或备注...",
         AppStrings.filter_all to "全部",
         AppStrings.filter_cash to "现金",
         AppStrings.filter_bank to "银行卡",
