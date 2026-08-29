@@ -17,6 +17,8 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 /**
  * Type-safe Navigation Tab definitions for ListenExpenseTracker.
@@ -93,13 +95,14 @@ class ExpenseAppState(
     }
 
     /**
-     * Timestamp trigger for scrolling a specific tab's list to top on double-tap.
+     * One-time event flow for scrolling a specific tab's list to top on double-tap.
+     * replay = 0 ensures no replay occurs when re-entering tabs.
      */
-    var scrollToTopTrigger by mutableStateOf<Pair<NavTab, Long>?>(null)
-        private set
+    private val _scrollToTopEvents = MutableSharedFlow<NavTab>(replay = 0, extraBufferCapacity = 1)
+    val scrollToTopEvents = _scrollToTopEvents.asSharedFlow()
 
     fun triggerScrollToTop(tab: NavTab) {
-        scrollToTopTrigger = tab to android.os.SystemClock.uptimeMillis()
+        _scrollToTopEvents.tryEmit(tab)
     }
 }
 

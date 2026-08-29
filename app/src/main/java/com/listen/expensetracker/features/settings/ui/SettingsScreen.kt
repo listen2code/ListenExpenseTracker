@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
+import kotlinx.coroutines.flow.Flow
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
@@ -37,7 +38,7 @@ fun SettingsScreen(
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
-    scrollToTopTrigger: Long = 0L
+    scrollToTopFlow: Flow<Unit>? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -46,8 +47,8 @@ fun SettingsScreen(
         LazyListState()
     }
 
-    LaunchedEffect(scrollToTopTrigger) {
-        if (scrollToTopTrigger > 0L) {
+    LaunchedEffect(scrollToTopFlow) {
+        scrollToTopFlow?.collect {
             listState.animateScrollToItem(0)
         }
     }

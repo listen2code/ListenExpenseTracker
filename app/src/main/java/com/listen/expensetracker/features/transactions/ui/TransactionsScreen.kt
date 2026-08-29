@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
+import kotlinx.coroutines.flow.Flow
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -49,7 +50,7 @@ fun TransactionsScreen(
     state: TransactionsUiState,
     onIntent: (TransactionsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollToTopTrigger: Long = 0L
+    scrollToTopFlow: Flow<Unit>? = null
 ) {
     val lang = state.language
     var showSortMenu by remember { mutableStateOf(false) }
@@ -147,7 +148,7 @@ fun TransactionsScreen(
                     state = state,
                     monthOffset = pageOffset,
                     onIntent = onIntent,
-                    scrollToTopTrigger = if (page == pagerState.currentPage) scrollToTopTrigger else 0L
+                    scrollToTopFlow = if (page == pagerState.currentPage) scrollToTopFlow else null
                 )
             }
         }

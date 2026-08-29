@@ -39,6 +39,8 @@ import com.listen.expensetracker.features.settings.ui.SettingsScreen
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
 import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 import com.listen.uicomponent.theme.ListenTheme
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -100,9 +102,8 @@ fun App(
     val settingsState by appState.settingsViewModel.viewState.collectAsState()
     val lang = settingsState.language
 
-    // Double-tap tracking across navigation tabs (threshold: 350ms)
+    // Double-tap tracking on active navigation tab (threshold: 350ms)
     var lastTabClickTime by remember { mutableStateOf(0L) }
-    var lastTabClickTab by remember { mutableStateOf<NavTab?>(null) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(appState.snackbarHostState) },
@@ -113,13 +114,15 @@ fun App(
                         selected = appState.currentTab == tab,
                         onClick = {
                             val now = android.os.SystemClock.uptimeMillis()
-                            if (lastTabClickTab == tab && (now - lastTabClickTime) < 350L) {
-                                appState.triggerScrollToTop(tab)
-                                lastTabClickTime = 0L
-                                lastTabClickTab = null
+                            if (appState.currentTab == tab) {
+                                if (now - lastTabClickTime < 350L) {
+                                    appState.triggerScrollToTop(tab)
+                                    lastTabClickTime = 0L
+                                } else {
+                                    lastTabClickTime = now
+                                }
                             } else {
-                                lastTabClickTime = now
-                                lastTabClickTab = tab
+                                lastTabClickTime = 0L
                                 appState.switchTab(tab)
                             }
                         },
@@ -138,36 +141,36 @@ fun App(
         saveableStateHolder.SaveableStateProvider(appState.currentTab) {
             when (appState.currentTab) {
                 NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
-                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.TRANSACTIONS) {
-                        appState.scrollToTopTrigger?.second ?: 0L
-                    } else 0L
+                    val scrollToTopFlow = remember(appState) {
+                        appState.scrollToTopEvents.filter { it == NavTab.TRANSACTIONS }.map { }
+                    }
                     TransactionsScreen(
                         state = state,
                         onIntent = onIntent,
-                        scrollToTopTrigger = scrollToTop,
+                        scrollToTopFlow = scrollToTopFlow,
                         modifier = screenModifier
                     )
                 }
                 NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
-                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.STATISTICS) {
-                        appState.scrollToTopTrigger?.second ?: 0L
-                    } else 0L
+                    val scrollToTopFlow = remember(appState) {
+                        appState.scrollToTopEvents.filter { it == NavTab.STATISTICS }.map { }
+                    }
                     StatisticsScreen(
                         state = state,
                         onIntent = onIntent,
-                        scrollToTopTrigger = scrollToTop,
+                        scrollToTopFlow = scrollToTopFlow,
                         modifier = screenModifier
                     )
                 }
                 NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
-                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.SETTINGS) {
-                        appState.scrollToTopTrigger?.second ?: 0L
-                    } else 0L
+                    val scrollToTopFlow = remember(appState) {
+                        appState.scrollToTopEvents.filter { it == NavTab.SETTINGS }.map { }
+                    }
                     SettingsScreen(
                         state = state,
                         onIntent = onIntent,
                         targetMonthOffset = appState.activeMonthOffset,
-                        scrollToTopTrigger = scrollToTop,
+                        scrollToTopFlow = scrollToTopFlow,
                         modifier = screenModifier
                     )
                 }
