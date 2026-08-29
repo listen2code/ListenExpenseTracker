@@ -1,37 +1,31 @@
 package com.listen.expensetracker.features.settings.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.listen.arch.i18n.tr
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
@@ -47,15 +41,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-
 /**
- * Cloud Sync and Google Account Settings Card.
- * Displays user profile avatar, display name, email, auto-backup toggles, and Google Drive sync indicators.
+ * Unified Data Center Section Card.
+ * Combines Google Drive Cloud Sync & Auto-Backup with Local File-Based JSON Export & Import.
  */
 @Composable
-fun SettingsCloudSection(
+fun SettingsDataCenterSection(
     googleAccountEmail: String?,
     googleDisplayName: String?,
     googleAvatarUrl: String? = null,
@@ -68,9 +59,11 @@ fun SettingsCloudSection(
     onToggleAutoBackupWifiOnly: (Boolean) -> Unit = {},
     onTriggerBackup: () -> Unit,
     onTriggerRestore: () -> Unit,
-    lang: String,
+    onExportJson: () -> Unit,
+    onImportJson: () -> Unit,
     modifier: Modifier = Modifier,
-    isOperating: Boolean = false
+    isOperating: Boolean = false,
+    lang: String = "zh"
 ) {
     val isLoggedIn = !googleAccountEmail.isNullOrBlank()
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
@@ -81,94 +74,31 @@ fun SettingsCloudSection(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
-            // Header with theme-adaptive primary tint
+            // Section Header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 Icon(
-                    imageVector = Icons.Default.CloudUpload,
-                    contentDescription = "Cloud",
+                    imageVector = Icons.Default.Storage,
+                    contentDescription = "Data Center",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.settings_cloud.tr(lang),
+                    text = AppStrings.settings_data_center.tr(lang),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
+            // Part A: Google Drive Cloud Sync
             if (isLoggedIn) {
-                // Logged-in Google Account Information Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(AppDimens.CornerButton))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                        .padding(horizontal = AppDimens.SpaceLarge, vertical = AppDimens.SpaceStandard),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f, fill = false)
-                    ) {
-                        // Google Avatar (Network profile picture or initial letter fallback)
-                        if (!googleAvatarUrl.isNullOrBlank()) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(googleAvatarUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Google Avatar",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = (googleDisplayName?.firstOrNull() ?: googleAccountEmail.firstOrNull() ?: 'G').uppercase(),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = AppDimens.TextTitle
-                                )
-                            }
-                        }
-
-                        Column {
-                            Text(
-                                text = googleDisplayName ?: "Google User",
-                                fontSize = AppDimens.TextSubtitle,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = googleAccountEmail,
-                                fontSize = AppDimens.TextMicro,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
-                        }
-                    }
-
-                    // Logout Icon
-                    IconButton(onClick = onLogoutGoogle) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Logout",
-                            tint = ExpenseRed
-                        )
-                    }
-                }
+                GoogleAccountProfileCard(
+                    email = googleAccountEmail,
+                    displayName = googleDisplayName,
+                    avatarUrl = googleAvatarUrl,
+                    onLogout = onLogoutGoogle
+                )
 
                 // Auto-Backup to Google Drive Switch Row
                 Row(
@@ -222,47 +152,11 @@ fun SettingsCloudSection(
                 }
 
                 // Sync Status Indicators
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val statusText = when (syncState.status) {
-                        SyncStatus.SYNCING -> AppStrings.cloud_status_syncing.tr(lang)
-                        SyncStatus.SUCCESS -> AppStrings.cloud_status_success.tr(lang)
-                        SyncStatus.ERROR -> AppStrings.cloud_status_error.tr(lang)
-                        SyncStatus.IDLE -> AppStrings.cloud_status_idle.tr(lang)
-                    }
-                    val statusColor = when (syncState.status) {
-                        SyncStatus.SYNCING -> MaterialTheme.colorScheme.primary
-                        SyncStatus.SUCCESS -> IncomeGreen
-                        SyncStatus.ERROR -> ExpenseRed
-                        SyncStatus.IDLE -> MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
-                    ) {
-                        if (syncState.status == SyncStatus.SYNCING) {
-                            CircularProgressIndicator(modifier = Modifier.size(12.dp), strokeWidth = 2.dp)
-                        }
-                        Text(
-                            text = statusText,
-                            fontSize = AppDimens.TextSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = statusColor
-                        )
-                    }
-
-                    if (syncState.lastSyncTimestamp > 0) {
-                        Text(
-                            text = "${AppStrings.cloud_last_sync.tr(lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                SyncStatusIndicator(
+                    syncState = syncState,
+                    sdf = sdf,
+                    lang = lang
+                )
 
                 // Cloud Action Buttons
                 Row(
@@ -314,6 +208,36 @@ fun SettingsCloudSection(
                     style = CommonButtonStyle.Primary,
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(18.dp)) },
                     modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Subtle Divider separating Cloud and Local File operations
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(vertical = 2.dp)
+            )
+
+            // Part B: Local File-based JSON Export & Import
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
+            ) {
+                CommonButton(
+                    text = AppStrings.export_json.tr(lang),
+                    onClick = onExportJson,
+                    style = CommonButtonStyle.Outlined,
+                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(16.dp)) },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    modifier = Modifier.weight(1f)
+                )
+
+                CommonButton(
+                    text = AppStrings.import_json.tr(lang),
+                    onClick = onImportJson,
+                    style = CommonButtonStyle.Outlined,
+                    icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(16.dp)) },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

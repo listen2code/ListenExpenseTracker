@@ -37,7 +37,7 @@ fun MetricsSummaryCard(
     modifier: Modifier = Modifier,
     hideAmount: Boolean = false
 ) {
-    val noneText = if (lang == "en") "None" else if (lang == "ja") "なし" else "无"
+    val noneText = AppStrings.common_none.tr(lang)
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,

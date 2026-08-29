@@ -11,6 +11,7 @@ import com.listen.uicomponent.theme.ThemeMode
 sealed interface SettingsDialog {
     data object MonthlyBudget : SettingsDialog
     data object CategoryManage : SettingsDialog
+    data object AccountManage : SettingsDialog
     data object CurrencySelect : SettingsDialog
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
@@ -56,7 +57,7 @@ sealed interface SettingsIntent {
     data object UnlinkGoogleAccount : SettingsIntent
     data object TriggerCloudBackup : SettingsIntent
     data object TriggerCloudRestore : SettingsIntent
-    data object SeedDemoData : SettingsIntent
+    data class SeedDemoData(val monthOffset: Int = 0) : SettingsIntent
     data object ClearAllData : SettingsIntent
     data class ExportJsonToFile(val uri: Uri) : SettingsIntent
     data class ImportJsonFromFile(val uri: Uri) : SettingsIntent

@@ -115,27 +115,32 @@ fun App(
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         val screenModifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
-        when (appState.currentTab) {
-            NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
-                TransactionsScreen(
-                    state = state,
-                    onIntent = onIntent,
-                    modifier = screenModifier
-                )
-            }
-            NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
-                StatisticsScreen(
-                    state = state,
-                    onIntent = onIntent,
-                    modifier = screenModifier
-                )
-            }
-            NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
-                SettingsScreen(
-                    state = state,
-                    onIntent = onIntent,
-                    modifier = screenModifier
-                )
+        val saveableStateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
+
+        saveableStateHolder.SaveableStateProvider(appState.currentTab) {
+            when (appState.currentTab) {
+                NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
+                    TransactionsScreen(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = screenModifier
+                    )
+                }
+                NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
+                    StatisticsScreen(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = screenModifier
+                    )
+                }
+                NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
+                    SettingsScreen(
+                        state = state,
+                        onIntent = onIntent,
+                        targetMonthOffset = appState.activeMonthOffset,
+                        modifier = screenModifier
+                    )
+                }
             }
         }
     }

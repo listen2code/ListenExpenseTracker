@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
@@ -58,7 +60,12 @@ fun TransactionsContentList(
         calc.filteredTransactions.groupBy { formatDayGroupHeader(it.timestamp) }
     }
 
+    val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) {
+        LazyListState()
+    }
+
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = AppDimens.SpaceLarge),

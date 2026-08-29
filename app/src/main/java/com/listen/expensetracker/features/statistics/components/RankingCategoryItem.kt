@@ -1,5 +1,8 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,94 +10,170 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.expensetracker.data.model.Category
+import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.charts.PieChartItem
-import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.parseHexColor
 
 /**
- * Category Ranking Item Card displaying percentage bar, category color dot, and total amount.
+ * Modern Category Ranking Item displaying podium badges (#1 🥇, #2 🥈, #3 🥉),
+ * category icon with soft tinted aura, percentage chip, amount, and full-width animated progress bar.
  */
 @Composable
 fun RankingCategoryItem(
+    rank: Int,
     share: PieChartItem,
     currencySymbol: String,
     modifier: Modifier = Modifier,
-    hideAmount: Boolean = false
+    hideAmount: Boolean = false,
+    lang: String = "zh"
 ) {
     val color = parseHexColor(share.colorHex)
+    val category: Category? = remember(share.label, lang) {
+        CategoryRepository.allCategories.find {
+            it.getDisplayName(lang) == share.label ||
+                it.id == share.label ||
+                it.nameKey == share.label ||
+                it.colorHex.equals(share.colorHex, ignoreCase = true)
+        }
+    }
 
-    SurfaceCard(
-        cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceStandard,
-        modifier = modifier.fillMaxWidth()
+    val animatedProgress by animateFloatAsState(
+        targetValue = share.percentage,
+        animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
+        label = "RankingProgress"
+    )
+
+    val (badgeBg, badgeTextColor) = when (rank) {
+        1 -> Color(0xFFF59E0B) to Color.White
+        2 -> Color(0xFF94A3B8) to Color.White
+        3 -> Color(0xFFD97706) to Color.White
+        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f) to MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Category Color Dot and Name
+            // Left Group: Rank Badge, Category Icon Aura, Name, Percentage Chip
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
                 modifier = Modifier.weight(1f, fill = false)
             ) {
+                // Rank Badge
                 Box(
                     modifier = Modifier
-                        .size(AppDimens.IconSizeMedium)
-                        .clip(CircleShape)
-                        .background(color)
-                )
-                Text(
-                    text = share.label,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = AppDimens.TextSubtitle,
-                    maxLines = 1
-                )
-            }
-
-            // Progress Bar & Percentage & Amount
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
-            ) {
-                Column(horizontalAlignment = Alignment.End) {
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(badgeBg),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
+                        text = rank.toString(),
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        fontSize = AppDimens.TextSubtitle,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = "${"%.1f".format(share.percentage * 100)}%",
-                        fontSize = AppDimens.TextMicro,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
+                        color = badgeTextColor
                     )
                 }
 
-                LinearProgressIndicator(
-                    progress = { share.percentage },
+                // Category Icon Bubble
+                Box(
                     modifier = Modifier
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = color,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (category != null) {
+                        Icon(
+                            imageVector = category.icon,
+                            contentDescription = share.label,
+                            tint = color,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                        )
+                    }
+                }
+
+                // Category Name & Percentage Pill
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = share.label,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = AppDimens.TextSubtitle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(color.copy(alpha = 0.12f))
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "${"%.1f".format(share.percentage * 100)}%",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = color
+                        )
+                    }
+                }
             }
+
+            // Right Group: Formatted Amount
+            Text(
+                text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
+                fontWeight = FontWeight.Bold,
+                fontSize = AppDimens.TextSubtitle,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
         }
+
+        // Full-width Smooth Progress Bar
+        LinearProgressIndicator(
+            progress = { animatedProgress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp)),
+            color = color,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     }
 }

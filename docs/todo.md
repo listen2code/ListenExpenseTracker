@@ -128,6 +128,15 @@
   - [x] 物理级微触觉震动反馈：`NumericKeypad` 按键轻触 (`TextHandleMove`) 与完成记账脉冲 (`LongPress`)；过滤器切换与危险删除确认震动。
   - [x] 图表展开与平滑补间动效：`DonutChart` 顺时针 650ms 优雅扫开，`LineChart` 600ms 自底向上平滑拔起。
   - [x] 预算进度与收支切换过渡：`BalanceOverviewCard` 预算进度条 500ms 阻尼过渡，统计页收支切换 `AnimatedContent` 丝滑交叉淡入淡出。
+- [x] **设置页信息架构现代化重构 (Settings Redesign - 方案一)**
+  - [x] 确立「财务规则偏好」与「数据中心」清晰二分法结构。
+  - [x] 落地 `SettingsFinanceSection`：聚合月度预算、分类管理，并全新引入资产账户管理入口 (`SettingsDialog.AccountManage`)。
+  - [x] 落地 `SettingsDataCenterSection`：统一收拢 Google Drive 云同步与本地 JSON 文件导入/导出数据处理。
+  - [x] 落地 `GoogleAccountProfileCard`：独立解耦个人信息条与同步指示器，所有文件行数收敛至 230 行内，严格遵循 `PROMPTS.md` 规范。
+- [x] **统计排行榜全新视觉重塑与全界面多语言横展开**
+  - [x] 重塑 `RankingCategoryItem`：采用聚合卡片，引入金/银/铜领奖台排名徽章 (#1 🥇, #2 🥈, #3 🥉)，分类图标彩色光晕气泡，百分比胶囊标签，并嵌入全宽平滑补间进度条 (`animateFloatAsState`)。
+  - [x] 修复 `LineChart` 趋势图 MAX 国际化缺陷：支持 `currencySymbol`、`maxLabel`、`totalLabel` 动态注入，完成横展开排查并消除 `MetricsSummaryCard` 等处的硬编码字符串。
+  - [x] 智能按月生成演练数据 (`SeedDemoData`)：打通 `Transactions` 与 `Statistics` 月份联动体系，根据用户当前所浏览的具体月份生成全天候逼真收支模拟明细。
 
 ---
 

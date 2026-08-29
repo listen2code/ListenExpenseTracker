@@ -65,6 +65,9 @@ object CategoryRepository {
     val incomeCategories: List<Category>
         get() = defaultIncomeCategories + customCategories.filter { it.type == "INCOME" }
 
+    val allCategories: List<Category>
+        get() = expenseCategories + incomeCategories
+
     fun addCustomCategory(
         name: String,
         type: String,

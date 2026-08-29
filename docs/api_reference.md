@@ -147,5 +147,9 @@
 * **`AccountCardItem`** (`features.transactions.components`)：单个账户行卡片，含视觉图标、内置/自定义胶囊徽标、编辑与删除按钮。
 * **`AccountEditDialog`** (`features.transactions.components`)：输入与编辑账户名称对话框。
 * **`AccountDeleteConfirmDialog`** (`features.transactions.components`)：账户删除确认对话框，使用 `CommonButtonStyle.Danger` 红色危险确认按钮。
+* **`SettingsFinanceSection`** (`features.settings.components`)：记账规则中枢卡片，集中管理月度预算、分类管理与资产账户管理入口。
+* **`SettingsDataCenterSection`** (`features.settings.components`)：一体化数据中心，收拢 Google Drive 云端同步与本地 JSON 导出/导入。
+* **`GoogleAccountProfileCard`** (`features.settings.components`)：Google 登录状态、头像名片与同步指示器组件。
+* **`RankingCategoryItem`** (`features.statistics.components`)：现代分类排行榜行项，含领奖台名次勋章、图标光晕气泡、百分比胶囊与全宽平滑补间进度条。
 * **`SettingsVersionFooter`** (`features.settings.components`)：设置页底部版本号展示与连击进入开发者模式触发器。
 * **`AboutAppDialog`** (`features.settings.components`)：关于应用信息对话框，含 Dedicated App Icon 与技术栈展示。

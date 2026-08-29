@@ -13,7 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 
 /**
@@ -51,7 +53,28 @@ class ExpenseAppState(
     var currentTab by mutableStateOf(NavTab.TRANSACTIONS)
         private set
 
+    /**
+     * Currently active month offset synchronized across Transactions and Statistics screens.
+     */
+    val activeMonthOffset: Int
+        get() = if (currentTab == NavTab.STATISTICS) {
+            statisticsViewModel.viewState.value.selectedMonthOffset
+        } else {
+            transactionsViewModel.viewState.value.selectedMonthOffset
+        }
+
     fun switchTab(tab: NavTab) {
+        if (tab == NavTab.STATISTICS && currentTab == NavTab.TRANSACTIONS) {
+            val offset = transactionsViewModel.viewState.value.selectedMonthOffset
+            if (statisticsViewModel.viewState.value.selectedMonthOffset != offset) {
+                statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(offset))
+            }
+        } else if (tab == NavTab.TRANSACTIONS && currentTab == NavTab.STATISTICS) {
+            val offset = statisticsViewModel.viewState.value.selectedMonthOffset
+            if (transactionsViewModel.viewState.value.selectedMonthOffset != offset) {
+                transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(offset))
+            }
+        }
         currentTab = tab
     }
 

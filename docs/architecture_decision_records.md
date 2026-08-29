@@ -175,3 +175,36 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
    - 仅使用 Upload Keystore 本地/CI 签名，主签名由 Google Play 托管。敏感凭据全量注入 GitHub Secrets。
 4. **渐进式灰度发布 (Staged Rollout)**：
    - 生产环境发布严格推行 `10% -> 20% -> 50% -> 100%` 灰度流转，依托 Android Vitals（Crash / ANR < 0.47%）守护质量红线。
+
+---
+
+## ADR-014: 设置页信息架构现代化重组与数据中心收拢 (Settings Information Architecture)
+
+### 背景 (Context)
+旧版设置页将云端备份与本地文件导入导出割裂置于不同卡片，且记账核心业务缺乏资产账户管理的系统级入口，违背了高内聚低耦合的直觉逻辑。
+
+### 决策 (Decision)
+1. **板块分层重组 (方案一)**：
+   - **记账规则中枢 (`SettingsFinanceSection`)**：将月度预算、分类管理与全新的「资产账户管理 (`SettingsDialog.AccountManage`)」聚合呈现。
+   - **统一数据中心 (`SettingsDataCenterSection`)**：将 Google Drive 自动备份与本地 JSON 导出/导入合并为一体化数据中心，通过 `HorizontalDivider` 优雅分隔。
+2. **遵循 PROMPTS.md 架构拆分**：
+   - 提取 `GoogleAccountProfileCard` 与 `SyncStatusIndicator`，彻底消除原先超长单文件，使所有组件控制在 120~230 行之间，保证组件纯粹性与可维护性。
+
+---
+
+## ADR-015: 全局月份状态联动与统计排行榜视觉体系升级
+
+### 背景 (Context)
+1. 记账流水页与多维统计页独立维护月份偏移状态，用户在流水页选定历史月份后切至统计页需再次选择；此外设置页的演练数据生成仅固化在当前系统月，无法针对所选历史月份生成演练数据。
+2. 统计页「支出分类排行榜」此前为零散堆叠的单行卡片，缺少榜单排名属性（名次勋章）、分类图标指示与宽幅进度对比。
+3. `LineChart` 组件中固化包含英文字符串 `"Max: "`，未接入全局统一多语言系统。
+
+### 决策 (Decision)
+1. **全局月份多端联动与按月生成演练数据**：
+   - 在 `ExpenseAppState` 统一维护跨 Tab 选中的月份偏移 (`activeMonthOffset`)，并在切换 Tab 时自动双向同步 `TransactionsViewModel` 与 `StatisticsViewModel`。
+   - `SettingsIntent.SeedDemoData(val monthOffset: Int)` 支持传入目标月份偏移，`SettingsViewModel` 精确依据指定年月的实际天数范围生成分布逼真的测试收支明细。
+2. **排行榜视觉现代化升级**：
+   - 聚合为单一 `SurfaceCard` 大卡片，配备金/银/铜领奖台名次勋章 (#1 🥇 `#F59E0B`、#2 🥈 `#94A3B8`、#3 🥉 `#D97706`)。
+   - 引入分类专属图标 + 彩色透明光晕背景气泡、百分比胶囊徽标与全宽平滑补间进度条 (`animateFloatAsState`)。
+3. **图表国际化规范**：
+   - `LineChart` 扩展 `currencySymbol`、`maxLabel`、`totalLabel` 属性，彻底消除硬编码，全项目所有组件实现 100% 国际化适配。

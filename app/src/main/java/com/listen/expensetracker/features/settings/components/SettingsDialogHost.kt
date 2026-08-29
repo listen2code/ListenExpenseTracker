@@ -25,6 +25,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.features.transactions.components.AccountManageDialog
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
@@ -62,6 +63,12 @@ fun SettingsDialogHost(
                 type = "EXPENSE",
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 onCategoriesChanged = { /* Handled reactively */ },
+                lang = lang
+            )
+        }
+        is SettingsDialog.AccountManage -> {
+            AccountManageDialog(
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )
         }

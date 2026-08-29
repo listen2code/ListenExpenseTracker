@@ -138,7 +138,7 @@ class SettingsViewModel(
             }
             is SettingsIntent.TriggerCloudBackup -> triggerCloudBackup(traceId)
             is SettingsIntent.TriggerCloudRestore -> triggerCloudRestore(traceId)
-            is SettingsIntent.SeedDemoData -> seedDemoData(traceId)
+            is SettingsIntent.SeedDemoData -> seedDemoData(traceId, intent.monthOffset)
             is SettingsIntent.ClearAllData -> clearAllData(traceId)
             is SettingsIntent.ExportJsonToFile -> exportJsonToFile(intent.uri)
             is SettingsIntent.ImportJsonFromFile -> importJsonFromFile(intent.uri)
@@ -318,11 +318,18 @@ class SettingsViewModel(
         }
     }
 
-    private fun seedDemoData(traceId: String) {
+    private fun seedDemoData(traceId: String, monthOffset: Int = 0) {
         viewModelScope.launch {
             val lang = currentState.language
-            val cal = java.util.Calendar.getInstance()
-            val currentDay = cal.get(java.util.Calendar.DAY_OF_MONTH)
+            val cal = java.util.Calendar.getInstance().apply {
+                add(java.util.Calendar.MONTH, monthOffset)
+            }
+            val maxDayInMonth = cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
+            val currentDay = if (monthOffset == 0) {
+                java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH).coerceIn(1, maxDayInMonth)
+            } else {
+                maxDayInMonth
+            }
             val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
 
             val expenseTemplates = listOf(
@@ -349,7 +356,7 @@ class SettingsViewModel(
             val incomeItem = incomeTemplates.random()
             val incAmt = kotlin.random.Random.nextInt(incomeItem.minAmount, incomeItem.maxAmount).toDouble()
             val incDay = kotlin.random.Random.nextInt(1, currentDay.coerceAtLeast(2))
-            val incCal = java.util.Calendar.getInstance().apply {
+            val incCal = (cal.clone() as java.util.Calendar).apply {
                 set(java.util.Calendar.DAY_OF_MONTH, incDay)
                 set(java.util.Calendar.HOUR_OF_DAY, kotlin.random.Random.nextInt(9, 18))
                 set(java.util.Calendar.MINUTE, kotlin.random.Random.nextInt(0, 59))
@@ -373,9 +380,9 @@ class SettingsViewModel(
             for (i in 1 until count) {
                 val exp = expenseTemplates.random()
                 val amt = kotlin.random.Random.nextInt(exp.minAmount, exp.maxAmount).toDouble()
-                val expDay = kotlin.random.Random.nextInt(1, (currentDay + 1).coerceAtLeast(2))
-                val expCal = java.util.Calendar.getInstance().apply {
-                    set(java.util.Calendar.DAY_OF_MONTH, expDay)
+                val expDay = kotlin.random.Random.nextInt(1, (currentDay + 1).coerceAtLeast(2).coerceAtMost(maxDayInMonth + 1))
+                val expCal = (cal.clone() as java.util.Calendar).apply {
+                    set(java.util.Calendar.DAY_OF_MONTH, expDay.coerceIn(1, maxDayInMonth))
                     set(java.util.Calendar.HOUR_OF_DAY, kotlin.random.Random.nextInt(7, 23))
                     set(java.util.Calendar.MINUTE, kotlin.random.Random.nextInt(0, 59))
                 }

@@ -13,9 +13,9 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
 import com.listen.expensetracker.features.settings.components.SettingsAppearanceSection
-import com.listen.expensetracker.features.settings.components.SettingsCloudSection
-import com.listen.expensetracker.features.settings.components.SettingsDataSection
+import com.listen.expensetracker.features.settings.components.SettingsDataCenterSection
 import com.listen.expensetracker.features.settings.components.SettingsDialogHost
+import com.listen.expensetracker.features.settings.components.SettingsFinanceSection
 import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
@@ -26,13 +26,14 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Pure Stateless Settings Screen cleanly orchestrating Cloud Sync, Appearance, Data Management, and System Ops.
+ * Pure Stateless Settings Screen cleanly orchestrating Finance Rules, Data Center, Appearance, and System Ops.
  */
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     onIntent: (SettingsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    targetMonthOffset: Int = 0
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -62,9 +63,21 @@ fun SettingsScreen(
                 .padding(horizontal = AppDimens.SpaceLarge),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
         ) {
-            // 1. Cloud Sync & Google Account Section
-            item(key = "cloud_section") {
-                SettingsCloudSection(
+            // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts)
+            item(key = "finance_section") {
+                SettingsFinanceSection(
+                    monthlyBudget = state.monthlyBudget,
+                    currencySymbol = sym,
+                    onOpenBudgetDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
+                    onOpenCategoryDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
+                    onOpenAccountDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AccountManage)) },
+                    lang = lang
+                )
+            }
+
+            // 2. Data & Cloud Backup Center (Google Drive Sync + Local JSON Export/Import)
+            item(key = "data_center_section") {
+                SettingsDataCenterSection(
                     googleAccountEmail = state.googleAccountEmail,
                     googleDisplayName = state.googleDisplayName,
                     googleAvatarUrl = state.googleAvatarUrl,
@@ -77,12 +90,19 @@ fun SettingsScreen(
                     onToggleAutoBackupWifiOnly = { onIntent(SettingsIntent.ToggleAutoBackupWifiOnly(it)) },
                     onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
+                    onExportJson = {
+                        val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
+                        exportJsonLauncher.launch(fileName)
+                    },
+                    onImportJson = {
+                        importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+                    },
                     lang = lang,
                     isOperating = state.isOperating
                 )
             }
 
-            // 2. Personalization & Appearance Section
+            // 3. Personalization & Appearance Section
             item(key = "appearance_section") {
                 SettingsAppearanceSection(
                     themeMode = state.themeMode,
@@ -97,30 +117,12 @@ fun SettingsScreen(
                 )
             }
 
-            // 3. Local Data Management Section (File-based JSON Export & Import)
-            item(key = "data_section") {
-                SettingsDataSection(
-                    monthlyBudget = state.monthlyBudget,
-                    currencySymbol = sym,
-                    onOpenBudgetDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
-                    onOpenCategoryDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
-                    onExportJson = {
-                        val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
-                        exportJsonLauncher.launch(fileName)
-                    },
-                    onImportJson = {
-                        importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
-                    },
-                    lang = lang
-                )
-            }
-
             // 4. System Ops & APM Observability Section (Developer Mode only)
             if (state.isDeveloperMode) {
                 item(key = "apm_section") {
                     SettingsApmSection(
                         onOpenApmInspector = { onIntent(SettingsIntent.OpenApmInspector) },
-                        onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData) },
+                        onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         lang = lang
                     )

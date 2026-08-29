@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.listen.arch.i18n.tr
@@ -61,7 +63,12 @@ fun StatisticsContentList(
     val activeSegments = if (isExpenseTab) calc.progressSegments else calc.incomeProgressSegments
     val totalAmount = if (isExpenseTab) calc.totalExpense else calc.totalIncome
 
+    val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) {
+        LazyListState()
+    }
+
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = AppDimens.SpaceLarge),
@@ -127,9 +134,13 @@ fun StatisticsContentList(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
                         )
+                        val maxDailyVal = calc.dailyTrendPoints.maxOfOrNull { it.value } ?: 0.0
                         LineChart(
                             points = calc.dailyTrendPoints,
                             chartHeight = AppDimens.ChartHeightStandard,
+                            currencySymbol = sym,
+                            maxLabel = AppStrings.chart_max.tr(lang).format(sym, maxDailyVal),
+                            totalLabel = if (state.hideAmount) "••••" else "$sym${"%.2f".format(calc.totalExpense)}",
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -174,13 +185,31 @@ fun StatisticsContentList(
                 )
             }
 
-            items(activeShares, key = { it.label }) { item ->
-                RankingCategoryItem(
-                    share = item,
-                    currencySymbol = sym,
-                    modifier = Modifier.fillMaxWidth(),
-                    hideAmount = state.hideAmount
-                )
+            item(key = "ranking_card") {
+                SurfaceCard(
+                    cornerRadius = AppDimens.CornerCard,
+                    contentPadding = AppDimens.SpaceLarge,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
+                        activeShares.forEachIndexed { index, item ->
+                            RankingCategoryItem(
+                                rank = index + 1,
+                                share = item,
+                                currencySymbol = sym,
+                                hideAmount = state.hideAmount,
+                                lang = lang,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            if (index < activeShares.lastIndex) {
+                                androidx.compose.material3.HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                                    modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
