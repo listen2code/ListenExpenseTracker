@@ -49,7 +49,9 @@ data class TransactionsUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accentColor: AccentColor = AccentColor.EMERALD,
     val activeDialog: TransactionsDialog? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val targetScrollDay: Int? = null,
+    val targetScrollTxId: String? = null
 )
 
 /**
@@ -81,4 +83,7 @@ sealed interface TransactionsIntent {
     data object DismissDialog : TransactionsIntent
     data class SeedDemoData(val monthOffset: Int) : TransactionsIntent
     data class FilterByCategory(val categoryName: String, val monthOffset: Int) : TransactionsIntent
+    data class FilterByDate(val monthOffset: Int, val day: Int) : TransactionsIntent
+    data class FilterByTransaction(val monthOffset: Int, val transactionId: String, val day: Int) : TransactionsIntent
+    data object ClearTargetScrollDay : TransactionsIntent
 }

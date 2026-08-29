@@ -65,6 +65,15 @@ class TransactionsViewModel(
                 updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = intent.categoryName, selectedAccountFilter = "ALL") }
                 recalculate()
             }
+            is TransactionsIntent.FilterByDate -> {
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", targetScrollDay = intent.day) }
+                recalculate()
+            }
+            is TransactionsIntent.FilterByTransaction -> {
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", targetScrollDay = intent.day, targetScrollTxId = intent.transactionId) }
+                recalculate()
+            }
+            is TransactionsIntent.ClearTargetScrollDay -> updateState { copy(targetScrollDay = null, targetScrollTxId = null) }
         }
     }
 

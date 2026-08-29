@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -46,7 +47,9 @@ fun StatisticsScreen(
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
     scrollToTopFlow: Flow<Unit>? = null,
-    onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null
+    onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
+    onNavigateToTransactionsDate: ((monthOffset: Int, day: Int) -> Unit)? = null,
+    onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null
 ) {
     val lang = state.language
     val coroutineScope = rememberCoroutineScope()
@@ -142,6 +145,12 @@ fun StatisticsScreen(
                     scrollToTopFlow = if (page == pagerState.currentPage) scrollToTopFlow else null,
                     onCategoryClick = onNavigateToTransactions?.let { callback ->
                         { categoryName -> callback(pageOffset, categoryName) }
+                    },
+                    onDateClick = onNavigateToTransactionsDate?.let { callback ->
+                        { day -> callback(pageOffset, day) }
+                    },
+                    onTransactionClick = onNavigateToTransaction?.let { callback ->
+                        { tx -> callback(pageOffset, tx) }
                     }
                 )
             }

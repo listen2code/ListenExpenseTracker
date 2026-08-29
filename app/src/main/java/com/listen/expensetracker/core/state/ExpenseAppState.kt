@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
@@ -88,6 +89,30 @@ class ExpenseAppState(
             statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         }
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByCategory(categoryName, monthOffset))
+        currentTab = NavTab.TRANSACTIONS
+    }
+
+    /**
+     * Navigates directly from Statistics to Transactions focused on a specific date in a month.
+     */
+    fun navigateToTransactionsDate(monthOffset: Int, day: Int) {
+        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
+            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        }
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day))
+        currentTab = NavTab.TRANSACTIONS
+    }
+
+    /**
+     * Navigates directly from Statistics to Transactions focused on a specific transaction in a month.
+     */
+    fun navigateToTransaction(monthOffset: Int, transaction: TransactionEntity) {
+        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
+            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        }
+        val cal = java.util.Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
+        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, day))
         currentTab = NavTab.TRANSACTIONS
     }
 

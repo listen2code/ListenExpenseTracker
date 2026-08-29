@@ -4,17 +4,22 @@ import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.StringsRes
@@ -35,7 +40,8 @@ fun MetricsSummaryCard(
     currencySymbol: String,
     lang: String,
     modifier: Modifier = Modifier,
-    hideAmount: Boolean = false
+    hideAmount: Boolean = false,
+    onMaxTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
     val noneText = AppStrings.common_none.tr(lang)
 
@@ -70,12 +76,28 @@ fun MetricsSummaryCard(
             }
 
             // Max Single Transaction
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = if (isExpenseTab) AppStrings.max_expense.tr(lang) else AppStrings.max_income.tr(lang),
-                    fontSize = AppDimens.TextSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            val themeColor = if (isExpenseTab) ExpenseRed else IncomeGreen
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = if (maxTransaction != null && onMaxTransactionClick != null) {
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onMaxTransactionClick(maxTransaction) }
+                } else Modifier
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(themeColor.copy(alpha = 0.09f))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = if (isExpenseTab) AppStrings.max_expense.tr(lang) else AppStrings.max_income.tr(lang),
+                        fontSize = AppDimens.TextSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = themeColor
+                    )
+                }
                 val maxDisplay = if (hideAmount) {
                     "••••"
                 } else {
@@ -89,7 +111,7 @@ fun MetricsSummaryCard(
                         text = maxDisplay,
                         fontSize = AppDimens.TextTitle,
                         fontWeight = FontWeight.Bold,
-                        color = if (isExpenseTab) ExpenseRed else IncomeGreen,
+                        color = themeColor,
                         maxLines = 1
                     )
                 }

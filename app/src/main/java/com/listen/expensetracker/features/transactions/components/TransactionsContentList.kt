@@ -77,6 +77,32 @@ fun TransactionsContentList(
         }
     }
 
+    LaunchedEffect(state.targetScrollDay, state.targetScrollTxId, groupedTransactions) {
+        val targetDay = state.targetScrollDay
+        val targetTxId = state.targetScrollTxId
+        if ((targetDay != null || targetTxId != null) && groupedTransactions.isNotEmpty()) {
+            var targetIndex = 1
+            for ((_, txList) in groupedTransactions) {
+                if (targetTxId != null) {
+                    val txIdx = txList.indexOfFirst { it.id == targetTxId }
+                    if (txIdx != -1) {
+                        listState.animateScrollToItem(targetIndex + 1 + txIdx)
+                        onIntent(TransactionsIntent.ClearTargetScrollDay)
+                        break
+                    }
+                }
+                val cal = java.util.Calendar.getInstance().apply { timeInMillis = txList.first().timestamp }
+                val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+                if (targetDay != null && day <= targetDay) {
+                    listState.animateScrollToItem(targetIndex)
+                    onIntent(TransactionsIntent.ClearTargetScrollDay)
+                    break
+                }
+                targetIndex += 1 + txList.size
+            }
+        }
+    }
+
     LazyColumn(
         state = listState,
         modifier = modifier

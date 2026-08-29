@@ -13,12 +13,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.listen.uicomponent.charts.PieChartItem
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -42,7 +47,9 @@ fun StatisticsContentList(
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
     scrollToTopFlow: Flow<Unit>? = null,
-    onCategoryClick: ((categoryName: String) -> Unit)? = null
+    onCategoryClick: ((categoryName: String) -> Unit)? = null,
+    onDateClick: ((day: Int) -> Unit)? = null,
+    onTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -52,14 +59,8 @@ fun StatisticsContentList(
     // Real-time calculation for this specific month page
     val calc = remember(state.allTransactions, monthOffset, state.monthlyBudget, lang) {
         TransactionCalculationEngine.filterAndCalculate(
-            allList = state.allTransactions,
-            currentOffset = monthOffset,
-            query = "",
-            accountFilter = "ALL",
-            budget = state.monthlyBudget,
-            sortOrder = TransactionSortOrder.DATE_DESC,
-            currencySymbol = sym,
-            lang = lang
+            allList = state.allTransactions, currentOffset = monthOffset, query = "", accountFilter = "ALL",
+            budget = state.monthlyBudget, sortOrder = TransactionSortOrder.DATE_DESC, currencySymbol = sym, lang = lang
         )
     }
 
@@ -67,9 +68,7 @@ fun StatisticsContentList(
     val activeSegments = if (isExpenseTab) calc.progressSegments else calc.incomeProgressSegments
     val totalAmount = if (isExpenseTab) calc.totalExpense else calc.totalIncome
 
-    val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) {
-        LazyListState()
-    }
+    val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() }
 
     LaunchedEffect(scrollToTopFlow) {
         scrollToTopFlow?.collect {
@@ -106,6 +105,8 @@ fun StatisticsContentList(
                     val segments = if (expenseTab) calc.progressSegments else calc.incomeProgressSegments
                     val amount = if (expenseTab) calc.totalExpense else calc.totalIncome
 
+                    var selectedDonutItem by remember(expenseTab, monthOffset) { mutableStateOf<PieChartItem?>(null) }
+
                     if (shares.isEmpty() || amount <= 0.0) {
                         CommonEmpty(
                             message = if (expenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
@@ -118,10 +119,20 @@ fun StatisticsContentList(
                                 totalValue = amount,
                                 centerTitle = if (expenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
                                 centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(amount)}",
+                                currencySymbol = sym,
+                                hideAmount = state.hideAmount,
+                                selectedItem = selectedDonutItem,
+                                onSelectionChange = { selectedDonutItem = it },
+                                onTooltipClick = onCategoryClick?.let { callback -> { item -> callback(item.label) } },
                                 modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
                             )
                             SegmentedProgressBar(
                                 segments = segments,
+                                highlightColorHex = selectedDonutItem?.colorHex,
+                                onSegmentClick = { seg ->
+                                    val matchedItem = shares.find { it.colorHex.equals(seg.colorHex, ignoreCase = true) }
+                                    selectedDonutItem = if (selectedDonutItem == matchedItem) null else matchedItem
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = AppDimens.SpaceSmall)
@@ -149,8 +160,10 @@ fun StatisticsContentList(
                             points = calc.dailyTrendPoints,
                             chartHeight = AppDimens.ChartHeightStandard,
                             currencySymbol = sym,
+                            hideAmount = state.hideAmount,
                             maxLabel = AppStrings.chart_max.tr(lang).format(sym, maxDailyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${"%.2f".format(calc.totalExpense)}",
+                            onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { cb(it) } } },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -178,7 +191,8 @@ fun StatisticsContentList(
                     currencySymbol = sym,
                     lang = lang,
                     modifier = Modifier.fillMaxWidth(),
-                    hideAmount = state.hideAmount
+                    hideAmount = state.hideAmount,
+                    onMaxTransactionClick = onTransactionClick
                 )
             }
         }

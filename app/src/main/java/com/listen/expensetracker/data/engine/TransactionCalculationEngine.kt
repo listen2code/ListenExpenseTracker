@@ -167,6 +167,7 @@ object TransactionCalculationEngine {
             c.get(Calendar.DAY_OF_MONTH)
         }
 
+        val month = cal.get(Calendar.MONTH) + 1
         val result = mutableListOf<LineChartPoint>()
         for (day in 1..limitDay) {
             val sum = dayGroups[day]?.sumOf { it.amount } ?: 0.0
@@ -174,7 +175,7 @@ object TransactionCalculationEngine {
                 LineChartPoint(
                     label = "$day",
                     value = sum,
-                    subLabel = "$day"
+                    subLabel = "${month}月${day}日"
                 )
             )
         }
