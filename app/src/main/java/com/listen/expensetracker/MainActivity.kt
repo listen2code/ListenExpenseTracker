@@ -19,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -97,6 +100,10 @@ fun App(
     val settingsState by appState.settingsViewModel.viewState.collectAsState()
     val lang = settingsState.language
 
+    // Double-tap tracking across navigation tabs (threshold: 350ms)
+    var lastTabClickTime by remember { mutableStateOf(0L) }
+    var lastTabClickTab by remember { mutableStateOf<NavTab?>(null) }
+
     Scaffold(
         snackbarHost = { SnackbarHost(appState.snackbarHostState) },
         bottomBar = {
@@ -104,7 +111,18 @@ fun App(
                 NavTab.entries.forEach { tab ->
                     NavigationBarItem(
                         selected = appState.currentTab == tab,
-                        onClick = { appState.switchTab(tab) },
+                        onClick = {
+                            val now = android.os.SystemClock.uptimeMillis()
+                            if (lastTabClickTab == tab && (now - lastTabClickTime) < 350L) {
+                                appState.triggerScrollToTop(tab)
+                                lastTabClickTime = 0L
+                                lastTabClickTab = null
+                            } else {
+                                lastTabClickTime = now
+                                lastTabClickTab = tab
+                                appState.switchTab(tab)
+                            }
+                        },
                         icon = { Icon(tab.icon, contentDescription = tab.labelKey.tr(lang)) },
                         label = { Text(tab.labelKey.tr(lang)) }
                     )
@@ -120,24 +138,36 @@ fun App(
         saveableStateHolder.SaveableStateProvider(appState.currentTab) {
             when (appState.currentTab) {
                 NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
+                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.TRANSACTIONS) {
+                        appState.scrollToTopTrigger?.second ?: 0L
+                    } else 0L
                     TransactionsScreen(
                         state = state,
                         onIntent = onIntent,
+                        scrollToTopTrigger = scrollToTop,
                         modifier = screenModifier
                     )
                 }
                 NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
+                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.STATISTICS) {
+                        appState.scrollToTopTrigger?.second ?: 0L
+                    } else 0L
                     StatisticsScreen(
                         state = state,
                         onIntent = onIntent,
+                        scrollToTopTrigger = scrollToTop,
                         modifier = screenModifier
                     )
                 }
                 NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
+                    val scrollToTop = if (appState.scrollToTopTrigger?.first == NavTab.SETTINGS) {
+                        appState.scrollToTopTrigger?.second ?: 0L
+                    } else 0L
                     SettingsScreen(
                         state = state,
                         onIntent = onIntent,
                         targetMonthOffset = appState.activeMonthOffset,
+                        scrollToTopTrigger = scrollToTop,
                         modifier = screenModifier
                     )
                 }

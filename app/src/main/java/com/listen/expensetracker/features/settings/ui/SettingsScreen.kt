@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -33,10 +36,21 @@ fun SettingsScreen(
     state: SettingsUiState,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    targetMonthOffset: Int = 0
+    targetMonthOffset: Int = 0,
+    scrollToTopTrigger: Long = 0L
 ) {
     val lang = state.language
     val sym = state.currencySymbol
+
+    val listState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+
+    LaunchedEffect(scrollToTopTrigger) {
+        if (scrollToTopTrigger > 0L) {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     // File-based JSON Export launcher
     val exportJsonLauncher = rememberLauncherForActivityResult(
@@ -57,6 +71,7 @@ fun SettingsScreen(
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

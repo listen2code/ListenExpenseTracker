@@ -48,7 +48,8 @@ private const val PAGER_PAGE_COUNT = 1200
 fun TransactionsScreen(
     state: TransactionsUiState,
     onIntent: (TransactionsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollToTopTrigger: Long = 0L
 ) {
     val lang = state.language
     var showSortMenu by remember { mutableStateOf(false) }
@@ -145,7 +146,8 @@ fun TransactionsScreen(
                 TransactionsContentList(
                     state = state,
                     monthOffset = pageOffset,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    scrollToTopTrigger = if (page == pagerState.currentPage) scrollToTopTrigger else 0L
                 )
             }
         }

@@ -91,6 +91,16 @@ class ExpenseAppState(
     fun dismissOverlay() {
         activeOverlay = null
     }
+
+    /**
+     * Timestamp trigger for scrolling a specific tab's list to top on double-tap.
+     */
+    var scrollToTopTrigger by mutableStateOf<Pair<NavTab, Long>?>(null)
+        private set
+
+    fun triggerScrollToTop(tab: NavTab) {
+        scrollToTopTrigger = tab to android.os.SystemClock.uptimeMillis()
+    }
 }
 
 /**

@@ -42,7 +42,8 @@ private const val PAGER_PAGE_COUNT = 1200
 fun StatisticsScreen(
     state: StatisticsUiState,
     onIntent: (StatisticsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollToTopTrigger: Long = 0L
 ) {
     val lang = state.language
     val coroutineScope = rememberCoroutineScope()
@@ -132,7 +133,8 @@ fun StatisticsScreen(
                 StatisticsContentList(
                     state = state,
                     monthOffset = pageOffset,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    scrollToTopTrigger = if (page == pagerState.currentPage) scrollToTopTrigger else 0L
                 )
             }
         }

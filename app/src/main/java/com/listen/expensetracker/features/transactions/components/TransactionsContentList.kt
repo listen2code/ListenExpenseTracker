@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -29,7 +30,8 @@ fun TransactionsContentList(
     state: TransactionsUiState,
     monthOffset: Int,
     onIntent: (TransactionsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollToTopTrigger: Long = 0L
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -62,6 +64,12 @@ fun TransactionsContentList(
 
     val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) {
         LazyListState()
+    }
+
+    LaunchedEffect(scrollToTopTrigger) {
+        if (scrollToTopTrigger > 0L) {
+            listState.animateScrollToItem(0)
+        }
     }
 
     LazyColumn(

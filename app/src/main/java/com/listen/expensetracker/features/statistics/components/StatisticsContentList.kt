@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -38,7 +39,8 @@ fun StatisticsContentList(
     state: StatisticsUiState,
     monthOffset: Int,
     onIntent: (StatisticsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollToTopTrigger: Long = 0L
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -65,6 +67,12 @@ fun StatisticsContentList(
 
     val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) {
         LazyListState()
+    }
+
+    LaunchedEffect(scrollToTopTrigger) {
+        if (scrollToTopTrigger > 0L) {
+            listState.animateScrollToItem(0)
+        }
     }
 
     LazyColumn(
