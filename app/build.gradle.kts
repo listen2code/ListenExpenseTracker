@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "com.listen.expensetracker"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
 
         val vName = "0.0.19"
         versionName = vName
@@ -33,9 +33,9 @@ android {
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
         versionCode = try {
             val parts = vName.split(".")
-            val major = parts.getOrNull(0)?.toInt() ?: 0
-            val minor = parts.getOrNull(1)?.toInt() ?: 0
-            val patch = parts.getOrNull(2)?.filter { it.isDigit() }?.toInt() ?: 0
+            val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
+            val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
+            val patch = parts.getOrNull(2)?.replace(Regex("[^0-9]"), "")?.toIntOrNull() ?: 0
             major * 10000 + minor * 100 + patch
         } catch (e: Exception) {
             1
