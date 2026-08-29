@@ -1,9 +1,7 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
 import com.listen.arch.i18n.tr
-
 import com.listen.expensetracker.data.i18n.AppStrings
-
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -55,30 +53,18 @@ class TransactionsViewModel(
             is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id, traceId)
             is TransactionsIntent.RestoreDeletedTransaction -> restoreDeletedTransaction(intent.transaction, traceId)
             is TransactionsIntent.ToggleHideBalance -> updateState { copy(hideBalance = intent.hide) }
-            is TransactionsIntent.SearchQueryChange -> {
-                updateState { copy(searchQuery = intent.query) }
-                recalculate()
-            }
-            is TransactionsIntent.FilterAccountChange -> {
-                updateState { copy(selectedAccountFilter = intent.accountType) }
-                recalculate()
-            }
-            is TransactionsIntent.ChangeMonthOffset -> {
-                val newOffset = currentState.selectedMonthOffset + intent.offsetDelta
-                updateState { copy(selectedMonthOffset = newOffset) }
-                recalculate()
-            }
-            is TransactionsIntent.SetMonthOffset -> {
-                updateState { copy(selectedMonthOffset = intent.offset) }
-                recalculate()
-            }
-            is TransactionsIntent.ChangeSortOrder -> {
-                updateState { copy(sortOrder = intent.order) }
-                recalculate()
-            }
+            is TransactionsIntent.SearchQueryChange -> { updateState { copy(searchQuery = intent.query) }; recalculate() }
+            is TransactionsIntent.FilterAccountChange -> { updateState { copy(selectedAccountFilter = intent.accountType) }; recalculate() }
+            is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }; recalculate() }
+            is TransactionsIntent.SetMonthOffset -> { updateState { copy(selectedMonthOffset = intent.offset) }; recalculate() }
+            is TransactionsIntent.ChangeSortOrder -> { updateState { copy(sortOrder = intent.order) }; recalculate() }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is TransactionsIntent.SeedDemoData -> seedDemoData(intent.monthOffset)
+            is TransactionsIntent.FilterByCategory -> {
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = intent.categoryName, selectedAccountFilter = "ALL") }
+                recalculate()
+            }
         }
     }
 

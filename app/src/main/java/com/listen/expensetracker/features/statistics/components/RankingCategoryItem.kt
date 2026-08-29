@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +52,8 @@ fun RankingCategoryItem(
     currencySymbol: String,
     modifier: Modifier = Modifier,
     hideAmount: Boolean = false,
-    lang: String = "zh"
+    lang: String = "zh",
+    onClick: (() -> Unit)? = null
 ) {
     val color = parseHexColor(share.colorHex)
     val category: Category? = remember(share.label, lang) {
@@ -91,8 +95,18 @@ fun RankingCategoryItem(
         else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f) to MaterialTheme.colorScheme.onSurfaceVariant
     }
 
+    val itemModifier = if (onClick != null) {
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(AppDimens.CornerButton))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp, horizontal = 4.dp)
+    } else {
+        modifier.fillMaxWidth()
+    }
+
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = itemModifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -176,14 +190,27 @@ fun RankingCategoryItem(
                 }
             }
 
-            // Right Group: Formatted Amount
-            Text(
-                text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
-                fontWeight = FontWeight.Bold,
-                fontSize = AppDimens.TextSubtitle,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
-            )
+            // Right Group: Formatted Amount & Optional Navigation Indicator
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = AppDimens.TextSubtitle,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
+                )
+                if (onClick != null) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "View in Transactions",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
         }
 
         // Full-width Smooth Progress Bar

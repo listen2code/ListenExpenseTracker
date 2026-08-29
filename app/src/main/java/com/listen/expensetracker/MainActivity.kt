@@ -160,6 +160,9 @@ fun App(
                         state = state,
                         onIntent = onIntent,
                         scrollToTopFlow = scrollToTopFlow,
+                        onNavigateToTransactions = { monthOffset, categoryName ->
+                            appState.navigateToTransactionsCategory(categoryName, monthOffset)
+                        },
                         modifier = screenModifier
                     )
                 }

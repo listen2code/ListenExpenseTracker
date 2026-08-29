@@ -80,4 +80,5 @@ sealed interface TransactionsIntent {
     data class OpenDialog(val dialog: TransactionsDialog) : TransactionsIntent
     data object DismissDialog : TransactionsIntent
     data class SeedDemoData(val monthOffset: Int) : TransactionsIntent
+    data class FilterByCategory(val categoryName: String, val monthOffset: Int) : TransactionsIntent
 }

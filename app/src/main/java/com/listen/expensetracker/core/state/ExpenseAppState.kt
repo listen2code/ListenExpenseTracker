@@ -81,6 +81,17 @@ class ExpenseAppState(
     }
 
     /**
+     * Navigates directly from Statistics to Transactions filtered by month and category.
+     */
+    fun navigateToTransactionsCategory(categoryName: String, monthOffset: Int) {
+        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
+            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        }
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByCategory(categoryName, monthOffset))
+        currentTab = NavTab.TRANSACTIONS
+    }
+
+    /**
      * Top-level active overlay state. Controlled entirely via openOverlay / dismissOverlay.
      */
     var activeOverlay by mutableStateOf<AppOverlay?>(null)

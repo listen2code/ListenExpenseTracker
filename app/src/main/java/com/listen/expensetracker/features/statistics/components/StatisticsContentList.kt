@@ -41,7 +41,8 @@ fun StatisticsContentList(
     monthOffset: Int,
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollToTopFlow: Flow<Unit>? = null
+    scrollToTopFlow: Flow<Unit>? = null,
+    onCategoryClick: ((categoryName: String) -> Unit)? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -208,7 +209,8 @@ fun StatisticsContentList(
                                 currencySymbol = sym,
                                 hideAmount = state.hideAmount,
                                 lang = lang,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = onCategoryClick?.let { { it(item.label) } }
                             )
                             if (index < activeShares.lastIndex) {
                                 androidx.compose.material3.HorizontalDivider(

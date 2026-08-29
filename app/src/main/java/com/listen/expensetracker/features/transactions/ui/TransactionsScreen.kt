@@ -24,6 +24,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.drop
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -67,22 +68,24 @@ fun TransactionsScreen(
         TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
     }
 
-    // Synchronize external month changes (MonthPickerDialog, etc.) with smooth page scroll
+    // Synchronize external month changes (MonthPickerDialog, Tab switch, etc.) with instantaneous page alignment
     LaunchedEffect(state.selectedMonthOffset) {
         val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
         if (pagerState.currentPage != targetPage) {
-            pagerState.animateScrollToPage(targetPage)
+            pagerState.scrollToPage(targetPage)
         }
     }
 
-    // Synchronize settled page changes with ViewModel state
+    // Synchronize settled page changes with ViewModel state (ignoring stale restoration emission)
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }.collect { page ->
-            val offset = page - PAGER_BASE_INDEX
-            if (offset != state.selectedMonthOffset) {
-                onIntent(TransactionsIntent.SetMonthOffset(offset))
+        snapshotFlow { pagerState.settledPage }
+            .drop(1)
+            .collect { page ->
+                val offset = page - PAGER_BASE_INDEX
+                if (offset != state.selectedMonthOffset) {
+                    onIntent(TransactionsIntent.SetMonthOffset(offset))
+                }
             }
-        }
     }
 
     BaseScreenScaffold(
