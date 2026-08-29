@@ -21,7 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,13 +61,23 @@ fun RankingCategoryItem(
         }
     }
 
-    val animProgress = remember { Animatable(0f) }
-    LaunchedEffect(share.label, share.percentage) {
-        animProgress.snapTo(0f)
-        animProgress.animateTo(
-            targetValue = share.percentage,
-            animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
-        )
+    val dataSignature = remember(share.label, share.percentage) {
+        "${share.label}_${share.percentage}"
+    }
+    var animatedSignature by rememberSaveable { mutableStateOf("") }
+    val animProgress = remember {
+        Animatable(if (animatedSignature == dataSignature) share.percentage else 0f)
+    }
+
+    LaunchedEffect(dataSignature) {
+        if (animatedSignature != dataSignature) {
+            animatedSignature = dataSignature
+            animProgress.snapTo(0f)
+            animProgress.animateTo(
+                targetValue = share.percentage,
+                animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
+            )
+        }
     }
 
     val (badgeBg, badgeTextColor) = when (rank) {

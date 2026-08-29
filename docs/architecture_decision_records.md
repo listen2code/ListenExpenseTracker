@@ -221,6 +221,7 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 1. **多 Tab 状态保持协议**：
    - 在 `MainActivity` 中引入 `rememberSaveableStateHolder()` 托管全局 Tab 切换，通过 `SaveableStateProvider(tab)` 保持离开 Tab 的状态快照。
    - 列表统一采用 `rememberSaveable(inputs = arrayOf(monthOffset), saver = LazyListState.Saver)`，彻底杜绝切回时列表置顶。
-2. **图表数据驱动动态刷新动效规范**：
-   - 所有通用图表组件统一采用 `val anim = remember { Animatable(0f) }` 配合 `LaunchedEffect(dataKey)` 监听数据实体变更。
-   - 数据变更时先 `snapTo(0f)` 重置起始态，再平滑 `animateTo(1f, tween(650~750, FastOutSlowInEasing))`，呈现极具现代金融产品质感的视觉动效体验。
+2. **图表数据驱动动态刷新与滚动防抖规范 (Data Signature Guard)**：
+   - 解决 `LazyColumn` 上下滑动时子项回收挂载导致重复触发 `snapTo(0f)` 动画的问题。
+   - 所有图表引入 `dataSignature = remember(data) { data.hashCode().toString() }` 配合 `rememberSaveable { mutableStateOf("") }`。
+   - 组件挂载时若已播放过相同签名的动画，直接以满格值初始渲染，仅当 `dataSignature` 发生实质性变更时才触发重置与播放。不仅消除了上下滚动时的重复动画干扰，更保证了真实数据刷新时动效的准时触发。
