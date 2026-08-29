@@ -163,7 +163,14 @@ object ExpenseStrings {
         AppStrings.cat_salary to "工资",
         AppStrings.cat_investment to "理财",
         AppStrings.cat_gift to "礼金",
-        AppStrings.cat_other_inc to "其他"
+        AppStrings.cat_other_inc to "其他",
+        AppStrings.checking_updates to "正在检查最新版本...",
+        AppStrings.already_latest_version to "当前已是最新版本 (v%s)",
+        AppStrings.update_found_title to "发现新版本 (v%s)",
+        AppStrings.update_now_btn to "立即下载更新",
+        AppStrings.view_on_github_btn to "前往 GitHub 查看",
+        AppStrings.check_update_failed to "检查更新失败，请稍后重试",
+        AppStrings.changelog_title to "更新日志"
     )
 
     private val enMap = mapOf(
@@ -315,7 +322,14 @@ object ExpenseStrings {
         AppStrings.cat_salary to "Salary",
         AppStrings.cat_investment to "Investment",
         AppStrings.cat_gift to "Gift",
-        AppStrings.cat_other_inc to "Other"
+        AppStrings.cat_other_inc to "Other",
+        AppStrings.checking_updates to "Checking for updates...",
+        AppStrings.already_latest_version to "You are on the latest version (v%s)",
+        AppStrings.update_found_title to "New Version Available (v%s)",
+        AppStrings.update_now_btn to "Download Update",
+        AppStrings.view_on_github_btn to "View on GitHub",
+        AppStrings.check_update_failed to "Failed to check for updates, please try again",
+        AppStrings.changelog_title to "Changelog"
     )
 
     private val jaMap = mapOf(
@@ -467,6 +481,13 @@ object ExpenseStrings {
         AppStrings.cat_salary to "給料",
         AppStrings.cat_investment to "投資",
         AppStrings.cat_gift to "祝儀",
-        AppStrings.cat_other_inc to "その他"
+        AppStrings.cat_other_inc to "その他",
+        AppStrings.checking_updates to "最新バージョンを確認中...",
+        AppStrings.already_latest_version to "現在最新バージョンです (v%s)",
+        AppStrings.update_found_title to "新しいバージョンが見つかりました (v%s)",
+        AppStrings.update_now_btn to "今すぐダウンロード",
+        AppStrings.view_on_github_btn to "GitHub で見る",
+        AppStrings.check_update_failed to "更新の確認に失敗しました。もう一度お試しください",
+        AppStrings.changelog_title to "更新内容"
     )
 }

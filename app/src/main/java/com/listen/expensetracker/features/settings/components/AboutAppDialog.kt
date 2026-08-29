@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Shop
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -32,12 +34,14 @@ import coil.request.ImageRequest
 import com.listen.expensetracker.R
 
 /**
- * About Application Dialog displaying dynamic package version info and Google Play update trigger.
+ * About Application Dialog displaying dynamic package version info and update triggers.
  */
 @Composable
 fun AboutAppDialog(
     onDismiss: () -> Unit,
-    lang: String = "zh"
+    lang: String = "zh",
+    isCheckingUpdate: Boolean = false,
+    onCheckUpdates: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val (versionName, versionCode) = try {
@@ -90,18 +94,49 @@ fun AboutAppDialog(
 
             Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
 
-            // Check for Updates on Google Play Button
+            // Check for Updates on GitHub Button
             CommonButton(
-                text = AppStrings.check_update.tr(lang),
+                text = if (isCheckingUpdate) AppStrings.checking_updates.tr(lang) else AppStrings.check_update.tr(lang),
+                onClick = {
+                    if (onCheckUpdates != null) {
+                        onCheckUpdates(versionName)
+                    } else {
+                        openGooglePlay(context)
+                        onDismiss()
+                    }
+                },
+                enabled = !isCheckingUpdate,
+                style = CommonButtonStyle.Primary,
+                icon = {
+                    if (isCheckingUpdate) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(AppDimens.IconSizeSmall),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.SystemUpdate,
+                            contentDescription = "Update",
+                            modifier = Modifier.size(AppDimens.IconSizeMedium)
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Google Play fallback button
+            CommonButton(
+                text = "Google Play",
                 onClick = {
                     openGooglePlay(context)
                     onDismiss()
                 },
-                style = CommonButtonStyle.Primary,
+                style = CommonButtonStyle.Secondary,
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.SystemUpdate,
-                        contentDescription = "Update",
+                        imageVector = Icons.Default.Shop,
+                        contentDescription = "Google Play",
                         modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
                 },

@@ -143,8 +143,23 @@
 
 ---
 
-## 需求池 (Backlog)
+- [x] **异步检查 GitHub Release 更新与更新引导 (GitHub Release Update Checker)**
+  - [x] 实现 `UpdateCheckerService`：异步请求 GitHub Releases API (`listen2code/ListenExpenseTracker`)，解析最新 Release Tag、标题、Changelog 与 APK 直链。
+  - [x] 语义化版本比对（SemVer）：精准比对云端 Tag 与本地 `versionName`，识别新版本并完成单元测试覆盖 (`UpdateCheckerServiceTest`)。
+  - [x] `AboutAppDialog` 接入更新检测与 Loading 状态，弹出 `UpdateAvailableDialog` 引导用户一键前往 GitHub 或下载 APK，全量适配中英日三语。
 
-- [ ] **新增架构设计全景可视化功能**：在 App 关于/开发者面板展示当前架构设计与技术栈拓扑。
-- [ ] **Push 本地推送与版本升级检查**：检测到新版本时推送本地通知，点击跳转设置页触发检查更新。
-- [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：支持全局可拖拽悬浮球调起调试控制台。
+---
+
+## 需求池 (Backlog - 待办任务清单)
+
+- [ ] **1. 账单全文搜索与多维复合筛选 (Transaction Search & Multi-filter)**
+  - 支持在流水页顶部提供实时搜索栏，按分类名、备注文本模糊搜索。
+  - 支持快捷金额区间筛选（如大额支出 > ¥500）与自定义日期区间筛选。
+- [ ] **2. 月度预算超支预警与动态告警 (Budget Overrun Alert System)**
+  - 支出达到 80% 警戒线时，进度条渐变呈现琥珀色预警。
+  - 超出 100% 预算时，主页展示高醒目红色告警横幅，展示超支金额，并可触发本地预警推送通知。
+- [ ] **3. APM 日志全局悬浮窗 (Log Overlay Inspector)**
+  - 提供全局可拖拽、吸边的半透明调试悬浮球。
+  - 点击悬浮球在任意画面快速滑出调试控制台，实时查看日志流、Room 慢查询与崩溃排查。
+- [ ] **4. 架构设计全景可视化面板 (Architecture Visualizer)**
+  - 在设置页/开发者面板以现代化图形拓扑展示当前系统的分层架构（MVI 响应式流、Clean Architecture、Room 本地持久化、Google Drive 云端同步、ListenArch 与 ListenUiComponent 双基座解耦设计）。

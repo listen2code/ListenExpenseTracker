@@ -164,6 +164,17 @@ fun SettingsDialogHost(
         }
         is SettingsDialog.AboutApp -> {
             AboutAppDialog(
+                isCheckingUpdate = state.isCheckingUpdate,
+                onCheckUpdates = { currentVersion ->
+                    onIntent(SettingsIntent.CheckForUpdates(currentVersion))
+                },
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                lang = lang
+            )
+        }
+        is SettingsDialog.UpdateAvailable -> {
+            UpdateAvailableDialog(
+                releaseInfo = (state.activeDialog as SettingsDialog.UpdateAvailable).releaseInfo,
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )

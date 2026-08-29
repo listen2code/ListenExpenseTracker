@@ -22,6 +22,8 @@ import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
+import com.listen.expensetracker.data.update.UpdateCheckerService
+import com.listen.expensetracker.data.update.UpdateResult
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.combine
@@ -146,6 +148,7 @@ class SettingsViewModel(
             is SettingsIntent.OpenApmInspector -> emitEffect(CommonUiEffect.OpenApmInspector)
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
+            is SettingsIntent.CheckForUpdates -> checkForUpdates(intent.currentVersion)
         }
     }
 
@@ -447,6 +450,33 @@ class SettingsViewModel(
                 }
             } catch (e: Throwable) {
                 emitEffect(CommonUiEffect.ShowToast(if (lang == "en") "Import failed: ${e.message}" else "导入 JSON 文件失败: ${e.message}"))
+            }
+        }
+    }
+
+    private fun checkForUpdates(currentVersion: String) {
+        if (currentState.isCheckingUpdate) return
+        viewModelScope.launch {
+            updateState { copy(isCheckingUpdate = true) }
+            val lang = currentState.language
+            when (val result = UpdateCheckerService.checkLatestRelease(currentVersion)) {
+                is UpdateResult.NewVersionAvailable -> {
+                    updateState {
+                        copy(
+                            isCheckingUpdate = false,
+                            activeDialog = SettingsDialog.UpdateAvailable(result.releaseInfo)
+                        )
+                    }
+                }
+                is UpdateResult.AlreadyLatest -> {
+                    updateState { copy(isCheckingUpdate = false) }
+                    val msg = String.format(AppStrings.already_latest_version.tr(lang), currentVersion)
+                    emitEffect(CommonUiEffect.ShowToast(msg))
+                }
+                is UpdateResult.Error -> {
+                    updateState { copy(isCheckingUpdate = false) }
+                    emitEffect(CommonUiEffect.ShowToast(AppStrings.check_update_failed.tr(lang)))
+                }
             }
         }
     }

@@ -177,4 +177,13 @@ object AppStrings {
     const val cat_investment = "cat_investment"
     const val cat_gift = "cat_gift"
     const val cat_other_inc = "cat_other_inc"
+
+    // Update Checker
+    const val checking_updates = "checking_updates"
+    const val already_latest_version = "already_latest_version"
+    const val update_found_title = "update_found_title"
+    const val update_now_btn = "update_now_btn"
+    const val view_on_github_btn = "view_on_github_btn"
+    const val check_update_failed = "check_update_failed"
+    const val changelog_title = "changelog_title"
 }

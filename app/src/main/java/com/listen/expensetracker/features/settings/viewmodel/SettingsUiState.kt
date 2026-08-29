@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.settings.viewmodel
 
 import android.net.Uri
 import com.listen.arch.sync.SyncState
+import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
@@ -16,6 +17,7 @@ sealed interface SettingsDialog {
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
+    data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
 }
 
 /**
@@ -37,7 +39,8 @@ data class SettingsUiState(
     val lastSyncTimestamp: Long = 0L,
     val activeDialog: SettingsDialog? = null,
     val isOperating: Boolean = false,
-    val isDeveloperMode: Boolean = false
+    val isDeveloperMode: Boolean = false,
+    val isCheckingUpdate: Boolean = false
 )
 
 /**
@@ -64,4 +67,5 @@ sealed interface SettingsIntent {
     data object OpenApmInspector : SettingsIntent
     data class OpenDialog(val dialog: SettingsDialog) : SettingsIntent
     data object DismissDialog : SettingsIntent
+    data class CheckForUpdates(val currentVersion: String) : SettingsIntent
 }
