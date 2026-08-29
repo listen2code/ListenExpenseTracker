@@ -459,7 +459,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             updateState { copy(isCheckingUpdate = true) }
             val lang = currentState.language
-            when (val result = UpdateCheckerService.checkLatestRelease(currentVersion)) {
+            val currentBuildNumber = try {
+                val pInfo = application.packageManager.getPackageInfo(application.packageName, 0)
+                androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(pInfo)
+            } catch (_: Exception) {
+                0L
+            }
+            when (val result = UpdateCheckerService.checkLatestRelease(currentVersion, currentBuildNumber, lang)) {
                 is UpdateResult.NewVersionAvailable -> {
                     updateState {
                         copy(

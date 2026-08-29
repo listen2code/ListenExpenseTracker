@@ -23,53 +23,117 @@ sealed interface UpdateResult {
 }
 
 /**
- * Service that queries the public GitHub Releases API asynchronously
- * and determines whether a newer version is available.
+ * Service that queries the version metadata from GitHub Pages version.json
+ * (with fallback to GitHub Releases API) asynchronously.
  */
 object UpdateCheckerService {
-    private const val REPO_OWNER = "listen2code"
-    private const val REPO_NAME = "ListenExpenseTracker"
-    private const val GITHUB_API_URL = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest"
+    const val GITHUB_PAGES_VERSION_URL =
+        "https://listen2code.github.io/ListenExpenseTracker/pages/version.json"
+    private const val GITHUB_API_URL =
+        "https://api.github.com/repos/listen2code/ListenExpenseTracker/releases/latest"
 
     /**
-     * Checks the latest GitHub release asynchronously and compares it against current version.
+     * Checks the latest release metadata asynchronously.
      */
-    suspend fun checkLatestRelease(currentVersion: String): UpdateResult = withContext(Dispatchers.IO) {
+    suspend fun checkLatestRelease(
+        currentVersion: String,
+        currentBuildNumber: Long = 0L,
+        lang: String = "zh"
+    ): UpdateResult = withContext(Dispatchers.IO) {
+        // 1. Try GitHub Pages version.json first (fast, CDN-cached, no rate-limits)
+        val pagesResult = queryVersionJson(GITHUB_PAGES_VERSION_URL, currentVersion, currentBuildNumber, lang)
+        if (pagesResult != null) {
+            return@withContext pagesResult
+        }
+
+        // 2. Fallback to GitHub Releases API if needed
+        queryGitHubReleasesApi(currentVersion)
+    }
+
+    private fun queryVersionJson(
+        urlStr: String,
+        currentVersion: String,
+        currentBuildNumber: Long,
+        lang: String
+    ): UpdateResult? {
         var connection: HttpURLConnection? = null
-        try {
+        return try {
+            val url = URL(urlStr)
+            connection = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 8000
+                readTimeout = 8000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "lExpense-Android-App")
+            }
+
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val jsonString = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+                val json = JSONObject(jsonString)
+
+                val version = json.optString("version", "") ?: ""
+                val buildNumber = json.optLong("buildNumber", 0L)
+                val targetUrl = json.optString("url", "https://github.com/listen2code/ListenExpenseTracker/releases") ?: ""
+
+                val changelogObj = json.optJSONObject("changelog")
+                val changelogText = changelogObj?.optString(lang)?.takeUnless { it.isBlank() }
+                    ?: changelogObj?.optString("en")?.takeUnless { it.isBlank() }
+                    ?: changelogObj?.optString("zh")?.takeUnless { it.isBlank() }
+                    ?: ""
+
+                val cleanRemote = version.removePrefix("v").removePrefix("V").trim()
+                val cleanLocal = currentVersion.removePrefix("v").removePrefix("V").trim()
+
+                val isNewer = if (currentBuildNumber > 0L && buildNumber > 0L) {
+                    buildNumber > currentBuildNumber
+                } else {
+                    isVersionNewer(cleanRemote, cleanLocal)
+                }
+
+                if (isNewer) {
+                    UpdateResult.NewVersionAvailable(
+                        ReleaseInfo(
+                            tagName = "v$cleanRemote",
+                            title = "v$cleanRemote",
+                            changelog = changelogText,
+                            htmlUrl = targetUrl,
+                            apkDownloadUrl = if (targetUrl.endsWith(".apk", ignoreCase = true)) targetUrl else null
+                        )
+                    )
+                } else {
+                    UpdateResult.AlreadyLatest(currentVersion)
+                }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun queryGitHubReleasesApi(currentVersion: String): UpdateResult {
+        var connection: HttpURLConnection? = null
+        return try {
             val url = URL(GITHUB_API_URL)
             connection = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
-                connectTimeout = 10000
-                readTimeout = 10000
+                connectTimeout = 8000
+                readTimeout = 8000
                 setRequestProperty("Accept", "application/vnd.github.v3+json")
                 setRequestProperty("User-Agent", "lExpense-Android-App")
             }
 
             val responseCode = connection.responseCode
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                val reader = BufferedReader(InputStreamReader(connection.inputStream))
-                val jsonString = reader.use { it.readText() }
+                val jsonString = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
                 val json = JSONObject(jsonString)
 
                 val tagName = json.optString("tag_name", "")
                 val title = json.optString("name", tagName)
                 val body = json.optString("body", "")
-                val htmlUrl = json.optString("html_url", "https://github.com/$REPO_OWNER/$REPO_NAME/releases")
-
-                // Find .apk download asset if available
-                var apkUrl: String? = null
-                val assets = json.optJSONArray("assets")
-                if (assets != null) {
-                    for (i in 0 until assets.length()) {
-                        val asset = assets.getJSONObject(i)
-                        val name = asset.optString("name", "")
-                        if (name.endsWith(".apk", ignoreCase = true)) {
-                            apkUrl = asset.optString("browser_download_url")
-                            break
-                        }
-                    }
-                }
+                val htmlUrl = json.optString("html_url", "https://github.com/listen2code/ListenExpenseTracker/releases")
 
                 val cleanRemote = tagName.removePrefix("v").removePrefix("V").trim()
                 val cleanLocal = currentVersion.removePrefix("v").removePrefix("V").trim()
@@ -81,14 +145,13 @@ object UpdateCheckerService {
                             title = title,
                             changelog = body,
                             htmlUrl = htmlUrl,
-                            apkDownloadUrl = apkUrl
+                            apkDownloadUrl = null
                         )
                     )
                 } else {
                     UpdateResult.AlreadyLatest(currentVersion)
                 }
             } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                // No releases published yet
                 UpdateResult.AlreadyLatest(currentVersion)
             } else {
                 UpdateResult.Error("HTTP $responseCode: ${connection.responseMessage}")
@@ -102,7 +165,6 @@ object UpdateCheckerService {
 
     /**
      * Compares remote and local semantic version numbers (major.minor.patch).
-     * Returns true if remote is strictly greater than local.
      */
     fun isVersionNewer(remote: String, local: String): Boolean {
         if (remote.isBlank() || local.isBlank()) return false

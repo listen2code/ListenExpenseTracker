@@ -41,4 +41,18 @@ class UpdateCheckerServiceTest {
         assertFalse(UpdateCheckerService.isVersionNewer("0.0.19", ""))
         assertFalse(UpdateCheckerService.isVersionNewer("", ""))
     }
+
+    @Test
+    fun testCheckLatestRelease_liveVersionJson() = kotlinx.coroutines.test.runTest {
+        val result = UpdateCheckerService.checkLatestRelease(
+            currentVersion = "0.0.1",
+            currentBuildNumber = 1L,
+            lang = "zh"
+        )
+        assertTrue("Expected new version available from version.json, got: $result", result is UpdateResult.NewVersionAvailable)
+        if (result is UpdateResult.NewVersionAvailable) {
+            assertTrue(result.releaseInfo.tagName.contains("0.0.20"))
+            assertTrue(result.releaseInfo.changelog.isNotBlank())
+        }
+    }
 }
