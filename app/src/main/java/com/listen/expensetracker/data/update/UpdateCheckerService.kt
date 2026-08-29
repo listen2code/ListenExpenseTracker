@@ -50,40 +50,7 @@ object UpdateCheckerService {
             val responseCode = connection.responseCode
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 val jsonString = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
-                val json = JSONObject(jsonString)
-
-                val version = json.optString("version", "") ?: ""
-                val buildNumber = json.optLong("buildNumber", 0L)
-                val targetUrl = json.optString("url", "") ?: ""
-
-                val changelogObj = json.optJSONObject("changelog")
-                val changelogText = changelogObj?.optString(lang)?.takeUnless { it.isBlank() }
-                    ?: changelogObj?.optString("en")?.takeUnless { it.isBlank() }
-                    ?: changelogObj?.optString("zh")?.takeUnless { it.isBlank() }
-                    ?: ""
-
-                val cleanRemote = version.removePrefix("v").removePrefix("V").trim()
-                val cleanLocal = currentVersion.removePrefix("v").removePrefix("V").trim()
-
-                val isNewer = if (currentBuildNumber > 0L && buildNumber > 0L) {
-                    buildNumber > currentBuildNumber
-                } else {
-                    isVersionNewer(cleanRemote, cleanLocal)
-                }
-
-                if (isNewer) {
-                    UpdateResult.NewVersionAvailable(
-                        ReleaseInfo(
-                            tagName = "v$cleanRemote",
-                            title = "v$cleanRemote",
-                            changelog = changelogText,
-                            htmlUrl = targetUrl,
-                            apkDownloadUrl = if (targetUrl.endsWith(".apk", ignoreCase = true)) targetUrl else null
-                        )
-                    )
-                } else {
-                    UpdateResult.AlreadyLatest(currentVersion)
-                }
+                parseVersionJson(jsonString, currentVersion, currentBuildNumber, lang)
             } else {
                 UpdateResult.Error("HTTP $responseCode: ${connection.responseMessage}")
             }
@@ -91,6 +58,54 @@ object UpdateCheckerService {
             UpdateResult.Error(e.localizedMessage ?: "Network error")
         } finally {
             connection?.disconnect()
+        }
+    }
+
+    /**
+     * Parses JSON string and determines if a newer version is available.
+     */
+    fun parseVersionJson(
+        jsonString: String,
+        currentVersion: String,
+        currentBuildNumber: Long = 0L,
+        lang: String = "zh"
+    ): UpdateResult {
+        return try {
+            val json = JSONObject(jsonString)
+            val version = json.optString("version", "") ?: ""
+            val buildNumber = json.optLong("buildNumber", 0L)
+            val targetUrl = json.optString("url", "") ?: ""
+
+            val changelogObj = json.optJSONObject("changelog")
+            val changelogText = changelogObj?.optString(lang)?.takeUnless { it.isBlank() }
+                ?: changelogObj?.optString("en")?.takeUnless { it.isBlank() }
+                ?: changelogObj?.optString("zh")?.takeUnless { it.isBlank() }
+                ?: ""
+
+            val cleanRemote = version.removePrefix("v").removePrefix("V").trim()
+            val cleanLocal = currentVersion.removePrefix("v").removePrefix("V").trim()
+
+            val isNewer = if (currentBuildNumber > 0L && buildNumber > 0L) {
+                buildNumber > currentBuildNumber
+            } else {
+                isVersionNewer(cleanRemote, cleanLocal)
+            }
+
+            if (isNewer) {
+                UpdateResult.NewVersionAvailable(
+                    ReleaseInfo(
+                        tagName = "v$cleanRemote",
+                        title = "v$cleanRemote",
+                        changelog = changelogText,
+                        htmlUrl = targetUrl,
+                        apkDownloadUrl = if (targetUrl.endsWith(".apk", ignoreCase = true)) targetUrl else null
+                    )
+                )
+            } else {
+                UpdateResult.AlreadyLatest(currentVersion)
+            }
+        } catch (e: Exception) {
+            UpdateResult.Error(e.localizedMessage ?: "Parse error")
         }
     }
 

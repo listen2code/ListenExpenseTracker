@@ -43,26 +43,67 @@ class UpdateCheckerServiceTest {
     }
 
     @Test
-    fun testCheckLatestRelease_liveVersionJson() = kotlinx.coroutines.test.runTest {
+    fun testParseVersionJson_newVersionAvailable() {
+        val json = """
+            {
+                "version": "0.0.20",
+                "buildNumber": 20,
+                "url": "https://github.com/listen2code/ListenExpenseTracker/releases/download/v0.0.20/app-release.apk",
+                "changelog": {
+                    "zh": "修复若干问题",
+                    "en": "Bug fixes"
+                }
+            }
+        """.trimIndent()
+        val result = UpdateCheckerService.parseVersionJson(
+            jsonString = json,
+            currentVersion = "0.0.1",
+            currentBuildNumber = 1L,
+            lang = "zh"
+        )
+        assertTrue("Expected NewVersionAvailable, got: $result", result is UpdateResult.NewVersionAvailable)
+        if (result is UpdateResult.NewVersionAvailable) {
+            assertTrue(result.releaseInfo.tagName.contains("0.0.20"))
+            assertTrue(result.releaseInfo.changelog.isNotBlank())
+            assertTrue(result.releaseInfo.apkDownloadUrl?.endsWith(".apk") == true)
+        }
+    }
+
+    @Test
+    fun testParseVersionJson_alreadyLatest() {
+        val json = """
+            {
+                "version": "0.0.20",
+                "buildNumber": 20,
+                "url": "https://github.com/listen2code/ListenExpenseTracker/releases"
+            }
+        """.trimIndent()
+        val result = UpdateCheckerService.parseVersionJson(
+            jsonString = json,
+            currentVersion = "0.0.20",
+            currentBuildNumber = 20L,
+            lang = "zh"
+        )
+        assertTrue("Expected AlreadyLatest, got: $result", result is UpdateResult.AlreadyLatest)
+    }
+
+    @Test
+    fun testParseVersionJson_malformedJson() {
+        val result = UpdateCheckerService.parseVersionJson(
+            jsonString = "invalid-json",
+            currentVersion = "0.0.1"
+        )
+        assertTrue("Expected Error on malformed JSON, got: $result", result is UpdateResult.Error)
+    }
+
+    @Test
+    fun testCheckLatestRelease_handlesNetworkOrResultGracefully() = kotlinx.coroutines.test.runTest {
         val result = UpdateCheckerService.checkLatestRelease(
             currentVersion = "0.0.1",
             currentBuildNumber = 1L,
             lang = "zh"
         )
-        assertTrue("Expected new version available from version.json, got: $result", result is UpdateResult.NewVersionAvailable)
-        if (result is UpdateResult.NewVersionAvailable) {
-            assertTrue(result.releaseInfo.tagName.contains("0.0.20"))
-            assertTrue(result.releaseInfo.changelog.isNotBlank())
-        }
-    }
-
-    @Test
-    fun testCheckLatestRelease_alreadyLatest() = kotlinx.coroutines.test.runTest {
-        val result = UpdateCheckerService.checkLatestRelease(
-            currentVersion = "0.0.20",
-            currentBuildNumber = 20L,
-            lang = "zh"
-        )
-        assertTrue("Expected already latest, got: $result", result is UpdateResult.AlreadyLatest)
+        // In CI or offline test runners, live HTTP may fail gracefully with Error or succeed
+        assertTrue(result is UpdateResult.NewVersionAvailable || result is UpdateResult.Error || result is UpdateResult.AlreadyLatest)
     }
 }
