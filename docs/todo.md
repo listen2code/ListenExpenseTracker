@@ -150,6 +150,27 @@
 
 ---
 
+## 阶段六：图表交互穿透、双向联动与手势体验精细化 (Stage 6 - 100% Completed)
+
+- [x] **统计与流水跨页双向穿透与下钻 (Cross-Screen Drill-Down & Navigation)**
+  - [x] 支出/收入分类排行榜点击穿透：轻触排行榜条目直接跳转至流水页，自动同步当前统计月份并筛选该分类流水。
+  - [x] 跨月份状态同步：解决统计页切月后跳转至流水页月份不一致问题，通过 `ExpenseAppState` 实现全 App 月份全局联动。
+- [x] **环形图与分段进度条双向高亮联动 (Two-Way Highlight & Tooltip Sync)**
+  - [x] 点击 `DonutChart` 扇区：计算圆弧中心坐标弹出 `DonutChartTooltip` 悬浮框，并同步高亮 `SegmentedProgressBar` 对应分段，其他分段平滑淡化（`animateColorAsState`）。
+  - [x] 点击 `SegmentedProgressBar` 分段：反向高亮 `DonutChart` 对应区块并触发扇区悬浮框展示，再次点击支持 Toggle 取消聚焦。
+- [x] **曲线图长按拖拽指示与流水日期自动滚动聚焦 (LineChart Scrubbing & Auto-Scroll)**
+  - [x] 手势优化：改用 `detectDragGesturesAfterLongPress`，确保用户上下滑动统计页面时零触控拦截，仅在长按曲线时激活手势指示。
+  - [x] 实时指示与悬浮气泡：长按并横向拖拽时动态呈现竖直虚线（Dashed Line）、高亮光晕点与 `LineChartTooltip` 气泡框，展示具体日期与金额。
+  - [x] 气泡框穿透跳转：轻触折线气泡框直达流水页，并自动平滑滚动（`animateScrollToItem`）精准对齐到对应日期列表分组。
+- [x] **X 轴时间刻度像素级精准对齐与高密度展示 (X-Axis Pixel Alignment)**
+  - [x] 解决虚线与日期偏差（如 17 vs 16）：使用自定义 Compose `Layout` 将每个日期标签的中心强制对准 Canvas 的 `x = (index / (N-1)) * width`，实现 100% 像素级吻合。
+  - [x] 字体缩小（8.5sp）并提升采样密度（每 2 天 1 刻度，单月呈现多达 16 个刻度），在无重叠前提下最大化展现时间轴。
+- [x] **微胶囊徽章（Pill Badge）统一设计语言与极值联动**
+  - [x] 曲线图右上角与指标卡片：统一消除生硬小箭头，采用 `RoundedCornerShape(12.dp)` + `0.09f` 微透光强调色的精致微胶囊徽章设计，天然暗示可点击性。
+  - [x] 极值双层联动：轻触曲线右上角峰值胶囊，图表直接自动锁定当月峰值点；轻触指标卡片单笔最大支出胶囊，直达流水页并平滑滚动停靠在对应单笔交易处。
+
+---
+
 ## 需求池 (Backlog - 待办任务清单)
 
 - [ ] **1. 账单全文搜索与多维复合筛选 (Transaction Search & Multi-filter)**
