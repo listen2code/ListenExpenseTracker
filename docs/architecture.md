@@ -108,10 +108,20 @@ sequenceDiagram
 
 ---
 
+### 2.5 组件拆分与规范基线 (`PROMPTS.md`)
+
+UI 组件严格遵循 `PROMPTS.md` 规范落地：
+- **单文件规模**：单个 UI 文件严格限制在 **200 ~ 250 行以内**，复杂弹窗/卡片拆分至 `features/**/components/` 独立文件（如 `AccountCardItem`, `AccountEditDialog`, `AccountDeleteConfirmDialog`）。
+- **参数签名规范 (Rule 13)**：所有独立 Composable 组件首个可选参数统一为 `modifier: Modifier = Modifier`。
+- **高危操作标准 (Rule 15)**：删除类二次确认统一采用 `CommonButtonStyle.Danger` 红色危险确认按钮。
+- **零硬编码 (Rule 5)**：所有展示文案通过 `AppStrings` + `StringsRes.get()` / `ExpenseStrings` 动态解析。
+
+---
+
 ## 3. 本地存储与计算架构 (Local-First Engine)
 
 1. **Room SQLite**：`TransactionEntity` 存储全部单笔账单流水，`TransactionDao` 提供响应式 Flow 监听；
-2. **DataStore Preferences**：`ExpenseDataStoreManager` 承载用户个性化偏好（语言、主题、主色调、月预算、币种符号）；
+2. **DataStore Preferences**：`ExpenseDataStoreManager` 承载用户个性化偏好（语言、主题、主色调、月预算、币种符号、自定义账户列表 JSON）；
 3. **TransactionCalculationEngine**：纯 Kotlin 高性能数据计算引擎，负责内存多维过滤（按月份、账户、搜索关键字）、收支聚合、预算消耗比率测算，与 UI 完全解耦。
 
 ---
@@ -124,3 +134,31 @@ sequenceDiagram
 3. **动态提权机制**：拦截 `UserRecoverableAuthException` 并自动调起 Google 原生授权面板，获得用户明确同意后无缝执行多端云备份与快照恢复；
 4. **架构详述**：参见专属文档 [Google 登录与 Drive 同步全指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)。
 
+---
+
+## 5. 触觉反馈与平滑动效设计系统 (Haptics & Motion)
+
+1. **分级触觉系统 (LocalHapticFeedback)**：
+   - **高频操作 (Tap)**：`NumericKeypad` 按键、头部账户筛选 Chip 切换、排序规则选择采用 `TextHandleMove`，提供物理键盘般的清脆反馈；
+   - **关键提交 (Confirm)**：「完成记账 ✓」全宽按钮按压、`AccountDeleteConfirmDialog` 危险删除采用 `LongPress` 脉冲，确认状态流转。
+2. **渐进式插值动效 (Progressive Motion)**：
+   - **图表展开**：`DonutChart`（650ms 顺时针扫开）、`LineChart`（600ms 自底向上拔起），采用 `FastOutSlowInEasing` 阻尼曲线；
+   - **跨屏/状态过渡**：`StatisticsContentList` 采用 `AnimatedContent` 承载收支 Tab 交叉淡入淡出（Crossfade 300ms），预算进度条接入 500ms 动态插值，彻底消除生硬跳帧。
+
+---
+
+## 6. CI/CD 自动化构建与 Release Pipeline 发布体系
+
+```mermaid
+flowchart LR
+    A[Git Tag / Push] --> B[GitHub Actions]
+    B --> C[R8 代码混淆与资源缩减]
+    C --> D[Play App Signing 签名]
+    D --> E[生成 AAB 交付物]
+    E --> F[发布至 Google Play 生产轨道]
+    F --> G[邮件通知负责人 listen2code@gmail.com]
+```
+
+1. **工业级版本管理**：`versionCode` 随构建自动化递增，`versionName` 遵循 SemVer 标准；
+2. **产物安全性与极简化**：强制开启 `minifyEnabled` + `shrinkResources`，Secrets 凭据由 GitHub Actions Secrets 隔离，生成针对不同设备的切片 AAB 包；
+3. **发布成功精准通知**：工作流配置 `if: success()`，仅在 AAB 生成并成功发版至 Google Play 时发送推送邮件。

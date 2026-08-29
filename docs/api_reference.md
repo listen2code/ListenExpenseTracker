@@ -82,9 +82,10 @@
 
 | 组件名 | 包路径 | 核心入参 | 说明 |
 | :--- | :--- | :--- | :--- |
-| `NumericKeypad` | `com.listen.uicomponent.keypad` | `onKeyPress`, `onDeletePress`, `onDonePress` | 算术键盘（带醒目“完成记账 ✓”按钮） |
-| `DonutChart` | `com.listen.uicomponent.charts` | `items: List<PieChartItem>`, `totalValue: Double` | Canvas 环形占比图（自适应中心指标） |
+| `NumericKeypad` | `com.listen.uicomponent.keypad` | `onKeyPress`, `onDeletePress`, `onDonePress` | 算术键盘（内置 `TextHandleMove` 轻触微震与 `LongPress` 完成记账脉冲反馈） |
+| `DonutChart` | `com.listen.uicomponent.charts` | `items: List<PieChartItem>`, `totalValue: Double` | Canvas 环形占比图（内置 650ms 顺时针扫开平滑动效与自适应中心指标） |
 | `BarChart` | `com.listen.uicomponent.charts` | `items: List<BarChartItem>`, `height: Dp` | Canvas 垂直柱状走势图 |
+| `LineChart` | `com.listen.uicomponent.charts` | `points: List<LineChartPoint>`, `chartHeight: Dp` | 平滑贝塞尔折线走势图（内置 600ms 动态拔起动效与渐变区域填充） |
 | `SegmentedProgressBar` | `com.listen.uicomponent.components` | `segments: List<ProgressSegment>` | 分段比例条 |
 | `SearchBarInput` | `com.listen.uicomponent.components` | `query: String`, `onQueryChange: (String) -> Unit` | 通用搜索输入框 |
 | `SurfaceCard` | `com.listen.uicomponent.components` | `cornerRadius: Dp`, `contentPadding: Dp` | 统一卡片容器，支持精准圆角几何对齐 |
@@ -92,7 +93,7 @@
 
 ---
 
-## 3. `ListenExpenseTracker` 业务层核心类与引擎
+## 3. `ListenExpenseTracker` 业务层核心类与组件
 
 ### 3.1 `TransactionCalculationEngine`
 * **包名**：`com.listen.expensetracker.data.engine`
@@ -123,10 +124,14 @@
 ### 3.3 `AccountRepository` (支付账户管理)
 * **包名**：`com.listen.expensetracker.data.model`
 * **方法**：
-  * `fun getAllAccounts(): List<AccountTypeItem>`
-  * `fun getAccountName(key: String): String`
-  * `fun addAccount(name: String): AccountTypeItem`
-  * `fun deleteAccount(key: String): Boolean`
+  * `fun getAllAccounts(): List<AccountTypeItem>`：获取内置（CASH/BANK/CREDIT）与用户自定义账户全集。
+  * `fun getFilterKeys(): List<String>`：获取过滤器 Chip 的 Key 列表（含 `ALL`）。
+  * `fun getAccountDisplayName(key: String, lang: String = "zh"): String`：多语言解析账户展示名。
+  * `fun addAccount(name: String): AccountTypeItem`：新增自定义账户。
+  * `fun updateAccount(key: String, newName: String)`：重命名账户。
+  * `fun deleteAccount(key: String): Boolean`：删除自定义账户。
+  * `fun serializeCustomAccounts(): String`：序列化为 JSON 供持久化。
+  * `fun deserializeCustomAccounts(json: String)`：从 JSON 反序列化恢复。
 
 ### 3.4 `GoogleAuthManager` (Google 授权管理)
 * **包名**：`com.listen.expensetracker.auth`
@@ -135,7 +140,12 @@
   * `fun getCredentialManager(context: Context): CredentialManager`：获取 AndroidX CredentialManager 实例。
   * `fun buildGoogleIdOption(serverClientId: String = ""): GetGoogleIdOption`：构建 Google Identity 登录选项配置。
   * `fun buildGetCredentialRequest(serverClientId: String = ""): GetCredentialRequest`：构建统一凭据请求。
-  * `fun parseGoogleIdCredential(response: GetCredentialResponse): Result<GoogleUserProfile>`：解析 CredentialManager 返回的 `GoogleIdTokenCredential`，提取用户邮箱、显示名称、头像 URL 与 IdToken。
+  * `fun parseGoogleIdCredential(response: GetCredentialResponse): Result<GoogleUserProfile>`：解析 CredentialManager 返回凭据。
   * `suspend fun clearCredentials(context: Context)`：清除所有凭据状态并登出用户。
-* **数据模型**：
-  * `GoogleUserProfile(email, displayName, avatarUrl, idToken)`：认证成功后的用户资料数据类。
+
+### 3.5 业务特化 UI 组件 (`features/**/components/`)
+* **`AccountCardItem`** (`features.transactions.components`)：单个账户行卡片，含视觉图标、内置/自定义胶囊徽标、编辑与删除按钮。
+* **`AccountEditDialog`** (`features.transactions.components`)：输入与编辑账户名称对话框。
+* **`AccountDeleteConfirmDialog`** (`features.transactions.components`)：账户删除确认对话框，使用 `CommonButtonStyle.Danger` 红色危险确认按钮。
+* **`SettingsVersionFooter`** (`features.settings.components`)：设置页底部版本号展示与连击进入开发者模式触发器。
+* **`AboutAppDialog`** (`features.settings.components`)：关于应用信息对话框，含 Dedicated App Icon 与技术栈展示。

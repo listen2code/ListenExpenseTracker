@@ -15,6 +15,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -128,13 +129,22 @@ fun BalanceOverviewCard(
             }
 
             // Bottom Row: Budget Progress Indicator & Percentage
+            val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = budgetUsageRatio.coerceIn(0f, 1f),
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = 500,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing
+                ),
+                label = "BudgetUsageProgress"
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
             ) {
                 LinearProgressIndicator(
-                    progress = { budgetUsageRatio.coerceIn(0f, 1f) },
+                    progress = { animatedProgress },
                     modifier = Modifier
                         .weight(1f)
                         .height(3.dp)

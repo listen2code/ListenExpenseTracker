@@ -74,7 +74,7 @@
 
 ## 阶段四：高阶体验、多账户云同步与自动化测试 (Stage 4 - 100% Completed)
 
-- [x] **Google 账户连携与云端备份恢复 ([CloudSyncManager.kt](file:///C:/Users/liste/Downloads/github/ListenArch/app/src/main/java/com/listen/arch/sync/CloudSyncManager.kt))**
+- [x] **Google 账户连携与云端备份恢复 (CloudSyncManager.kt)**
   - [x] `GoogleAuthManager` Google 登录意图调度与结果解析
   - [x] 账号级隔离云端快照与 MD5 校验和验证
   - [x] 实时 `CircularProgressIndicator` 备份/恢复进度指示与上次同步时间戳
@@ -84,7 +84,7 @@
   - [x] `ApmLogger` 500 条环形内存日志管理器（APP / DB / SYNC / CRASH）
   - [x] `TraceManager` 全链路毫秒耗时打点
   - [x] `CrashHandler` 全局未捕获异常保护
-- [x] **15 套自动化单元测试全矩阵 (100% Pass，覆盖率超 60%)**
+- [x] **16 套自动化单元测试全矩阵 (100% Pass，覆盖率超 60%)**
   - [x] `ApmLoggerTest`
   - [x] `TraceManagerTest`
   - [x] `CloudSyncManagerTest`
@@ -100,16 +100,39 @@
   - [x] `AccountRepositoryTest`
   - [x] `TransactionCalculationEngineTest`
   - [x] `TransactionsIntentEffectTest`
-- [x] **v0.0.9 体验与功能专项升级 (100% Completed)**
-  - [x] 近 7 日图表重构升级为从当月 1 日至今的月度日走势平滑折线图 (`LineChart`)
-  - [x] 流水页面移除左滑删除，改成长按条目呼出确认对话框 (`ConfirmDelete`) 进行安全删除
-  - [x] 流水与统计画面年月导航胶囊支持左右滑动手势切换月份 (50px 灵敏阈值)
-  - [x] 账户选择栏支持横向滑动，同时最右侧排序筛选按钮吸顶固定
-  - [x] 资产账户管理 Dialog 现代化卡片式重构与美化，并实现账户在 DataStore 的持久化
-  - [x] 演练数据生成升级为全随机化算法，每次点击生成不同真实场景账单
+  - [x] `TransactionsUiStateTest`
 
-## 需求池
-- [ ] **新增架构设计功能，展示当前APP的架构设计和技术栈**
-- [ ] **增加push功能，APP升级后，可以收到推送，点击后跳转到setting画面，触发检查更新逻辑**
-- [ ] **目前APM 日志浮窗 (Log Overlay Inspector)，目前还没实现**
-- [ ] **CI/CD 增强：GitHub Actions `deploy` 任务执行成功后，自动发送邮件通知至 `listen2code@gmail.com`**
+---
+
+## 阶段五：体验精细化、CI/CD 自动化与架构组件解耦 (Stage 5 - 100% Completed)
+
+- [x] **CI/CD 发布与邮件精准通知**
+  - [x] GitHub Actions `deploy.yml` 仅在发布至 Google Play 生产环境成功时触发邮件通知至指定邮箱 (`listen2code@gmail.com`)。
+- [x] **设置页版本号与开发者模式**
+  - [x] 底部 `SettingsVersionFooter` 组件：展示当前 App 版本（优雅降级默认版本 `0.0.1`），加大点击触发热区。
+  - [x] 快速连续点击版本号解锁「开发者模式」，动态展开「系统运维与测试」面板。
+  - [x] `AboutAppDialog` 现代化改造：使用 App 专用矢量/栅格图标，移除冗余确认按钮，强化技术架构与 SDK 呈现。
+- [x] **资产账户管理系统全面升级与重构**
+  - [x] 结构分层：区分系统内置账户 (`现金`/`银行卡`/`信用卡`) 与用户自定义账户。
+  - [x] 状态响应修复：引入 `refreshKey` 解决 Compose `remember` 引用相等导致添加/删除/编辑账户不即时刷新的问题。
+  - [x] 长按删除能力全覆盖：在流水顶部过滤器、账户管理 Dialog、新增账单弹窗、编辑账单弹窗 4 大入口全量支持长按自定义账户调起删除二次确认。
+  - [x] 遵循 `PROMPTS.md` 规范拆分抽取：
+    - `AccountCardItem.kt`：单个账户行卡片与专属视觉着色。
+    - `AccountEditDialog.kt`：账户添加与改名弹窗。
+    - `AccountDeleteConfirmDialog.kt`：破坏性删除二次确认，遵循 Rule 15 使用 `CommonButtonStyle.Danger` 红色危险确认按钮。
+    - `AccountManageDialog.kt`：精简至 220 行以内，专职调度编排。
+- [x] **代码清理与多语言体验优化**
+  - [x] 彻底清除微信/支付宝历史代码、文案及测试数据，规范化账户体系。
+  - [x] 缩短添加账户输入框占位提示词 (`account_name_input`)，解决多语言在小屏设备折成 2 行的问题。
+- [x] **UI / 动效细节微调与触觉反馈系统 (Polish & Haptics)**
+  - [x] 物理级微触觉震动反馈：`NumericKeypad` 按键轻触 (`TextHandleMove`) 与完成记账脉冲 (`LongPress`)；过滤器切换与危险删除确认震动。
+  - [x] 图表展开与平滑补间动效：`DonutChart` 顺时针 650ms 优雅扫开，`LineChart` 600ms 自底向上平滑拔起。
+  - [x] 预算进度与收支切换过渡：`BalanceOverviewCard` 预算进度条 500ms 阻尼过渡，统计页收支切换 `AnimatedContent` 丝滑交叉淡入淡出。
+
+---
+
+## 需求池 (Backlog)
+
+- [ ] **新增架构设计全景可视化功能**：在 App 关于/开发者面板展示当前架构设计与技术栈拓扑。
+- [ ] **Push 本地推送与版本升级检查**：检测到新版本时推送本地通知，点击跳转设置页触发检查更新。
+- [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：支持全局可拖拽悬浮球调起调试控制台。

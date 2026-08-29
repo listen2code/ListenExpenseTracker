@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.transactions.components
+package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,8 @@ fun AccountDeleteConfirmDialog(
     modifier: Modifier = Modifier,
     lang: String = "zh"
 ) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     CommonDialog(
         onDismissRequest = onDismiss,
         title = AppStrings.delete_account_confirm_title.tr(lang),
@@ -33,7 +35,10 @@ fun AccountDeleteConfirmDialog(
         confirmButton = {
             CommonButton(
                 text = AppStrings.common_delete.tr(lang),
-                onClick = onConfirm,
+                onClick = {
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onConfirm()
+                },
                 style = CommonButtonStyle.Danger
             )
         },

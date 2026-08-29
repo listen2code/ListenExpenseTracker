@@ -1,5 +1,6 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,26 +74,42 @@ fun StatisticsContentList(
                     .fillMaxWidth()
                     .padding(top = AppDimens.SpaceExtraSmall)
             ) {
-                if (activeShares.isEmpty() || totalAmount <= 0.0) {
-                    CommonEmpty(
-                        message = if (isExpenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
-                        modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
-                    )
-                } else {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        DonutChart(
-                            items = activeShares,
-                            totalValue = totalAmount,
-                            centerTitle = if (isExpenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
-                            centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(totalAmount)}",
-                            modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
+                androidx.compose.animation.AnimatedContent(
+                    targetState = isExpenseTab,
+                    transitionSpec = {
+                        androidx.compose.animation.fadeIn(
+                            animationSpec = androidx.compose.animation.core.tween(300)
+                        ) togetherWith androidx.compose.animation.fadeOut(
+                            animationSpec = androidx.compose.animation.core.tween(200)
                         )
-                        SegmentedProgressBar(
-                            segments = activeSegments,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = AppDimens.SpaceSmall)
+                    },
+                    label = "DonutChartTabTransition"
+                ) { expenseTab ->
+                    val shares = if (expenseTab) calc.categoryShares else calc.incomeCategoryShares
+                    val segments = if (expenseTab) calc.progressSegments else calc.incomeProgressSegments
+                    val amount = if (expenseTab) calc.totalExpense else calc.totalIncome
+
+                    if (shares.isEmpty() || amount <= 0.0) {
+                        CommonEmpty(
+                            message = if (expenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
+                            modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                         )
+                    } else {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            DonutChart(
+                                items = shares,
+                                totalValue = amount,
+                                centerTitle = if (expenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
+                                centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(amount)}",
+                                modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
+                            )
+                            SegmentedProgressBar(
+                                segments = segments,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = AppDimens.SpaceSmall)
+                            )
+                        }
                     }
                 }
             }
@@ -122,15 +139,27 @@ fun StatisticsContentList(
 
         // Key Metrics Summary Card
         item(key = "metrics_card") {
-            MetricsSummaryCard(
-                isExpenseTab = isExpenseTab,
-                dailyAverage = if (isExpenseTab) calc.dailyAverageExpense else calc.dailyAverageIncome,
-                maxTransaction = if (isExpenseTab) calc.maxExpenseTransaction else calc.maxIncomeTransaction,
-                currencySymbol = sym,
-                lang = lang,
-                modifier = Modifier.fillMaxWidth(),
-                hideAmount = state.hideAmount
-            )
+            androidx.compose.animation.AnimatedContent(
+                targetState = isExpenseTab,
+                transitionSpec = {
+                    androidx.compose.animation.fadeIn(
+                        animationSpec = androidx.compose.animation.core.tween(300)
+                    ) togetherWith androidx.compose.animation.fadeOut(
+                        animationSpec = androidx.compose.animation.core.tween(200)
+                    )
+                },
+                label = "MetricsTabTransition"
+            ) { expenseTab ->
+                MetricsSummaryCard(
+                    isExpenseTab = expenseTab,
+                    dailyAverage = if (expenseTab) calc.dailyAverageExpense else calc.dailyAverageIncome,
+                    maxTransaction = if (expenseTab) calc.maxExpenseTransaction else calc.maxIncomeTransaction,
+                    currencySymbol = sym,
+                    lang = lang,
+                    modifier = Modifier.fillMaxWidth(),
+                    hideAmount = state.hideAmount
+                )
+            }
         }
 
         // Category Breakdown Ranking List

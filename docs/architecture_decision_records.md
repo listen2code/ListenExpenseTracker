@@ -92,7 +92,7 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 2. 列表层通过 `groupBy { formatDayGroupHeader(it.timestamp) }` 实现按日自动聚合分组，并提供每日收支小计。
 3. 将条目图标与内边距压缩为 24dp/6dp，使信息密度提高 100%。
 
-·---
+---
 
 ## ADR-008: Listen 系列多 App 架构边界与通用库业务解耦 (Zero Business Coupling)
 
@@ -103,3 +103,75 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 1. **`ListenArch` 通用底座化**：移除所有 Room Entity/DAO/Database 与记账 CSV 导出，迁移至 `ListenExpenseTracker`；将 `CloudSyncManager` 改造为支持任意泛型/JSON 字符串的通用 Payload 传输引擎；`StringsRes` 仅保留系统级通用词并开放 `registerAppStrings()` 动态注册能力。
 2. **`ListenUiComponent` 纯粹化**：消除 UI 控件中的业务硬编码文案（如 `NumericKeypad` 的 `doneText` 参数化，`SearchBarInput` 默认通用占位符）。
 3. **`ListenExpenseTracker` 业务闭环**：通过 `ExpenseDataStoreManager`、`ExpenseStrings` 及 `data/db/` 完整承接领域模型与业务计算。
+
+---
+
+## ADR-009: 资产账户多维分层与破坏性操作确认规范 (Rule 15 Danger Button)
+
+### 背景 (Context)
+随着用户自定义资产账户（交通卡、理财专户等）数量增加，混杂内置账户造成层级混乱；且账户删除属于高危破坏性操作（需防止误触，并让用户明确知晓已关联账单不会丢失）。
+
+### 决策 (Decision)
+1. **双层账户结构**：将账户划分为标准系统账户 (`CASH`/`BANK`/`CREDIT`) 与动态持久化自定义账户 (`ACC_*`)。
+2. **多端交互一致性**：在流水头部筛选胶囊、账户管理弹窗、添加账单 Sheet、编辑账单 Sheet 四个场景统一支持长按自定义账户调出删除二次确认。
+3. **Rule 15 破坏性确认标准**：删除弹窗的确认按钮强制采用 `CommonButtonStyle.Danger` 醒目红色调，取消按钮采用弱化 Text 样式。
+
+---
+
+## ADR-010: UI 组件深度拆分解耦与单文件行数控制标准 (PROMPTS.md Rule 3)
+
+### 背景 (Context)
+`AccountManageDialog.kt` 随业务迭代膨胀至近 500 行，内部混杂了卡片渲染、改名弹窗、删除确认与列表编排，降低了代码可读性与复用性。
+
+### 决策 (Decision)
+1. **单一职责物理拆分**：
+   - 提取 `AccountCardItem.kt` 负责单行卡片、徽标与着色。
+   - 提取 `AccountEditDialog.kt` 负责新增/重命名录入。
+   - 提取 `AccountDeleteConfirmDialog.kt` 负责安全删除确认。
+   - `AccountManageDialog.kt` 降至 220 行以内，仅承载 Section 列表编排。
+2. **严格参数规范 (Rule 13)**：所有独立 Composable 组件首个可选参数统一为 `modifier: Modifier = Modifier`。
+
+---
+
+## ADR-011: CI/CD 自动化构建与发布成功邮件通知机制
+
+### 背景 (Context)
+持续集成每次 push 或 PR 执行工作流都会触发状态，但开发者仅在正式发版到 Google Play 成功时需要接收确认通知，无需为日常常规 CI 接收干扰邮件。
+
+### 决策 (Decision)
+1. 在 `.github/workflows/deploy.yml` 的 `publish-google-play` 任务末尾集成邮件通知步骤。
+2. 设定条件限制 `if: success()`，仅在 AAB 生成、签名、元数据校验及 Google Play 发布成功后，向 `listen2code@gmail.com` 发送带版本号与 commit 信息的高优邮件。
+
+---
+
+## ADR-012: 触觉反馈系统与组件级平滑动效体系 (Haptics & Motion Design System)
+
+### 背景 (Context)
+移动记账属于高频操作场景，缺乏物理按键的触感反馈会导致输入确定性不足；同时，数据卡片与图表在月份或收支 Tab 切换时的突兀跳变会削弱界面的精致度。
+
+### 决策 (Decision)
+1. **统一触觉反馈梯队 (Compose LocalHapticFeedback)**：
+   - **轻触级 (`TextHandleMove`)**：用于 `NumericKeypad` 数字键/退格键按压、账户筛选胶囊切换、排序规则选择，模拟高频机械微触感。
+   - **脉冲确认级 (`LongPress`)**：用于「完成记账 ✓」全宽提交、危险操作 (`AccountDeleteConfirmDialog`) 确认删除，强化关键状态流转的确定感。
+2. **渐进式图表展开与过渡补间**：
+   - `DonutChart`：引入 `animateFloatAsState`（650ms `FastOutSlowInEasing`），圆环从 -90° 顺时针优雅展开。
+   - `LineChart`：引入 600ms 阻尼插值，折线与填充自底向上拔起。
+   - `BalanceOverviewCard`：预算进度条应用 500ms 平滑插值，避免硬切抖动。
+   - 页面级 Tab 切换：使用 `AnimatedContent` 进行交叉淡入淡出（Crossfade 300ms）。
+
+---
+
+## ADR-013: Release Pipeline 工业级上线交付与多轨道发布规范
+
+### 背景 (Context)
+发布到 Google Play 需面对全球多设备机型与多语言环境，必须具备严格的版本递增、混淆优化、密钥安全隔离、AAB 动态下发与阶段性灰度防护。
+
+### 决策 (Decision)
+1. **自动化构建与版本控制**：
+   - `versionCode` 在 Gradle/CI 中基于构建号自动化递增，`versionName` 采用严格 SemVer 语义化规范。
+2. **生产构建加固 (R8 / Shrinking)**：
+   - Release 构建强制启用 `minifyEnabled true` 与 `shrinkResources true`，保护 Room、Kotlinx Serialization 等实体规则，并归档 `mapping.txt`。
+3. **Play App Signing 与 Secrets 隔离**：
+   - 仅使用 Upload Keystore 本地/CI 签名，主签名由 Google Play 托管。敏感凭据全量注入 GitHub Secrets。
+4. **渐进式灰度发布 (Staged Rollout)**：
+   - 生产环境发布严格推行 `10% -> 20% -> 50% -> 100%` 灰度流转，依托 Android Vitals（Crash / ANR < 0.47%）守护质量红线。

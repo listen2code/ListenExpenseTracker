@@ -59,6 +59,7 @@ fun TransactionsHeaderFilters(
     modifier: Modifier = Modifier
 ) {
     val lang = state.language
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var accountKeyToDelete by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -96,8 +97,14 @@ fun TransactionsHeaderFilters(
                         selected = isSelected,
                         label = label,
                         isCustom = isCustom,
-                        onClick = { onIntent(TransactionsIntent.FilterAccountChange(acctKey)) },
-                        onLongClick = { accountKeyToDelete = acctKey }
+                        onClick = {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                            onIntent(TransactionsIntent.FilterAccountChange(acctKey))
+                        },
+                        onLongClick = {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            accountKeyToDelete = acctKey
+                        }
                     )
                 }
 
@@ -132,6 +139,7 @@ fun TransactionsHeaderFilters(
                         DropdownMenuItem(
                             text = { Text(order.displayNameKey.tr(lang)) },
                             onClick = {
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
                                 onIntent(TransactionsIntent.ChangeSortOrder(order))
                                 onShowSortMenuChange(false)
                             }
