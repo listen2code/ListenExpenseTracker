@@ -143,10 +143,10 @@
 
 ---
 
-- [x] **异步检查 GitHub Release 更新与更新引导 (GitHub Release Update Checker)**
-  - [x] 实现 `UpdateCheckerService`：异步请求 GitHub Releases API (`listen2code/ListenExpenseTracker`)，解析最新 Release Tag、标题、Changelog 与 APK 直链。
-  - [x] 语义化版本比对（SemVer）：精准比对云端 Tag 与本地 `versionName`，识别新版本并完成单元测试覆盖 (`UpdateCheckerServiceTest`)。
-  - [x] `AboutAppDialog` 接入更新检测与 Loading 状态，弹出 `UpdateAvailableDialog` 引导用户一键前往 GitHub 或下载 APK，全量适配中英日三语。
+- [x] **异步检查版本更新与更新引导 (In-App Version Checker)**
+  - [x] 实现 `UpdateCheckerService`：异步请求静态配置 (`https://listen2code.github.io/ListenExpenseTracker/pages/version.json`)，毫秒级响应、免鉴权且无 API 频控限制。
+  - [x] 语义化版本比对（SemVer）与构建号（BuildNumber）双重比对：识别新版本并完成单元测试覆盖 (`UpdateCheckerServiceTest`)。
+  - [x] `AboutAppDialog` 接入更新检测与 Loading 状态，弹出 `UpdateAvailableDialog` 自动按中英日展示多语言 Changelog 并引导前往更新。
 
 ---
 

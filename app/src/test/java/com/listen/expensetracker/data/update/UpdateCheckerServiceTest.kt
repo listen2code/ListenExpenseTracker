@@ -55,4 +55,14 @@ class UpdateCheckerServiceTest {
             assertTrue(result.releaseInfo.changelog.isNotBlank())
         }
     }
+
+    @Test
+    fun testCheckLatestRelease_alreadyLatest() = kotlinx.coroutines.test.runTest {
+        val result = UpdateCheckerService.checkLatestRelease(
+            currentVersion = "0.0.20",
+            currentBuildNumber = 20L,
+            lang = "zh"
+        )
+        assertTrue("Expected already latest, got: $result", result is UpdateResult.AlreadyLatest)
+    }
 }
