@@ -54,7 +54,6 @@ fun TransactionsScreen(
     scrollToTopFlow: Flow<Unit>? = null
 ) {
     val lang = state.language
-    var showSortMenu by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val pagerState = rememberPagerState(
@@ -134,8 +133,6 @@ fun TransactionsScreen(
             TransactionsHeaderFilters(
                 state = state,
                 onIntent = onIntent,
-                showSortMenu = showSortMenu,
-                onShowSortMenuChange = { showSortMenu = it },
                 modifier = Modifier
                     .padding(horizontal = AppDimens.SpaceLarge)
                     .padding(bottom = AppDimens.SpaceSmall)

@@ -1,6 +1,7 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
@@ -23,6 +24,8 @@ sealed interface TransactionsDialog {
     data class ConfirmDelete(val transaction: TransactionEntity) : TransactionsDialog
     data object MonthPicker : TransactionsDialog
     data object ManageAccount : TransactionsDialog
+    data object FilterSheet : TransactionsDialog
+    data object MonthlyBudget : TransactionsDialog
 }
 
 /**
@@ -41,6 +44,11 @@ data class TransactionsUiState(
     val hideBalance: Boolean = false,
     val searchQuery: String = "",
     val selectedAccountFilter: String = "ALL",
+    val typeFilter: String = "ALL",
+    val selectedCategories: Set<String> = emptySet(),
+    val amountPreset: AmountFilterPreset = AmountFilterPreset.ALL,
+    val customMinAmount: Double? = null,
+    val customMaxAmount: Double? = null,
     val selectedMonthOffset: Int = 0,
     val monthTitle: String = "本月",
     val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
@@ -52,7 +60,23 @@ data class TransactionsUiState(
     val isLoading: Boolean = false,
     val targetScrollDay: Int? = null,
     val targetScrollTxId: String? = null
-)
+) {
+    val categoryFilter: String
+        get() = if (selectedCategories.isEmpty()) "ALL" else selectedCategories.first()
+
+    val activeFilterCount: Int
+        get() {
+            var count = 0
+            if (typeFilter != "ALL") count++
+            if (selectedCategories.isNotEmpty()) count++
+            if (amountPreset != AmountFilterPreset.ALL) count++
+            if (sortOrder != TransactionSortOrder.DATE_DESC) count++
+            return count
+        }
+
+    val hasActiveFilters: Boolean
+        get() = activeFilterCount > 0 || searchQuery.isNotBlank() || selectedAccountFilter != "ALL"
+}
 
 /**
  * User Intents for Transactions Feature.
@@ -86,4 +110,20 @@ sealed interface TransactionsIntent {
     data class FilterByDate(val monthOffset: Int, val day: Int) : TransactionsIntent
     data class FilterByTransaction(val monthOffset: Int, val transactionId: String, val day: Int) : TransactionsIntent
     data object ClearTargetScrollDay : TransactionsIntent
+    data class ChangeTypeFilter(val type: String) : TransactionsIntent
+    data class ApplyCompoundFilter(
+        val type: String,
+        val categories: Set<String> = emptySet(),
+        val preset: AmountFilterPreset,
+        val min: Double? = null,
+        val max: Double? = null,
+        val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC
+    ) : TransactionsIntent
+    data object ResetAllFilters : TransactionsIntent
+    data object ClearTypeFilter : TransactionsIntent
+    data object ClearCategoryFilter : TransactionsIntent
+    data class RemoveCategoryFilter(val categoryId: String) : TransactionsIntent
+    data object ClearAmountFilter : TransactionsIntent
+    data object ClearSortOrder : TransactionsIntent
+    data class UpdateMonthlyBudget(val budget: Double) : TransactionsIntent
 }

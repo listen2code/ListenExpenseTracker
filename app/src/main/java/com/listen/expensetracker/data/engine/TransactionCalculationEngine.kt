@@ -1,6 +1,7 @@
 package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.LineChartPoint
@@ -33,6 +34,11 @@ data class CalculationResult(
     val monthTitle: String
 )
 
+enum class AmountFilterPreset(val labelKey: String) {
+    ALL("filter_amount_all"), SMALL_LT_50("filter_amount_small"),
+    MEDIUM_50_500("filter_amount_medium"), LARGE_GT_500("filter_amount_large"), CUSTOM("filter_amount_custom")
+}
+
 object TransactionCalculationEngine {
 
     fun filterAndCalculate(
@@ -43,19 +49,48 @@ object TransactionCalculationEngine {
         budget: Double,
         sortOrder: TransactionSortOrder,
         currencySymbol: String = "￥",
-        lang: String = "zh"
+        lang: String = "zh",
+        typeFilter: String = "ALL",
+        selectedCategories: Set<String> = emptySet(),
+        categoryFilter: String = "ALL",
+        amountPreset: AmountFilterPreset = AmountFilterPreset.ALL,
+        customMinAmount: Double? = null,
+        customMaxAmount: Double? = null
     ): CalculationResult {
         val cleanQuery = query.trim().lowercase()
         val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset, lang)
-
         val monthFilteredList = allList.filter { it.timestamp in startTs..endTs }
+        val activeCategories = if (selectedCategories.isNotEmpty()) selectedCategories else if (categoryFilter != "ALL") setOf(categoryFilter) else emptySet()
 
         val matchedFiltered = monthFilteredList.filter { item ->
             val matchesQuery = cleanQuery.isEmpty() ||
                     item.categoryName.lowercase().contains(cleanQuery) ||
-                    item.note.lowercase().contains(cleanQuery)
+                    item.note.lowercase().contains(cleanQuery) ||
+                    item.accountType.lowercase().contains(cleanQuery) ||
+                    "%.2f".format(item.amount).contains(cleanQuery) ||
+                    item.amount.toLong().toString() == cleanQuery
             val matchesAccount = accountFilter == "ALL" || item.accountType == accountFilter
-            matchesQuery && matchesAccount
+            val matchesType = typeFilter == "ALL" || item.type.equals(typeFilter, ignoreCase = true)
+            val matchesCategory = activeCategories.isEmpty() || activeCategories.contains("ALL") ||
+                    activeCategories.any { catFilter ->
+                        item.categoryName.equals(catFilter, ignoreCase = true) ||
+                        item.categoryId.equals(catFilter, ignoreCase = true) ||
+                        CategoryRepository.allCategories.any { cat ->
+                            (cat.id.equals(catFilter, true) || cat.nameKey.equals(catFilter, true) || cat.customName.equals(catFilter, true)) &&
+                            (item.categoryId.equals(cat.id, true) || item.categoryName.equals(cat.nameKey, true) || item.categoryName.equals(cat.customName, true))
+                        }
+                    }
+            val matchesAmount = when (amountPreset) {
+                AmountFilterPreset.ALL -> true
+                AmountFilterPreset.SMALL_LT_50 -> item.amount < 50.0
+                AmountFilterPreset.MEDIUM_50_500 -> item.amount in 50.0..500.0
+                AmountFilterPreset.LARGE_GT_500 -> item.amount > 500.0
+                AmountFilterPreset.CUSTOM -> {
+                    (customMinAmount == null || item.amount >= customMinAmount) &&
+                    (customMaxAmount == null || item.amount <= customMaxAmount)
+                }
+            }
+            matchesQuery && matchesAccount && matchesType && matchesCategory && matchesAmount
         }
 
         val finalSorted = when (sortOrder) {
@@ -183,17 +218,13 @@ object TransactionCalculationEngine {
     }
 
     fun getMonthRangeAndTitle(offset: Int, lang: String = "zh"): Triple<Long, Long, String> {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MONTH, offset)
-        cal.set(Calendar.DAY_OF_MONTH, 1)
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
+        val cal = Calendar.getInstance().apply {
+            add(Calendar.MONTH, offset)
+            set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }
         val startTs = cal.timeInMillis
-
-        cal.add(Calendar.MONTH, 1)
-        cal.add(Calendar.MILLISECOND, -1)
+        cal.add(Calendar.MONTH, 1); cal.add(Calendar.MILLISECOND, -1)
         val endTs = cal.timeInMillis
 
         val sdf = when (lang.lowercase()) {

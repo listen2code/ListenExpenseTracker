@@ -47,6 +47,11 @@ fun TransactionsContentList(
         monthOffset,
         state.searchQuery,
         state.selectedAccountFilter,
+        state.typeFilter,
+        state.selectedCategories,
+        state.amountPreset,
+        state.customMinAmount,
+        state.customMaxAmount,
         state.monthlyBudget,
         state.sortOrder,
         lang
@@ -59,7 +64,12 @@ fun TransactionsContentList(
             budget = state.monthlyBudget,
             sortOrder = state.sortOrder,
             currencySymbol = sym,
-            lang = lang
+            lang = lang,
+            typeFilter = state.typeFilter,
+            selectedCategories = state.selectedCategories,
+            amountPreset = state.amountPreset,
+            customMinAmount = state.customMinAmount,
+            customMaxAmount = state.customMaxAmount
         )
     }
 
@@ -121,6 +131,9 @@ fun TransactionsContentList(
                 isOverBudget = calc.isOverBudget,
                 hideBalance = state.hideBalance,
                 lang = lang,
+                monthlyBudget = calc.monthlyBudget,
+                remainingBudget = calc.remainingBudget,
+                onBudgetClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppDimens.SpaceExtraSmall)
@@ -130,18 +143,27 @@ fun TransactionsContentList(
         // Grouped Transactions List
         if (groupedTransactions.isEmpty()) {
             item(key = "empty_transactions_view") {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = AppDimens.SpaceSection),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
-                ) {
-                    CommonEmpty(message = AppStrings.empty_transactions.tr(lang))
-                    CommonButton(
-                        text = AppStrings.seed_month_demo_data.tr(lang),
-                        style = CommonButtonStyle.Tonal,
-                        onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
+                if (state.hasActiveFilters) {
+                    CommonEmpty(
+                        message = "${AppStrings.empty_search_title.tr(lang)}\n${AppStrings.empty_search_desc.tr(lang)}",
+                        action = {
+                            CommonButton(
+                                text = AppStrings.filter_clear_active.tr(lang),
+                                style = CommonButtonStyle.Outlined,
+                                onClick = { onIntent(TransactionsIntent.ResetAllFilters) }
+                            )
+                        }
+                    )
+                } else {
+                    CommonEmpty(
+                        message = AppStrings.empty_transactions.tr(lang),
+                        action = {
+                            CommonButton(
+                                text = AppStrings.seed_month_demo_data.tr(lang),
+                                style = CommonButtonStyle.Tonal,
+                                onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
+                            )
+                        }
                     )
                 }
             }

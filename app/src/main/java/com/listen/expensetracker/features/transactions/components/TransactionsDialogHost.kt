@@ -1,7 +1,13 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.KeyboardType
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.features.common.components.MonthPickerDialog
@@ -13,7 +19,9 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiS
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
+import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonText
+import java.util.Calendar
 
 /**
  * Dedicated Dialog and Sheet Host for Transactions Feature.
@@ -29,8 +37,23 @@ fun TransactionsDialogHost(
 
     when (val dialog = state.activeDialog) {
         is TransactionsDialog.AddTransaction -> {
+            val initialDate = remember(state.selectedMonthOffset) {
+                if (state.selectedMonthOffset != 0) {
+                    Calendar.getInstance().apply {
+                        add(Calendar.MONTH, state.selectedMonthOffset)
+                        set(Calendar.DAY_OF_MONTH, 1)
+                        set(Calendar.HOUR_OF_DAY, 12)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                } else {
+                    System.currentTimeMillis()
+                }
+            }
             AddTransactionSheet(
                 currencySymbol = sym,
+                initialTimestamp = initialDate,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
                 onSave = { type, catId, catName, catIcon, catColor, amt, note, acct, ts ->
                     onIntent(TransactionsIntent.AddTransaction(type, catId, catName, catIcon, catColor, amt, note, acct, ts))
@@ -103,6 +126,36 @@ fun TransactionsDialogHost(
                     onIntent(TransactionsIntent.FilterAccountChange(newKey))
                 },
                 lang = lang
+            )
+        }
+        is TransactionsDialog.FilterSheet -> {
+            TransactionFilterBottomSheet(
+                currentType = state.typeFilter,
+                currentCategories = state.selectedCategories,
+                currentPreset = state.amountPreset,
+                currentSortOrder = state.sortOrder,
+                currentMin = state.customMinAmount,
+                currentMax = state.customMaxAmount,
+                currencySymbol = sym,
+                lang = lang,
+                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onReset = { onIntent(TransactionsIntent.ResetAllFilters) },
+                onApply = { type, categories, preset, min, max, sort ->
+                    onIntent(TransactionsIntent.ApplyCompoundFilter(type, categories, preset, min, max, sort))
+                }
+            )
+        }
+        is TransactionsDialog.MonthlyBudget -> {
+            MonthlyBudgetDialog(
+                currentBudget = state.monthlyBudget,
+                currencySymbol = sym,
+                lang = lang,
+                spentAmount = state.totalExpense,
+                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onConfirm = { newBudget ->
+                    onIntent(TransactionsIntent.UpdateMonthlyBudget(newBudget))
+                    onIntent(TransactionsIntent.DismissDialog)
+                }
             )
         }
         null -> Unit

@@ -4,13 +4,21 @@ import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.SurfaceCard
@@ -52,6 +61,9 @@ fun BalanceOverviewCard(
     isOverBudget: Boolean,
     hideBalance: Boolean,
     lang: String,
+    monthlyBudget: Double = 0.0,
+    remainingBudget: Double = 0.0,
+    onBudgetClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     SurfaceCard(
@@ -128,7 +140,7 @@ fun BalanceOverviewCard(
                 }
             }
 
-            // Bottom Row: Budget Progress Indicator & Percentage
+            // Bottom Section: Prominent Monthly Budget Progress Container
             val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
                 targetValue = budgetUsageRatio.coerceIn(0f, 1f),
                 animationSpec = androidx.compose.animation.core.tween(
@@ -138,25 +150,71 @@ fun BalanceOverviewCard(
                 label = "BudgetUsageProgress"
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                    .clickable(onClick = onBudgetClick)
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Savings,
+                            contentDescription = null,
+                            tint = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = AppStrings.monthly_budget.tr(lang),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (monthlyBudget > 0.0) {
+                            Text(
+                                text = "($currencySymbol${"%.0f".format(monthlyBudget)})",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Budget",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(11.dp)
+                        )
+                    }
+
+                    Text(
+                        text = if (isOverBudget) {
+                            "${AppStrings.over_budget.tr(lang)} $currencySymbol${"%.0f".format(totalExpense - monthlyBudget)}"
+                        } else {
+                            "${AppStrings.used_budget.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary
+                    )
+                }
+
                 LinearProgressIndicator(
                     progress = { animatedProgress },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(3.dp)
-                        .clip(RoundedCornerShape(2.dp)),
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
                     color = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-                Text(
-                    text = "${"%.0f".format(budgetUsageRatio * 100)}%",
-                    fontSize = AppDimens.TextMicro,
-                    color = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
                 )
             }
         }

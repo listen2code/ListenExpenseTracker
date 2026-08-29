@@ -30,6 +30,23 @@ object ExpenseStrings {
         AppStrings.filter_cash to "现金",
         AppStrings.filter_bank to "银行卡",
         AppStrings.filter_credit to "信用卡",
+        AppStrings.filter_title to "多维筛选",
+        AppStrings.filter_type to "收支类型",
+        AppStrings.filter_type_all to "全部类型",
+        AppStrings.filter_amount to "金额区间",
+        AppStrings.filter_amount_all to "全部金额",
+        AppStrings.filter_amount_small to "小额 (< 50)",
+        AppStrings.filter_amount_medium to "中额 (50 - 500)",
+        AppStrings.filter_amount_large to "大额 (> 500)",
+        AppStrings.filter_amount_custom to "自定义",
+        AppStrings.filter_min_amount to "最低金额",
+        AppStrings.filter_max_amount to "最高金额",
+        AppStrings.filter_reset to "重置",
+        AppStrings.filter_apply to "完成",
+        AppStrings.filter_clear_active to "清除筛选",
+        AppStrings.filter_sort to "排序规则",
+        AppStrings.empty_search_title to "未找到匹配账单",
+        AppStrings.empty_search_desc to "尝试更换关键字或重置筛选条件",
         AppStrings.sort_date_desc to "时间最新",
         AppStrings.sort_date_asc to "时间最早",
         AppStrings.sort_amount_desc to "金额降序",
@@ -171,9 +188,9 @@ object ExpenseStrings {
         AppStrings.already_latest_version to "当前已是最新版本 (v%s)",
         AppStrings.update_found_title to "发现新版本 (v%s)",
         AppStrings.update_now_btn to "立即下载更新",
-        AppStrings.view_on_github_btn to "前往 GitHub 查看",
         AppStrings.check_update_failed to "检查更新失败，请稍后重试",
-        AppStrings.changelog_title to "更新日志"
+        AppStrings.changelog_title to "更新日志",
+        AppStrings.transaction_note_hint to "添加备注 (选填)..."
     )
 
     private val enMap = mapOf(
@@ -191,6 +208,23 @@ object ExpenseStrings {
         AppStrings.filter_cash to "Cash",
         AppStrings.filter_bank to "Card",
         AppStrings.filter_credit to "Credit",
+        AppStrings.filter_title to "Filters",
+        AppStrings.filter_type to "Transaction Type",
+        AppStrings.filter_type_all to "All Types",
+        AppStrings.filter_amount to "Amount Range",
+        AppStrings.filter_amount_all to "All Amounts",
+        AppStrings.filter_amount_small to "Small (< 50)",
+        AppStrings.filter_amount_medium to "Medium (50 - 500)",
+        AppStrings.filter_amount_large to "Large (> 500)",
+        AppStrings.filter_amount_custom to "Custom",
+        AppStrings.filter_min_amount to "Min Amount",
+        AppStrings.filter_max_amount to "Max Amount",
+        AppStrings.filter_reset to "Reset",
+        AppStrings.filter_apply to "Done",
+        AppStrings.filter_clear_active to "Clear Filters",
+        AppStrings.filter_sort to "Sort By",
+        AppStrings.empty_search_title to "No Transactions Found",
+        AppStrings.empty_search_desc to "Try searching with different keywords or reset filters",
         AppStrings.sort_date_desc to "Newest First",
         AppStrings.sort_date_asc to "Oldest First",
         AppStrings.sort_amount_desc to "Amount High-Low",
@@ -334,7 +368,8 @@ object ExpenseStrings {
         AppStrings.update_now_btn to "Download Update",
         AppStrings.view_on_github_btn to "View on GitHub",
         AppStrings.check_update_failed to "Failed to check for updates, please try again",
-        AppStrings.changelog_title to "Changelog"
+        AppStrings.changelog_title to "Changelog",
+        AppStrings.transaction_note_hint to "Add note (optional)..."
     )
 
     private val jaMap = mapOf(
@@ -352,6 +387,23 @@ object ExpenseStrings {
         AppStrings.filter_cash to "現金",
         AppStrings.filter_bank to "口座",
         AppStrings.filter_credit to "クレカ",
+        AppStrings.filter_title to "詳細絞り込み",
+        AppStrings.filter_type to "収支タイプ",
+        AppStrings.filter_type_all to "すべて",
+        AppStrings.filter_amount to "金額範囲",
+        AppStrings.filter_amount_all to "すべての金額",
+        AppStrings.filter_amount_small to "少額 (< 50)",
+        AppStrings.filter_amount_medium to "中額 (50 - 500)",
+        AppStrings.filter_amount_large to "大口 (> 500)",
+        AppStrings.filter_amount_custom to "カスタム",
+        AppStrings.filter_min_amount to "最小金額",
+        AppStrings.filter_max_amount to "最大金額",
+        AppStrings.filter_reset to "リセット",
+        AppStrings.filter_apply to "完了",
+        AppStrings.filter_clear_active to "絞り込み解除",
+        AppStrings.filter_sort to "並び替え",
+        AppStrings.empty_search_title to "該当する明細がありません",
+        AppStrings.empty_search_desc to "キーワードを変更するか、絞り込み条件をリセットしてください",
         AppStrings.sort_date_desc to "日付（新しい順）",
         AppStrings.sort_date_asc to "日付（古い順）",
         AppStrings.sort_amount_desc to "金額（高い順）",
@@ -495,6 +547,7 @@ object ExpenseStrings {
         AppStrings.update_now_btn to "今すぐダウンロード",
         AppStrings.view_on_github_btn to "GitHub で見る",
         AppStrings.check_update_failed to "更新の確認に失敗しました。もう一度お試しください",
-        AppStrings.changelog_title to "更新内容"
+        AppStrings.changelog_title to "更新内容",
+        AppStrings.transaction_note_hint to "メモを追加 (任意)..."
     )
 }

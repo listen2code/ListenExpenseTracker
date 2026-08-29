@@ -26,6 +26,7 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
 import com.listen.expensetracker.features.transactions.components.AccountManageDialog
+import com.listen.expensetracker.features.transactions.components.MonthlyBudgetDialog
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
@@ -73,38 +74,16 @@ fun SettingsDialogHost(
             )
         }
         is SettingsDialog.MonthlyBudget -> {
-            var budgetInput by remember { mutableStateOf("%.0f".format(state.monthlyBudget)) }
-
-            CommonDialog(
-                onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.monthly_budget.tr(lang),
-                confirmButton = {
-                    CommonButton(
-                        text = AppStrings.btn_done.tr(lang),
-                        onClick = {
-                            val budget = budgetInput.toDoubleOrNull() ?: state.monthlyBudget
-                            onIntent(SettingsIntent.UpdateMonthlyBudget(budget))
-                            onIntent(SettingsIntent.DismissDialog)
-                        },
-                        style = CommonButtonStyle.Primary
-                    )
-                },
-                dismissButton = {
-                    CommonButton(
-                        text = AppStrings.btn_cancel.tr(lang),
-                        onClick = { onIntent(SettingsIntent.DismissDialog) },
-                        style = CommonButtonStyle.Text
-                    )
+            MonthlyBudgetDialog(
+                currentBudget = state.monthlyBudget,
+                currencySymbol = sym,
+                lang = lang,
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                onConfirm = { newBudget ->
+                    onIntent(SettingsIntent.UpdateMonthlyBudget(newBudget))
+                    onIntent(SettingsIntent.DismissDialog)
                 }
-            ) {
-                CommonEditText(
-                    value = budgetInput,
-                    onValueChange = { budgetInput = it },
-                    label = AppStrings.monthly_budget.tr(lang),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-            }
+            )
         }
         is SettingsDialog.ClearConfirm -> {
             CommonDialog(

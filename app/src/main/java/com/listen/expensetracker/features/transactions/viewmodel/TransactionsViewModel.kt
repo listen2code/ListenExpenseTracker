@@ -14,9 +14,11 @@ import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.model.AccountRepository
+import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.AccentColor
@@ -62,115 +64,96 @@ class TransactionsViewModel(
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is TransactionsIntent.SeedDemoData -> seedDemoData(intent.monthOffset)
             is TransactionsIntent.FilterByCategory -> {
-                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = intent.categoryName, selectedAccountFilter = "ALL") }
+                val cat = CategoryRepository.allCategories.find {
+                    it.id.equals(intent.categoryName, true) || it.nameKey.equals(intent.categoryName, true) ||
+                    it.customName.equals(intent.categoryName, true) || it.getDisplayName("zh").equals(intent.categoryName, true) ||
+                    it.getDisplayName("en").equals(intent.categoryName, true) || it.getDisplayName("ja").equals(intent.categoryName, true)
+                }
+                updateState {
+                    copy(
+                        selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL",
+                        typeFilter = cat?.type ?: "ALL", selectedCategories = setOf(cat?.id ?: intent.categoryName),
+                        amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
+                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = null, targetScrollTxId = null
+                    )
+                }
                 recalculate()
             }
             is TransactionsIntent.FilterByDate -> {
-                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", targetScrollDay = intent.day) }
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, targetScrollDay = intent.day) }
                 recalculate()
             }
             is TransactionsIntent.FilterByTransaction -> {
-                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", targetScrollDay = intent.day, targetScrollTxId = intent.transactionId) }
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, targetScrollDay = intent.day, targetScrollTxId = intent.transactionId) }
                 recalculate()
             }
             is TransactionsIntent.ClearTargetScrollDay -> updateState { copy(targetScrollDay = null, targetScrollTxId = null) }
+            is TransactionsIntent.ChangeTypeFilter -> { updateState { copy(typeFilter = intent.type) }; recalculate() }
+            is TransactionsIntent.ApplyCompoundFilter -> {
+                updateState { copy(typeFilter = intent.type, selectedCategories = intent.categories, amountPreset = intent.preset, customMinAmount = intent.min, customMaxAmount = intent.max, sortOrder = intent.sortOrder) }
+                recalculate()
+            }
+            is TransactionsIntent.ResetAllFilters -> {
+                updateState { copy(searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC) }
+                recalculate()
+            }
+            is TransactionsIntent.ClearTypeFilter -> { updateState { copy(typeFilter = "ALL") }; recalculate() }
+            is TransactionsIntent.ClearCategoryFilter -> { updateState { copy(selectedCategories = emptySet()) }; recalculate() }
+            is TransactionsIntent.RemoveCategoryFilter -> { updateState { copy(selectedCategories = selectedCategories - intent.categoryId) }; recalculate() }
+            is TransactionsIntent.ClearAmountFilter -> { updateState { copy(amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null) }; recalculate() }
+            is TransactionsIntent.ClearSortOrder -> { updateState { copy(sortOrder = TransactionSortOrder.DATE_DESC) }; recalculate() }
+            is TransactionsIntent.UpdateMonthlyBudget -> { viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget) } }
         }
     }
 
     private fun observeSettings() {
-        viewModelScope.launch {
-            prefManager.languageFlow.collectLatest { lang ->
-                updateState { copy(language = lang) }
-                recalculate()
-            }
-        }
-        viewModelScope.launch {
-            prefManager.themeModeFlow.collectLatest { mode ->
-                val themeEnum = try { ThemeMode.valueOf(mode) } catch (_: Exception) { ThemeMode.SYSTEM }
-                updateState { copy(themeMode = themeEnum) }
-            }
-        }
-        viewModelScope.launch {
-            prefManager.accentColorFlow.collectLatest { accent ->
-                val accentEnum = try { AccentColor.valueOf(accent) } catch (_: Exception) { AccentColor.EMERALD }
-                updateState { copy(accentColor = accentEnum) }
-            }
-        }
-        viewModelScope.launch {
-            prefManager.currencySymbolFlow.collectLatest { sym ->
-                updateState { copy(currencySymbol = sym) }
-            }
-        }
-        viewModelScope.launch {
-            prefManager.monthlyBudgetFlow.collectLatest { budget ->
-                updateState { copy(monthlyBudget = budget) }
-                recalculate()
-            }
-        }
-        viewModelScope.launch {
-            prefManager.customAccountsFlow.collectLatest { json ->
-                AccountRepository.deserializeCustomAccounts(json)
-                recalculate()
-            }
-        }
+        viewModelScope.launch { prefManager.languageFlow.collectLatest { updateState { copy(language = it) }; recalculate() } }
+        viewModelScope.launch { prefManager.themeModeFlow.collectLatest { mode -> updateState { copy(themeMode = try { ThemeMode.valueOf(mode) } catch (_: Exception) { ThemeMode.SYSTEM }) } } }
+        viewModelScope.launch { prefManager.accentColorFlow.collectLatest { a -> updateState { copy(accentColor = try { AccentColor.valueOf(a) } catch (_: Exception) { AccentColor.EMERALD }) } } }
+        viewModelScope.launch { prefManager.currencySymbolFlow.collectLatest { sym -> updateState { copy(currencySymbol = sym) } } }
+        viewModelScope.launch { prefManager.monthlyBudgetFlow.collectLatest { updateState { copy(monthlyBudget = it) }; recalculate() } }
+        viewModelScope.launch { prefManager.customAccountsFlow.collectLatest { AccountRepository.deserializeCustomAccounts(it); recalculate() } }
     }
 
     private fun observeTransactions() {
         viewModelScope.launch {
             dao.getAllTransactionsFlow().collectLatest { allList ->
-                applyCalculations(allList)
-                updateWidgets(allList)
+                applyCalculations(allList); updateWidgets(allList)
                 com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }
     }
 
     private fun updateWidgets(allList: List<TransactionEntity>) {
-        val todayCal = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, 0)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-        }
-        val todayStart = todayCal.timeInMillis
+        val todayStart = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+        }.timeInMillis
         val todayExp = allList.filter { it.type == "EXPENSE" && it.timestamp >= todayStart }.sumOf { it.amount }
-        try {
-            ListenExpenseAppWidgetProvider.updateAllWidgets(application, todayExp, currentState.currencySymbol)
-        } catch (_: Exception) {}
+        try { ListenExpenseAppWidgetProvider.updateAllWidgets(application, todayExp, currentState.currencySymbol) } catch (_: Exception) {}
     }
 
     private fun recalculate() {
-        viewModelScope.launch {
-            val allList = dao.getAllTransactions()
-            applyCalculations(allList)
-        }
+        viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
     }
 
     private fun applyCalculations(allList: List<TransactionEntity>) {
         val calculated = TransactionCalculationEngine.filterAndCalculate(
-            allList = allList,
-            currentOffset = currentState.selectedMonthOffset,
-            query = currentState.searchQuery,
-            accountFilter = currentState.selectedAccountFilter,
-            budget = currentState.monthlyBudget,
-            sortOrder = currentState.sortOrder,
-            currencySymbol = currentState.currencySymbol,
-            lang = currentState.language
+            allList = allList, currentOffset = currentState.selectedMonthOffset, query = currentState.searchQuery,
+            accountFilter = currentState.selectedAccountFilter, budget = currentState.monthlyBudget,
+            sortOrder = currentState.sortOrder, currencySymbol = currentState.currencySymbol, lang = currentState.language,
+            typeFilter = currentState.typeFilter, selectedCategories = currentState.selectedCategories,
+            amountPreset = currentState.amountPreset,
+            customMinAmount = currentState.customMinAmount, customMaxAmount = currentState.customMaxAmount
         )
 
         updateState {
             copy(
-                transactions = allList,
-                filteredTransactions = calculated.filteredTransactions,
-                totalExpense = calculated.totalExpense,
-                totalIncome = calculated.totalIncome,
-                netBalance = calculated.netBalance,
-                monthlyBudget = calculated.monthlyBudget,
-                remainingBudget = calculated.remainingBudget,
-                budgetUsageRatio = calculated.budgetUsageRatio,
-                isOverBudget = calculated.isOverBudget,
-                monthTitle = calculated.monthTitle,
-                isLoading = false
+                transactions = allList, filteredTransactions = calculated.filteredTransactions,
+                totalExpense = calculated.totalExpense, totalIncome = calculated.totalIncome,
+                netBalance = calculated.netBalance, monthlyBudget = calculated.monthlyBudget,
+                remainingBudget = calculated.remainingBudget, budgetUsageRatio = calculated.budgetUsageRatio,
+                isOverBudget = calculated.isOverBudget, monthTitle = calculated.monthTitle, isLoading = false
             )
         }
     }

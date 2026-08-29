@@ -97,4 +97,21 @@ class TransactionsUiStateTest {
         assertTrue(updated.hideBalance)
         assertEquals("$", updated.currencySymbol)
     }
+
+    @Test
+    fun testNonCurrentMonthAddTransactionInitialDateDefaultsToFirstDay() {
+        val offset = -3 // 3 months in past
+        val cal = java.util.Calendar.getInstance().apply {
+            add(java.util.Calendar.MONTH, offset)
+            set(java.util.Calendar.DAY_OF_MONTH, 1)
+            set(java.util.Calendar.HOUR_OF_DAY, 12)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        val resultCal = java.util.Calendar.getInstance().apply {
+            timeInMillis = cal.timeInMillis
+        }
+        assertEquals(1, resultCal.get(java.util.Calendar.DAY_OF_MONTH))
+    }
 }
