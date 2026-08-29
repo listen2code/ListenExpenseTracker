@@ -161,3 +161,10 @@
   - 弹窗内容必须清晰阐明操作后果（例如提示“退出后将无法自动同步云端数据”）；
   - 确认按钮必须使用 `CommonButtonStyle.Danger`（警告/危险红色调）；
   - 取消按钮必须使用 `CommonButtonStyle.Outlined` 或 `CommonButtonStyle.Text`，确保交互预期安全明确。
+
+---
+
+## 16. Git 提交权限与控制规范 (Git Commit Control Rule)
+
+- **除非用户明确要求（例如“帮我提交到git”、“commit并推送到远程”），否则每次代码修改后严禁主动执行 `git commit`**；
+- 日常编码中只需完成代码修改、根据任务分级执行必要编译或测试验证，改动保持在工作区供用户审核检视，不得擅自生成 commit 记录。
