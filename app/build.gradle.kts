@@ -25,9 +25,9 @@ android {
     defaultConfig {
         applicationId = "com.listen.expensetracker"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
 
-        val vName = "0.0.19"
+        val vName = "0.0.20"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
