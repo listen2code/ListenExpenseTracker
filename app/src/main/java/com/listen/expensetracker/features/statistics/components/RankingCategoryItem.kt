@@ -61,14 +61,18 @@ fun RankingCategoryItem(
         }
     }
 
+    // Unique data fingerprint for this specific category and its percentage
     val dataSignature = remember(share.label, share.percentage) {
         "${share.label}_${share.percentage}"
     }
+    // Preserves the last animated signature across LazyColumn scroll recycling
     var animatedSignature by rememberSaveable { mutableStateOf("") }
+    // Initialize directly to target percentage if already animated to avoid scroll re-trigger
     val animProgress = remember {
         Animatable(if (animatedSignature == dataSignature) share.percentage else 0f)
     }
 
+    // Only trigger bar progress animation when category share percentage actually changes
     LaunchedEffect(dataSignature) {
         if (animatedSignature != dataSignature) {
             animatedSignature = dataSignature
