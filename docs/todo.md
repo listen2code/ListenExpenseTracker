@@ -137,6 +137,9 @@
   - [x] 重塑 `RankingCategoryItem`：采用聚合卡片，引入金/银/铜领奖台排名徽章 (#1 🥇, #2 🥈, #3 🥉)，分类图标彩色光晕气泡，百分比胶囊标签，并嵌入全宽平滑补间进度条 (`animateFloatAsState`)。
   - [x] 修复 `LineChart` 趋势图 MAX 国际化缺陷：支持 `currencySymbol`、`maxLabel`、`totalLabel` 动态注入，完成横展开排查并消除 `MetricsSummaryCard` 等处的硬编码字符串。
   - [x] 智能按月生成演练数据 (`SeedDemoData`)：打通 `Transactions` 与 `Statistics` 月份联动体系，根据用户当前所浏览的具体月份生成全天候逼真收支模拟明细。
+- [x] **Tab 切换滚动状态保持与图表动态刷新动效 (State Retention & Chart Animations)**
+  - [x] 列表滑动位置记忆：在 `MainActivity` 中引入 `SaveableStateHolder` 配合 `rememberSaveable` 绑定各月份列表，彻底解决 Tab 切换时列表被重置置顶的问题。
+  - [x] 图表数据刷新初启动画：升级 `DonutChart` (圆环扫掠)、`SegmentedProgressBar` (进度条伸展)、`LineChart` (曲线生长升起)、`BarChart` (柱状图升长) 与 `RankingCategoryItem`，统一接入 `Animatable` + `LaunchedEffect(data)` 驱动，在月份切换、收支切换、新增删除流水时均展示丝滑的入场微动效。
 
 ---
 

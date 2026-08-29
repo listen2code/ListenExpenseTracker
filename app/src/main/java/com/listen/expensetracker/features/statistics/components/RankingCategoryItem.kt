@@ -1,7 +1,7 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +19,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,11 +58,14 @@ fun RankingCategoryItem(
         }
     }
 
-    val animatedProgress by animateFloatAsState(
-        targetValue = share.percentage,
-        animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
-        label = "RankingProgress"
-    )
+    val animProgress = remember { Animatable(0f) }
+    LaunchedEffect(share.label, share.percentage) {
+        animProgress.snapTo(0f)
+        animProgress.animateTo(
+            targetValue = share.percentage,
+            animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
+        )
+    }
 
     val (badgeBg, badgeTextColor) = when (rank) {
         1 -> Color(0xFFF59E0B) to Color.White
@@ -167,7 +171,7 @@ fun RankingCategoryItem(
 
         // Full-width Smooth Progress Bar
         LinearProgressIndicator(
-            progress = { animatedProgress },
+            progress = { animProgress.value },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)

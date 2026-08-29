@@ -208,3 +208,19 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
    - 引入分类专属图标 + 彩色透明光晕背景气泡、百分比胶囊徽标与全宽平滑补间进度条 (`animateFloatAsState`)。
 3. **图表国际化规范**：
    - `LineChart` 扩展 `currencySymbol`、`maxLabel`、`totalLabel` 属性，彻底消除硬编码，全项目所有组件实现 100% 国际化适配。
+
+---
+
+## ADR-016: 状态树持久化保持与图表动态刷新动效协议 (State Retention & Chart Animations)
+
+### 背景 (Context)
+1. 之前的底栏 Tab 切换采用原生的 `when (appState.currentTab)` 分支，切走 Tab 时组件树被直接卸载，导致滑动列表重置置顶。
+2. 基础图表组件 (`DonutChart`, `SegmentedProgressBar`, `LineChart`, `BarChart`) 内部仅在初次由空变非空时启动动画；在数据更新、月份切换或收支切换时，由于 `targetValue` 已处于最终态 `1f`，无法触发入场重启动画。
+
+### 决策 (Decision)
+1. **多 Tab 状态保持协议**：
+   - 在 `MainActivity` 中引入 `rememberSaveableStateHolder()` 托管全局 Tab 切换，通过 `SaveableStateProvider(tab)` 保持离开 Tab 的状态快照。
+   - 列表统一采用 `rememberSaveable(inputs = arrayOf(monthOffset), saver = LazyListState.Saver)`，彻底杜绝切回时列表置顶。
+2. **图表数据驱动动态刷新动效规范**：
+   - 所有通用图表组件统一采用 `val anim = remember { Animatable(0f) }` 配合 `LaunchedEffect(dataKey)` 监听数据实体变更。
+   - 数据变更时先 `snapTo(0f)` 重置起始态，再平滑 `animateTo(1f, tween(650~750, FastOutSlowInEasing))`，呈现极具现代金融产品质感的视觉动效体验。
