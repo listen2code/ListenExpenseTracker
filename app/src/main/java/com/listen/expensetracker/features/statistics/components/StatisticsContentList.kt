@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,12 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.arch.i18n.tr
-import kotlinx.coroutines.flow.Flow
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.DonutChart
@@ -47,7 +51,7 @@ fun StatisticsContentList(
     monthOffset: Int,
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollToTopFlow: Flow<Unit>? = null,
+    listState: LazyListState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() },
     onCategoryClick: ((categoryName: String) -> Unit)? = null,
     onDateClick: ((day: Int, dateLabel: String) -> Unit)? = null,
     onTransactionClick: ((TransactionEntity) -> Unit)? = null
@@ -55,27 +59,16 @@ fun StatisticsContentList(
     val lang = state.language
     val sym = state.currencySymbol
 
-    val isExpenseTab = state.statisticsTab == "EXPENSE"
+    val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
     // Real-time calculation for this specific month page
     val calc = remember(state.allTransactions, monthOffset, state.monthlyBudget, lang) {
         TransactionCalculationEngine.filterAndCalculate(
-            allList = state.allTransactions, currentOffset = monthOffset, query = "", accountFilter = "ALL",
-            budget = state.monthlyBudget, sortOrder = TransactionSortOrder.DATE_DESC, currencySymbol = sym, lang = lang
+            allList = state.allTransactions, currentOffset = monthOffset, query = "", accountFilter = "ALL", budget = state.monthlyBudget, sortOrder = TransactionSortOrder.DATE_DESC, currencySymbol = sym, lang = lang
         )
     }
 
     val activeShares = if (isExpenseTab) calc.categoryShares else calc.incomeCategoryShares
-    val activeSegments = if (isExpenseTab) calc.progressSegments else calc.incomeProgressSegments
-    val totalAmount = if (isExpenseTab) calc.totalExpense else calc.totalIncome
-
-    val listState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() }
-
-    LaunchedEffect(scrollToTopFlow) {
-        scrollToTopFlow?.collect {
-            listState.animateScrollToItem(0)
-        }
-    }
 
     LazyColumn(
         state = listState,
@@ -92,13 +85,13 @@ fun StatisticsContentList(
                     .fillMaxWidth()
                     .padding(top = AppDimens.SpaceExtraSmall)
             ) {
-                androidx.compose.animation.AnimatedContent(
+                AnimatedContent(
                     targetState = isExpenseTab,
                     transitionSpec = {
-                        androidx.compose.animation.fadeIn(
-                            animationSpec = androidx.compose.animation.core.tween(300)
-                        ) togetherWith androidx.compose.animation.fadeOut(
-                            animationSpec = androidx.compose.animation.core.tween(200)
+                        fadeIn(
+                            animationSpec = tween(300)
+                        ) togetherWith fadeOut(
+                            animationSpec = tween(200)
                         )
                     },
                     label = "DonutChartTabTransition"
@@ -111,7 +104,7 @@ fun StatisticsContentList(
 
                     if (shares.isEmpty() || amount <= 0.0) {
                         CommonEmpty(
-                            message = if (expenseTab) AppStrings.empty_month_expense.tr(lang) else AppStrings.empty_month_income.tr(lang),
+                            message = if (expenseTab) AppStrings.EMPTY_MONTH_EXPENSE.tr(lang) else AppStrings.EMPTY_MONTH_INCOME.tr(lang),
                             modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                         )
                     } else {
@@ -119,7 +112,7 @@ fun StatisticsContentList(
                             DonutChart(
                                 items = shares,
                                 totalValue = amount,
-                                centerTitle = if (expenseTab) AppStrings.total_expense.tr(lang) else AppStrings.total_income.tr(lang),
+                                centerTitle = if (expenseTab) AppStrings.TOTAL_EXPENSE.tr(lang) else AppStrings.TOTAL_INCOME.tr(lang),
                                 centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(amount)}",
                                 currencySymbol = sym,
                                 hideAmount = state.hideAmount,
@@ -151,7 +144,7 @@ fun StatisticsContentList(
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = AppStrings.trend_month_daily.tr(lang),
+                            text = AppStrings.TREND_MONTH_DAILY.tr(lang),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -163,7 +156,7 @@ fun StatisticsContentList(
                             chartHeight = AppDimens.ChartHeightStandard,
                             currencySymbol = sym,
                             hideAmount = state.hideAmount,
-                            maxLabel = AppStrings.chart_max.tr(lang).format(sym, maxDailyVal),
+                            maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxDailyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${"%.2f".format(calc.totalExpense)}",
                             onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { day -> cb(day, pt.subLabel ?: "") } } },
                             modifier = Modifier.fillMaxWidth()
@@ -175,13 +168,13 @@ fun StatisticsContentList(
 
         // Key Metrics Summary Card
         item(key = "metrics_card") {
-            androidx.compose.animation.AnimatedContent(
+            AnimatedContent(
                 targetState = isExpenseTab,
                 transitionSpec = {
-                    androidx.compose.animation.fadeIn(
-                        animationSpec = androidx.compose.animation.core.tween(300)
-                    ) togetherWith androidx.compose.animation.fadeOut(
-                        animationSpec = androidx.compose.animation.core.tween(200)
+                    fadeIn(
+                        animationSpec = tween(300)
+                    ) togetherWith fadeOut(
+                        animationSpec = tween(200)
                     )
                 },
                 label = "MetricsTabTransition"
@@ -203,7 +196,7 @@ fun StatisticsContentList(
         if (activeShares.isNotEmpty()) {
             item(key = "ranking_header") {
                 Text(
-                    text = if (isExpenseTab) AppStrings.expense_ranking.tr(lang) else AppStrings.income_ranking.tr(lang),
+                    text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr(lang) else AppStrings.INCOME_RANKING.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -229,7 +222,7 @@ fun StatisticsContentList(
                                 onClick = onCategoryClick?.let { { it(item.label) } }
                             )
                             if (index < activeShares.lastIndex) {
-                                androidx.compose.material3.HorizontalDivider(
+                                HorizontalDivider(
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
                                     modifier = Modifier.padding(vertical = AppDimens.SpaceSmall)
                                 )

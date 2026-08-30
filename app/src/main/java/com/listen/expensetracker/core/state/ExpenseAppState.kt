@@ -1,5 +1,6 @@
 package com.listen.expensetracker.core.state
 
+import android.app.Application
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.PieChart
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
@@ -21,6 +23,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsInt
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.util.Calendar
 
 /**
  * Type-safe Navigation Tab definitions for ListenExpenseTracker.
@@ -111,8 +114,8 @@ class ExpenseAppState(
         if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
             statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         }
-        val cal = java.util.Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
-        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        val cal = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
+        val day = cal.get(Calendar.DAY_OF_MONTH)
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, day, transaction.amount))
         currentTab = NavTab.TRANSACTIONS
     }
@@ -140,6 +143,11 @@ class ExpenseAppState(
 
     fun triggerScrollToTop(tab: NavTab) {
         _scrollToTopEvents.tryEmit(tab)
+        when (tab) {
+            NavTab.TRANSACTIONS -> transactionsViewModel.handleIntent(TransactionsIntent.ScrollToTop)
+            NavTab.STATISTICS -> statisticsViewModel.handleIntent(StatisticsIntent.ScrollToTop)
+            NavTab.SETTINGS -> settingsViewModel.handleIntent(SettingsIntent.ScrollToTop)
+        }
     }
 }
 
@@ -151,13 +159,13 @@ fun rememberExpenseAppState(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ): ExpenseAppState {
     val transactionsViewModel: TransactionsViewModel = viewModel(
-        factory = TransactionsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
+        factory = TransactionsViewModel.Factory(LocalContext.current.applicationContext as Application)
     )
     val statisticsViewModel: StatisticsViewModel = viewModel(
-        factory = StatisticsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
+        factory = StatisticsViewModel.Factory(LocalContext.current.applicationContext as Application)
     )
     val settingsViewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
+        factory = SettingsViewModel.Factory(LocalContext.current.applicationContext as Application)
     )
 
     return remember(transactionsViewModel, statisticsViewModel, settingsViewModel, snackbarHostState) {

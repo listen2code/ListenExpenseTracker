@@ -1,6 +1,7 @@
 package com.listen.expensetracker.data.backup
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,7 +49,7 @@ object TransactionBackupManager {
             if (map.isNotEmpty()) {
                 val tx = TransactionEntity(
                     id = map["id"] ?: UUID.randomUUID().toString(),
-                    type = map["type"] ?: "EXPENSE",
+                    type = map["type"] ?: TransactionType.EXPENSE,
                     categoryId = map["categoryId"] ?: "c_other_exp",
                     categoryName = map["categoryName"] ?: "其他",
                     categoryIcon = map["categoryIcon"] ?: "c_other_exp",
@@ -106,10 +107,11 @@ object TransactionBackupManager {
         sb.append(header)
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         transactions.forEach { tx ->
+            val isExpense = tx.type == TransactionType.EXPENSE
             val typeStr = when (lang.lowercase()) {
-                "en" -> if (tx.type == "EXPENSE") "Expense" else "Income"
-                "ja" -> if (tx.type == "EXPENSE") "支出" else "収入"
-                else -> if (tx.type == "EXPENSE") "支出" else "收入"
+                "en" -> if (isExpense) "Expense" else "Income"
+                "ja" -> if (isExpense) "支出" else "収入"
+                else -> if (isExpense) "支出" else "收入"
             }
             val timeStr = sdf.format(Date(tx.timestamp))
             val cleanNote = tx.note.replace(",", " ")

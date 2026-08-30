@@ -18,7 +18,7 @@ fun StatisticsDialogHost(
         MonthPickerDialog(
             currentOffset = state.selectedMonthOffset,
             onOffsetSelected = { offset ->
-                onIntent(StatisticsIntent.SetMonthOffset(offset))
+                onIntent(StatisticsIntent.SelectMonth(offset))
                 onIntent(StatisticsIntent.DismissMonthPicker)
             },
             onDismiss = { onIntent(StatisticsIntent.DismissMonthPicker) },

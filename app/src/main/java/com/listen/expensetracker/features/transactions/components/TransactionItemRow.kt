@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -129,8 +130,9 @@ fun TransactionItemRow(
             }
 
             // Right Section: Signed Currency Amount
-            val amountPrefix = if (transaction.type == "EXPENSE") "-" else "+"
-            val amountColor = if (transaction.type == "EXPENSE") ExpenseRed else IncomeGreen
+            val isExpense = transaction.type == TransactionType.EXPENSE
+            val amountPrefix = if (isExpense) "-" else "+"
+            val amountColor = if (isExpense) ExpenseRed else IncomeGreen
 
             Text(
                 text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${"%.2f".format(transaction.amount)}",

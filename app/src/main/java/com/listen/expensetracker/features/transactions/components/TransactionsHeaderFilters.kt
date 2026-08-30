@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
@@ -56,7 +58,7 @@ fun TransactionsHeaderFilters(
     modifier: Modifier = Modifier
 ) {
     val lang = state.language
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val haptic = LocalHapticFeedback.current
     var accountKeyToDelete by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -72,7 +74,7 @@ fun TransactionsHeaderFilters(
             SearchBarInput(
                 query = state.searchQuery,
                 onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
-                placeholder = AppStrings.search_placeholder.tr(lang),
+                placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
                 modifier = Modifier.weight(1f)
             )
 
@@ -93,7 +95,7 @@ fun TransactionsHeaderFilters(
                 ) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = AppStrings.filter_title.tr(lang),
+                        contentDescription = AppStrings.FILTER_TITLE.tr(lang),
                         tint = if (hasDialogFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
@@ -135,11 +137,11 @@ fun TransactionsHeaderFilters(
                     label = label,
                     isCustom = isCustom,
                     onClick = {
-                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onIntent(TransactionsIntent.FilterAccountChange(acctKey))
                     },
                     onLongClick = {
-                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         accountKeyToDelete = acctKey
                     }
                 )
@@ -152,7 +154,7 @@ fun TransactionsHeaderFilters(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = AppStrings.manage_accounts_title.tr(lang),
+                    contentDescription = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )

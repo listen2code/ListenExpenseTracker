@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.SurfaceCard
@@ -43,7 +42,7 @@ fun MetricsSummaryCard(
     hideAmount: Boolean = false,
     onMaxTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
-    val noneText = AppStrings.common_none.tr(lang)
+    val noneText = AppStrings.COMMON_NONE.tr(lang)
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -57,7 +56,7 @@ fun MetricsSummaryCard(
             // Daily Average
             Column {
                 Text(
-                    text = if (isExpenseTab) AppStrings.daily_average_expense.tr(lang) else AppStrings.daily_average_income.tr(lang),
+                    text = if (isExpenseTab) AppStrings.DAILY_AVERAGE_EXPENSE.tr(lang) else AppStrings.DAILY_AVERAGE_INCOME.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -92,7 +91,7 @@ fun MetricsSummaryCard(
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = if (isExpenseTab) AppStrings.max_expense.tr(lang) else AppStrings.max_income.tr(lang),
+                        text = if (isExpenseTab) AppStrings.MAX_EXPENSE.tr(lang) else AppStrings.MAX_INCOME.tr(lang),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColor

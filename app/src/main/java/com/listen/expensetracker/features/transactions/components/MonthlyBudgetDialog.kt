@@ -62,7 +62,7 @@ fun MonthlyBudgetDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.budget_dialog_title.tr(lang),
+        title = AppStrings.BUDGET_DIALOG_TITLE.tr(lang),
         modifier = modifier,
         icon = {
             Box(
@@ -82,7 +82,7 @@ fun MonthlyBudgetDialog(
         },
         confirmButton = {
             CommonButton(
-                text = AppStrings.common_save.tr(lang),
+                text = AppStrings.COMMON_SAVE.tr(lang),
                 onClick = {
                     val newBudget = budgetInput.toDoubleOrNull()?.coerceAtLeast(1.0) ?: currentBudget
                     onConfirm(newBudget)
@@ -93,7 +93,7 @@ fun MonthlyBudgetDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.common_cancel.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -166,7 +166,7 @@ fun MonthlyBudgetDialog(
                         modifier = Modifier.size(16.dp)
                     )
                     CommonText(
-                        text = "${AppStrings.total_expense.tr(lang)}: $currencySymbol${"%.2f".format(spentAmount)}",
+                        text = "${AppStrings.TOTAL_EXPENSE.tr(lang)}: $currencySymbol${"%.2f".format(spentAmount)}",
                         fontSize = AppDimens.TextCaption,
                         color = if (isOver) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )

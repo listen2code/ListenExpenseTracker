@@ -36,7 +36,7 @@ fun AccountEditDialog(
         modifier = modifier,
         confirmButton = {
             CommonButton(
-                text = AppStrings.common_save.tr(lang),
+                text = AppStrings.COMMON_SAVE.tr(lang),
                 onClick = {
                     val trimmed = name.trim()
                     if (trimmed.isNotBlank()) onConfirm(trimmed)
@@ -47,7 +47,7 @@ fun AccountEditDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.common_cancel.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -57,7 +57,7 @@ fun AccountEditDialog(
             CommonEditText(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = AppStrings.account_name_input.tr(lang),
+                placeholder = AppStrings.ACCOUNT_NAME_INPUT.tr(lang),
                 singleLine = true
             )
         }

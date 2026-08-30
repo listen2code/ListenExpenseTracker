@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.theme.IncomeGreen
 import java.util.Calendar
@@ -72,14 +71,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = "${AppStrings.type_expense.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
+                    text = "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = "${AppStrings.type_income.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
+                    text = "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

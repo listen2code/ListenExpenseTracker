@@ -1,6 +1,7 @@
 package com.listen.expensetracker.data.model
 
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 
 import androidx.compose.material.icons.Icons
@@ -37,33 +38,33 @@ data class Category(
 object CategoryRepository {
 
     private val defaultExpenseCategories = listOf(
-        Category("c_food", AppStrings.cat_food, null, Icons.Default.Restaurant, "#EF4444", "EXPENSE", true),
-        Category("c_transport", AppStrings.cat_transport, null, Icons.Default.DirectionsBus, "#3B82F6", "EXPENSE", true),
-        Category("c_shopping", AppStrings.cat_shopping, null, Icons.Default.ShoppingBag, "#EC4899", "EXPENSE", true),
-        Category("c_entertainment", AppStrings.cat_entertainment, null, Icons.Default.SportsEsports, "#8B5CF6", "EXPENSE", true),
-        Category("c_housing", AppStrings.cat_housing, null, Icons.Default.Home, "#F59E0B", "EXPENSE", true),
-        Category("c_medical", AppStrings.cat_medical, null, Icons.Default.LocalHospital, "#10B981", "EXPENSE", true),
-        Category("c_social", AppStrings.cat_social, null, Icons.Default.CardGiftcard, "#6366F1", "EXPENSE", true),
-        Category("c_pets", AppStrings.cat_pets, null, Icons.Default.Pets, "#F97316", "EXPENSE", true),
-        Category("c_fitness", AppStrings.cat_fitness, null, Icons.Default.FitnessCenter, "#06B6D4", "EXPENSE", true),
-        Category("c_cafe", AppStrings.cat_cafe, null, Icons.Default.LocalCafe, "#84CC16", "EXPENSE", true),
-        Category("c_other_exp", AppStrings.cat_other_exp, null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
+        Category("c_food", AppStrings.CAT_FOOD, null, Icons.Default.Restaurant, "#EF4444", TransactionType.EXPENSE, true),
+        Category("c_transport", AppStrings.CAT_TRANSPORT, null, Icons.Default.DirectionsBus, "#3B82F6", TransactionType.EXPENSE, true),
+        Category("c_shopping", AppStrings.CAT_SHOPPING, null, Icons.Default.ShoppingBag, "#EC4899", TransactionType.EXPENSE, true),
+        Category("c_entertainment", AppStrings.CAT_ENTERTAINMENT, null, Icons.Default.SportsEsports, "#8B5CF6", TransactionType.EXPENSE, true),
+        Category("c_housing", AppStrings.CAT_HOUSING, null, Icons.Default.Home, "#F59E0B", TransactionType.EXPENSE, true),
+        Category("c_medical", AppStrings.CAT_MEDICAL, null, Icons.Default.LocalHospital, "#10B981", TransactionType.EXPENSE, true),
+        Category("c_social", AppStrings.CAT_SOCIAL, null, Icons.Default.CardGiftcard, "#6366F1", TransactionType.EXPENSE, true),
+        Category("c_pets", AppStrings.CAT_PETS, null, Icons.Default.Pets, "#F97316", TransactionType.EXPENSE, true),
+        Category("c_fitness", AppStrings.CAT_FITNESS, null, Icons.Default.FitnessCenter, "#06B6D4", TransactionType.EXPENSE, true),
+        Category("c_cafe", AppStrings.CAT_CAFE, null, Icons.Default.LocalCafe, "#84CC16", TransactionType.EXPENSE, true),
+        Category("c_other_exp", AppStrings.CAT_OTHER_EXP, null, Icons.Default.MoreHoriz, "#6B7280", TransactionType.EXPENSE, true)
     )
 
     private val defaultIncomeCategories = listOf(
-        Category("c_salary", AppStrings.cat_salary, null, Icons.Default.AccountBalance, "#10B981", "INCOME", true),
-        Category("c_investment", AppStrings.cat_investment, null, Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", "INCOME", true),
-        Category("c_gift", AppStrings.cat_gift, null, Icons.Default.CardGiftcard, "#F59E0B", "INCOME", true),
-        Category("c_other_inc", AppStrings.cat_other_inc, null, Icons.Default.MoreHoriz, "#6B7280", "INCOME", true)
+        Category("c_salary", AppStrings.CAT_SALARY, null, Icons.Default.AccountBalance, "#10B981", TransactionType.INCOME, true),
+        Category("c_investment", AppStrings.CAT_INVESTMENT, null, Icons.AutoMirrored.Filled.TrendingUp, "#3B82F6", TransactionType.INCOME, true),
+        Category("c_gift", AppStrings.CAT_GIFT, null, Icons.Default.CardGiftcard, "#F59E0B", TransactionType.INCOME, true),
+        Category("c_other_inc", AppStrings.CAT_OTHER_INC, null, Icons.Default.MoreHoriz, "#6B7280", TransactionType.INCOME, true)
     )
 
     private val customCategories = mutableListOf<Category>()
 
     val expenseCategories: List<Category>
-        get() = defaultExpenseCategories + customCategories.filter { it.type == "EXPENSE" }
+        get() = defaultExpenseCategories + customCategories.filter { it.type == TransactionType.EXPENSE }
 
     val incomeCategories: List<Category>
-        get() = defaultIncomeCategories + customCategories.filter { it.type == "INCOME" }
+        get() = defaultIncomeCategories + customCategories.filter { it.type == TransactionType.INCOME }
 
     val allCategories: List<Category>
         get() = expenseCategories + incomeCategories
@@ -102,6 +103,6 @@ object CategoryRepository {
 
     fun getCategoryById(id: String): Category {
         return (expenseCategories + incomeCategories).find { it.id == id }
-            ?: Category("c_other_exp", "cat_other_exp", null, Icons.Default.MoreHoriz, "#6B7280", "EXPENSE", true)
+            ?: Category("c_other_exp", "cat_other_exp", null, Icons.Default.MoreHoriz, "#6B7280", TransactionType.EXPENSE, true)
     }
 }

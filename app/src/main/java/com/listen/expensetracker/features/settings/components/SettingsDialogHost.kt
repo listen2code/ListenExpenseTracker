@@ -2,24 +2,18 @@ package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
@@ -30,7 +24,6 @@ import com.listen.expensetracker.features.transactions.components.MonthlyBudgetD
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
-import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 
@@ -61,7 +54,7 @@ fun SettingsDialogHost(
         }
         is SettingsDialog.CategoryManage -> {
             CategoryManageDialog(
-                type = "EXPENSE",
+                type = TransactionType.EXPENSE,
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 onCategoriesChanged = { /* Handled reactively */ },
                 lang = lang
@@ -88,10 +81,10 @@ fun SettingsDialogHost(
         is SettingsDialog.ClearConfirm -> {
             CommonDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.confirm_clear_title.tr(lang),
+                title = AppStrings.CONFIRM_CLEAR_TITLE.tr(lang),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.btn_delete.tr(lang),
+                        text = AppStrings.BTN_DELETE.tr(lang),
                         onClick = {
                             onIntent(SettingsIntent.ClearAllData)
                             onIntent(SettingsIntent.DismissDialog)
@@ -101,14 +94,14 @@ fun SettingsDialogHost(
                 },
                 dismissButton = {
                     CommonButton(
-                        text = AppStrings.btn_cancel.tr(lang),
+                        text = AppStrings.BTN_CANCEL.tr(lang),
                         onClick = { onIntent(SettingsIntent.DismissDialog) },
                         style = CommonButtonStyle.Outlined
                     )
                 }
             ) {
                 CommonText(
-                    text = AppStrings.confirm_clear_desc.tr(lang),
+                    text = AppStrings.CONFIRM_CLEAR_DESC.tr(lang),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -116,10 +109,10 @@ fun SettingsDialogHost(
         is SettingsDialog.LogoutConfirm -> {
             CommonDialog(
                 onDismissRequest = { onIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.google_logout_confirm_title.tr(lang),
+                title = AppStrings.GOOGLE_LOGOUT_CONFIRM_TITLE.tr(lang),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.google_logout_btn.tr(lang),
+                        text = AppStrings.GOOGLE_LOGOUT_BTN.tr(lang),
                         onClick = {
                             onIntent(SettingsIntent.UnlinkGoogleAccount)
                             onIntent(SettingsIntent.DismissDialog)
@@ -129,14 +122,14 @@ fun SettingsDialogHost(
                 },
                 dismissButton = {
                     CommonButton(
-                        text = AppStrings.btn_cancel.tr(lang),
+                        text = AppStrings.BTN_CANCEL.tr(lang),
                         onClick = { onIntent(SettingsIntent.DismissDialog) },
                         style = CommonButtonStyle.Outlined
                     )
                 }
             ) {
                 CommonText(
-                    text = AppStrings.google_logout_confirm_desc.tr(lang),
+                    text = AppStrings.GOOGLE_LOGOUT_CONFIRM_DESC.tr(lang),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -153,7 +146,7 @@ fun SettingsDialogHost(
         }
         is SettingsDialog.UpdateAvailable -> {
             UpdateAvailableDialog(
-                releaseInfo = (state.activeDialog as SettingsDialog.UpdateAvailable).releaseInfo,
+                releaseInfo = state.activeDialog.releaseInfo,
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )
@@ -180,7 +173,7 @@ fun SettingsDialogHost(
                         color = MaterialTheme.colorScheme.primary
                     )
                     CommonText(
-                        text = AppStrings.cloud_status_syncing.tr(lang),
+                        text = AppStrings.CLOUD_STATUS_SYNCING.tr(lang),
                         fontSize = AppDimens.TextBody,
                         color = MaterialTheme.colorScheme.onSurface
                     )

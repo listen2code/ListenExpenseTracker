@@ -30,6 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 
+const val PAGER_BASE_INDEX = 600
+const val PAGER_PAGE_COUNT = 1200
+
 /**
  * Month Navigation Capsule component for ListenExpenseTracker.
  * Displays previous/next buttons and a clickable center month title in a pill container.

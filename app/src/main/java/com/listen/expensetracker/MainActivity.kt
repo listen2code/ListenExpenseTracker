@@ -3,6 +3,7 @@ package com.listen.expensetracker
 import com.listen.arch.i18n.tr
 
 import android.os.Bundle
+import android.os.SystemClock.uptimeMillis
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,10 +22,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import com.listen.arch.apm.CrashHandler
 import com.listen.expensetracker.core.effect.CollectCommonUiEffects
 import com.listen.expensetracker.core.overlay.AppOverlayHost
@@ -41,7 +42,6 @@ import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 import com.listen.uicomponent.theme.ListenTheme
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -108,7 +108,7 @@ fun App(
                     NavigationBarItem(
                         selected = appState.currentTab == tab,
                         onClick = {
-                            val now = android.os.SystemClock.uptimeMillis()
+                            val now = uptimeMillis()
                             if (appState.currentTab == tab) {
                                 if (now - lastTabClickTime < 350L) {
                                     appState.triggerScrollToTop(tab)
@@ -131,29 +131,23 @@ fun App(
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         val screenModifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
-        val saveableStateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
+        val saveableStateHolder = rememberSaveableStateHolder()
 
         saveableStateHolder.SaveableStateProvider(appState.currentTab) {
             when (appState.currentTab) {
                 NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
-                    val scrollToTopFlow = remember(appState) {
-                        appState.scrollToTopEvents.filter { it == NavTab.TRANSACTIONS }.map { }
-                    }
                     TransactionsScreen(
                         state = state,
                         onIntent = onIntent,
-                        scrollToTopFlow = scrollToTopFlow,
+                        viewModel = appState.transactionsViewModel,
                         modifier = screenModifier
                     )
                 }
                 NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
-                    val scrollToTopFlow = remember(appState) {
-                        appState.scrollToTopEvents.filter { it == NavTab.STATISTICS }.map { }
-                    }
                     StatisticsScreen(
                         state = state,
                         onIntent = onIntent,
-                        scrollToTopFlow = scrollToTopFlow,
+                        viewModel = appState.statisticsViewModel,
                         onNavigateToTransactions = { monthOffset, categoryName ->
                             appState.navigateToTransactionsCategory(categoryName, monthOffset)
                         },
@@ -167,14 +161,10 @@ fun App(
                     )
                 }
                 NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
-                    val scrollToTopFlow = remember(appState) {
-                        appState.scrollToTopEvents.filter { it == NavTab.SETTINGS }.map { }
-                    }
                     SettingsScreen(
                         state = state,
                         onIntent = onIntent,
                         targetMonthOffset = transactionsState.selectedMonthOffset,
-                        scrollToTopFlow = scrollToTopFlow,
                         onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
                         viewModel = appState.settingsViewModel,
                         modifier = screenModifier

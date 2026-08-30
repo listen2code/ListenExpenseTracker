@@ -31,7 +31,7 @@ class SettingsSyncDelegate(
         onToast: (String) -> Unit
     ) {
         if (email.isNullOrBlank()) {
-            onToast(AppStrings.login_google_required_toast.tr(lang))
+            onToast(AppStrings.LOGIN_GOOGLE_REQUIRED_TOAST.tr(lang))
             return
         }
         onOperating(true)
@@ -66,7 +66,7 @@ class SettingsSyncDelegate(
         onToast: (String) -> Unit
     ) {
         if (email.isNullOrBlank()) {
-            onToast(AppStrings.login_google_required_toast.tr(lang))
+            onToast(AppStrings.LOGIN_GOOGLE_REQUIRED_TOAST.tr(lang))
             return
         }
         onOperating(true)
@@ -80,7 +80,7 @@ class SettingsSyncDelegate(
                     prefManager.setLastSyncTimestamp(System.currentTimeMillis())
                     onToast("已从 Google Drive 成功恢复 ${list.size} 条账单")
                 } else {
-                    onToast(AppStrings.restore_empty_toast.tr(lang))
+                    onToast(AppStrings.RESTORE_EMPTY_TOAST.tr(lang))
                 }
             }.onFailure { driveErr ->
                 val fallbackRes = CloudSyncManager.restoreFromCloud(email, traceId)
@@ -116,12 +116,12 @@ class SettingsSyncDelegate(
         val generated = DemoDataEngine.generate(monthOffset, lang, accounts)
         dao.insertTransactions(generated)
         val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
-        onToast(AppStrings.seed_month_success_toast.tr(lang).format(title, generated.size))
+        onToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(lang).format(title, generated.size))
     }
 
     suspend fun clearAllData(lang: String, onToast: (String) -> Unit) {
         dao.deleteAll()
-        onToast(AppStrings.clear_all_success_toast.tr(lang))
+        onToast(AppStrings.CLEAR_ALL_SUCCESS_TOAST.tr(lang))
     }
 
     suspend fun exportJsonToFile(uri: Uri, lang: String, onToast: (String) -> Unit) = withContext(Dispatchers.IO) {

@@ -2,6 +2,8 @@ package com.listen.expensetracker.features.settings.viewmodel
 
 import android.app.Application
 import android.content.Context
+import androidx.core.content.pm.PackageInfoCompat
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -51,40 +53,23 @@ class SettingsViewModel(
     override fun handleIntent(intent: SettingsIntent) {
         val traceId = TraceManager.newTraceId()
         when (intent) {
-            is SettingsIntent.ChangeLanguage -> viewModelScope.launch {
-                prefManager.setLanguage(intent.langCode)
-                updateState { copy(language = intent.langCode) }
-            }
-            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch {
-                prefManager.setThemeMode(intent.mode.name)
-                updateState { copy(themeMode = intent.mode) }
-            }
-            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch {
-                prefManager.setAccentColor(intent.accent.name)
-                updateState { copy(accentColor = intent.accent) }
-            }
-            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch {
-                prefManager.setCurrencySymbol(intent.symbol)
-                updateState { copy(currencySymbol = intent.symbol) }
-            }
-            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch {
-                prefManager.setMonthlyBudget(intent.budget)
-                updateState { copy(monthlyBudget = intent.budget) }
-            }
+            is SettingsIntent.ChangeLanguage -> viewModelScope.launch { prefManager.setLanguage(intent.langCode); updateState { copy(language = intent.langCode) } }
+            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch { prefManager.setThemeMode(intent.mode.name); updateState { copy(themeMode = intent.mode) } }
+            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch { prefManager.setAccentColor(intent.accent.name); updateState { copy(accentColor = intent.accent) } }
+            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch { prefManager.setCurrencySymbol(intent.symbol); updateState { copy(currencySymbol = intent.symbol) } }
+            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget); updateState { copy(monthlyBudget = intent.budget) } }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
                 updateState { copy(autoBackupDrive = intent.enabled) }
                 if (intent.enabled) GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 1000L)
             }
-            is SettingsIntent.ToggleAutoBackupWifiOnly -> viewModelScope.launch {
-                prefManager.setAutoBackupWifiOnly(intent.enabled)
-                updateState { copy(autoBackupWifiOnly = intent.enabled) }
-            }
+            is SettingsIntent.ToggleAutoBackupWifiOnly -> viewModelScope.launch { prefManager.setAutoBackupWifiOnly(intent.enabled); updateState { copy(autoBackupWifiOnly = intent.enabled) } }
+            is SettingsIntent.ScrollToTop -> { _settingsEffect.tryEmit(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
                 prefManager.setDeveloperMode(intent.enabled)
                 updateState { copy(isDeveloperMode = intent.enabled) }
                 val lang = currentState.language
-                val msg = if (intent.enabled) AppStrings.developer_mode_enabled.tr(lang) else AppStrings.developer_mode_disabled.tr(lang)
+                val msg = if (intent.enabled) AppStrings.DEVELOPER_MODE_ENABLED.tr(lang) else AppStrings.DEVELOPER_MODE_DISABLED.tr(lang)
                 emitEffect(CommonUiEffect.ShowToast(msg))
             }
             is SettingsIntent.LinkGoogleAccount -> viewModelScope.launch {
@@ -207,7 +192,7 @@ class SettingsViewModel(
             val lang = currentState.language
             val currentBuildNumber = try {
                 val pInfo = application.packageManager.getPackageInfo(application.packageName, 0)
-                androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(pInfo)
+                PackageInfoCompat.getLongVersionCode(pInfo)
             } catch (_: Exception) { 0L }
             when (val result = UpdateCheckerService.checkLatestRelease(currentVersion, currentBuildNumber, lang)) {
                 is UpdateResult.NewVersionAvailable -> updateState {
@@ -215,11 +200,11 @@ class SettingsViewModel(
                 }
                 is UpdateResult.AlreadyLatest -> {
                     updateState { copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(String.format(AppStrings.already_latest_version.tr(lang), currentVersion)))
+                    emitEffect(CommonUiEffect.ShowToast(String.format(AppStrings.ALREADY_LATEST_VERSION.tr(lang), currentVersion)))
                 }
                 is UpdateResult.Error -> {
                     updateState { copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(AppStrings.check_update_failed.tr(lang)))
+                    emitEffect(CommonUiEffect.ShowToast(AppStrings.CHECK_UPDATE_FAILED.tr(lang)))
                 }
             }
         }
@@ -236,7 +221,7 @@ class SettingsViewModel(
             }.onFailure { err ->
                 emitEffect(CommonUiEffect.ShowToast("Google 授权解析失败: ${err.message}"))
             }
-        } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+        } catch (e: GetCredentialCancellationException) {
             // Cancelled by user
         } catch (e: Throwable) {
             ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")

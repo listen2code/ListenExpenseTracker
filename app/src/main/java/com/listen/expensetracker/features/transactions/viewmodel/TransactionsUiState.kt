@@ -5,6 +5,16 @@ import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
+
+sealed interface TransactionsEffect {
+    data class ScrollToMonth(val offset: Int) : TransactionsEffect
+    data object ScrollToTop : TransactionsEffect
+    data class ScrollToTransaction(val txId: String) :
+        TransactionsEffect
+    data class ScrollToDay(val day: Int) : TransactionsEffect
+}
+
+
 /**
  * Sorting order enumeration for transactions list.
  */
@@ -58,9 +68,7 @@ data class TransactionsUiState(
     val accentColor: AccentColor = AccentColor.EMERALD,
     val activeDialog: TransactionsDialog? = null,
     val isLoading: Boolean = false,
-    val isDeveloperMode: Boolean = false,
-    val targetScrollDay: Int? = null,
-    val targetScrollTxId: String? = null
+    val isDeveloperMode: Boolean = false
 ) {
     val categoryFilter: String
         get() = if (selectedCategories.isEmpty()) "ALL" else selectedCategories.first()
@@ -110,7 +118,8 @@ sealed interface TransactionsIntent {
     data class FilterByCategory(val categoryName: String, val monthOffset: Int) : TransactionsIntent
     data class FilterByDate(val monthOffset: Int, val day: Int, val dateLabel: String? = null) : TransactionsIntent
     data class FilterByTransaction(val monthOffset: Int, val transactionId: String, val day: Int, val amount: Double? = null) : TransactionsIntent
-    data object ClearTargetScrollDay : TransactionsIntent
+    data object ScrollToTop : TransactionsIntent
+    data class SelectMonth(val offset: Int) : TransactionsIntent
     data class ChangeTypeFilter(val type: String) : TransactionsIntent
     data class ApplyCompoundFilter(
         val type: String,
@@ -128,3 +137,4 @@ sealed interface TransactionsIntent {
     data object ClearSortOrder : TransactionsIntent
     data class UpdateMonthlyBudget(val budget: Double) : TransactionsIntent
 }
+

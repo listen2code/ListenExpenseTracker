@@ -4,6 +4,9 @@ import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,7 +82,7 @@ fun BalanceOverviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = AppStrings.balance_title.tr(lang),
+                    text = AppStrings.BALANCE_TITLE.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -108,7 +111,7 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = AppStrings.total_expense.tr(lang),
+                        text = AppStrings.TOTAL_EXPENSE.tr(lang),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -126,7 +129,7 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = AppStrings.total_income.tr(lang),
+                        text = AppStrings.TOTAL_INCOME.tr(lang),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -141,11 +144,11 @@ fun BalanceOverviewCard(
             }
 
             // Bottom Section: Prominent Monthly Budget Progress Container
-            val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
+            val animatedProgress by animateFloatAsState(
                 targetValue = budgetUsageRatio.coerceIn(0f, 1f),
-                animationSpec = androidx.compose.animation.core.tween(
+                animationSpec = tween(
                     durationMillis = 500,
-                    easing = androidx.compose.animation.core.FastOutSlowInEasing
+                    easing = FastOutSlowInEasing
                 ),
                 label = "BudgetUsageProgress"
             )
@@ -175,7 +178,7 @@ fun BalanceOverviewCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = AppStrings.monthly_budget.tr(lang),
+                            text = AppStrings.MONTHLY_BUDGET.tr(lang),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -197,9 +200,9 @@ fun BalanceOverviewCard(
 
                     Text(
                         text = if (isOverBudget) {
-                            "${AppStrings.over_budget.tr(lang)} $currencySymbol${"%.0f".format(totalExpense - monthlyBudget)}"
+                            "${AppStrings.OVER_BUDGET.tr(lang)} $currencySymbol${"%.0f".format(totalExpense - monthlyBudget)}"
                         } else {
-                            "${AppStrings.used_budget.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
+                            "${AppStrings.USED_BUDGET.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
                         },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,

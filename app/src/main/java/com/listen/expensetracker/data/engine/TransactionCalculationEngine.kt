@@ -1,6 +1,7 @@
 package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.BarChartItem
@@ -107,24 +108,24 @@ object TransactionCalculationEngine {
             TransactionSortOrder.AMOUNT_ASC -> matchedFiltered.sortedBy { it.amount }
         }
 
-        val totalExp = finalSorted.filter { it.type == "EXPENSE" }.sumOf { it.amount }
-        val totalInc = finalSorted.filter { it.type == "INCOME" }.sumOf { it.amount }
+        val totalExp = finalSorted.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
+        val totalInc = finalSorted.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
 
-        val expenseShares = calculateCategoryShares(finalSorted.filter { it.type == "EXPENSE" }, totalExp)
+        val expenseShares = calculateCategoryShares(finalSorted.filter { it.type == TransactionType.EXPENSE }, totalExp)
         val expenseSegments = expenseShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
 
-        val incomeShares = calculateCategoryShares(finalSorted.filter { it.type == "INCOME" }, totalInc)
+        val incomeShares = calculateCategoryShares(finalSorted.filter { it.type == TransactionType.INCOME }, totalInc)
         val incomeSegments = incomeShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
 
-        val maxExpenseTx = finalSorted.filter { it.type == "EXPENSE" }.maxByOrNull { it.amount }
-        val maxIncomeTx = finalSorted.filter { it.type == "INCOME" }.maxByOrNull { it.amount }
+        val maxExpenseTx = finalSorted.filter { it.type == TransactionType.EXPENSE }.maxByOrNull { it.amount }
+        val maxIncomeTx = finalSorted.filter { it.type == TransactionType.INCOME }.maxByOrNull { it.amount }
 
         val daysInMonth = getDaysInMonth(currentOffset)
         val dailyAvgExp = if (daysInMonth > 0) totalExp / daysInMonth else 0.0
         val dailyAvgInc = if (daysInMonth > 0) totalInc / daysInMonth else 0.0
 
-        val trendBars = calculateRecentDaysTrend(finalSorted.filter { it.type == "EXPENSE" })
-        val trendPoints = calculateMonthDailyTrend(finalSorted.filter { it.type == "EXPENSE" }, currentOffset)
+        val trendBars = calculateRecentDaysTrend(finalSorted.filter { it.type == TransactionType.EXPENSE })
+        val trendPoints = calculateMonthDailyTrend(finalSorted.filter { it.type == TransactionType.EXPENSE }, currentOffset)
         val ratio = if (budget > 0) (totalExp / budget).toFloat() else 0f
 
         return CalculationResult(

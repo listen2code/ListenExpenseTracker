@@ -46,10 +46,10 @@ fun CurrencySelectDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.currency_dialog_title.tr(lang),
+        title = AppStrings.CURRENCY_DIALOG_TITLE.tr(lang),
         dismissButton = {
             CommonButton(
-                text = AppStrings.btn_cancel.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )

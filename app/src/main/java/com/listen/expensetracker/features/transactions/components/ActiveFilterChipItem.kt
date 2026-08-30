@@ -1,5 +1,6 @@
 package com.listen.expensetracker.features.transactions.components
 
+import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -125,9 +127,9 @@ fun ActiveFilterTagsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 1. Transaction Type Tag
-        if (state.typeFilter != "ALL") {
+        if (state.typeFilter != TransactionType.ALL) {
             ActiveFilterChipItem(
-                label = if (state.typeFilter == "EXPENSE") AppStrings.type_expense.tr(lang) else AppStrings.type_income.tr(lang),
+                label = if (state.typeFilter == TransactionType.EXPENSE) AppStrings.TYPE_EXPENSE.tr(lang) else AppStrings.TYPE_INCOME.tr(lang),
                 onRemove = { onIntent(TransactionsIntent.ClearTypeFilter) }
             )
         }
@@ -140,7 +142,7 @@ fun ActiveFilterTagsRow(
                 }
             }
             val catColor = try {
-                cat?.colorHex?.let { Color(android.graphics.Color.parseColor(it)) }
+                cat?.colorHex?.let { Color(AndroidColor.parseColor(it)) }
             } catch (_: Exception) { null }
 
             ActiveFilterChipItem(
@@ -176,7 +178,7 @@ fun ActiveFilterTagsRow(
 
         // Clear All Link
         Text(
-            text = AppStrings.filter_clear_active.tr(lang),
+            text = AppStrings.FILTER_CLEAR_ACTIVE.tr(lang),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,

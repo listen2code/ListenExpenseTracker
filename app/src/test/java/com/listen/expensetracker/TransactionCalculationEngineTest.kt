@@ -3,6 +3,7 @@ package com.listen.expensetracker
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
+import java.util.Calendar
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -264,9 +265,9 @@ class TransactionCalculationEngineTest {
 
     @Test
     fun testFilterByDateKeyword() {
-        val cal = java.util.Calendar.getInstance().apply { timeInMillis = sampleTransactions.first().timestamp }
-        val m = cal.get(java.util.Calendar.MONTH) + 1
-        val d = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        val cal = Calendar.getInstance().apply { timeInMillis = sampleTransactions.first().timestamp }
+        val m = cal.get(Calendar.MONTH) + 1
+        val d = cal.get(Calendar.DAY_OF_MONTH)
         val dateKeyword = "${m}月${d}日"
 
         val result = TransactionCalculationEngine.filterAndCalculate(

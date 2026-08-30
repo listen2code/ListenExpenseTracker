@@ -80,13 +80,13 @@ fun TransactionsDialogHost(
         }
         is TransactionsDialog.ConfirmDelete -> {
             val tx = dialog.transaction
-            val desc = AppStrings.delete_transaction_desc.tr(lang).format(tx.categoryName, sym, tx.amount)
+            val desc = AppStrings.DELETE_TRANSACTION_DESC.tr(lang).format(tx.categoryName, sym, tx.amount)
             CommonDialog(
                 onDismissRequest = { onIntent(TransactionsIntent.DismissDialog) },
-                title = AppStrings.delete_transaction_title.tr(lang),
+                title = AppStrings.DELETE_TRANSACTION_TITLE.tr(lang),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.common_delete.tr(lang),
+                        text = AppStrings.COMMON_DELETE.tr(lang),
                         onClick = {
                             onIntent(TransactionsIntent.DeleteTransaction(tx.id))
                             onIntent(TransactionsIntent.DismissDialog)
@@ -96,7 +96,7 @@ fun TransactionsDialogHost(
                 },
                 dismissButton = {
                     CommonButton(
-                        text = AppStrings.common_cancel.tr(lang),
+                        text = AppStrings.COMMON_CANCEL.tr(lang),
                         onClick = { onIntent(TransactionsIntent.DismissDialog) },
                         style = CommonButtonStyle.Outlined
                     )
@@ -112,7 +112,7 @@ fun TransactionsDialogHost(
             MonthPickerDialog(
                 currentOffset = state.selectedMonthOffset,
                 onOffsetSelected = { offset ->
-                    onIntent(TransactionsIntent.SetMonthOffset(offset))
+                    onIntent(TransactionsIntent.SelectMonth(offset))
                     onIntent(TransactionsIntent.DismissDialog)
                 },
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },

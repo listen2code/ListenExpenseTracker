@@ -1,23 +1,14 @@
 package com.listen.expensetracker.features.settings.ui
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import com.listen.arch.i18n.tr
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
@@ -27,7 +18,6 @@ import com.listen.expensetracker.features.settings.components.SettingsDialogHost
 import com.listen.expensetracker.features.settings.components.SettingsFinanceSection
 import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
-import com.listen.expensetracker.features.settings.viewmodel.SettingsEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
@@ -37,63 +27,34 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Pure Stateless Settings Screen cleanly orchestrating Finance Rules, Data Center, Appearance, and System Ops.
+ * 纯无状态设置主画面 (SettingsScreen)。
+ *
+ * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * 1. 业务与偏好数据由 [state] ([SettingsUiState]) 纯数据类驱动；
+ * 2. 界面系统契约调用与滚动位置由 [rememberSettingsStateHolder] 封装接管；
+ * 3. 页面布局与各设置分组（财务参数、云端同步中心、外观偏好、运维工具）彻底解耦。
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
-    scrollToTopFlow: Flow<Unit>? = null,
     onOpenApm: () -> Unit = {},
     viewModel: SettingsViewModel? = null
 ) {
-    val context = LocalContext.current
+    // 🌟 一行收拢所有列表滚动、月份标题与系统文件选择器
+    val holder = rememberSettingsStateHolder(state, onIntent, targetMonthOffset, viewModel)
     val lang = state.language
     val sym = state.currencySymbol
-    val (_, _, currentMonthTitle) = remember(targetMonthOffset, lang) {
-        TransactionCalculationEngine.getMonthRangeAndTitle(targetMonthOffset, lang)
-    }
-
-    LaunchedEffect(viewModel) {
-        viewModel?.settingsEffect?.collectLatest { effect ->
-            when (effect) {
-                is SettingsEffect.LaunchGoogleSignIn -> viewModel.launchGoogleAccountPicker(context)
-            }
-        }
-    }
-
-    val listState = rememberSaveable(saver = LazyListState.Saver) {
-        LazyListState()
-    }
-
-    LaunchedEffect(scrollToTopFlow) {
-        scrollToTopFlow?.collect {
-            listState.animateScrollToItem(0)
-        }
-    }
-
-    // File-based JSON Export launcher
-    val exportJsonLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        uri?.let { onIntent(SettingsIntent.ExportJsonToFile(it)) }
-    }
-
-    // File-based JSON Import launcher
-    val importJsonLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { onIntent(SettingsIntent.ImportJsonFromFile(it)) }
-    }
 
     BaseScreenScaffold(
-        title = AppStrings.settings_title.tr(lang),
+        title = AppStrings.SETTINGS_TITLE.tr(lang),
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
-            state = listState,
+            state = holder.listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
@@ -130,10 +91,10 @@ fun SettingsScreen(
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
                     onExportJson = {
                         val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
-                        exportJsonLauncher.launch(fileName)
+                        holder.exportJsonLauncher.launch(fileName)
                     },
                     onImportJson = {
-                        importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+                        holder.importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
                     },
                     lang = lang,
                     isOperating = state.isOperating
@@ -162,7 +123,7 @@ fun SettingsScreen(
                         onOpenApmInspector = onOpenApm,
                         onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
-                        targetMonthTitle = currentMonthTitle,
+                        targetMonthTitle = holder.currentMonthTitle,
                         lang = lang
                     )
                 }

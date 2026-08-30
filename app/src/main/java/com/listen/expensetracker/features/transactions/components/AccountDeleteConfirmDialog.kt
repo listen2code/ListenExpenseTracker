@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -26,17 +28,17 @@ fun AccountDeleteConfirmDialog(
     modifier: Modifier = Modifier,
     lang: String = "zh"
 ) {
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val haptic = LocalHapticFeedback.current
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.delete_account_confirm_title.tr(lang),
+        title = AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE.tr(lang),
         modifier = modifier,
         confirmButton = {
             CommonButton(
-                text = AppStrings.common_delete.tr(lang),
+                text = AppStrings.COMMON_DELETE.tr(lang),
                 onClick = {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onConfirm()
                 },
                 style = CommonButtonStyle.Danger
@@ -44,7 +46,7 @@ fun AccountDeleteConfirmDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.common_cancel.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -58,7 +60,7 @@ fun AccountDeleteConfirmDialog(
                 color = MaterialTheme.colorScheme.primary
             )
             CommonText(
-                text = AppStrings.delete_account_confirm_desc.tr(lang),
+                text = AppStrings.DELETE_ACCOUNT_CONFIRM_DESC.tr(lang),
                 fontSize = AppDimens.TextSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

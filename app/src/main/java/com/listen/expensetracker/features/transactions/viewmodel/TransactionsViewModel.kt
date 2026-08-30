@@ -3,17 +3,19 @@ package com.listen.expensetracker.features.transactions.viewmodel
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import android.app.Application
+import java.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
-import com.listen.arch.i18n.StringsRes
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
+import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
@@ -23,6 +25,8 @@ import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -32,6 +36,9 @@ import kotlinx.coroutines.launch
 class TransactionsViewModel(
     private val application: Application
 ) : BaseViewModel<TransactionsUiState, TransactionsIntent, CommonUiEffect>(TransactionsUiState()) {
+
+    private val _screenEffect = MutableSharedFlow<TransactionsEffect>(replay = 0, extraBufferCapacity = 64)
+    val screenEffect = _screenEffect.asSharedFlow()
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
@@ -59,6 +66,11 @@ class TransactionsViewModel(
             is TransactionsIntent.FilterAccountChange -> { updateState { copy(selectedAccountFilter = intent.accountType) }; recalculate() }
             is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }; recalculate() }
             is TransactionsIntent.SetMonthOffset -> { updateState { copy(selectedMonthOffset = intent.offset) }; recalculate() }
+            is TransactionsIntent.SelectMonth -> {
+                updateState { copy(selectedMonthOffset = intent.offset) }; recalculate()
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.offset))
+            }
+            is TransactionsIntent.ScrollToTop -> { _screenEffect.tryEmit(TransactionsEffect.ScrollToTop) }
             is TransactionsIntent.ChangeSortOrder -> { updateState { copy(sortOrder = intent.order) }; recalculate() }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
@@ -74,10 +86,11 @@ class TransactionsViewModel(
                         selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL",
                         typeFilter = cat?.type ?: "ALL", selectedCategories = setOf(cat?.id ?: intent.categoryName),
                         amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
-                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = null, targetScrollTxId = null
+                        sortOrder = TransactionSortOrder.DATE_DESC
                     )
                 }
                 recalculate()
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
             }
             is TransactionsIntent.FilterByDate -> {
                 updateState {
@@ -85,10 +98,12 @@ class TransactionsViewModel(
                         selectedMonthOffset = intent.monthOffset, searchQuery = intent.dateLabel ?: "",
                         selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
                         amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
-                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = intent.day, targetScrollTxId = null
+                        sortOrder = TransactionSortOrder.DATE_DESC
                     )
                 }
                 recalculate()
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToDay(intent.day))
             }
             is TransactionsIntent.FilterByTransaction -> {
                 val amtStr = if (intent.amount != null) {
@@ -99,12 +114,13 @@ class TransactionsViewModel(
                         selectedMonthOffset = intent.monthOffset, searchQuery = amtStr,
                         selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
                         amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
-                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = intent.day, targetScrollTxId = intent.transactionId
+                        sortOrder = TransactionSortOrder.DATE_DESC
                     )
                 }
                 recalculate()
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
+                _screenEffect.tryEmit(TransactionsEffect.ScrollToTransaction(intent.transactionId))
             }
-            is TransactionsIntent.ClearTargetScrollDay -> updateState { copy(targetScrollDay = null, targetScrollTxId = null) }
             is TransactionsIntent.ChangeTypeFilter -> { updateState { copy(typeFilter = intent.type) }; recalculate() }
             is TransactionsIntent.ApplyCompoundFilter -> {
                 updateState { copy(typeFilter = intent.type, selectedCategories = intent.categories, amountPreset = intent.preset, customMinAmount = intent.min, customMaxAmount = intent.max, sortOrder = intent.sortOrder) }
@@ -138,17 +154,17 @@ class TransactionsViewModel(
         viewModelScope.launch {
             dao.getAllTransactionsFlow().collectLatest { allList ->
                 applyCalculations(allList); updateWidgets(allList)
-                com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
+                GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }
     }
 
     private fun updateWidgets(allList: List<TransactionEntity>) {
-        val todayStart = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+        val todayStart = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }.timeInMillis
-        val todayExp = allList.filter { it.type == "EXPENSE" && it.timestamp >= todayStart }.sumOf { it.amount }
+        val todayExp = allList.filter { it.type == TransactionType.EXPENSE && it.timestamp >= todayStart }.sumOf { it.amount }
         try { ListenExpenseAppWidgetProvider.updateAllWidgets(application, todayExp, currentState.currencySymbol) } catch (_: Exception) {}
     }
 
@@ -177,21 +193,12 @@ class TransactionsViewModel(
         }
     }
 
-    private fun addTransaction(
-        intent: TransactionsIntent.AddTransaction,
-        traceId: String
-    ) {
+    private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) {
         viewModelScope.launch {
             val entity = TransactionEntity(
-                type = intent.type,
-                categoryId = intent.categoryId,
-                categoryName = intent.categoryName,
-                categoryIcon = intent.categoryIcon,
-                categoryColorHex = intent.categoryColorHex,
-                amount = intent.amount,
-                note = intent.note,
-                accountType = intent.accountType,
-                timestamp = intent.timestamp
+                type = intent.type, categoryId = intent.categoryId, categoryName = intent.categoryName,
+                categoryIcon = intent.categoryIcon, categoryColorHex = intent.categoryColorHex,
+                amount = intent.amount, note = intent.note, accountType = intent.accountType, timestamp = intent.timestamp
             )
             TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) {
                 dao.insertTransaction(entity)
@@ -199,56 +206,42 @@ class TransactionsViewModel(
         }
     }
 
-    private fun updateTransaction(transaction: TransactionEntity, traceId: String) {
-        viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) {
-                dao.updateTransaction(transaction)
-            }
+    private fun updateTransaction(transaction: TransactionEntity, traceId: String) = viewModelScope.launch {
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) {
+            dao.updateTransaction(transaction)
         }
     }
 
-    private fun deleteTransaction(id: String, traceId: String) {
-        viewModelScope.launch {
-            val entity = dao.getTransactionById(id)
-            if (entity != null) {
-                TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
-                    dao.deleteTransaction(entity)
-                }
-                val lang = currentState.language
-                emitEffect(CommonUiEffect.ShowSnackbar(
-                    message = AppStrings.undo_delete_toast.tr(lang),
-                    actionLabel = AppStrings.undo_action_label.tr(lang),
-                    onAction = {
-                        handleIntent(TransactionsIntent.RestoreDeletedTransaction(entity))
-                    }
-                ))
-            }
+    private fun deleteTransaction(id: String, traceId: String) = viewModelScope.launch {
+        val entity = dao.getTransactionById(id) ?: return@launch
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
+            dao.deleteTransaction(entity)
         }
+        val lang = currentState.language
+        emitEffect(CommonUiEffect.ShowSnackbar(
+            message = AppStrings.UNDO_DELETE_TOAST.tr(lang),
+            actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(lang),
+            onAction = { handleIntent(TransactionsIntent.RestoreDeletedTransaction(entity)) }
+        ))
     }
 
-    private fun restoreDeletedTransaction(tx: TransactionEntity, traceId: String) {
-        viewModelScope.launch {
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
-                dao.insertTransaction(tx)
-            }
-            emitEffect(CommonUiEffect.ShowToast(AppStrings.undo_success_toast.tr(currentState.language)))
+    private fun restoreDeletedTransaction(tx: TransactionEntity, traceId: String) = viewModelScope.launch {
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
+            dao.insertTransaction(tx)
         }
+        emitEffect(CommonUiEffect.ShowToast(AppStrings.UNDO_SUCCESS_TOAST.tr(currentState.language)))
     }
 
-    private fun seedDemoData(monthOffset: Int) {
-        viewModelScope.launch {
-            val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
-            val generated = DemoDataEngine.generate(monthOffset, currentState.language, accounts)
-            dao.insertTransactions(generated)
-            val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, currentState.language)
-            emitEffect(CommonUiEffect.ShowToast(AppStrings.seed_month_success_toast.tr(currentState.language).format(title, generated.size)))
-        }
+    private fun seedDemoData(monthOffset: Int) = viewModelScope.launch {
+        val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
+        val generated = DemoDataEngine.generate(monthOffset, currentState.language, accounts)
+        dao.insertTransactions(generated)
+        val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, currentState.language)
+        emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(currentState.language).format(title, generated.size)))
     }
 
     class Factory(private val application: Application) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TransactionsViewModel(application) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = TransactionsViewModel(application) as T
     }
 }

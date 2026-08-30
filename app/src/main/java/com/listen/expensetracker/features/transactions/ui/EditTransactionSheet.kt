@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AccountTypeItem
@@ -64,7 +65,7 @@ fun EditTransactionSheet(
 
     var type by remember { mutableStateOf(transaction.type) }
     val categories = remember(type) {
-        if (type == "EXPENSE") CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
+        if (type == TransactionType.EXPENSE) CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
     }
     var selectedCategory: Category by remember(categories) {
         mutableStateOf(categories.find { it.id == transaction.categoryId } ?: categories.first())
@@ -77,7 +78,7 @@ fun EditTransactionSheet(
     var accountToDelete by remember { mutableStateOf<AccountTypeItem?>(null) }
     var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
 
-    val typeOptions = listOf(AppStrings.type_expense.tr(lang), AppStrings.type_income.tr(lang))
+    val typeOptions = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang))
 
     CommonBottomSheet(
         onDismissRequest = onDismiss,
@@ -95,7 +96,7 @@ fun EditTransactionSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = AppStrings.edit_transaction_title.tr(lang),
+                    text = AppStrings.EDIT_TRANSACTION_TITLE.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextHeader
                 )
@@ -111,9 +112,9 @@ fun EditTransactionSheet(
             // Expense / Income Segmented Switch
             CommonSegmentedControl(
                 items = typeOptions,
-                selectedIndex = if (type == "EXPENSE") 0 else 1,
+                selectedIndex = if (type == TransactionType.EXPENSE) 0 else 1,
                 onIndexChange = { index ->
-                    type = if (index == 0) "EXPENSE" else "INCOME"
+                    type = if (index == 0) TransactionType.EXPENSE else TransactionType.INCOME
                 }
             )
 
@@ -133,7 +134,7 @@ fun EditTransactionSheet(
                         text = currencySymbol,
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
-                        color = if (type == "EXPENSE") ExpenseRed else IncomeGreen
+                        color = if (type == TransactionType.EXPENSE) ExpenseRed else IncomeGreen
                     )
                 },
                 singleLine = true,
@@ -152,7 +153,7 @@ fun EditTransactionSheet(
             CommonEditText(
                 value = note,
                 onValueChange = { note = it },
-                placeholder = AppStrings.transaction_note_hint.tr(lang),
+                placeholder = AppStrings.TRANSACTION_NOTE_HINT.tr(lang),
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.EditNote,
@@ -223,7 +224,7 @@ fun EditTransactionSheet(
                         )
                     }
                 },
-                doneText = AppStrings.common_done.tr(lang) + " ✓",
+                doneText = AppStrings.COMMON_DONE.tr(lang) + " ✓",
                 modifier = Modifier.fillMaxWidth()
             )
         }

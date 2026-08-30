@@ -21,7 +21,7 @@ class StatisticsUiStateTest {
         assertEquals(0.0f, state.budgetUsageRatio, 0.0f)
         assertFalse(state.isOverBudget)
         assertNull(state.maxExpenseTransaction)
-        assertEquals("EXPENSE", state.statisticsTab)
+        assertEquals(StatisticsTab.EXPENSE, state.statisticsTab)
         assertEquals("￥", state.currencySymbol)
         assertEquals(ThemeMode.SYSTEM, state.themeMode)
         assertEquals(AccentColor.EMERALD, state.accentColor)
@@ -38,8 +38,8 @@ class StatisticsUiStateTest {
         val intentSetMonth = StatisticsIntent.SetMonthOffset(-1)
         assertEquals(-1, intentSetMonth.offset)
 
-        val intentChangeTab = StatisticsIntent.ChangeStatisticsTab("INCOME")
-        assertEquals("INCOME", intentChangeTab.tab)
+        val intentChangeTab = StatisticsIntent.ChangeStatisticsTab(StatisticsTab.INCOME)
+        assertEquals(StatisticsTab.INCOME, intentChangeTab.tab)
 
         val intentToggleHide = StatisticsIntent.ToggleHideAmount(true)
         assertTrue(intentToggleHide.hide)

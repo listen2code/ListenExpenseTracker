@@ -3,103 +3,63 @@ package com.listen.expensetracker.features.transactions.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.drop
-import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
+import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.transactions.components.TransactionsContentList
 import com.listen.expensetracker.features.transactions.components.TransactionsDialogHost
 import com.listen.expensetracker.features.transactions.components.TransactionsHeaderFilters
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
-import kotlinx.coroutines.launch
-
-private const val PAGER_BASE_INDEX = 600
-private const val PAGER_PAGE_COUNT = 1200
 
 /**
- * Pure Stateless Transactions Screen.
- * Search bar and Account Filter chips stay stationary at top, while the Balance Overview
- * and Grouped Transaction Items glide smoothly in a horizontal PageView underneath with real-time month calculation.
+ * 纯无状态流水主画面 (TransactionsScreen)。
+ *
+ * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * 本 Screen 严格遵循“单向数据流 (UDF)”与“状态提升 (State Hoisting)”模式：
+ * 1. 业务只读数据由 [state] ([TransactionsUiState]) 纯数据类驱动；
+ * 2. 交互状态与动画控制器（PagerState、LazyListState、副作用监听）统一由 [rememberTransactionsStateHolder] 承接；
+ * 3. Screen 函数内部无任何悬挂逻辑或散落状态，开门见山直接声明 UI 布局树。
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     state: TransactionsUiState,
     onIntent: (TransactionsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollToTopFlow: Flow<Unit>? = null
+    viewModel: TransactionsViewModel? = null
 ) {
+    // 🌟 一行收拢所有 Pager、ListState 与副作用协同逻辑
+    val holder = rememberTransactionsStateHolder(state, onIntent, viewModel)
     val lang = state.language
-    val coroutineScope = rememberCoroutineScope()
-
-    val pagerState = rememberPagerState(
-        initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
-        pageCount = { PAGER_PAGE_COUNT }
-    )
-
-    // Dynamically compute the month header title in real-time as the user swipes
-    val activeOffset = pagerState.currentPage - PAGER_BASE_INDEX
-    val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
-        TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
-    }
-
-    // Synchronize external month changes (MonthPickerDialog, Tab switch, etc.) with instantaneous page alignment
-    LaunchedEffect(state.selectedMonthOffset) {
-        val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
-        if (pagerState.currentPage != targetPage) {
-            pagerState.scrollToPage(targetPage)
-        }
-    }
-
-    // Synchronize settled page changes with ViewModel state (ignoring stale restoration emission)
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }
-            .drop(1)
-            .collect { page ->
-                val offset = page - PAGER_BASE_INDEX
-                if (offset != state.selectedMonthOffset) {
-                    onIntent(TransactionsIntent.SetMonthOffset(offset))
-                }
-            }
-    }
 
     BaseScreenScaffold(
         titleSlot = {
             MonthNavigationCapsule(
-                monthTitle = currentMonthTitle,
+                monthTitle = holder.currentMonthTitle,
                 onPreviousMonth = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                    }
+                    onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset - 1))
                 },
                 onNextMonth = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
+                    onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset + 1))
                 },
                 onTitleClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthPicker)) }
             )
@@ -119,7 +79,7 @@ fun TransactionsScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = AppStrings.btn_add_transaction.tr(lang))
+                Icon(Icons.Default.Add, contentDescription = AppStrings.BTN_ADD_TRANSACTION.tr(lang))
             }
         },
         modifier = modifier
@@ -129,7 +89,7 @@ fun TransactionsScreen(
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
-            // 1. Pinned Top Search Bar & Account Filters (Stationary)
+            // 1. 顶部常驻搜索栏与账户过滤芯片 (Stationary)
             TransactionsHeaderFilters(
                 state = state,
                 onIntent = onIntent,
@@ -138,9 +98,9 @@ fun TransactionsScreen(
                     .padding(bottom = AppDimens.SpaceSmall)
             )
 
-            // 2. Horizontal PageView Slider with month-specific page calculation
+            // 2. 水平双向无限滑动分页器 (HorizontalPager)
             HorizontalPager(
-                state = pagerState,
+                state = holder.pagerState,
                 modifier = Modifier.weight(1f)
             ) { page ->
                 val pageOffset = page - PAGER_BASE_INDEX
@@ -148,12 +108,12 @@ fun TransactionsScreen(
                     state = state,
                     monthOffset = pageOffset,
                     onIntent = onIntent,
-                    scrollToTopFlow = if (page == pagerState.currentPage) scrollToTopFlow else null
+                    listState = if (page == holder.pagerState.currentPage) holder.listState else rememberLazyListState()
                 )
             }
         }
     }
 
-    // Feature-Level Dialog Host
+    // 弹窗宿主分发器
     TransactionsDialogHost(state = state, onIntent = onIntent)
 }

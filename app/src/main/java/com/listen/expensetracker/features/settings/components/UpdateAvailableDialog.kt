@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -52,7 +51,7 @@ fun UpdateAvailableDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = String.format(AppStrings.update_found_title.tr(lang), releaseInfo.tagName),
+        title = String.format(AppStrings.UPDATE_FOUND_TITLE.tr(lang), releaseInfo.tagName),
         icon = {
             Box(
                 modifier = Modifier
@@ -95,7 +94,7 @@ fun UpdateAvailableDialog(
                         .padding(AppDimens.SpaceMedium)
                 ) {
                     CommonText(
-                        text = AppStrings.changelog_title.tr(lang),
+                        text = AppStrings.CHANGELOG_TITLE.tr(lang),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
@@ -123,7 +122,7 @@ fun UpdateAvailableDialog(
                 // 1. Download Update / Open Release
                 val targetDownloadUrl = releaseInfo.apkDownloadUrl ?: releaseInfo.htmlUrl
                 CommonButton(
-                    text = AppStrings.update_now_btn.tr(lang),
+                    text = AppStrings.UPDATE_NOW_BTN.tr(lang),
                     onClick = {
                         openUrlInBrowser(context, targetDownloadUrl)
                         onDismiss()
@@ -142,7 +141,7 @@ fun UpdateAvailableDialog(
                 // 2. View on GitHub button (if direct apk download exists)
                 if (releaseInfo.apkDownloadUrl != null) {
                     CommonButton(
-                        text = AppStrings.view_on_github_btn.tr(lang),
+                        text = AppStrings.VIEW_ON_GITHUB_BTN.tr(lang),
                         onClick = {
                             openUrlInBrowser(context, releaseInfo.htmlUrl)
                             onDismiss()
@@ -161,7 +160,7 @@ fun UpdateAvailableDialog(
 
                 // 3. Cancel button
                 CommonButton(
-                    text = AppStrings.btn_cancel.tr(lang),
+                    text = AppStrings.BTN_CANCEL.tr(lang),
                     onClick = onDismiss,
                     style = CommonButtonStyle.Secondary,
                     modifier = Modifier.fillMaxWidth()

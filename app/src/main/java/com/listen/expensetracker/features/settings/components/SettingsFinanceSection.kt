@@ -65,14 +65,14 @@ fun SettingsFinanceSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.settings_finance_rules.tr(lang),
+                    text = AppStrings.SETTINGS_FINANCE_RULES.tr(lang),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
             // Monthly Budget Button (Full Width)
             CommonButton(
-                text = "${AppStrings.monthly_budget.tr(lang)}: $currencySymbol${"%.0f".format(monthlyBudget)}",
+                text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${"%.0f".format(monthlyBudget)}",
                 onClick = onOpenBudgetDialog,
                 style = CommonButtonStyle.Outlined,
                 icon = {
@@ -92,7 +92,7 @@ fun SettingsFinanceSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = AppStrings.settings_category_manage.tr(lang),
+                    text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
                     onClick = onOpenCategoryDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {
@@ -107,7 +107,7 @@ fun SettingsFinanceSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.manage_accounts_title.tr(lang),
+                    text = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
                     onClick = onOpenAccountDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {

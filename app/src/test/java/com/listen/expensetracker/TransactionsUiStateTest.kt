@@ -1,7 +1,9 @@
 package com.listen.expensetracker
 
 import com.listen.expensetracker.data.db.TransactionEntity
+import java.util.Calendar
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
@@ -38,7 +40,7 @@ class TransactionsUiStateTest {
     @Test
     fun testStatisticsDefaultStateValues() {
         val statsState = StatisticsUiState()
-        assertEquals("EXPENSE", statsState.statisticsTab)
+        assertEquals(StatisticsTab.EXPENSE, statsState.statisticsTab)
         assertEquals(0.0, statsState.totalExpense, 0.001)
         assertTrue(statsState.categoryShares.isEmpty())
         assertTrue(statsState.dailyTrendBars.isEmpty())
@@ -102,17 +104,17 @@ class TransactionsUiStateTest {
     @Test
     fun testNonCurrentMonthAddTransactionInitialDateDefaultsToFirstDay() {
         val offset = -3 // 3 months in past
-        val cal = java.util.Calendar.getInstance().apply {
-            add(java.util.Calendar.MONTH, offset)
-            set(java.util.Calendar.DAY_OF_MONTH, 1)
-            set(java.util.Calendar.HOUR_OF_DAY, 12)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
+        val cal = Calendar.getInstance().apply {
+            add(Calendar.MONTH, offset)
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 12)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
-        val resultCal = java.util.Calendar.getInstance().apply {
+        val resultCal = Calendar.getInstance().apply {
             timeInMillis = cal.timeInMillis
         }
-        assertEquals(1, resultCal.get(java.util.Calendar.DAY_OF_MONTH))
+        assertEquals(1, resultCal.get(Calendar.DAY_OF_MONTH))
     }
 }

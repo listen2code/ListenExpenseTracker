@@ -64,7 +64,7 @@ fun AccountManageDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.manage_accounts_title.tr(lang),
+        title = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
         modifier = modifier,
         icon = {
             Box(
@@ -84,7 +84,7 @@ fun AccountManageDialog(
         },
         confirmButton = {
             CommonButton(
-                text = AppStrings.add_account.tr(lang),
+                text = AppStrings.ADD_ACCOUNT.tr(lang),
                 onClick = { showAddDialog = true },
                 style = CommonButtonStyle.Primary,
                 icon = {
@@ -98,7 +98,7 @@ fun AccountManageDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.common_done.tr(lang),
+                text = AppStrings.COMMON_DONE.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -113,7 +113,7 @@ fun AccountManageDialog(
             // 1. Built-in Accounts Section
             item(key = "header_system") {
                 CommonText(
-                    text = AppStrings.system_accounts_section.tr(lang),
+                    text = AppStrings.SYSTEM_ACCOUNTS_SECTION.tr(lang),
                     fontSize = AppDimens.TextCaption,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -133,7 +133,7 @@ fun AccountManageDialog(
             item(key = "header_custom") {
                 Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
                 CommonText(
-                    text = AppStrings.custom_accounts_section.tr(lang),
+                    text = AppStrings.CUSTOM_ACCOUNTS_SECTION.tr(lang),
                     fontSize = AppDimens.TextCaption,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -161,7 +161,7 @@ fun AccountManageDialog(
                                 modifier = Modifier.size(18.dp)
                             )
                             CommonText(
-                                text = AppStrings.custom_accounts_empty.tr(lang),
+                                text = AppStrings.CUSTOM_ACCOUNTS_EMPTY.tr(lang),
                                 fontSize = AppDimens.TextSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -185,7 +185,7 @@ fun AccountManageDialog(
     if (showAddDialog) {
         AccountEditDialog(
             initialName = "",
-            title = AppStrings.add_account.tr(lang),
+            title = AppStrings.ADD_ACCOUNT.tr(lang),
             onDismiss = { showAddDialog = false },
             onConfirm = { name ->
                 val created = AccountRepository.addAccount(name)
@@ -201,7 +201,7 @@ fun AccountManageDialog(
     accountToEdit?.let { acct ->
         AccountEditDialog(
             initialName = acct.customName ?: "",
-            title = AppStrings.edit_account.tr(lang),
+            title = AppStrings.EDIT_ACCOUNT.tr(lang),
             onDismiss = { accountToEdit = null },
             onConfirm = { name ->
                 AccountRepository.updateAccount(acct.key, name)

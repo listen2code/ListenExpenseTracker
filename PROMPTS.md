@@ -41,9 +41,12 @@
 
 ---
 
-## 4. 语言与注释规范 (Language & Comments)
+## 4. 语言与教学型注释规范 (Learning-Oriented Chinese Comments & Documentation)
 
-- **代码内注释 (In-code Comments)**：必须使用**详尽清晰的英文注释 (Detailed English Comments)**。重点解释 Compose 状态重组边界、MVI Intent 流转、生命周期避让、Insets 处理和异步协同原理。
+本项目是一个**学习型 App (Educational / Learning App)**，代码不仅要保证工业级健壮性，更要具备极高的一线教学与学习价值：
+- **代码内注释 (In-code Comments)**：**必须使用详尽清晰的中文注释 (Detailed Chinese Comments)**：
+  - **特殊业务与实现逻辑**：重点阐明业务逻辑的设计初衷、状态机流转决策、MVI 架构边界、重组性能优化与异步协同原理；
+  - **Kotlin & Compose 官方进阶 API 教学说明**：针对较为进阶、不常见的官方 API（例如 `rememberUpdatedState` 解决协程闭包捕获旧值问题、`snapshotFlow` 将 Compose State 转换为 Cold Flow、`rememberSaveable(saver = ...)` 实现自定义状态跨进程保存与恢复、`drop(1)` 过滤初始发射值等），**必须附带通俗易懂的原理解析与使用场景注释**，帮助开发者在阅读源码的同时系统学习掌握这些关键技术。
 - **文档与说明 (Documentation)**：所有 Markdown 说明文档（如 `README.md`、`ARCHITECTURE.md`、`walkthrough.md`、`PROMPTS.md`）一律使用**中文**进行阐述。
 
 ---
@@ -168,3 +171,21 @@
 
 - **除非用户明确要求（例如“帮我提交到git”、“commit并推送到远程”），否则每次代码修改后严禁主动执行 `git commit`**；
 - 日常编码中只需完成代码修改、根据任务分级执行必要编译或测试验证，改动保持在工作区供用户审核检视，不得擅自生成 commit 记录。
+
+---
+
+## 17. 状态标签与业务类型强类型规范 (Type-Safe State & Tab Enum Rule)
+
+- **严禁在 ViewModel、UiState、Composable UI 中使用硬编码魔数字符串（Magic Strings，如 `state.statisticsTab == "EXPENSE"`、`"INCOME"` 等）作为状态标志位、Tab 切换标识或类型分类**；
+- **必须通过显式声明的枚举（Enum）或密封类（Sealed Class/Interface）进行强类型安全收口**（例如使用 `StatisticsTab.EXPENSE` 代替 `"EXPENSE"`）；
+- **全栈杜绝字符串拼写错误引发的潜在隐患，充分利用 Kotlin 编译期类型检查与 `when` 表达式穷举完整性保障**。
+
+---
+
+## 18. UI 状态持有者与业务状态分层规范 (StateHolder vs UiState Separation Standard)
+
+- **严格分离业务数据状态 (UiState) 与界面控件状态 (StateHolder)**：
+  - **业务数据状态 (`[Feature]UiState`)**：由 ViewModel 管理并暴露，属于不可变的纯 Kotlin 数据类（如流水列表、账户余额、筛选标记），支持 JVM 快速单元测试；
+  - **界面控件状态持有者 (`[Feature]StateHolder`)**：由 Compose UI 树通过 `@Composable fun remember[Feature]StateHolder(...)` 创建并持有，统一管理 `PagerState`、`LazyListState`、滚动动画计算、系统契约回调（如 `ActivityResultLauncher`）以及底层副作用（`[Feature]Effects`）的生命周期挂载。
+- **严禁将 UI 控件对象放入 ViewModel**：禁止在 ViewModel 或 `UiState` 中持有 `PagerState`、`LazyListState` 等持有 Compose 布局或 Context 引用的对象，防止屏幕旋转或配置变更时发生内存泄漏；
+- **Screen 纯声明式排版**：Screen Composable 头部通过一行 `val holder = remember[Feature]StateHolder(...)` 收口所有控制器，开门见山声明 `BaseScreenScaffold` 与视图布局，消灭散落逻辑。

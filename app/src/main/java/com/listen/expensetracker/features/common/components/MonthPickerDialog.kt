@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
-import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
@@ -88,7 +87,7 @@ fun MonthPickerDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.select_month_dialog.tr(lang),
+        title = AppStrings.SELECT_MONTH_DIALOG.tr(lang),
         confirmButton = {
             TextButton(
                 onClick = {
@@ -106,7 +105,7 @@ fun MonthPickerDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.btn_cancel.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )

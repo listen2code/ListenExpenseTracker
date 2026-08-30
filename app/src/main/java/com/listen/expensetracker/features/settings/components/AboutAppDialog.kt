@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -47,7 +48,7 @@ fun AboutAppDialog(
     val (versionName, versionCode) = try {
         val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         val vName = pInfo.versionName ?: "0.0.1"
-        val vCode = androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(pInfo)
+        val vCode = PackageInfoCompat.getLongVersionCode(pInfo)
         Pair(vName, vCode)
     } catch (_: Exception) {
         Pair("0.0.1", 1L)
@@ -71,23 +72,23 @@ fun AboutAppDialog(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             CommonText(
-                text = "${AppStrings.app_version_label.tr(lang)}: v$versionName (Build $versionCode)",
+                text = "${AppStrings.APP_VERSION_LABEL.tr(lang)}: v$versionName (Build $versionCode)",
                 fontSize = AppDimens.TextBody,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
             CommonText(
-                text = "${AppStrings.app_architecture_label.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
+                text = "${AppStrings.APP_ARCHITECTURE_LABEL.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
                 fontSize = AppDimens.TextSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             CommonText(
-                text = "${AppStrings.app_core_sdk_label.tr(lang)}: ListenArch, ListenUiComponent",
+                text = "${AppStrings.APP_CORE_SDK_LABEL.tr(lang)}: ListenArch, ListenUiComponent",
                 fontSize = AppDimens.TextSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             CommonText(
-                text = AppStrings.app_features_desc.tr(lang),
+                text = AppStrings.APP_FEATURES_DESC.tr(lang),
                 fontSize = AppDimens.TextSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -96,7 +97,7 @@ fun AboutAppDialog(
 
             // Check for Updates on GitHub Button
             CommonButton(
-                text = if (isCheckingUpdate) AppStrings.checking_updates.tr(lang) else AppStrings.check_update.tr(lang),
+                text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr(lang) else AppStrings.CHECK_UPDATE.tr(lang),
                 onClick = {
                     if (onCheckUpdates != null) {
                         onCheckUpdates(versionName)

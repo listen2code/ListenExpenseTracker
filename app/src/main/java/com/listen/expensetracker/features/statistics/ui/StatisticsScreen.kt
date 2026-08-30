@@ -3,102 +3,65 @@ package com.listen.expensetracker.features.statistics.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.drop
 import com.listen.expensetracker.data.db.TransactionEntity
-import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
+import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.statistics.components.StatisticsContentList
 import com.listen.expensetracker.features.statistics.components.StatisticsDialogHost
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
 import com.listen.uicomponent.components.CommonSegmentedControl
-import kotlinx.coroutines.launch
-
-private const val PAGER_BASE_INDEX = 600
-private const val PAGER_PAGE_COUNT = 1200
 
 /**
- * Pure Stateless Statistics Screen.
- * The Expense/Income Segmented Toggle stays pinned at top, while the Donut Chart,
- * Trend Chart, Metrics, and Category Rankings glide smoothly in a horizontal PageView underneath with real-time month calculation.
+ * 纯无状态统计分析主画面 (StatisticsScreen)。
+ *
+ * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * 1. 业务只读数据由 [state] ([StatisticsUiState]) 纯数据类驱动；
+ * 2. 交互状态与动画控制器（PagerState、LazyListState、副作用监听）统一由 [rememberStatisticsStateHolder] 承接；
+ * 3. 顶部收支切换栏（Expense / Income Toggle）与底部图表卡片彻底解耦。
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
     state: StatisticsUiState,
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    scrollToTopFlow: Flow<Unit>? = null,
+    viewModel: StatisticsViewModel? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
     onNavigateToTransactionsDate: ((monthOffset: Int, day: Int, dateLabel: String) -> Unit)? = null,
     onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null
 ) {
+    // 🌟 一行收口所有 Pager、ListState 与副作用协同逻辑
+    val holder = rememberStatisticsStateHolder(state, onIntent, viewModel)
     val lang = state.language
-    val coroutineScope = rememberCoroutineScope()
-    val isExpenseTab = state.statisticsTab == "EXPENSE"
-
-    val pagerState = rememberPagerState(
-        initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
-        pageCount = { PAGER_PAGE_COUNT }
-    )
-
-    // Dynamically compute the month header title in real-time as the user swipes
-    val activeOffset = pagerState.currentPage - PAGER_BASE_INDEX
-    val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
-        TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
-    }
-
-    // Synchronize external month changes (MonthPickerDialog, etc.) with instantaneous page alignment
-    LaunchedEffect(state.selectedMonthOffset) {
-        val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
-        if (pagerState.currentPage != targetPage) {
-            pagerState.scrollToPage(targetPage)
-        }
-    }
-
-    // Synchronize settled page changes with ViewModel state (ignoring stale restoration emission)
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }
-            .drop(1)
-            .collect { page ->
-                val offset = page - PAGER_BASE_INDEX
-                if (offset != state.selectedMonthOffset) {
-                    onIntent(StatisticsIntent.SetMonthOffset(offset))
-                }
-            }
-    }
+    val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
     BaseScreenScaffold(
         titleSlot = {
             MonthNavigationCapsule(
-                monthTitle = currentMonthTitle,
+                monthTitle = holder.currentMonthTitle,
                 onPreviousMonth = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                    }
+                    onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset - 1))
                 },
                 onNextMonth = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
+                    onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset + 1))
                 },
                 onTitleClick = { onIntent(StatisticsIntent.OpenMonthPicker) }
             )
@@ -120,12 +83,12 @@ fun StatisticsScreen(
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
             // 1. Pinned Top Expense vs Income Segmented Toggle (Stationary)
-            val tabs = listOf(AppStrings.tab_expense_analysis.tr(lang), AppStrings.tab_income_analysis.tr(lang))
+            val tabs = listOf(AppStrings.TAB_EXPENSE_ANALYSIS.tr(lang), AppStrings.TAB_INCOME_ANALYSIS.tr(lang))
             CommonSegmentedControl(
                 items = tabs,
                 selectedIndex = if (isExpenseTab) 0 else 1,
                 onIndexChange = { index ->
-                    onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) "EXPENSE" else "INCOME"))
+                    onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) StatisticsTab.EXPENSE else StatisticsTab.INCOME))
                 },
                 modifier = Modifier
                     .padding(horizontal = AppDimens.SpaceLarge)
@@ -134,7 +97,7 @@ fun StatisticsScreen(
 
             // 2. Horizontal PageView Slider with month-specific analytics calculation
             HorizontalPager(
-                state = pagerState,
+                state = holder.pagerState,
                 modifier = Modifier.weight(1f)
             ) { page ->
                 val pageOffset = page - PAGER_BASE_INDEX
@@ -142,7 +105,7 @@ fun StatisticsScreen(
                     state = state,
                     monthOffset = pageOffset,
                     onIntent = onIntent,
-                    scrollToTopFlow = if (page == pagerState.currentPage) scrollToTopFlow else null,
+                    listState = if (page == holder.pagerState.currentPage) holder.listState else rememberLazyListState(),
                     onCategoryClick = onNavigateToTransactions?.let { callback ->
                         { categoryName -> callback(pageOffset, categoryName) }
                     },

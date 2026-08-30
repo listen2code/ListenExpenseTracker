@@ -21,9 +21,9 @@ object AccountRepository {
     const val ALL_ACCOUNTS_KEY = "ALL"
 
     private val defaultAccounts = listOf(
-        AccountTypeItem(key = "CASH", nameKey = AppStrings.filter_cash, isSystem = true),
-        AccountTypeItem(key = "BANK", nameKey = AppStrings.filter_bank, isSystem = true),
-        AccountTypeItem(key = "CREDIT", nameKey = AppStrings.filter_credit, isSystem = true)
+        AccountTypeItem(key = "CASH", nameKey = AppStrings.FILTER_CASH, isSystem = true),
+        AccountTypeItem(key = "BANK", nameKey = AppStrings.FILTER_BANK, isSystem = true),
+        AccountTypeItem(key = "CREDIT", nameKey = AppStrings.FILTER_CREDIT, isSystem = true)
     )
 
     private val customAccounts = mutableListOf<AccountTypeItem>()
@@ -60,7 +60,7 @@ object AccountRepository {
     }
 
     fun getAccountDisplayName(key: String, lang: String = "zh"): String {
-        if (key == ALL_ACCOUNTS_KEY) return AppStrings.filter_all.tr(lang)
+        if (key == ALL_ACCOUNTS_KEY) return AppStrings.FILTER_ALL.tr(lang)
         return getAllAccounts().find { it.key == key }?.getDisplayName(lang) ?: key
     }
 

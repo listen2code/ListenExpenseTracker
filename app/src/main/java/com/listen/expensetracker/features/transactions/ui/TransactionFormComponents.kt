@@ -128,7 +128,7 @@ fun TransactionCategoryPicker(
                         )
                     }
                     Text(
-                        text = AppStrings.settings_category_manage.tr(lang),
+                        text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
                         fontSize = AppDimens.TextMicro,
                         color = MaterialTheme.colorScheme.primary
                     )

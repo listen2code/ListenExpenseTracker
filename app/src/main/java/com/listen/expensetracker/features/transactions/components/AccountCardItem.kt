@@ -111,9 +111,9 @@ fun AccountCardItem(
                     ) {
                         CommonText(
                             text = if (acct.isSystem) {
-                                AppStrings.account_badge_system.tr(lang)
+                                AppStrings.ACCOUNT_BADGE_SYSTEM.tr(lang)
                             } else {
-                                AppStrings.account_badge_custom.tr(lang)
+                                AppStrings.ACCOUNT_BADGE_CUSTOM.tr(lang)
                             },
                             fontSize = 9.sp,
                             color = if (acct.isSystem) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,

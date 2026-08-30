@@ -2,7 +2,10 @@ package com.listen.expensetracker.data.cloud
 
 import android.accounts.Account
 import android.content.Context
+import android.content.Intent
 import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.UserRecoverableAuthException
+import java.io.InputStream
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
@@ -39,9 +42,9 @@ object GoogleDriveService {
         val account = Account(accountEmail, "com.google")
         try {
             GoogleAuthUtil.getToken(context, account, OAUTH_SCOPE)
-        } catch (e: com.google.android.gms.auth.UserRecoverableAuthException) {
+        } catch (e: UserRecoverableAuthException) {
             e.intent?.let { intent ->
-                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
             throw IllegalStateException("请在弹出的 Google 授权窗口中点击「允许」，完成后再次点击备份")
@@ -231,7 +234,7 @@ object GoogleDriveService {
         }
     }
 
-    private fun readStream(inputStream: java.io.InputStream?): String {
+    private fun readStream(inputStream: InputStream?): String {
         if (inputStream == null) return ""
         return BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8)).use { it.readText() }
     }

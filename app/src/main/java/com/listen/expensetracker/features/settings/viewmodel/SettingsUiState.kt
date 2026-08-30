@@ -6,6 +6,12 @@ import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
+
+sealed interface SettingsEffect {
+    data object LaunchGoogleSignIn : SettingsEffect
+    data object ScrollToTop : SettingsEffect
+}
+
 /**
  * Dialog presentation states for Settings feature.
  */
@@ -56,6 +62,7 @@ sealed interface SettingsIntent {
     data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
     data class ToggleDeveloperMode(val enabled: Boolean) : SettingsIntent
     data object TriggerGoogleSignIn : SettingsIntent
+    data object ScrollToTop : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent
     data object UnlinkGoogleAccount : SettingsIntent
     data object TriggerCloudBackup : SettingsIntent
@@ -68,3 +75,4 @@ sealed interface SettingsIntent {
     data object DismissDialog : SettingsIntent
     data class CheckForUpdates(val currentVersion: String) : SettingsIntent
 }
+

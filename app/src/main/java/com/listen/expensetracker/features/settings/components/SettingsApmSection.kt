@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -58,14 +56,14 @@ fun SettingsApmSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.settings_system_ops.tr(lang),
+                    text = AppStrings.SETTINGS_SYSTEM_OPS.tr(lang),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
             // APM Inspector Button
             CommonButton(
-                text = AppStrings.apm_inspector.tr(lang),
+                text = AppStrings.APM_INSPECTOR.tr(lang),
                 onClick = onOpenApmInspector,
                 style = CommonButtonStyle.Outlined,
                 icon = { Icon(Icons.Default.BugReport, contentDescription = "APM", modifier = Modifier.size(AppDimens.IconSizeMedium)) },
@@ -78,9 +76,9 @@ fun SettingsApmSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 val seedBtnText = if (targetMonthTitle.isNotBlank()) {
-                    "${AppStrings.seed_data_btn.tr(lang)} ($targetMonthTitle)"
+                    "${AppStrings.SEED_DATA_BTN.tr(lang)} ($targetMonthTitle)"
                 } else {
-                    AppStrings.seed_data_btn.tr(lang)
+                    AppStrings.SEED_DATA_BTN.tr(lang)
                 }
                 CommonButton(
                     text = seedBtnText,
@@ -91,7 +89,7 @@ fun SettingsApmSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.clear_all.tr(lang),
+                    text = AppStrings.CLEAR_ALL.tr(lang),
                     onClick = onConfirmClearAll,
                     style = CommonButtonStyle.Danger,
                     icon = { Icon(Icons.Default.DeleteSweep, contentDescription = "Clear", modifier = Modifier.size(AppDimens.IconSizeMedium)) },

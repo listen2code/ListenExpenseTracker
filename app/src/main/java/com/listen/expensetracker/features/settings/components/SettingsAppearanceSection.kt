@@ -20,9 +20,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,10 +28,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -74,7 +71,7 @@ fun SettingsAppearanceSection(
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )
                 Text(
-                    text = AppStrings.settings_appearance.tr(lang),
+                    text = AppStrings.SETTINGS_APPEARANCE.tr(lang),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle
                 )
@@ -83,19 +80,19 @@ fun SettingsAppearanceSection(
             // Theme Mode Segmented Switch
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = AppStrings.settings_theme_mode.tr(lang),
+                    text = AppStrings.SETTINGS_THEME_MODE.tr(lang),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 val modes = listOf(
-                    ThemeMode.LIGHT to AppStrings.theme_light.tr(lang),
-                    ThemeMode.DARK to AppStrings.theme_dark.tr(lang),
-                    ThemeMode.SYSTEM to AppStrings.theme_system.tr(lang)
+                    ThemeMode.LIGHT to AppStrings.THEME_LIGHT.tr(lang),
+                    ThemeMode.DARK to AppStrings.THEME_DARK.tr(lang),
+                    ThemeMode.SYSTEM to AppStrings.THEME_SYSTEM.tr(lang)
                 )
 
-                com.listen.uicomponent.components.CommonSegmentedControl(
+                CommonSegmentedControl(
                     items = modes.map { it.second },
                     selectedIndex = modes.indexOfFirst { it.first == themeMode }.coerceAtLeast(0),
                     onIndexChange = { index -> onChangeThemeMode(modes[index].first) }
@@ -105,7 +102,7 @@ fun SettingsAppearanceSection(
             // Accent Color Selection Row
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = AppStrings.settings_accent_color.tr(lang),
+                    text = AppStrings.SETTINGS_ACCENT_COLOR.tr(lang),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -154,7 +151,7 @@ fun SettingsAppearanceSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = "${AppStrings.settings_currency.tr(lang)} ($currencySymbol)",
+                    text = "${AppStrings.SETTINGS_CURRENCY.tr(lang)} ($currencySymbol)",
                     onClick = onOpenCurrencyDialog,
                     style = CommonButtonStyle.Outlined,
                     modifier = Modifier.weight(1f)
@@ -167,7 +164,7 @@ fun SettingsAppearanceSection(
                 }
 
                 CommonButton(
-                    text = "${AppStrings.settings_language.tr(lang)}: $currentLangLabel",
+                    text = "${AppStrings.SETTINGS_LANGUAGE.tr(lang)}: $currentLangLabel",
                     onClick = {
                         val next = when (language) {
                             "zh" -> "en"

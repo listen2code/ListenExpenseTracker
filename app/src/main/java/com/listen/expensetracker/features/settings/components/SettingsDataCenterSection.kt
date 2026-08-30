@@ -1,4 +1,4 @@
-package com.listen.expensetracker.features.settings.components
+﻿package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,10 +35,7 @@ import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
-import com.listen.uicomponent.theme.ExpenseRed
-import com.listen.uicomponent.theme.IncomeGreen
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -47,6 +44,7 @@ import java.util.Locale
  */
 @Composable
 fun SettingsDataCenterSection(
+    modifier: Modifier = Modifier,
     googleAccountEmail: String?,
     googleDisplayName: String?,
     googleAvatarUrl: String? = null,
@@ -61,7 +59,6 @@ fun SettingsDataCenterSection(
     onTriggerRestore: () -> Unit,
     onExportJson: () -> Unit,
     onImportJson: () -> Unit,
-    modifier: Modifier = Modifier,
     isOperating: Boolean = false,
     lang: String = "zh"
 ) {
@@ -86,7 +83,7 @@ fun SettingsDataCenterSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.settings_data_center.tr(lang),
+                    text = AppStrings.SETTINGS_DATA_CENTER.tr(lang),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -108,12 +105,12 @@ fun SettingsDataCenterSection(
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = AppDimens.SpaceMedium)) {
                         Text(
-                            text = AppStrings.auto_backup_drive_title.tr(lang),
+                            text = AppStrings.AUTO_BACKUP_DRIVE_TITLE.tr(lang),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = AppStrings.auto_backup_drive_desc.tr(lang),
+                            text = AppStrings.AUTO_BACKUP_DRIVE_DESC.tr(lang),
                             fontSize = AppDimens.TextMicro,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -136,7 +133,7 @@ fun SettingsDataCenterSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = AppStrings.auto_backup_wifi_only_title.tr(lang),
+                            text = AppStrings.AUTO_BACKUP_WIFI_ONLY_TITLE.tr(lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -165,7 +162,7 @@ fun SettingsDataCenterSection(
                 ) {
                     val isBusy = isOperating || syncState.status == SyncStatus.SYNCING
                     CommonButton(
-                        text = if (isBusy) AppStrings.cloud_status_syncing.tr(lang) else AppStrings.cloud_backup_btn.tr(lang),
+                        text = if (isBusy) AppStrings.CLOUD_STATUS_SYNCING.tr(lang) else AppStrings.CLOUD_BACKUP_BTN.tr(lang),
                         onClick = onTriggerBackup,
                         enabled = !isBusy,
                         style = CommonButtonStyle.Primary,
@@ -185,7 +182,7 @@ fun SettingsDataCenterSection(
                     )
 
                     CommonButton(
-                        text = AppStrings.cloud_restore_btn.tr(lang),
+                        text = AppStrings.CLOUD_RESTORE_BTN.tr(lang),
                         onClick = onTriggerRestore,
                         enabled = !isBusy,
                         style = CommonButtonStyle.Outlined,
@@ -197,13 +194,13 @@ fun SettingsDataCenterSection(
             } else {
                 // Not Logged In State
                 CommonText(
-                    text = AppStrings.google_login_required.tr(lang),
+                    text = AppStrings.GOOGLE_LOGIN_REQUIRED.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 CommonButton(
-                    text = AppStrings.google_login_btn.tr(lang),
+                    text = AppStrings.GOOGLE_LOGIN_BTN.tr(lang),
                     onClick = onLoginGoogle,
                     style = CommonButtonStyle.Primary,
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(18.dp)) },
@@ -223,7 +220,7 @@ fun SettingsDataCenterSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = AppStrings.export_json.tr(lang),
+                    text = AppStrings.EXPORT_JSON.tr(lang),
                     onClick = onExportJson,
                     style = CommonButtonStyle.Outlined,
                     icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(16.dp)) },
@@ -232,7 +229,7 @@ fun SettingsDataCenterSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.import_json.tr(lang),
+                    text = AppStrings.IMPORT_JSON.tr(lang),
                     onClick = onImportJson,
                     style = CommonButtonStyle.Outlined,
                     icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(16.dp)) },

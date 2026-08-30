@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -65,15 +65,15 @@ fun CategoryManageDialog(
     var refreshKey by remember { mutableIntStateOf(0) }
 
     val currentCategories = remember(activeType, refreshKey) {
-        if (activeType == "EXPENSE") CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
+        if (activeType == TransactionType.EXPENSE) CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
     }
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.settings_category_manage.tr(lang),
+        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
         confirmButton = {
             CommonButton(
-                text = AppStrings.btn_add_transaction.tr(lang),
+                text = AppStrings.BTN_ADD_TRANSACTION.tr(lang),
                 onClick = { showAddDialog = true },
                 style = CommonButtonStyle.Primary,
                 icon = {
@@ -83,7 +83,7 @@ fun CategoryManageDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.btn_done.tr(lang),
+                text = AppStrings.BTN_DONE.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -95,18 +95,18 @@ fun CategoryManageDialog(
         ) {
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
-                    selected = activeType == "EXPENSE",
-                    onClick = { activeType = "EXPENSE" },
+                    selected = activeType == TransactionType.EXPENSE,
+                    onClick = { activeType = TransactionType.EXPENSE },
                     shape = SegmentedButtonDefaults.itemShape(0, 2)
                 ) {
-                    CommonText(AppStrings.type_expense.tr(lang), fontSize = AppDimens.TextBody)
+                    CommonText(AppStrings.TYPE_EXPENSE.tr(lang), fontSize = AppDimens.TextBody)
                 }
                 SegmentedButton(
-                    selected = activeType == "INCOME",
-                    onClick = { activeType = "INCOME" },
+                    selected = activeType == TransactionType.INCOME,
+                    onClick = { activeType = TransactionType.INCOME },
                     shape = SegmentedButtonDefaults.itemShape(1, 2)
                 ) {
-                    CommonText(AppStrings.type_income.tr(lang), fontSize = AppDimens.TextBody)
+                    CommonText(AppStrings.TYPE_INCOME.tr(lang), fontSize = AppDimens.TextBody)
                 }
             }
 
@@ -179,10 +179,10 @@ private fun AddCustomCategoryDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.settings_category_manage.tr(lang),
+        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
         confirmButton = {
             CommonButton(
-                text = AppStrings.btn_save.tr(lang),
+                text = AppStrings.BTN_SAVE.tr(lang),
                 onClick = {
                     if (name.isNotBlank()) {
                         CategoryRepository.addCustomCategory(
@@ -200,7 +200,7 @@ private fun AddCustomCategoryDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.btn_cancel.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(lang),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -210,7 +210,7 @@ private fun AddCustomCategoryDialog(
             CommonEditText(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = AppStrings.search_placeholder.tr(lang),
+                placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
                 singleLine = true
             )
 

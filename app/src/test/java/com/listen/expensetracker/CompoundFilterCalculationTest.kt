@@ -4,6 +4,7 @@ import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -194,7 +195,7 @@ class CompoundFilterCalculationTest {
 
     @Test
     fun testAccountSelectionDoesNotIncrementDialogFilterCount() {
-        val stateWithAccount = com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState(
+        val stateWithAccount = TransactionsUiState(
             selectedAccountFilter = "CASH"
         )
         assertEquals(0, stateWithAccount.activeFilterCount)

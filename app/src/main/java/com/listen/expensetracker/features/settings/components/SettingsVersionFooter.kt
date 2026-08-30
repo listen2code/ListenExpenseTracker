@@ -79,7 +79,7 @@ fun SettingsVersionFooter(
                         onToggleDeveloperMode(!isDeveloperMode)
                     } else if (clickCount in 3..4 && !isDeveloperMode) {
                         val remaining = 5 - clickCount
-                        val stepMsg = String.format(AppStrings.developer_mode_steps.tr(lang), remaining)
+                        val stepMsg = String.format(AppStrings.DEVELOPER_MODE_STEPS.tr(lang), remaining)
                         Toast.makeText(context, stepMsg, Toast.LENGTH_SHORT).show()
                     }
                 },

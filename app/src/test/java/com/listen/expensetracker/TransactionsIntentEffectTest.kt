@@ -3,8 +3,12 @@ package com.listen.expensetracker
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.features.settings.viewmodel.SettingsEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsEffect
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsEffect
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.uicomponent.theme.AccentColor
@@ -76,8 +80,8 @@ class TransactionsIntentEffectTest {
         val accentIntent = SettingsIntent.ChangeAccentColor(AccentColor.ROSE)
         assertEquals(AccentColor.ROSE, accentIntent.accent)
 
-        val statsTabIntent = StatisticsIntent.ChangeStatisticsTab("INCOME")
-        assertEquals("INCOME", statsTabIntent.tab)
+        val statsTabIntent = StatisticsIntent.ChangeStatisticsTab(StatisticsTab.INCOME)
+        assertEquals(StatisticsTab.INCOME, statsTabIntent.tab)
     }
 
     @Test
@@ -105,8 +109,24 @@ class TransactionsIntentEffectTest {
         val hideKb = CommonUiEffect.HideKeyboard
         assertNotNull(hideKb)
 
-        val settingsEffect = com.listen.expensetracker.features.settings.viewmodel.SettingsEffect.LaunchGoogleSignIn
+        val settingsEffect = SettingsEffect.LaunchGoogleSignIn
         assertNotNull(settingsEffect)
+        val settingsScrollToTop = SettingsEffect.ScrollToTop
+        assertNotNull(settingsScrollToTop)
+
+        val txScrollMonth = TransactionsEffect.ScrollToMonth(3)
+        assertEquals(3, txScrollMonth.offset)
+        val txScrollTop = TransactionsEffect.ScrollToTop
+        assertNotNull(txScrollTop)
+        val txScrollTx = TransactionsEffect.ScrollToTransaction("tx-1")
+        assertEquals("tx-1", txScrollTx.txId)
+        val txScrollDay = TransactionsEffect.ScrollToDay(15)
+        assertEquals(15, txScrollDay.day)
+
+        val statsScrollMonth = StatisticsEffect.ScrollToMonth(-2)
+        assertEquals(-2, statsScrollMonth.offset)
+        val statsScrollTop = StatisticsEffect.ScrollToTop
+        assertNotNull(statsScrollTop)
     }
 
     @Test

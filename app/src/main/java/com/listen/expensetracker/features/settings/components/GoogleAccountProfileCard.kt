@@ -1,4 +1,4 @@
-package com.listen.expensetracker.features.settings.components
+﻿package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -133,10 +134,10 @@ fun SyncStatusIndicator(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val statusText = when (syncState.status) {
-            SyncStatus.SYNCING -> AppStrings.cloud_status_syncing.tr(lang)
-            SyncStatus.SUCCESS -> AppStrings.cloud_status_success.tr(lang)
-            SyncStatus.ERROR -> AppStrings.cloud_status_error.tr(lang)
-            SyncStatus.IDLE -> AppStrings.cloud_status_idle.tr(lang)
+            SyncStatus.SYNCING -> AppStrings.CLOUD_STATUS_SYNCING.tr(lang)
+            SyncStatus.SUCCESS -> AppStrings.CLOUD_STATUS_SUCCESS.tr(lang)
+            SyncStatus.ERROR -> AppStrings.CLOUD_STATUS_ERROR.tr(lang)
+            SyncStatus.IDLE -> AppStrings.CLOUD_STATUS_IDLE.tr(lang)
         }
         val statusColor = when (syncState.status) {
             SyncStatus.SYNCING -> MaterialTheme.colorScheme.primary
@@ -150,7 +151,7 @@ fun SyncStatusIndicator(
             horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
         ) {
             if (syncState.status == SyncStatus.SYNCING) {
-                androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(12.dp), strokeWidth = 2.dp)
+                CircularProgressIndicator(modifier = Modifier.size(12.dp), strokeWidth = 2.dp)
             }
             Text(
                 text = statusText,
@@ -162,7 +163,7 @@ fun SyncStatusIndicator(
 
         if (syncState.lastSyncTimestamp > 0) {
             Text(
-                text = "${AppStrings.cloud_last_sync.tr(lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
+                text = "${AppStrings.CLOUD_LAST_SYNC.tr(lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
                 fontSize = AppDimens.TextMicro,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
