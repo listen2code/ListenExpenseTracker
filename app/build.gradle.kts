@@ -131,6 +131,7 @@ dependencies {
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
+    description = ""
     dependsOn("testDebugUnitTest")
     reports {
         xml.required.set(true)
