@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
  */
 class TransactionsViewModel(
     private val application: Application
-) : BaseViewModel<TransactionsUiState, TransactionsIntent, CommonUiEffect>(TransactionsUiState()) {
+) : BaseViewModel<TransactionsUiState, TransactionsIntent>(TransactionsUiState()) {
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()

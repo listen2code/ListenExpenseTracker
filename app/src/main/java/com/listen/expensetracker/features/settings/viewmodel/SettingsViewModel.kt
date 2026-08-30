@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val application: Application
-) : BaseViewModel<SettingsUiState, SettingsIntent, CommonUiEffect>(SettingsUiState()) {
+) : BaseViewModel<SettingsUiState, SettingsIntent>(SettingsUiState()) {
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()

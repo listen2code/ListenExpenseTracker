@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  */
 class StatisticsViewModel(
     application: Application
-) : BaseViewModel<StatisticsUiState, StatisticsIntent, CommonUiEffect>(StatisticsUiState()) {
+) : BaseViewModel<StatisticsUiState, StatisticsIntent>(StatisticsUiState()) {
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()

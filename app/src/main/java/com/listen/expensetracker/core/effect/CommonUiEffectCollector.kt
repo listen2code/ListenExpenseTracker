@@ -27,7 +27,7 @@ import androidx.core.net.toUri
  */
 @Composable
 fun CollectCommonUiEffects(
-    vararg viewModels: BaseViewModel<*, *, CommonUiEffect>,
+    vararg viewModels: BaseViewModel<*, *>,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit = {},
     onNavigateTo: (String) -> Unit = {}

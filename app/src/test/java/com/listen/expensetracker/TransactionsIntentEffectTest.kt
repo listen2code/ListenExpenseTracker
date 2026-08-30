@@ -15,6 +15,7 @@ import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TransactionsIntentEffectTest {
@@ -111,11 +112,13 @@ class TransactionsIntentEffectTest {
 
         val settingsEffect = SettingsEffect.LaunchGoogleSignIn
         assertNotNull(settingsEffect)
+        assertTrue(settingsEffect is CommonUiEffect)
         val settingsScrollToTop = SettingsEffect.ScrollToTop
         assertNotNull(settingsScrollToTop)
 
         val txScrollMonth = TransactionsEffect.ScrollToMonth(3)
         assertEquals(3, txScrollMonth.offset)
+        assertTrue(txScrollMonth is CommonUiEffect)
         val txScrollTop = TransactionsEffect.ScrollToTop
         assertNotNull(txScrollTop)
         val txScrollTx = TransactionsEffect.ScrollToTransaction("tx-1")
@@ -125,6 +128,7 @@ class TransactionsIntentEffectTest {
 
         val statsScrollMonth = StatisticsEffect.ScrollToMonth(-2)
         assertEquals(-2, statsScrollMonth.offset)
+        assertTrue(statsScrollMonth is CommonUiEffect)
         val statsScrollTop = StatisticsEffect.ScrollToTop
         assertNotNull(statsScrollTop)
     }

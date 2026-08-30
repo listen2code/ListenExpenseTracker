@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 
 /**
  * 设置画面专用副作用集中调度器 (SettingsEffects)。
@@ -22,7 +23,7 @@ fun SettingsEffects(
     listState: LazyListState
 ) {
     LaunchedEffect(viewModel) {
-        viewModel?.settingsEffect?.collectLatest { effect ->
+        viewModel?.viewEffect?.filterIsInstance<SettingsEffect>()?.collectLatest { effect ->
             when (effect) {
                 is SettingsEffect.LaunchGoogleSignIn -> viewModel.launchGoogleAccountPicker(context)
                 is SettingsEffect.ScrollToTop -> listState.animateScrollToItem(0)

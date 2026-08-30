@@ -18,7 +18,7 @@ import com.listen.arch.mvi.BaseViewModel
  * @param content Stateless Screen Composable slot receiving (state, onIntent)
  */
 @Composable
-inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I, *>> CommonRoute(
+inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I>> CommonRoute(
     viewModel: VM = viewModel(),
     crossinline content: @Composable (state: S, onIntent: (I) -> Unit) -> Unit
 ) {
