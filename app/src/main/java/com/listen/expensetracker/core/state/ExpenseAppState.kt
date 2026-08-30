@@ -71,15 +71,18 @@ class ExpenseAppState(
         }
 
     fun switchTab(tab: NavTab) {
-        if (tab == NavTab.STATISTICS && currentTab == NavTab.TRANSACTIONS) {
-            val offset = transactionsViewModel.viewState.value.selectedMonthOffset
-            if (statisticsViewModel.viewState.value.selectedMonthOffset != offset) {
-                statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(offset))
+        val currentOffset = when (currentTab) {
+            NavTab.TRANSACTIONS -> transactionsViewModel.viewState.value.selectedMonthOffset
+            NavTab.STATISTICS -> statisticsViewModel.viewState.value.selectedMonthOffset
+            NavTab.SETTINGS -> activeMonthOffset
+        }
+        if (tab == NavTab.STATISTICS) {
+            if (statisticsViewModel.viewState.value.selectedMonthOffset != currentOffset) {
+                statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(currentOffset))
             }
-        } else if (tab == NavTab.TRANSACTIONS && currentTab == NavTab.STATISTICS) {
-            val offset = statisticsViewModel.viewState.value.selectedMonthOffset
-            if (transactionsViewModel.viewState.value.selectedMonthOffset != offset) {
-                transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(offset))
+        } else if (tab == NavTab.TRANSACTIONS) {
+            if (transactionsViewModel.viewState.value.selectedMonthOffset != currentOffset) {
+                transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(currentOffset))
             }
         }
         currentTab = tab

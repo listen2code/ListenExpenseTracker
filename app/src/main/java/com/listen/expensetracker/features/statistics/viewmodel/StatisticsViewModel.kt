@@ -6,15 +6,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.mvi.BaseViewModel
-import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
-import com.listen.uicomponent.theme.AccentColor
-import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

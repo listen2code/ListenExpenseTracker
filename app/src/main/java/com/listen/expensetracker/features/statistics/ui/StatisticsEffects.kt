@@ -38,8 +38,18 @@ fun StatisticsEffects(
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
 
     LaunchedEffect(viewModel, pagerState) {
+        // 任务 1：监听外部月份变更并同步对齐 Pager（Tab 切换、弹窗选月等）
+        launch {
+            snapshotFlow { currentMonthOffset }.collectLatest { offset ->
+                val targetPage = PAGER_BASE_INDEX + offset
+                if (pagerState.currentPage != targetPage) {
+                    pagerState.scrollToPage(targetPage)
+                }
+            }
+        }
+
         if (viewModel != null) {
-            // 任务 1：监听单次事件副作用（月份跳转、一键置顶等）
+            // 任务 2：监听单次事件副作用（月份跳转、一键置顶等）
             launch {
                 viewModel.viewEffect.filterIsInstance<StatisticsEffect>().collectLatest { effect ->
                     when (effect) {
@@ -57,7 +67,7 @@ fun StatisticsEffects(
             }
         }
 
-        // 任务 2：监听 Pager 手势翻页完成并同步更新状态机中的月份偏移
+        // 任务 3：监听 Pager 手势翻页完成并同步更新状态机中的月份偏移
         launch {
             snapshotFlow { pagerState.settledPage }
                 .drop(1)

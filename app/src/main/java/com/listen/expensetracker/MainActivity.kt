@@ -164,7 +164,7 @@ fun App(
                     SettingsScreen(
                         state = state,
                         onIntent = onIntent,
-                        targetMonthOffset = transactionsState.selectedMonthOffset,
+                        targetMonthOffset = appState.activeMonthOffset,
                         onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
                         viewModel = appState.settingsViewModel,
                         modifier = screenModifier

@@ -46,8 +46,18 @@ fun TransactionsEffects(
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
 
     LaunchedEffect(viewModel, pagerState) {
+        // 任务 1：监听外部月份变更并同步对齐 Pager（Tab 切换、分类联动、弹窗选月等）
+        launch {
+            snapshotFlow { currentMonthOffset }.collectLatest { offset ->
+                val targetPage = PAGER_BASE_INDEX + offset
+                if (pagerState.currentPage != targetPage) {
+                    pagerState.scrollToPage(targetPage)
+                }
+            }
+        }
+
         if (viewModel != null) {
-            // 任务 1：监听 ViewModel 发射的单次 UI 副作用（滚动定位等）
+            // 任务 2：监听 ViewModel 发射的单次 UI 副作用（滚动定位等）
             launch {
                 viewModel.viewEffect.filterIsInstance<TransactionsEffect>().collectLatest { effect ->
                     when (effect) {
@@ -77,7 +87,7 @@ fun TransactionsEffects(
             }
         }
 
-        // 任务 2：将 Pager 滑动停止事件转化为 MVI Intent 同步至 ViewModel
+        // 任务 3：将 Pager 滑动停止事件转化为 MVI Intent 同步至 ViewModel
         launch {
             snapshotFlow { pagerState.settledPage }
                 .drop(1) // 忽略初次创建时的第 1 次发射

@@ -29,14 +29,9 @@ class TransactionsStateHolder(
     val pagerState: PagerState,
     val listState: LazyListState,
     val groupedTransactions: Map<String, List<TransactionEntity>>,
-    val currentMonthTitle: String
-) {
-    /**
-     * 当前手势落定页对应的自然月份相对偏移（0 表示本月，-1 表示上月）。
-     */
+    val currentMonthTitle: String,
     val currentMonthOffset: Int
-        get() = pagerState.currentPage - PAGER_BASE_INDEX
-}
+)
 
 /**
  * 创建并记住 [TransactionsStateHolder] 的 Composable 辅助函数。
@@ -70,8 +65,12 @@ fun rememberTransactionsStateHolder(
         state.filteredTransactions.groupBy { formatDayGroupHeader(it.timestamp) }
     }
 
-    // 4. 根据当前滑动页实时计算顶部胶囊标题
-    val activeOffset = pagerState.currentPage - PAGER_BASE_INDEX
+    // 4. 根据当前滑动手势或状态机实时计算顶部胶囊标题与月份偏移（避免跨 Tab 切换时的闪烁）
+    val activeOffset = if (pagerState.isScrollInProgress) {
+        pagerState.currentPage - PAGER_BASE_INDEX
+    } else {
+        state.selectedMonthOffset
+    }
     val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
         TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
     }
@@ -86,12 +85,13 @@ fun rememberTransactionsStateHolder(
         onIntent = onIntent
     )
 
-    return remember(pagerState, listState, groupedTransactions, currentMonthTitle) {
+    return remember(pagerState, listState, groupedTransactions, currentMonthTitle, activeOffset) {
         TransactionsStateHolder(
             pagerState = pagerState,
             listState = listState,
             groupedTransactions = groupedTransactions,
-            currentMonthTitle = currentMonthTitle
+            currentMonthTitle = currentMonthTitle,
+            currentMonthOffset = activeOffset
         )
     }
 }
