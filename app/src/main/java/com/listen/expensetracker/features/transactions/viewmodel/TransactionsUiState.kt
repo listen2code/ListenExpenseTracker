@@ -135,5 +135,7 @@ sealed interface TransactionsIntent {
     data object ClearAmountFilter : TransactionsIntent
     data object ClearSortOrder : TransactionsIntent
     data class UpdateMonthlyBudget(val budget: Double) : TransactionsIntent
+    data object ScreenAppear : TransactionsIntent
+    data object ScreenDisappear : TransactionsIntent
 }
 

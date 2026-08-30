@@ -38,5 +38,10 @@ class TransactionsIntentTest {
         
         val dialogIntent = TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction)
         assertEquals(TransactionsDialog.AddTransaction, dialogIntent.dialog)
+
+        val appearIntent = TransactionsIntent.ScreenAppear
+        val disappearIntent = TransactionsIntent.ScreenDisappear
+        assertTrue(appearIntent is TransactionsIntent)
+        assertTrue(disappearIntent is TransactionsIntent)
     }
 }

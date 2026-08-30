@@ -25,13 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
-import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
@@ -45,7 +43,6 @@ import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.keypad.NumericKeypad
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
-import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * 统一记账弹窗 (Unified Transaction Sheet)。
@@ -81,29 +78,19 @@ fun TransactionSheet(
     
     // 选中分类，编辑模式下尝试匹配
     var selectedCategory: Category by remember(categories) {
-        mutableStateOf(
-            if (isEditMode) {
-                categories.find { it.id == transaction.categoryId } ?: categories.first()
-            } else {
-                categories.first()
-            }
-        )
+        mutableStateOf(if (isEditMode) categories.find { it.id == transaction.categoryId } ?: categories.first() else categories.first())
     }
 
     // 金额输入串（编辑模式下格式化显示）
-    var amountExpression by remember { 
+    var amountExpression by remember {
         mutableStateOf(if (isEditMode) "%.2f".format(transaction.amount ?: 0.0) else "0")
     }
     
     var note by remember { mutableStateOf(transaction?.note ?: "") }
-    
     var accountVersion by remember { mutableIntStateOf(0) }
     val availableAccounts = remember(accountVersion) { AccountRepository.getAllAccounts() }
     var selectedAccount by remember { mutableStateOf(transaction?.accountType ?: "CASH") }
-    
-    var selectedTimestamp by remember(initialTimestamp) { 
-        mutableLongStateOf(transaction?.timestamp ?: initialTimestamp) 
-    }
+    var selectedTimestamp by remember(initialTimestamp) { mutableLongStateOf(transaction?.timestamp ?: initialTimestamp) }
     
     // 全局/局部弹窗标记
     var showCategoryManageDialog by remember { mutableStateOf(false) }
@@ -120,25 +107,6 @@ fun TransactionSheet(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
         ) {
-            // 编辑模式专有页眉：标题与删除按钮
-            if (isEditMode) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (onDelete != null) {
-                        IconButton(onClick = onDelete) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-                }
-            }
-
             // 1. 收支类型分段选择器
             CommonSegmentedControl(
                 items = typeOptions,
@@ -192,7 +160,7 @@ fun TransactionSheet(
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
-            // 5. 日期选择胶囊
+            // 5. 日期选择胶囊与操作区（左侧日期，右侧编辑模式删除按钮）
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -202,6 +170,16 @@ fun TransactionSheet(
                     selectedTimestamp = selectedTimestamp,
                     onDateSelected = { selectedTimestamp = it }
                 )
+
+                if (isEditMode && onDelete != null) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
 
             // 6. 支付账户选择（支持长按管理）
@@ -216,36 +194,24 @@ fun TransactionSheet(
             // 7. 响应式数字键盘
             NumericKeypad(
                 onKeyPress = { key ->
-                    if (key == "." && amountExpression.contains(".")) {
-                        // 忽略多余小数点
-                    } else if ((amountExpression == "0" || amountExpression.isEmpty()) && key != ".") {
+                    if (key == "." && amountExpression.contains(".")) return@NumericKeypad
+                    if ((amountExpression == "0" || amountExpression.isEmpty()) && key != ".") {
                         amountExpression = key
                     } else if (amountExpression.length < 10) {
                         amountExpression += key
                     }
                 },
                 onDeletePress = {
-                    amountExpression = if (amountExpression.length > 1) {
-                        amountExpression.dropLast(1)
-                    } else {
-                        "0"
-                    }
+                    amountExpression = if (amountExpression.length > 1) amountExpression.dropLast(1) else "0"
                 },
                 onDonePress = {
                     val finalAmount = amountExpression.toDoubleOrNull() ?: 0.0
                     if (finalAmount > 0) {
                         val catName = selectedCategory.getDisplayName(lang)
-                        // 若为新增模式，UUID 主键由 TransactionEntity 构造函数自动生成
                         val result = (transaction ?: TransactionEntity(type = type, categoryId = "", categoryName = "", categoryIcon = "", categoryColorHex = "", amount = 0.0)).copy(
-                            type = type,
-                            categoryId = selectedCategory.id,
-                            categoryName = catName,
-                            categoryIcon = selectedCategory.id,
-                            categoryColorHex = selectedCategory.colorHex,
-                            amount = finalAmount,
-                            note = note.trim(),
-                            accountType = selectedAccount,
-                            timestamp = selectedTimestamp
+                            type = type, categoryId = selectedCategory.id, categoryName = catName,
+                            categoryIcon = selectedCategory.id, categoryColorHex = selectedCategory.colorHex,
+                            amount = finalAmount, note = note.trim(), accountType = selectedAccount, timestamp = selectedTimestamp
                         )
                         onSave(result)
                     }
@@ -257,69 +223,23 @@ fun TransactionSheet(
     }
 
     // --- 弹窗逻辑聚合 ---
-
     if (showCategoryManageDialog) {
         CategoryManageDialog(
-            type = type,
-            onDismiss = { showCategoryManageDialog = false },
-            onCategoriesChanged = { categoryVersion++ },
-            lang = lang
+            type = type, onDismiss = { showCategoryManageDialog = false },
+            onCategoriesChanged = { categoryVersion++ }, lang = lang
         )
     }
 
     accountToDelete?.let { acct ->
         AccountDeleteConfirmDialog(
-            accountName = acct.getDisplayName(lang),
-            onDismiss = { accountToDelete = null },
+            accountName = acct.getDisplayName(lang), onDismiss = { accountToDelete = null },
             onConfirm = {
                 AccountRepository.deleteAccount(acct.key)
                 accountVersion++
-                if (selectedAccount == acct.key) {
-                    selectedAccount = "CASH"
-                }
+                if (selectedAccount == acct.key) selectedAccount = "CASH"
                 accountToDelete = null
             },
             lang = lang
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TransactionSheetAddPreview() {
-    ExpenseStrings.init()
-    ListenTheme {
-        TransactionSheet(
-            currencySymbol = "$",
-            onDismiss = {},
-            onSave = {},
-            lang = "en"
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TransactionSheetEditPreview() {
-    ExpenseStrings.init()
-    val sampleTransaction = TransactionEntity(
-        type = TransactionType.EXPENSE,
-        categoryId = "c_food",
-        categoryName = "Food",
-        categoryIcon = "c_food",
-        categoryColorHex = "#EF4444",
-        amount = 42.5,
-        note = "Lunch at McDonald's",
-        accountType = "CASH"
-    )
-    ListenTheme {
-        TransactionSheet(
-            currencySymbol = "$",
-            onDismiss = {},
-            onSave = {},
-            transaction = sampleTransaction,
-            onDelete = {},
-            lang = "en"
         )
     }
 }

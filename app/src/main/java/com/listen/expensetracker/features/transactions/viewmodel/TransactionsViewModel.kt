@@ -10,6 +10,7 @@ import com.listen.arch.apm.TraceManager
 import com.listen.arch.i18n.tr
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
+import com.listen.arch.mvi.LifecycleEvent
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -120,12 +121,10 @@ class TransactionsViewModel(
                 recalculate()
             }
             is TransactionsIntent.ApplyCompoundFilter -> {
-                updateState { copy(typeFilter = intent.type, selectedCategories = intent.categories, amountPreset = intent.preset, customMinAmount = intent.min, customMaxAmount = intent.max, sortOrder = intent.sortOrder) }
-                recalculate()
+                updateState { copy(typeFilter = intent.type, selectedCategories = intent.categories, amountPreset = intent.preset, customMinAmount = intent.min, customMaxAmount = intent.max, sortOrder = intent.sortOrder) }; recalculate()
             }
             is TransactionsIntent.ResetAllFilters -> {
-                updateState { copy(searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC) }
-                recalculate()
+                updateState { copy(searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC) }; recalculate()
             }
             is TransactionsIntent.ClearTypeFilter -> { updateState { copy(typeFilter = "ALL") }; recalculate() }
             is TransactionsIntent.ClearCategoryFilter -> { updateState { copy(selectedCategories = emptySet()) }; recalculate() }
@@ -133,7 +132,14 @@ class TransactionsViewModel(
             is TransactionsIntent.ClearAmountFilter -> { updateState { copy(amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null) }; recalculate() }
             is TransactionsIntent.ClearSortOrder -> { updateState { copy(sortOrder = TransactionSortOrder.DATE_DESC) }; recalculate() }
             is TransactionsIntent.UpdateMonthlyBudget -> { viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget) } }
+            is TransactionsIntent.ScreenAppear -> recalculate()
+            is TransactionsIntent.ScreenDisappear -> Unit
         }
+    }
+
+    override fun toLifecycleIntent(event: LifecycleEvent): TransactionsIntent? = when (event) {
+        LifecycleEvent.ON_APPEAR -> TransactionsIntent.ScreenAppear
+        LifecycleEvent.ON_DISAPPEAR -> TransactionsIntent.ScreenDisappear
     }
 
     private fun observeSettings() {
