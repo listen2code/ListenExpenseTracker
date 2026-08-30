@@ -13,8 +13,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.listen.arch.i18n.tr
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -25,8 +27,10 @@ import com.listen.expensetracker.features.settings.components.SettingsDialogHost
 import com.listen.expensetracker.features.settings.components.SettingsFinanceSection
 import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
+import com.listen.expensetracker.features.settings.viewmodel.SettingsEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,12 +45,23 @@ fun SettingsScreen(
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
-    scrollToTopFlow: Flow<Unit>? = null
+    scrollToTopFlow: Flow<Unit>? = null,
+    onOpenApm: () -> Unit = {},
+    viewModel: SettingsViewModel? = null
 ) {
+    val context = LocalContext.current
     val lang = state.language
     val sym = state.currencySymbol
     val (_, _, currentMonthTitle) = remember(targetMonthOffset, lang) {
         TransactionCalculationEngine.getMonthRangeAndTitle(targetMonthOffset, lang)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel?.settingsEffect?.collectLatest { effect ->
+            when (effect) {
+                is SettingsEffect.LaunchGoogleSignIn -> viewModel.launchGoogleAccountPicker(context)
+            }
+        }
     }
 
     val listState = rememberSaveable(saver = LazyListState.Saver) {
@@ -144,7 +159,7 @@ fun SettingsScreen(
             if (state.isDeveloperMode) {
                 item(key = "apm_section") {
                     SettingsApmSection(
-                        onOpenApmInspector = { onIntent(SettingsIntent.OpenApmInspector) },
+                        onOpenApmInspector = onOpenApm,
                         onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = currentMonthTitle,

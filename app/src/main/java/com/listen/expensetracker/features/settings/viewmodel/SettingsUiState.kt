@@ -64,7 +64,6 @@ sealed interface SettingsIntent {
     data object ClearAllData : SettingsIntent
     data class ExportJsonToFile(val uri: Uri) : SettingsIntent
     data class ImportJsonFromFile(val uri: Uri) : SettingsIntent
-    data object OpenApmInspector : SettingsIntent
     data class OpenDialog(val dialog: SettingsDialog) : SettingsIntent
     data object DismissDialog : SettingsIntent
     data class CheckForUpdates(val currentVersion: String) : SettingsIntent

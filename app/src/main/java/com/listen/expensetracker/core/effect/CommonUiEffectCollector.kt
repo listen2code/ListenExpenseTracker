@@ -2,6 +2,7 @@ package com.listen.expensetracker.core.effect
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -9,26 +10,30 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import kotlinx.coroutines.flow.collectLatest
+import androidx.core.net.toUri
 
 /**
  * Universal Centralized Composable Hook to collect and handle CommonUiEffect across ViewModels.
- * Eliminates duplicate LaunchedEffect boilerplate for Toast, Snackbar, ShareText, and APM sheet.
+ * Eliminates duplicate LaunchedEffect boilerplate for Toast, Snackbar, ShareText, Browser URL, and Navigation.
  *
  * @param viewModels List of ViewModels producing CommonUiEffect
  * @param snackbarHostState Active SnackbarHostState to show transient feedback
- * @param onOpenApm Callback to display the APM log inspector bottom sheet
+ * @param onNavigateBack Optional callback for back navigation
+ * @param onNavigateTo Optional callback for screen routing
  */
 @Composable
 fun CollectCommonUiEffects(
     vararg viewModels: BaseViewModel<*, *, CommonUiEffect>,
     snackbarHostState: SnackbarHostState,
-    onOpenApm: () -> Unit = {},
-    onLaunchGoogleSignIn: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    onNavigateTo: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     viewModels.forEach { vm ->
         LaunchedEffect(vm) {
@@ -50,14 +55,17 @@ fun CollectCommonUiEffects(
                     is CommonUiEffect.ShareText -> {
                         shareSystemText(context, effect.content, effect.title)
                     }
-                    is CommonUiEffect.OpenApmInspector -> {
-                        onOpenApm()
-                    }
-                    is CommonUiEffect.LaunchGoogleSignIn -> {
-                        onLaunchGoogleSignIn()
-                    }
                     is CommonUiEffect.NavigateTo -> {
-                        // Navigation handled by routing if needed
+                        onNavigateTo(effect.route)
+                    }
+                    is CommonUiEffect.NavigateBack -> {
+                        onNavigateBack()
+                    }
+                    is CommonUiEffect.OpenUrl -> {
+                        openBrowserUrl(context, effect.url)
+                    }
+                    is CommonUiEffect.HideKeyboard -> {
+                        keyboardController?.hide()
                     }
                 }
             }
@@ -78,4 +86,16 @@ fun shareSystemText(context: Context, content: String, title: String) {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     context.startActivity(chooser)
+}
+
+/**
+ * Helper function to open an external web URL via system browser.
+ */
+fun openBrowserUrl(context: Context, url: String) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {}
 }

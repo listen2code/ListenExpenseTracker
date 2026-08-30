@@ -60,18 +60,12 @@ class MainActivity : ComponentActivity() {
 
             splashScreen.setKeepOnScreenCondition { transactionsState.isLoading }
 
-            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, APM, Google Login)
+            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, Navigation)
             CollectCommonUiEffects(
                 appState.transactionsViewModel,
                 appState.statisticsViewModel,
                 appState.settingsViewModel,
-                snackbarHostState = appState.snackbarHostState,
-                onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
-                onLaunchGoogleSignIn = {
-                    lifecycleScope.launch {
-                        appState.settingsViewModel.launchGoogleAccountPicker(this@MainActivity)
-                    }
-                }
+                snackbarHostState = appState.snackbarHostState
             )
 
             ListenTheme(
@@ -181,6 +175,8 @@ fun App(
                         onIntent = onIntent,
                         targetMonthOffset = transactionsState.selectedMonthOffset,
                         scrollToTopFlow = scrollToTopFlow,
+                        onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
+                        viewModel = appState.settingsViewModel,
                         modifier = screenModifier
                     )
                 }

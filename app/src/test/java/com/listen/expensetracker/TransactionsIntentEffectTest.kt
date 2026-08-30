@@ -96,8 +96,17 @@ class TransactionsIntentEffectTest {
         assertEquals("Title", shareEffect.title)
         assertEquals("Content", shareEffect.content)
 
-        val apmEffect = CommonUiEffect.OpenApmInspector
-        assertNotNull(apmEffect)
+        val navBack = CommonUiEffect.NavigateBack
+        assertNotNull(navBack)
+
+        val openUrl = CommonUiEffect.OpenUrl("https://example.com")
+        assertEquals("https://example.com", openUrl.url)
+
+        val hideKb = CommonUiEffect.HideKeyboard
+        assertNotNull(hideKb)
+
+        val settingsEffect = com.listen.expensetracker.features.settings.viewmodel.SettingsEffect.LaunchGoogleSignIn
+        assertNotNull(settingsEffect)
     }
 
     @Test
