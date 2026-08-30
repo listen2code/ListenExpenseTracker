@@ -97,8 +97,13 @@ fun TransactionFilterBottomSheet(
                     TransactionType.INCOME to AppStrings.TYPE_INCOME.tr(lang)
                 ).forEach { (typeKey, label) ->
                     FilterChip(
-                        selected = selectedType == typeKey, onClick = { selectedType = typeKey; selectedCategories = emptySet() },
-                        label = { Text(label, fontSize = 12.sp) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer)
+                        selected = selectedType == typeKey,
+                        onClick = {
+                            selectedType = typeKey
+                            selectedCategories = emptySet()
+                        },
+                        label = { Text(label, fontSize = 12.sp) },
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer)
                     )
                 }
             }
@@ -174,9 +179,14 @@ fun TransactionFilterBottomSheet(
                 CommonButton(
                     text = AppStrings.FILTER_RESET.tr(lang),
                     onClick = {
-                        selectedType = "ALL"; selectedCategories = emptySet(); selectedPreset = AmountFilterPreset.ALL
-                        selectedSortOrder = TransactionSortOrder.DATE_DESC; minAmountText = ""; maxAmountText = ""
-                        onReset(); onDismiss()
+                        selectedType = "ALL"
+                        selectedCategories = emptySet()
+                        selectedPreset = AmountFilterPreset.ALL
+                        selectedSortOrder = TransactionSortOrder.DATE_DESC
+                        minAmountText = ""
+                        maxAmountText = ""
+                        onReset()
+                        onDismiss()
                     },
                     style = CommonButtonStyle.Outlined, modifier = Modifier.weight(1f)
                 )

@@ -23,6 +23,7 @@ import com.listen.expensetracker.data.update.UpdateResult
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -47,17 +48,35 @@ class SettingsViewModel(
     override fun handleIntent(intent: SettingsIntent) {
         val traceId = TraceManager.newTraceId()
         when (intent) {
-            is SettingsIntent.ChangeLanguage -> viewModelScope.launch { prefManager.setLanguage(intent.langCode); updateState { copy(language = intent.langCode) } }
-            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch { prefManager.setThemeMode(intent.mode.name); updateState { copy(themeMode = intent.mode) } }
-            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch { prefManager.setAccentColor(intent.accent.name); updateState { copy(accentColor = intent.accent) } }
-            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch { prefManager.setCurrencySymbol(intent.symbol); updateState { copy(currencySymbol = intent.symbol) } }
-            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget); updateState { copy(monthlyBudget = intent.budget) } }
+            is SettingsIntent.ChangeLanguage -> viewModelScope.launch {
+                prefManager.setLanguage(intent.langCode)
+                updateState { copy(language = intent.langCode) }
+            }
+            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch {
+                prefManager.setThemeMode(intent.mode.name)
+                updateState { copy(themeMode = intent.mode) }
+            }
+            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch {
+                prefManager.setAccentColor(intent.accent.name)
+                updateState { copy(accentColor = intent.accent) }
+            }
+            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch {
+                prefManager.setCurrencySymbol(intent.symbol)
+                updateState { copy(currencySymbol = intent.symbol) }
+            }
+            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch {
+                prefManager.setMonthlyBudget(intent.budget)
+                updateState { copy(monthlyBudget = intent.budget) }
+            }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
                 updateState { copy(autoBackupDrive = intent.enabled) }
                 if (intent.enabled) GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 1000L)
             }
-            is SettingsIntent.ToggleAutoBackupWifiOnly -> viewModelScope.launch { prefManager.setAutoBackupWifiOnly(intent.enabled); updateState { copy(autoBackupWifiOnly = intent.enabled) } }
+            is SettingsIntent.ToggleAutoBackupWifiOnly -> viewModelScope.launch {
+                prefManager.setAutoBackupWifiOnly(intent.enabled)
+                updateState { copy(autoBackupWifiOnly = intent.enabled) }
+            }
             is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
                 prefManager.setDeveloperMode(intent.enabled)
@@ -150,7 +169,7 @@ class SettingsViewModel(
 
     private fun observeGoogleAccount() {
         viewModelScope.launch {
-            kotlinx.coroutines.flow.combine(
+            combine(
                 prefManager.isLoggedInFlow,
                 prefManager.userEmailFlow,
                 prefManager.userDisplayNameFlow,

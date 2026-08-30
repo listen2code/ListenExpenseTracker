@@ -212,11 +212,15 @@ object TransactionCalculationEngine {
     fun getMonthRangeAndTitle(offset: Int, lang: String = "zh"): Triple<Long, Long, String> {
         val cal = Calendar.getInstance().apply {
             add(Calendar.MONTH, offset)
-            set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
         val startTs = cal.timeInMillis
-        cal.add(Calendar.MONTH, 1); cal.add(Calendar.MILLISECOND, -1)
+        cal.add(Calendar.MONTH, 1)
+        cal.add(Calendar.MILLISECOND, -1)
         val endTs = cal.timeInMillis
 
         val sdf = when (lang.lowercase()) {

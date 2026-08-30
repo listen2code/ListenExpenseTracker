@@ -189,3 +189,12 @@
   - **界面控件状态持有者 (`[Feature]StateHolder`)**：由 Compose UI 树通过 `@Composable fun remember[Feature]StateHolder(...)` 创建并持有，统一管理 `PagerState`、`LazyListState`、滚动动画计算、系统契约回调（如 `ActivityResultLauncher`）以及底层副作用（`[Feature]Effects`）的生命周期挂载。
 - **严禁将 UI 控件对象放入 ViewModel**：禁止在 ViewModel 或 `UiState` 中持有 `PagerState`、`LazyListState` 等持有 Compose 布局或 Context 引用的对象，防止屏幕旋转或配置变更时发生内存泄漏；
 - **Screen 纯声明式排版**：Screen Composable 头部通过一行 `val holder = remember[Feature]StateHolder(...)` 收口所有控制器，开门见山声明 `BaseScreenScaffold` 与视图布局，消灭散落逻辑。
+
+---
+
+## 19. Kotlin 惯用排版与分号禁用规范 (Kotlin Idiomatic Formatting & Semicolon Prohibition)
+
+- **严禁使用分号 (`;`) 将多个语句合并在同一行**：
+  - 必须遵循 Kotlin 惯用的“一行一语句”原则；
+  - 严禁通过分号来刻意压缩代码行数（如 `applyA(); updateB()`），这会严重破坏代码的可读性、调试断点的精准度以及 Git Diff 的清晰度；
+  - 除非是在极少数为了配合特定语法（如枚举类中带方法时必须在枚举项末尾加分号）的情况，否则全项目严禁出现任何不必要的分号。
