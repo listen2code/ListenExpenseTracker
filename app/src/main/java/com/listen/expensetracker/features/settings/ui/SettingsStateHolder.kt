@@ -33,7 +33,7 @@ class SettingsStateHolder(
 /**
  * 创建并记住 [SettingsStateHolder] 的 Composable 辅助函数。
  *
- * 【教学重点】：
+ * 
  * - 使用 [LocalContext.current] 获取 Compose 环境上下文，传递给状态容器；
  * - 使用 [rememberSaveable] 保存列表滚动位置，防止旋转屏幕或折叠屏折叠后滚动丢失；
  * - 声明 [rememberLauncherForActivityResult] 统一管理系统文件选择器并转发 MVI Intent。

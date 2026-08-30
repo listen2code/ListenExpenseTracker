@@ -41,7 +41,7 @@ class TransactionsStateHolder(
 /**
  * 创建并记住 [TransactionsStateHolder] 的 Composable 辅助函数。
  *
- * 【教学重点】：
+ * 
  * - 使用 [rememberPagerState] 与虚拟基准页 [PAGER_BASE_INDEX] 支撑双向无限滑动；
  * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现进程死亡或配置变更后的列表位置恢复；
  * - 在状态容器内部安全挂载 [TransactionsEffects]，避免向 Screen 暴露杂乱的效应监听逻辑。

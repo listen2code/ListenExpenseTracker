@@ -38,7 +38,7 @@ class StatisticsStateHolder(
 /**
  * 创建并记住 [StatisticsStateHolder] 的 Composable 辅助函数。
  *
- * 【教学重点】：
+ * 
  * - 使用 [rememberPagerState] 支撑统计页横向月份滑动切换；
  * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现列表位置记忆与恢复；
  * - 内部挂载 [StatisticsEffects]，避免向 Screen 暴露杂乱的效应监听逻辑。

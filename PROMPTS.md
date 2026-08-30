@@ -41,12 +41,12 @@
 
 ---
 
-## 4. 语言与教学型注释规范 (Learning-Oriented Chinese Comments & Documentation)
+## 4. 语言与注释规范 (Learning-Oriented Chinese Comments & Documentation)
 
 本项目是一个**学习型 App (Educational / Learning App)**，代码不仅要保证工业级健壮性，更要具备极高的一线教学与学习价值：
 - **代码内注释 (In-code Comments)**：**必须使用详尽清晰的中文注释 (Detailed Chinese Comments)**：
   - **特殊业务与实现逻辑**：重点阐明业务逻辑的设计初衷、状态机流转决策、MVI 架构边界、重组性能优化与异步协同原理；
-  - **Kotlin & Compose 官方进阶 API 教学说明**：针对较为进阶、不常见的官方 API（例如 `rememberUpdatedState` 解决协程闭包捕获旧值问题、`snapshotFlow` 将 Compose State 转换为 Cold Flow、`rememberSaveable(saver = ...)` 实现自定义状态跨进程保存与恢复、`drop(1)` 过滤初始发射值等），**必须附带通俗易懂的原理解析与使用场景注释**，帮助开发者在阅读源码的同时系统学习掌握这些关键技术。
+  - **Kotlin & Compose 官方进阶 API 说明**：针对较为进阶、不常见的官方 API（例如 `rememberUpdatedState` 解决协程闭包捕获旧值问题、`snapshotFlow` 将 Compose State 转换为 Cold Flow、`rememberSaveable(saver = ...)` 实现自定义状态跨进程保存与恢复、`drop(1)` 过滤初始发射值等），**必须附带通俗易懂的原理解析与使用场景注释**，帮助开发者在阅读源码的同时系统学习掌握这些关键技术。
 - **文档与说明 (Documentation)**：所有 Markdown 说明文档（如 `README.md`、`ARCHITECTURE.md`、`walkthrough.md`、`PROMPTS.md`）一律使用**中文**进行阐述。
 
 ---

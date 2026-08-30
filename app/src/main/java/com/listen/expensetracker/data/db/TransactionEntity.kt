@@ -7,7 +7,7 @@ import java.util.UUID
 /**
  * 记账核心领域实体 (TransactionEntity) - 对应 SQLite 数据表 "transactions"。
  *
- * 【教学重点】：
+ * 
  * 1. [Entity] 与 [PrimaryKey]：Room 数据库核心注解，标记此数据类为关系数据库中的一张表。
  * 2. 字段设计保持最小化不可变状态（val），使用 UUID 生成分布式唯一主键，配合毫秒级时间戳支撑时间轴排序。
  */
