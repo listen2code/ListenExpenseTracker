@@ -27,6 +27,7 @@ class TransactionsUiStateTest {
         assertFalse(state.isOverBudget)
         assertFalse(state.hideBalance)
         assertFalse(state.isLoading)
+        assertFalse(state.isDeveloperMode)
         assertEquals("￥", state.currencySymbol)
         assertEquals("zh", state.language)
         assertEquals(ThemeMode.SYSTEM, state.themeMode)

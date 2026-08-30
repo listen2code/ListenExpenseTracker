@@ -95,11 +95,11 @@ class ExpenseAppState(
     /**
      * Navigates directly from Statistics to Transactions focused on a specific date in a month.
      */
-    fun navigateToTransactionsDate(monthOffset: Int, day: Int) {
+    fun navigateToTransactionsDate(monthOffset: Int, day: Int, dateLabel: String = "") {
         if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
             statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         }
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day))
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day, dateLabel))
         currentTab = NavTab.TRANSACTIONS
     }
 
@@ -112,7 +112,7 @@ class ExpenseAppState(
         }
         val cal = java.util.Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
         val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, day))
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, day, transaction.amount))
         currentTab = NavTab.TRANSACTIONS
     }
 

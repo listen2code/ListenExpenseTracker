@@ -48,7 +48,7 @@ fun StatisticsScreen(
     modifier: Modifier = Modifier,
     scrollToTopFlow: Flow<Unit>? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
-    onNavigateToTransactionsDate: ((monthOffset: Int, day: Int) -> Unit)? = null,
+    onNavigateToTransactionsDate: ((monthOffset: Int, day: Int, dateLabel: String) -> Unit)? = null,
     onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null
 ) {
     val lang = state.language
@@ -117,7 +117,7 @@ fun StatisticsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             // 1. Pinned Top Expense vs Income Segmented Toggle (Stationary)
             val tabs = listOf(AppStrings.tab_expense_analysis.tr(lang), AppStrings.tab_income_analysis.tr(lang))
@@ -147,7 +147,7 @@ fun StatisticsScreen(
                         { categoryName -> callback(pageOffset, categoryName) }
                     },
                     onDateClick = onNavigateToTransactionsDate?.let { callback ->
-                        { day -> callback(pageOffset, day) }
+                        { day, dateLabel -> callback(pageOffset, day, dateLabel) }
                     },
                     onTransactionClick = onNavigateToTransaction?.let { callback ->
                         { tx -> callback(pageOffset, tx) }

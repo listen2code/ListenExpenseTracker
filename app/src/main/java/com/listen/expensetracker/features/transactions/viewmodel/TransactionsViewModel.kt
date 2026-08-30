@@ -54,7 +54,7 @@ class TransactionsViewModel(
             is TransactionsIntent.UpdateTransaction -> updateTransaction(intent.transaction, traceId)
             is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id, traceId)
             is TransactionsIntent.RestoreDeletedTransaction -> restoreDeletedTransaction(intent.transaction, traceId)
-            is TransactionsIntent.ToggleHideBalance -> updateState { copy(hideBalance = intent.hide) }
+            is TransactionsIntent.ToggleHideBalance -> { viewModelScope.launch { prefManager.setHideBalance(intent.hide) } }
             is TransactionsIntent.SearchQueryChange -> { updateState { copy(searchQuery = intent.query) }; recalculate() }
             is TransactionsIntent.FilterAccountChange -> { updateState { copy(selectedAccountFilter = intent.accountType) }; recalculate() }
             is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }; recalculate() }
@@ -80,11 +80,28 @@ class TransactionsViewModel(
                 recalculate()
             }
             is TransactionsIntent.FilterByDate -> {
-                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, targetScrollDay = intent.day) }
+                updateState {
+                    copy(
+                        selectedMonthOffset = intent.monthOffset, searchQuery = intent.dateLabel ?: "",
+                        selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
+                        amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
+                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = intent.day, targetScrollTxId = null
+                    )
+                }
                 recalculate()
             }
             is TransactionsIntent.FilterByTransaction -> {
-                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, targetScrollDay = intent.day, targetScrollTxId = intent.transactionId) }
+                val amtStr = if (intent.amount != null) {
+                    if (intent.amount % 1.0 == 0.0) "%.0f".format(intent.amount) else "%.2f".format(intent.amount)
+                } else ""
+                updateState {
+                    copy(
+                        selectedMonthOffset = intent.monthOffset, searchQuery = amtStr,
+                        selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
+                        amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
+                        sortOrder = TransactionSortOrder.DATE_DESC, targetScrollDay = intent.day, targetScrollTxId = intent.transactionId
+                    )
+                }
                 recalculate()
             }
             is TransactionsIntent.ClearTargetScrollDay -> updateState { copy(targetScrollDay = null, targetScrollTxId = null) }
@@ -113,6 +130,8 @@ class TransactionsViewModel(
         viewModelScope.launch { prefManager.currencySymbolFlow.collectLatest { sym -> updateState { copy(currencySymbol = sym) } } }
         viewModelScope.launch { prefManager.monthlyBudgetFlow.collectLatest { updateState { copy(monthlyBudget = it) }; recalculate() } }
         viewModelScope.launch { prefManager.customAccountsFlow.collectLatest { AccountRepository.deserializeCustomAccounts(it); recalculate() } }
+        viewModelScope.launch { prefManager.hideBalanceFlow.collectLatest { updateState { copy(hideBalance = it) } } }
+        viewModelScope.launch { prefManager.isDeveloperModeFlow.collectLatest { updateState { copy(isDeveloperMode = it) } } }
     }
 
     private fun observeTransactions() {

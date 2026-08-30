@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -118,6 +119,7 @@ fun TransactionsContentList(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = AppDimens.SpaceLarge),
+        contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
         verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
     ) {
         // Monthly Balance Overview Card
@@ -157,13 +159,15 @@ fun TransactionsContentList(
                 } else {
                     CommonEmpty(
                         message = AppStrings.empty_transactions.tr(lang),
-                        action = {
-                            CommonButton(
-                                text = AppStrings.seed_month_demo_data.tr(lang),
-                                style = CommonButtonStyle.Tonal,
-                                onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
-                            )
-                        }
+                        action = if (state.isDeveloperMode) {
+                            {
+                                CommonButton(
+                                    text = AppStrings.seed_month_demo_data.tr(lang),
+                                    style = CommonButtonStyle.Tonal,
+                                    onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
+                                )
+                            }
+                        } else null
                     )
                 }
             }

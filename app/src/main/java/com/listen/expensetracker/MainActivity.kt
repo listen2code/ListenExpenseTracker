@@ -163,8 +163,8 @@ fun App(
                         onNavigateToTransactions = { monthOffset, categoryName ->
                             appState.navigateToTransactionsCategory(categoryName, monthOffset)
                         },
-                        onNavigateToTransactionsDate = { monthOffset, day ->
-                            appState.navigateToTransactionsDate(monthOffset, day)
+                        onNavigateToTransactionsDate = { monthOffset, day, dateLabel ->
+                            appState.navigateToTransactionsDate(monthOffset, day, dateLabel)
                         },
                         onNavigateToTransaction = { monthOffset, tx ->
                             appState.navigateToTransaction(monthOffset, tx)

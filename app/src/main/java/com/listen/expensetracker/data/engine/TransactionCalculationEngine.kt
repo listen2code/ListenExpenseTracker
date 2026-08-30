@@ -47,7 +47,7 @@ object TransactionCalculationEngine {
         query: String,
         accountFilter: String,
         budget: Double,
-        sortOrder: TransactionSortOrder,
+        sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
         currencySymbol: String = "￥",
         lang: String = "zh",
         typeFilter: String = "ALL",
@@ -63,12 +63,19 @@ object TransactionCalculationEngine {
         val activeCategories = if (selectedCategories.isNotEmpty()) selectedCategories else if (categoryFilter != "ALL") setOf(categoryFilter) else emptySet()
 
         val matchedFiltered = monthFilteredList.filter { item ->
+            val itemCal = Calendar.getInstance().apply { timeInMillis = item.timestamp }
+            val itemMonth = itemCal.get(Calendar.MONTH) + 1
+            val itemDay = itemCal.get(Calendar.DAY_OF_MONTH)
+            val dateLabelZh = "${itemMonth}月${itemDay}日"
             val matchesQuery = cleanQuery.isEmpty() ||
                     item.categoryName.lowercase().contains(cleanQuery) ||
                     item.note.lowercase().contains(cleanQuery) ||
                     item.accountType.lowercase().contains(cleanQuery) ||
                     "%.2f".format(item.amount).contains(cleanQuery) ||
-                    item.amount.toLong().toString() == cleanQuery
+                    item.amount.toLong().toString() == cleanQuery ||
+                    dateLabelZh.contains(cleanQuery) ||
+                    "%02d-%02d".format(itemMonth, itemDay).contains(cleanQuery) ||
+                    "$itemMonth-$itemDay".contains(cleanQuery)
             val matchesAccount = accountFilter == "ALL" || item.accountType == accountFilter
             val matchesType = typeFilter == "ALL" || item.type.equals(typeFilter, ignoreCase = true)
             val matchesCategory = activeCategories.isEmpty() || activeCategories.contains("ALL") ||
@@ -186,33 +193,17 @@ object TransactionCalculationEngine {
         expenses: List<TransactionEntity>,
         offset: Int
     ): List<LineChartPoint> {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MONTH, offset)
+        val cal = Calendar.getInstance().apply { add(Calendar.MONTH, offset) }
         val maxDaysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        val limitDay = if (offset == 0) {
-            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDaysInMonth)
-        } else if (offset < 0) {
-            maxDaysInMonth
-        } else {
-            1
-        }
-
         val dayGroups = expenses.groupBy {
             val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
             c.get(Calendar.DAY_OF_MONTH)
         }
-
         val month = cal.get(Calendar.MONTH) + 1
         val result = mutableListOf<LineChartPoint>()
-        for (day in 1..limitDay) {
+        for (day in 1..maxDaysInMonth) {
             val sum = dayGroups[day]?.sumOf { it.amount } ?: 0.0
-            result.add(
-                LineChartPoint(
-                    label = "$day",
-                    value = sum,
-                    subLabel = "${month}月${day}日"
-                )
-            )
+            result.add(LineChartPoint(label = "$day", value = sum, subLabel = "${month}月${day}日"))
         }
         return result
     }

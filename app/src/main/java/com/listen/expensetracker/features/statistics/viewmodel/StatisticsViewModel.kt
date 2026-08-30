@@ -54,7 +54,7 @@ class StatisticsViewModel(
                 updateState { copy(statisticsTab = intent.tab) }
             }
             is StatisticsIntent.ToggleHideAmount -> {
-                updateState { copy(hideAmount = intent.hide) }
+                viewModelScope.launch { prefManager.setHideBalance(intent.hide) }
             }
             is StatisticsIntent.OpenMonthPicker -> updateState { copy(showMonthPicker = true) }
             is StatisticsIntent.DismissMonthPicker -> updateState { copy(showMonthPicker = false) }
@@ -97,6 +97,11 @@ class StatisticsViewModel(
                         isOverBudget = totalExpense > budget
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            prefManager.hideBalanceFlow.collectLatest { hide ->
+                updateState { copy(hideAmount = hide) }
             }
         }
     }

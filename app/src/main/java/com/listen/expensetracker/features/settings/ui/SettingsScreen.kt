@@ -3,6 +3,7 @@ package com.listen.expensetracker.features.settings.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,8 +81,9 @@ fun SettingsScreen(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .padding(horizontal = AppDimens.SpaceLarge),
+            contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
         ) {
             // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts)

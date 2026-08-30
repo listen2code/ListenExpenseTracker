@@ -127,7 +127,7 @@ fun TransactionsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             // 1. Pinned Top Search Bar & Account Filters (Stationary)
             TransactionsHeaderFilters(

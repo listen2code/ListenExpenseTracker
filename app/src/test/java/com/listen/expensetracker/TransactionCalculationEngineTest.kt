@@ -254,11 +254,29 @@ class TransactionCalculationEngineTest {
     fun testMonthDailyTrendCalculation() {
         val expenses = sampleTransactions.filter { it.type == "EXPENSE" }
         val points = TransactionCalculationEngine.calculateMonthDailyTrend(expenses, 0)
-        assertTrue(points.isNotEmpty())
+        val expectedDays = TransactionCalculationEngine.getDaysInMonth(0)
+        assertEquals(expectedDays, points.size)
         points.forEach { pt ->
             assertNotNull(pt.label)
             assertTrue(pt.value >= 0.0)
         }
+    }
+
+    @Test
+    fun testFilterByDateKeyword() {
+        val cal = java.util.Calendar.getInstance().apply { timeInMillis = sampleTransactions.first().timestamp }
+        val m = cal.get(java.util.Calendar.MONTH) + 1
+        val d = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        val dateKeyword = "${m}月${d}日"
+
+        val result = TransactionCalculationEngine.filterAndCalculate(
+            allList = sampleTransactions,
+            currentOffset = 0,
+            query = dateKeyword,
+            accountFilter = "ALL",
+            budget = 5000.0
+        )
+        assertTrue(result.filteredTransactions.isNotEmpty())
     }
 
     @Test

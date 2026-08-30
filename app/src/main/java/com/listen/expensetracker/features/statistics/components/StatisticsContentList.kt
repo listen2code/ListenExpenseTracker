@@ -3,6 +3,7 @@ package com.listen.expensetracker.features.statistics.components
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -48,7 +49,7 @@ fun StatisticsContentList(
     modifier: Modifier = Modifier,
     scrollToTopFlow: Flow<Unit>? = null,
     onCategoryClick: ((categoryName: String) -> Unit)? = null,
-    onDateClick: ((day: Int) -> Unit)? = null,
+    onDateClick: ((day: Int, dateLabel: String) -> Unit)? = null,
     onTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
     val lang = state.language
@@ -81,6 +82,7 @@ fun StatisticsContentList(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = AppDimens.SpaceLarge),
+        contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
         verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
     ) {
         // Donut Chart & Segmented Progress Card
@@ -163,7 +165,7 @@ fun StatisticsContentList(
                             hideAmount = state.hideAmount,
                             maxLabel = AppStrings.chart_max.tr(lang).format(sym, maxDailyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${"%.2f".format(calc.totalExpense)}",
-                            onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { cb(it) } } },
+                            onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { day -> cb(day, pt.subLabel ?: "") } } },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
