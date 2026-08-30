@@ -3,7 +3,9 @@ package com.listen.expensetracker.core.effect
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -39,9 +41,9 @@ fun CollectCommonUiEffects(
                         val res = snackbarHostState.showSnackbar(
                             message = effect.message,
                             actionLabel = effect.actionLabel,
-                            duration = androidx.compose.material3.SnackbarDuration.Short
+                            duration = SnackbarDuration.Short
                         )
-                        if (res == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                        if (res == SnackbarResult.ActionPerformed) {
                             effect.onAction?.invoke()
                         }
                     }

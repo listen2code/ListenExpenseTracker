@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Intelligent Google Drive Auto-Backup Orchestrator.
@@ -35,7 +36,7 @@ object GoogleDriveAutoBackupManager {
     fun scheduleAutoBackup(context: Context, delayMs: Long = 5000L) {
         pendingDebounceJob?.cancel()
         pendingDebounceJob = scope.launch {
-            delay(delayMs)
+            delay(delayMs.milliseconds)
             performAutoBackup(context.applicationContext, force = false)
         }
     }

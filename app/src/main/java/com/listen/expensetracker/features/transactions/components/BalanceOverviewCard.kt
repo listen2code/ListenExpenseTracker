@@ -84,7 +84,7 @@ fun BalanceOverviewCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Box(
-                    modifier = androidx.compose.ui.Modifier.height(30.dp),
+                    modifier = Modifier.height(30.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Text(

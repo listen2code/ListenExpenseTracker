@@ -19,14 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.listen.arch.apm.CrashHandler
-import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.core.effect.CollectCommonUiEffects
 import com.listen.expensetracker.core.overlay.AppOverlayHost
 import com.listen.expensetracker.core.route.CommonRoute
@@ -34,6 +33,7 @@ import com.listen.expensetracker.core.state.AppOverlay
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.core.state.rememberExpenseAppState
+import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.features.settings.ui.SettingsScreen
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
+        GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
     }
 }
 
@@ -104,7 +104,7 @@ fun App(
     val lang = settingsState.language
 
     // Double-tap tracking on active navigation tab (threshold: 350ms)
-    var lastTabClickTime by remember { mutableStateOf(0L) }
+    var lastTabClickTime by remember { mutableLongStateOf(0L) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(appState.snackbarHostState) },

@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
@@ -150,13 +151,13 @@ fun rememberExpenseAppState(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ): ExpenseAppState {
     val transactionsViewModel: TransactionsViewModel = viewModel(
-        factory = TransactionsViewModel.Factory(androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application)
+        factory = TransactionsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
     )
     val statisticsViewModel: StatisticsViewModel = viewModel(
-        factory = StatisticsViewModel.Factory(androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application)
+        factory = StatisticsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
     )
     val settingsViewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModel.Factory(androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application)
+        factory = SettingsViewModel.Factory(LocalContext.current.applicationContext as android.app.Application)
     )
 
     return remember(transactionsViewModel, statisticsViewModel, settingsViewModel, snackbarHostState) {

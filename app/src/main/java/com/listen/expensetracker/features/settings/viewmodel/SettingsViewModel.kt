@@ -420,7 +420,7 @@ class SettingsViewModel(
         } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
             // 用户主动取消/关闭弹窗，不弹出错误提示
         } catch (e: Throwable) {
-            com.listen.arch.apm.ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")
+            ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")
             emitEffect(CommonUiEffect.ShowToast("Google 登录未成功 (${e.javaClass.simpleName}): ${e.message}"))
         }
     }
