@@ -33,7 +33,7 @@ import com.listen.uicomponent.components.BaseScreenScaffold
 /**
  * 纯无状态流水主画面 (TransactionsScreen)。
  *
- * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * Google 官方 UI State Holder 架构规范：
  * 本 Screen 严格遵循“单向数据流 (UDF)”与“状态提升 (State Hoisting)”模式：
  * 1. 业务只读数据由 [state] ([TransactionsUiState]) 纯数据类驱动；
  * 2. 交互状态与动画控制器（PagerState、LazyListState、副作用监听）统一由 [rememberTransactionsStateHolder] 承接；

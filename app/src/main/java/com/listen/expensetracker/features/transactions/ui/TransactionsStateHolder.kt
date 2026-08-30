@@ -18,7 +18,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsVie
 /**
  * 流水画面专用 UI 状态持有者 (TransactionsStateHolder)。
  *
- * 【教学重点 - Google 官方 UI State Holder 设计模式】：
+ * Google 官方 UI State Holder 设计模式说明：
  * 1. 【职责解耦】：
  *    - [TransactionsUiState]：存放业务领域只读数据（账单、预算、搜索关键字等），由 ViewModel 管理，支持 JVM 纯净单测；
  *    - [TransactionsStateHolder]：存放 Compose 控件状态与动画协调（PagerState, LazyListState, 滚动计算, 副作用触发），生命周期跟随 Compose 树。

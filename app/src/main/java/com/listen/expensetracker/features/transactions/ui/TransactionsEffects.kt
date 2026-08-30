@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 /**
  * 流水画面专用副作用集中调度器 (TransactionsEffects)。
  *
- * 【教学重点 - Compose 副作用与协程协同】：
+ * Compose 副作用与协程协同说明：
  * 1. [rememberUpdatedState]：解决协程闭包捕获旧值问题。由于内部 `LaunchedEffect` 的 key 仅为 `viewModel` 和 `pagerState`，
  *    当外部重组传入新的 `groupedTransactions` 或 `selectedMonthOffset` 时，长协程不会被销毁重启，
  *    但通过 `rememberUpdatedState` 保证了在协程中始终能读取到最新的状态值。
