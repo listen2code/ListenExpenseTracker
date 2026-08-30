@@ -43,19 +43,31 @@ fun TransactionsDialogHost(
                     System.currentTimeMillis()
                 }
             }
-            AddTransactionSheet(
+            TransactionSheet(
                 currencySymbol = sym,
                 initialTimestamp = initialDate,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
-                onSave = { type, catId, catName, catIcon, catColor, amt, note, acct, ts ->
-                    onIntent(TransactionsIntent.AddTransaction(type, catId, catName, catIcon, catColor, amt, note, acct, ts))
+                onSave = { entity ->
+                    onIntent(
+                        TransactionsIntent.AddTransaction(
+                            type = entity.type,
+                            categoryId = entity.categoryId,
+                            categoryName = entity.categoryName,
+                            categoryIcon = entity.categoryIcon,
+                            categoryColorHex = entity.categoryColorHex,
+                            amount = entity.amount,
+                            note = entity.note,
+                            accountType = entity.accountType,
+                            timestamp = entity.timestamp
+                        )
+                    )
                     onIntent(TransactionsIntent.DismissDialog)
                 },
                 lang = lang
             )
         }
         is TransactionsDialog.EditTransaction -> {
-            EditTransactionSheet(
+            TransactionSheet(
                 transaction = dialog.transaction,
                 currencySymbol = sym,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
