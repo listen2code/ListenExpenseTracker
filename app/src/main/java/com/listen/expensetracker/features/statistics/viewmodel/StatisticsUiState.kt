@@ -52,7 +52,7 @@ data class StatisticsUiState(
 /**
  * 统计分析专属类型安全 Tab 标签枚举 (StatisticsTab)。
  *
- * 【教学重点 - 枚举替代魔数字符串】：
+ * 类型安全枚举规范：
  * 1. 严格遵守 PROMPTS.md Rule 17，彻底杜绝 `"EXPENSE"` 与 `"INCOME"` 字符串直接在 UI 与 State 中流转。
  * 2. 赋予编译器完整的类型检查能力，结合 `when (tab)` 表达式可享受穷举安全性（Exhaustive Check），新增 Tab 时未处理的分支会触发编译报错，避免隐蔽 Bug。
  */

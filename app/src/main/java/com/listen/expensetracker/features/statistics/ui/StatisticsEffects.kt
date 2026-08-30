@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 /**
  * 统计分析画面专用副作用集中调度器 (StatisticsEffects)。
  *
- * 【教学重点 - Compose 副作用与数据流桥接】：
+ * Compose 副作用与数据流桥接实现要点：
  * 1. [rememberUpdatedState]：将外部动态变化的 `selectedMonthOffset` 转为长协程安全的状态读取引用，
  *    确保协程生命周期只跟随 `viewModel` 与 `pagerState`，避免页面滑动或重组时协程意外重启。
  * 2. [LaunchedEffect] + [launch]：统一父级协程生命周期，利用两组并发协程分别处理“副作用事件流监听”与“手势快照流监听”。

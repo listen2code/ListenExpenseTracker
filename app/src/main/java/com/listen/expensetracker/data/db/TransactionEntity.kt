@@ -29,7 +29,6 @@ data class TransactionEntity(
 /**
  * 交易类型常量收口对象 (TransactionType)。
  *
- * 【教学重点 - 消灭魔数字符串】：
  * 统一集中收口支出、收入、全部过滤类型的常量值。既能在 Kotlin 编译期避免拼写错误，
  * 又能直接作为 Room 数据库中的列值，无须编写额外的 TypeConverter，保持轻量高效。
  */

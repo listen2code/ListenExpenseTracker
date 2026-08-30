@@ -29,7 +29,7 @@ import java.util.Locale
 /**
  * 纯无状态设置主画面 (SettingsScreen)。
  *
- * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * Google 官方 UI State Holder 架构规范：
  * 1. 业务与偏好数据由 [state] ([SettingsUiState]) 纯数据类驱动；
  * 2. 界面系统契约调用与滚动位置由 [rememberSettingsStateHolder] 封装接管；
  * 3. 页面布局与各设置分组（财务参数、云端同步中心、外观偏好、运维工具）彻底解耦。

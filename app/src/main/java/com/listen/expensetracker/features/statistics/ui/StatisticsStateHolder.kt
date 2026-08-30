@@ -16,7 +16,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewMod
 /**
  * 统计分析画面专用 UI 状态持有者 (StatisticsStateHolder)。
  *
- * 【教学重点 - Google 官方 UI State Holder 设计模式】：
+ * Google 官方 UI State Holder 设计模式说明：
  * 1. 【职责解耦】：
  *    - [StatisticsUiState]：存放业务领域只读数据（分类占比图表数据、收支总计、预算进度、趋势图点位），由 ViewModel 状态机持有；
  *    - [StatisticsStateHolder]：承载界面控件与动画调度状态（PagerState, LazyListState, 滚动计算, 副作用触发），生命周期与 Compose 树绑定。

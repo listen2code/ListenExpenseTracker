@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.data.pref.archDataStore
+import com.listen.uicomponent.theme.AccentColor
+import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -26,6 +28,29 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_LAST_BACKUP_HASH = stringPreferencesKey("expense_last_backup_hash")
         val KEY_DEVELOPER_MODE = booleanPreferencesKey("expense_developer_mode")
         val KEY_HIDE_BALANCE = booleanPreferencesKey("expense_hide_balance")
+    }
+
+    val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
+        ExpensePreferences(
+            language = prefs[KEY_LANGUAGE] ?: "zh",
+            themeMode = try {
+                ThemeMode.valueOf(prefs[KEY_THEME_MODE] ?: "SYSTEM")
+            } catch (_: Exception) {
+                ThemeMode.SYSTEM
+            },
+            accentColor = try {
+                AccentColor.valueOf(prefs[KEY_ACCENT_COLOR] ?: "EMERALD")
+            } catch (_: Exception) {
+                AccentColor.EMERALD
+            },
+            currencySymbol = prefs[KEY_CURRENCY_SYMBOL] ?: "￥",
+            monthlyBudget = prefs[KEY_MONTHLY_BUDGET] ?: 5000.0,
+            customAccounts = prefs[KEY_CUSTOM_ACCOUNTS] ?: "",
+            autoBackupDrive = prefs[KEY_AUTO_BACKUP_DRIVE] ?: true,
+            autoBackupWifiOnly = prefs[KEY_AUTO_BACKUP_WIFI_ONLY] ?: false,
+            isDeveloperMode = prefs[KEY_DEVELOPER_MODE] ?: false,
+            hideBalance = prefs[KEY_HIDE_BALANCE] ?: false
+        )
     }
 
     val currencySymbolFlow: Flow<String> = context.archDataStore.data.map { prefs ->

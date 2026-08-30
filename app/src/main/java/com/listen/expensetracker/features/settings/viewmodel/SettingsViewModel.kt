@@ -18,6 +18,7 @@ import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
+import com.listen.expensetracker.data.pref.observeExpensePreferences
 import com.listen.expensetracker.data.update.UpdateCheckerService
 import com.listen.expensetracker.data.update.UpdateResult
 import com.listen.uicomponent.theme.AccentColor
@@ -135,35 +136,19 @@ class SettingsViewModel(
     }
 
     private fun observeSettings() {
-        viewModelScope.launch {
-            prefManager.languageFlow.collectLatest { lang -> updateState { copy(language = lang) } }
-        }
-        viewModelScope.launch {
-            prefManager.themeModeFlow.collectLatest { mode ->
-                val themeEnum = try { ThemeMode.valueOf(mode) } catch (_: Exception) { ThemeMode.SYSTEM }
-                updateState { copy(themeMode = themeEnum) }
+        observeExpensePreferences(prefManager) { prefs ->
+            updateState {
+                copy(
+                    language = prefs.language,
+                    themeMode = prefs.themeMode,
+                    accentColor = prefs.accentColor,
+                    currencySymbol = prefs.currencySymbol,
+                    monthlyBudget = prefs.monthlyBudget,
+                    autoBackupDrive = prefs.autoBackupDrive,
+                    autoBackupWifiOnly = prefs.autoBackupWifiOnly,
+                    isDeveloperMode = prefs.isDeveloperMode
+                )
             }
-        }
-        viewModelScope.launch {
-            prefManager.accentColorFlow.collectLatest { accent ->
-                val accentEnum = try { AccentColor.valueOf(accent) } catch (_: Exception) { AccentColor.EMERALD }
-                updateState { copy(accentColor = accentEnum) }
-            }
-        }
-        viewModelScope.launch {
-            prefManager.currencySymbolFlow.collectLatest { symbol -> updateState { copy(currencySymbol = symbol) } }
-        }
-        viewModelScope.launch {
-            prefManager.monthlyBudgetFlow.collectLatest { budget -> updateState { copy(monthlyBudget = budget) } }
-        }
-        viewModelScope.launch {
-            prefManager.autoBackupDriveFlow.collectLatest { enabled -> updateState { copy(autoBackupDrive = enabled) } }
-        }
-        viewModelScope.launch {
-            prefManager.autoBackupWifiOnlyFlow.collectLatest { enabled -> updateState { copy(autoBackupWifiOnly = enabled) } }
-        }
-        viewModelScope.launch {
-            prefManager.isDeveloperModeFlow.collectLatest { enabled -> updateState { copy(isDeveloperMode = enabled) } }
         }
     }
 

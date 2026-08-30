@@ -1,27 +1,26 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
-import com.listen.arch.i18n.tr
-import com.listen.expensetracker.data.i18n.AppStrings
 import android.app.Application
-import java.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
+import com.listen.arch.i18n.tr
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
-import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
+import com.listen.expensetracker.data.pref.observeExpensePreferences
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -57,32 +56,16 @@ class TransactionsViewModel(
             is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id, traceId)
             is TransactionsIntent.RestoreDeletedTransaction -> restoreDeletedTransaction(intent.transaction, traceId)
             is TransactionsIntent.ToggleHideBalance -> { viewModelScope.launch { prefManager.setHideBalance(intent.hide) } }
-            is TransactionsIntent.SearchQueryChange -> {
-                updateState { copy(searchQuery = intent.query) }
-                recalculate()
-            }
-            is TransactionsIntent.FilterAccountChange -> {
-                updateState { copy(selectedAccountFilter = intent.accountType) }
-                recalculate()
-            }
-            is TransactionsIntent.ChangeMonthOffset -> {
-                updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }
-                recalculate()
-            }
-            is TransactionsIntent.SetMonthOffset -> {
-                updateState { copy(selectedMonthOffset = intent.offset) }
-                recalculate()
-            }
+            is TransactionsIntent.SearchQueryChange -> { updateState { copy(searchQuery = intent.query) }; recalculate() }
+            is TransactionsIntent.FilterAccountChange -> { updateState { copy(selectedAccountFilter = intent.accountType) }; recalculate() }
+            is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }; recalculate() }
+            is TransactionsIntent.SetMonthOffset -> { updateState { copy(selectedMonthOffset = intent.offset) }; recalculate() }
             is TransactionsIntent.SelectMonth -> {
-                updateState { copy(selectedMonthOffset = intent.offset) }
-                recalculate()
+                updateState { copy(selectedMonthOffset = intent.offset) }; recalculate()
                 emitEffect(TransactionsEffect.ScrollToMonth(intent.offset))
             }
             is TransactionsIntent.ScrollToTop -> { emitEffect(TransactionsEffect.ScrollToTop) }
-            is TransactionsIntent.ChangeSortOrder -> {
-                updateState { copy(sortOrder = intent.order) }
-                recalculate()
-            }
+            is TransactionsIntent.ChangeSortOrder -> { updateState { copy(sortOrder = intent.order) }; recalculate() }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is TransactionsIntent.SeedDemoData -> seedDemoData(intent.monthOffset)
@@ -144,75 +127,41 @@ class TransactionsViewModel(
                 updateState { copy(searchQuery = "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC) }
                 recalculate()
             }
-            is TransactionsIntent.ClearTypeFilter -> {
-                updateState { copy(typeFilter = "ALL") }
-                recalculate()
-            }
-            is TransactionsIntent.ClearCategoryFilter -> {
-                updateState { copy(selectedCategories = emptySet()) }
-                recalculate()
-            }
-            is TransactionsIntent.RemoveCategoryFilter -> {
-                updateState { copy(selectedCategories = selectedCategories - intent.categoryId) }
-                recalculate()
-            }
-            is TransactionsIntent.ClearAmountFilter -> {
-                updateState { copy(amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null) }
-                recalculate()
-            }
-            is TransactionsIntent.ClearSortOrder -> {
-                updateState { copy(sortOrder = TransactionSortOrder.DATE_DESC) }
-                recalculate()
-            }
+            is TransactionsIntent.ClearTypeFilter -> { updateState { copy(typeFilter = "ALL") }; recalculate() }
+            is TransactionsIntent.ClearCategoryFilter -> { updateState { copy(selectedCategories = emptySet()) }; recalculate() }
+            is TransactionsIntent.RemoveCategoryFilter -> { updateState { copy(selectedCategories = selectedCategories - intent.categoryId) }; recalculate() }
+            is TransactionsIntent.ClearAmountFilter -> { updateState { copy(amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null) }; recalculate() }
+            is TransactionsIntent.ClearSortOrder -> { updateState { copy(sortOrder = TransactionSortOrder.DATE_DESC) }; recalculate() }
             is TransactionsIntent.UpdateMonthlyBudget -> { viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget) } }
         }
     }
 
     private fun observeSettings() {
-        viewModelScope.launch {
-            prefManager.languageFlow.collectLatest {
-                updateState { copy(language = it) }
-                recalculate()
+        observeExpensePreferences(prefManager) { prefs ->
+            AccountRepository.deserializeCustomAccounts(prefs.customAccounts)
+            updateState {
+                copy(
+                    language = prefs.language,
+                    themeMode = prefs.themeMode,
+                    accentColor = prefs.accentColor,
+                    currencySymbol = prefs.currencySymbol,
+                    monthlyBudget = prefs.monthlyBudget,
+                    hideBalance = prefs.hideBalance,
+                    isDeveloperMode = prefs.isDeveloperMode
+                )
             }
+            recalculate()
         }
-        viewModelScope.launch { prefManager.themeModeFlow.collectLatest { mode -> updateState { copy(themeMode = try { ThemeMode.valueOf(mode) } catch (_: Exception) { ThemeMode.SYSTEM }) } } }
-        viewModelScope.launch { prefManager.accentColorFlow.collectLatest { a -> updateState { copy(accentColor = try { AccentColor.valueOf(a) } catch (_: Exception) { AccentColor.EMERALD }) } } }
-        viewModelScope.launch { prefManager.currencySymbolFlow.collectLatest { sym -> updateState { copy(currencySymbol = sym) } } }
-        viewModelScope.launch {
-            prefManager.monthlyBudgetFlow.collectLatest {
-                updateState { copy(monthlyBudget = it) }
-                recalculate()
-            }
-        }
-        viewModelScope.launch {
-            prefManager.customAccountsFlow.collectLatest {
-                AccountRepository.deserializeCustomAccounts(it)
-                recalculate()
-            }
-        }
-        viewModelScope.launch { prefManager.hideBalanceFlow.collectLatest { updateState { copy(hideBalance = it) } } }
-        viewModelScope.launch { prefManager.isDeveloperModeFlow.collectLatest { updateState { copy(isDeveloperMode = it) } } }
     }
 
     private fun observeTransactions() {
         viewModelScope.launch {
             dao.getAllTransactionsFlow().collectLatest { allList ->
                 applyCalculations(allList)
-                updateWidgets(allList)
+                ListenExpenseAppWidgetProvider.updateFromTransactions(application, allList, currentState.currencySymbol)
                 GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }
-    }
-
-    private fun updateWidgets(allList: List<TransactionEntity>) {
-        val todayStart = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        val todayExp = allList.filter { it.type == TransactionType.EXPENSE && it.timestamp >= todayStart }.sumOf { it.amount }
-        try { ListenExpenseAppWidgetProvider.updateAllWidgets(application, todayExp, currentState.currencySymbol) } catch (_: Exception) {}
     }
 
     private fun recalculate() {

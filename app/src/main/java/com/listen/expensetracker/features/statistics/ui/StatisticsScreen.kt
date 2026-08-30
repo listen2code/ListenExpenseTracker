@@ -32,7 +32,7 @@ import com.listen.uicomponent.components.CommonSegmentedControl
 /**
  * 纯无状态统计分析主画面 (StatisticsScreen)。
  *
- * 【教学重点 - Google 官方 UI State Holder 架构规范】：
+ * Google 官方 UI State Holder 架构规范：
  * 1. 业务只读数据由 [state] ([StatisticsUiState]) 纯数据类驱动；
  * 2. 交互状态与动画控制器（PagerState、LazyListState、副作用监听）统一由 [rememberStatisticsStateHolder] 承接；
  * 3. 顶部收支切换栏（Expense / Income Toggle）与底部图表卡片彻底解耦。

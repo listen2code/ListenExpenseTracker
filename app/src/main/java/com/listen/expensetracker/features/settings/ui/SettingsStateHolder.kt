@@ -17,7 +17,7 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 /**
  * 设置画面专用 UI 状态持有者 (SettingsStateHolder)。
  *
- * 【教学重点 - Google 官方 UI State Holder 设计模式】：
+ * Google 官方 UI State Holder 设计模式说明：
  * 1. 【职责分离】：
  *    - [SettingsUiState]：存放业务与用户偏好数据（语言、货币符号、主题模式、登录状态等），由 ViewModel 管理；
  *    - [SettingsStateHolder]：承载系统级契约回调（文件导入/导出 ActivityResultLauncher）、滚动位置与副作用监听，生命周期与 Compose 树绑定。
