@@ -14,8 +14,6 @@ import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -25,9 +23,6 @@ import kotlinx.coroutines.launch
 class StatisticsViewModel(
     application: Application
 ) : BaseViewModel<StatisticsUiState, StatisticsIntent, CommonUiEffect>(StatisticsUiState()) {
-
-    private val _screenEffect = MutableSharedFlow<StatisticsEffect>(replay = 0, extraBufferCapacity = 64)
-    val screenEffect = _screenEffect.asSharedFlow()
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
@@ -64,14 +59,14 @@ class StatisticsViewModel(
             }
             is StatisticsIntent.OpenMonthPicker -> updateState { copy(showMonthPicker = true) }
             is StatisticsIntent.DismissMonthPicker -> updateState { copy(showMonthPicker = false) }
-            is StatisticsIntent.ScrollToTop -> { _screenEffect.tryEmit(StatisticsEffect.ScrollToTop) }
+            is StatisticsIntent.ScrollToTop -> { emitEffect(StatisticsEffect.ScrollToTop) }
             is StatisticsIntent.SelectMonth -> {
                 updateState { copy(selectedMonthOffset = intent.offset) }
                 viewModelScope.launch {
                     val allList = dao.getAllTransactions()
                     applyCalculations(allList)
                 }
-                _screenEffect.tryEmit(StatisticsEffect.ScrollToMonth(intent.offset))
+                emitEffect(StatisticsEffect.ScrollToMonth(intent.offset))
             }
         }
     }

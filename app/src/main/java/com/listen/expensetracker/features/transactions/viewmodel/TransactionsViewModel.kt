@@ -25,8 +25,6 @@ import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -36,9 +34,6 @@ import kotlinx.coroutines.launch
 class TransactionsViewModel(
     private val application: Application
 ) : BaseViewModel<TransactionsUiState, TransactionsIntent, CommonUiEffect>(TransactionsUiState()) {
-
-    private val _screenEffect = MutableSharedFlow<TransactionsEffect>(replay = 0, extraBufferCapacity = 64)
-    val screenEffect = _screenEffect.asSharedFlow()
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
@@ -68,9 +63,9 @@ class TransactionsViewModel(
             is TransactionsIntent.SetMonthOffset -> { updateState { copy(selectedMonthOffset = intent.offset) }; recalculate() }
             is TransactionsIntent.SelectMonth -> {
                 updateState { copy(selectedMonthOffset = intent.offset) }; recalculate()
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.offset))
+                emitEffect(TransactionsEffect.ScrollToMonth(intent.offset))
             }
-            is TransactionsIntent.ScrollToTop -> { _screenEffect.tryEmit(TransactionsEffect.ScrollToTop) }
+            is TransactionsIntent.ScrollToTop -> { emitEffect(TransactionsEffect.ScrollToTop) }
             is TransactionsIntent.ChangeSortOrder -> { updateState { copy(sortOrder = intent.order) }; recalculate() }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is TransactionsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
@@ -90,7 +85,7 @@ class TransactionsViewModel(
                     )
                 }
                 recalculate()
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
+                emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset))
             }
             is TransactionsIntent.FilterByDate -> {
                 updateState {
@@ -102,8 +97,8 @@ class TransactionsViewModel(
                     )
                 }
                 recalculate()
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToDay(intent.day))
+                emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset))
+                emitEffect(TransactionsEffect.ScrollToDay(intent.day))
             }
             is TransactionsIntent.FilterByTransaction -> {
                 val amtStr = if (intent.amount != null) {
@@ -118,8 +113,8 @@ class TransactionsViewModel(
                     )
                 }
                 recalculate()
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToMonth(intent.monthOffset))
-                _screenEffect.tryEmit(TransactionsEffect.ScrollToTransaction(intent.transactionId))
+                emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset))
+                emitEffect(TransactionsEffect.ScrollToTransaction(intent.transactionId))
             }
             is TransactionsIntent.ChangeTypeFilter -> { updateState { copy(typeFilter = intent.type) }; recalculate() }
             is TransactionsIntent.ApplyCompoundFilter -> {

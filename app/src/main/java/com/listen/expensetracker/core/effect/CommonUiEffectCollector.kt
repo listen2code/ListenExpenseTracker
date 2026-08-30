@@ -67,6 +67,9 @@ fun CollectCommonUiEffects(
                     is CommonUiEffect.HideKeyboard -> {
                         keyboardController?.hide()
                     }
+                    else -> {
+                        // 业务画面专属副作用（如 ScrollToMonth、ScrollToTop）已由各 Screen 独立消费，全局收集器直接忽略
+                    }
                 }
             }
         }

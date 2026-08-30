@@ -22,9 +22,6 @@ import com.listen.expensetracker.data.update.UpdateCheckerService
 import com.listen.expensetracker.data.update.UpdateResult
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -39,9 +36,6 @@ class SettingsViewModel(
     private val dao = db.transactionDao()
     private val prefManager = ExpenseDataStoreManager(application)
     private val syncDelegate = SettingsSyncDelegate(application, dao, prefManager)
-
-    private val _settingsEffect = MutableSharedFlow<SettingsEffect>()
-    val settingsEffect: SharedFlow<SettingsEffect> = _settingsEffect.asSharedFlow()
 
     init {
         ApmLogger.i(tag = "VM", message = "SettingsViewModel initialized")
@@ -64,7 +58,7 @@ class SettingsViewModel(
                 if (intent.enabled) GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 1000L)
             }
             is SettingsIntent.ToggleAutoBackupWifiOnly -> viewModelScope.launch { prefManager.setAutoBackupWifiOnly(intent.enabled); updateState { copy(autoBackupWifiOnly = intent.enabled) } }
-            is SettingsIntent.ScrollToTop -> { _settingsEffect.tryEmit(SettingsEffect.ScrollToTop) }
+            is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
                 prefManager.setDeveloperMode(intent.enabled)
                 updateState { copy(isDeveloperMode = intent.enabled) }
@@ -112,8 +106,8 @@ class SettingsViewModel(
                     emitEffect(CommonUiEffect.ShowToast(msg))
                 }
             }
-            is SettingsIntent.TriggerGoogleSignIn -> viewModelScope.launch {
-                _settingsEffect.emit(SettingsEffect.LaunchGoogleSignIn)
+            is SettingsIntent.TriggerGoogleSignIn -> {
+                emitEffect(SettingsEffect.LaunchGoogleSignIn)
             }
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }

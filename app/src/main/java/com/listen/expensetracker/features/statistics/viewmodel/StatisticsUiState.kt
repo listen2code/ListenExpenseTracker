@@ -1,5 +1,6 @@
 package com.listen.expensetracker.features.statistics.viewmodel
 
+import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.LineChartPoint
@@ -8,8 +9,7 @@ import com.listen.uicomponent.components.ProgressSegment
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
-
-sealed interface StatisticsEffect {
+sealed interface StatisticsEffect : CommonUiEffect {
     data class ScrollToMonth(val offset: Int) : StatisticsEffect
     data object ScrollToTop : StatisticsEffect
 }

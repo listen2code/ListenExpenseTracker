@@ -1,13 +1,13 @@
 package com.listen.expensetracker.features.settings.viewmodel
 
 import android.net.Uri
+import com.listen.arch.mvi.CommonUiEffect
 import com.listen.arch.sync.SyncState
 import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
-
-sealed interface SettingsEffect {
+sealed interface SettingsEffect : CommonUiEffect {
     data object LaunchGoogleSignIn : SettingsEffect
     data object ScrollToTop : SettingsEffect
 }

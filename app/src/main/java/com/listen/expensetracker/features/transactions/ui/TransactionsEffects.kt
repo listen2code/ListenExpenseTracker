@@ -16,6 +16,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsInt
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
 /**
@@ -48,7 +49,7 @@ fun TransactionsEffects(
         if (viewModel != null) {
             // 任务 1：监听 ViewModel 发射的单次 UI 副作用（滚动定位等）
             launch {
-                viewModel.screenEffect.collectLatest { effect ->
+                viewModel.viewEffect.filterIsInstance<TransactionsEffect>().collectLatest { effect ->
                     when (effect) {
                         is TransactionsEffect.ScrollToMonth -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset

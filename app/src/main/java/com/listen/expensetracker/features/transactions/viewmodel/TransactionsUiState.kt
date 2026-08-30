@@ -1,16 +1,15 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
+import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
-
-sealed interface TransactionsEffect {
+sealed interface TransactionsEffect : CommonUiEffect {
     data class ScrollToMonth(val offset: Int) : TransactionsEffect
     data object ScrollToTop : TransactionsEffect
-    data class ScrollToTransaction(val txId: String) :
-        TransactionsEffect
+    data class ScrollToTransaction(val txId: String) : TransactionsEffect
     data class ScrollToDay(val day: Int) : TransactionsEffect
 }
 

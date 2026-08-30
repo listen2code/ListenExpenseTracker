@@ -13,6 +13,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
 /**
@@ -40,7 +41,7 @@ fun StatisticsEffects(
         if (viewModel != null) {
             // 任务 1：监听单次事件副作用（月份跳转、一键置顶等）
             launch {
-                viewModel.screenEffect.collectLatest { effect ->
+                viewModel.viewEffect.filterIsInstance<StatisticsEffect>().collectLatest { effect ->
                     when (effect) {
                         is StatisticsEffect.ScrollToMonth -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
