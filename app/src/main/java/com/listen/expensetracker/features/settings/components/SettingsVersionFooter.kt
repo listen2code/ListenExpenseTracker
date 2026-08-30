@@ -61,7 +61,7 @@ fun SettingsVersionFooter(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = AppDimens.SpaceExtraSmall, bottom = 24.dp)
+            .padding(vertical = AppDimens.SpaceSection)
             .clip(RoundedCornerShape(AppDimens.CornerCard))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
             .combinedClickable(

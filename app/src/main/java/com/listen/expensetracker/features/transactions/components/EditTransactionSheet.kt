@@ -1,4 +1,4 @@
-package com.listen.expensetracker.features.transactions.ui
+package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,17 +25,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryRepository
-import com.listen.expensetracker.features.settings.components.CategoryManageDialog
-import com.listen.expensetracker.features.transactions.components.AccountDeleteConfirmDialog
 import com.listen.uicomponent.components.CommonBottomSheet
 import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonSegmentedControl
@@ -43,35 +44,36 @@ import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
 
 /**
- * Bottom Sheet for creating a new transaction.
+ * Bottom Sheet for editing or deleting an existing transaction entity.
  * Uses standardized CommonEditText for consistent styling with MonthlyBudgetDialog and the whole app.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionSheet(
+fun EditTransactionSheet(
+    transaction: TransactionEntity,
     currencySymbol: String,
     onDismiss: () -> Unit,
-    onSave: (type: String, categoryId: String, categoryName: String, categoryIcon: String, categoryColorHex: String, amount: Double, note: String, accountType: String, timestamp: Long) -> Unit,
+    onSave: (TransactionEntity) -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
-    initialTimestamp: Long = System.currentTimeMillis(),
     lang: String = "zh"
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var type by remember { mutableStateOf(TransactionType.EXPENSE) }
-    var categoryVersion by remember { mutableIntStateOf(0) }
-    val categories = remember(type, categoryVersion) {
+    var type by remember { mutableStateOf(transaction.type) }
+    val categories = remember(type) {
         if (type == TransactionType.EXPENSE) CategoryRepository.expenseCategories else CategoryRepository.incomeCategories
     }
-    var selectedCategory by remember(categories) { mutableStateOf(categories.first()) }
-    var amountExpression by remember { mutableStateOf("0") }
-    var note by remember { mutableStateOf("") }
+    var selectedCategory: Category by remember(categories) {
+        mutableStateOf(categories.find { it.id == transaction.categoryId } ?: categories.first())
+    }
+    var amountExpression by remember { mutableStateOf("%.2f".format(transaction.amount)) }
+    var note by remember { mutableStateOf(transaction.note) }
     var accountVersion by remember { mutableIntStateOf(0) }
     val availableAccounts = remember(accountVersion) { AccountRepository.getAllAccounts() }
-    var selectedAccount by remember { mutableStateOf("CASH") }
+    var selectedAccount by remember { mutableStateOf(transaction.accountType) }
     var accountToDelete by remember { mutableStateOf<AccountTypeItem?>(null) }
-    var selectedTimestamp by remember(initialTimestamp) { mutableLongStateOf(initialTimestamp) }
-    var showCategoryManageDialog by remember { mutableStateOf(false) }
+    var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
 
     val typeOptions = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang))
 
@@ -84,6 +86,26 @@ fun AddTransactionSheet(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
         ) {
+            // Header Row: Title & Delete Icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = AppStrings.EDIT_TRANSACTION_TITLE.tr(lang),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = AppDimens.TextHeader
+                )
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
             // Expense / Income Segmented Switch
             CommonSegmentedControl(
                 items = typeOptions,
@@ -116,13 +138,12 @@ fun AddTransactionSheet(
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             )
 
-            // Category Horizontal Picker with Add Category button
+            // Category Horizontal Picker
             TransactionCategoryPicker(
                 categories = categories,
                 selectedCategory = selectedCategory,
                 onCategorySelected = { selectedCategory = it },
-                lang = lang,
-                onManageCategories = { showCategoryManageDialog = true }
+                lang = lang
             )
 
             // Standardized Note Input Field (CommonEditText)
@@ -167,7 +188,7 @@ fun AddTransactionSheet(
             NumericKeypad(
                 onKeyPress = { key ->
                     if (key == "." && amountExpression.contains(".")) {
-                        // ignore secondary decimal points
+                        // ignore secondary decimal point
                     } else if ((amountExpression == "0" || amountExpression.isEmpty()) && key != ".") {
                         amountExpression = key
                     } else if (amountExpression.length < 10) {
@@ -178,7 +199,7 @@ fun AddTransactionSheet(
                     amountExpression = if (amountExpression.length > 1) {
                         amountExpression.dropLast(1)
                     } else {
-                        "0"
+                        ""
                     }
                 },
                 onDonePress = {
@@ -186,15 +207,17 @@ fun AddTransactionSheet(
                     if (finalAmount > 0) {
                         val catName = selectedCategory.getDisplayName(lang)
                         onSave(
-                            type,
-                            selectedCategory.id,
-                            catName,
-                            selectedCategory.id,
-                            selectedCategory.colorHex,
-                            finalAmount,
-                            note.trim(),
-                            selectedAccount,
-                            selectedTimestamp
+                            transaction.copy(
+                                type = type,
+                                categoryId = selectedCategory.id,
+                                categoryName = catName,
+                                categoryIcon = selectedCategory.id,
+                                categoryColorHex = selectedCategory.colorHex,
+                                amount = finalAmount,
+                                note = note.trim(),
+                                accountType = selectedAccount,
+                                timestamp = selectedTimestamp
+                            )
                         )
                     }
                 },
@@ -204,15 +227,7 @@ fun AddTransactionSheet(
         }
     }
 
-    if (showCategoryManageDialog) {
-        CategoryManageDialog(
-            type = type,
-            onDismiss = { showCategoryManageDialog = false },
-            onCategoriesChanged = { categoryVersion++ },
-            lang = lang
-        )
-    }
-
+    // Delete Account Confirmation Dialog on Long Press
     accountToDelete?.let { acct ->
         AccountDeleteConfirmDialog(
             accountName = acct.getDisplayName(lang),
