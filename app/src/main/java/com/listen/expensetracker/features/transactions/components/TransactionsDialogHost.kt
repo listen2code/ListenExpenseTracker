@@ -48,20 +48,19 @@ fun TransactionsDialogHost(
                 initialTimestamp = initialDate,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
                 onSave = { entity ->
-                    onIntent(
-                        TransactionsIntent.AddTransaction(
-                            type = entity.type,
-                            categoryId = entity.categoryId,
-                            categoryName = entity.categoryName,
-                            categoryIcon = entity.categoryIcon,
-                            categoryColorHex = entity.categoryColorHex,
-                            amount = entity.amount,
-                            note = entity.note,
-                            accountType = entity.accountType,
-                            timestamp = entity.timestamp
-                        )
-                    )
+                    onIntent(TransactionsIntent.AddTransaction(
+                        type = entity.type, categoryId = entity.categoryId, categoryName = entity.categoryName,
+                        categoryIcon = entity.categoryIcon, categoryColorHex = entity.categoryColorHex,
+                        amount = entity.amount, note = entity.note, accountType = entity.accountType, timestamp = entity.timestamp
+                    ))
                     onIntent(TransactionsIntent.DismissDialog)
+                },
+                onSaveAndContinue = { entity ->
+                    onIntent(TransactionsIntent.AddTransaction(
+                        type = entity.type, categoryId = entity.categoryId, categoryName = entity.categoryName,
+                        categoryIcon = entity.categoryIcon, categoryColorHex = entity.categoryColorHex,
+                        amount = entity.amount, note = entity.note, accountType = entity.accountType, timestamp = entity.timestamp
+                    ))
                 },
                 lang = lang
             )
@@ -84,33 +83,17 @@ fun TransactionsDialogHost(
         }
         is TransactionsDialog.ConfirmDelete -> {
             val tx = dialog.transaction
-            val desc = AppStrings.DELETE_TRANSACTION_DESC.tr(lang).format(tx.categoryName, sym, tx.amount)
-            CommonDialog(
-                onDismissRequest = { onIntent(TransactionsIntent.DismissDialog) },
-                title = AppStrings.DELETE_TRANSACTION_TITLE.tr(lang),
-                confirmButton = {
-                    CommonButton(
-                        text = AppStrings.COMMON_DELETE.tr(lang),
-                        onClick = {
-                            onIntent(TransactionsIntent.DeleteTransaction(tx.id))
-                            onIntent(TransactionsIntent.DismissDialog)
-                        },
-                        style = CommonButtonStyle.Danger
-                    )
+            TransactionDeleteConfirmDialog(
+                categoryName = tx.categoryName,
+                currencySymbol = sym,
+                amount = tx.amount,
+                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onConfirm = {
+                    onIntent(TransactionsIntent.DeleteTransaction(tx.id))
+                    onIntent(TransactionsIntent.DismissDialog)
                 },
-                dismissButton = {
-                    CommonButton(
-                        text = AppStrings.COMMON_CANCEL.tr(lang),
-                        onClick = { onIntent(TransactionsIntent.DismissDialog) },
-                        style = CommonButtonStyle.Outlined
-                    )
-                }
-            ) {
-                CommonText(
-                    text = desc,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                lang = lang
+            )
         }
         is TransactionsDialog.MonthPicker -> {
             MonthPickerDialog(

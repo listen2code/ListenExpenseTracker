@@ -178,7 +178,8 @@ fun TransactionsContentList(
                         dayExpense = dayExpense,
                         dayIncome = dayIncome,
                         currencySymbol = sym,
-                        lang = lang
+                        lang = lang,
+                        hideAmount = state.hideBalance
                     )
                 }
 

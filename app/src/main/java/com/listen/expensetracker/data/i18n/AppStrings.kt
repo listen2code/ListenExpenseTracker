@@ -79,7 +79,9 @@ object AppStrings {
     const val COMMON_CANCEL = "common_cancel"
     const val COMMON_SAVE = "common_save"
     const val COMMON_DONE = "common_done"
+    const val COMMON_CONTINUE = "common_continue"
     const val COMMON_DELETE = "common_delete"
+    const val MSG_SAVED_CONTINUE = "msg_saved_continue"
 
     // Settings & Dialogs
     const val SETTINGS_TITLE = "settings_title"

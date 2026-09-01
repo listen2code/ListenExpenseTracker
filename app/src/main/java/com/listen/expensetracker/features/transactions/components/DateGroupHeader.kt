@@ -52,7 +52,8 @@ fun DateGroupHeader(
     dayIncome: Double,
     currencySymbol: String,
     lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hideAmount: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -71,14 +72,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
+                    text = if (hideAmount) "${AppStrings.TYPE_EXPENSE.tr(lang)} ••••" else "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
+                    text = if (hideAmount) "${AppStrings.TYPE_INCOME.tr(lang)} ••••" else "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

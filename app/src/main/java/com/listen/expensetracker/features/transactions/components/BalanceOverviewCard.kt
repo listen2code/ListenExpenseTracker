@@ -116,7 +116,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "$currencySymbol${"%.2f".format(totalExpense)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalExpense)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = ExpenseRed,
@@ -134,7 +134,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "$currencySymbol${"%.2f".format(totalIncome)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalIncome)}",
                         fontSize = AppDimens.TextBody,
                         fontWeight = FontWeight.Bold,
                         color = IncomeGreen,
@@ -185,7 +185,7 @@ fun BalanceOverviewCard(
                         )
                         if (monthlyBudget > 0.0) {
                             Text(
-                                text = "($currencySymbol${"%.0f".format(monthlyBudget)})",
+                                text = if (hideBalance) "(••••)" else "($currencySymbol${"%.0f".format(monthlyBudget)})",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -199,7 +199,9 @@ fun BalanceOverviewCard(
                     }
 
                     Text(
-                        text = if (isOverBudget) {
+                        text = if (hideBalance) {
+                            if (isOverBudget) "${AppStrings.OVER_BUDGET.tr(lang)} ••••" else "${AppStrings.USED_BUDGET.tr(lang)} ••••"
+                        } else if (isOverBudget) {
                             "${AppStrings.OVER_BUDGET.tr(lang)} $currencySymbol${"%.0f".format(totalExpense - monthlyBudget)}"
                         } else {
                             "${AppStrings.USED_BUDGET.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
