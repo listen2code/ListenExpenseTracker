@@ -19,8 +19,9 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.features.budget.components.BudgetDialogMode
+import com.listen.expensetracker.features.budget.components.CategoryBudgetModalDialog
 import com.listen.expensetracker.features.transactions.components.AccountManageDialog
-import com.listen.expensetracker.features.transactions.components.MonthlyBudgetDialog
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
@@ -67,13 +68,17 @@ fun SettingsDialogHost(
             )
         }
         is SettingsDialog.MonthlyBudget -> {
-            MonthlyBudgetDialog(
-                currentBudget = state.monthlyBudget,
+            CategoryBudgetModalDialog(
+                allTransactions = emptyList(),
+                monthlyBudget = state.monthlyBudget,
+                categoryRatios = state.categoryBudgetRatios,
                 currencySymbol = sym,
                 lang = lang,
+                hideAmount = false,
+                initialMode = BudgetDialogMode.EDIT,
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
-                onConfirm = { newBudget ->
-                    onIntent(SettingsIntent.UpdateMonthlyBudget(newBudget))
+                onSave = { newBudget, newRatios ->
+                    onIntent(SettingsIntent.UpdateCategoryBudgets(newBudget, newRatios))
                     onIntent(SettingsIntent.DismissDialog)
                 }
             )

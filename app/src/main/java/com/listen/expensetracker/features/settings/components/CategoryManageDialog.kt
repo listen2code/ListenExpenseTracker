@@ -158,6 +158,7 @@ fun CategoryManageDialog(
             type = activeType,
             onDismiss = { showAddDialog = false },
             onCategoryAdded = {
+                refreshKey++
                 onCategoriesChanged()
                 showAddDialog = false
             },

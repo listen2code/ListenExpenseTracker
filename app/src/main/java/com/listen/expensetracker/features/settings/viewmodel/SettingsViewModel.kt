@@ -69,6 +69,11 @@ class SettingsViewModel(
                 prefManager.setMonthlyBudget(intent.budget)
                 updateState { copy(monthlyBudget = intent.budget) }
             }
+            is SettingsIntent.UpdateCategoryBudgets -> viewModelScope.launch {
+                prefManager.setMonthlyBudget(intent.budget)
+                prefManager.setCategoryBudgetRatios(intent.ratios)
+                updateState { copy(monthlyBudget = intent.budget, categoryBudgetRatios = intent.ratios) }
+            }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
                 updateState { copy(autoBackupDrive = intent.enabled) }
@@ -139,13 +144,10 @@ class SettingsViewModel(
         observeExpensePreferences(prefManager) { prefs ->
             updateState {
                 copy(
-                    language = prefs.language,
-                    themeMode = prefs.themeMode,
-                    accentColor = prefs.accentColor,
-                    currencySymbol = prefs.currencySymbol,
-                    monthlyBudget = prefs.monthlyBudget,
-                    autoBackupDrive = prefs.autoBackupDrive,
-                    autoBackupWifiOnly = prefs.autoBackupWifiOnly,
+                    language = prefs.language, themeMode = prefs.themeMode, accentColor = prefs.accentColor,
+                    currencySymbol = prefs.currencySymbol, monthlyBudget = prefs.monthlyBudget,
+                    categoryBudgetRatios = prefs.categoryBudgetRatios,
+                    autoBackupDrive = prefs.autoBackupDrive, autoBackupWifiOnly = prefs.autoBackupWifiOnly,
                     isDeveloperMode = prefs.isDeveloperMode
                 )
             }

@@ -35,6 +35,7 @@ sealed interface TransactionsDialog {
     data object ManageAccount : TransactionsDialog
     data object FilterSheet : TransactionsDialog
     data object MonthlyBudget : TransactionsDialog
+    data object CategoryBudgetEdit : TransactionsDialog
 }
 
 /**
@@ -47,6 +48,7 @@ data class TransactionsUiState(
     val totalIncome: Double = 0.0,
     val netBalance: Double = 0.0,
     val monthlyBudget: Double = 5000.0,
+    val categoryBudgetRatios: Map<String, Float> = com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios,
     val remainingBudget: Double = 5000.0,
     val budgetUsageRatio: Float = 0.0f,
     val isOverBudget: Boolean = false,
@@ -135,6 +137,7 @@ sealed interface TransactionsIntent {
     data object ClearAmountFilter : TransactionsIntent
     data object ClearSortOrder : TransactionsIntent
     data class UpdateMonthlyBudget(val budget: Double) : TransactionsIntent
+    data class UpdateCategoryBudgets(val totalBudget: Double, val ratios: Map<String, Float>) : TransactionsIntent
     data object ScreenAppear : TransactionsIntent
     data object ScreenDisappear : TransactionsIntent
 }

@@ -132,6 +132,12 @@ class TransactionsViewModel(
             is TransactionsIntent.ClearAmountFilter -> { updateState { copy(amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null) }; recalculate() }
             is TransactionsIntent.ClearSortOrder -> { updateState { copy(sortOrder = TransactionSortOrder.DATE_DESC) }; recalculate() }
             is TransactionsIntent.UpdateMonthlyBudget -> { viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget) } }
+            is TransactionsIntent.UpdateCategoryBudgets -> {
+                viewModelScope.launch {
+                    prefManager.setMonthlyBudget(intent.totalBudget)
+                    prefManager.setCategoryBudgetRatios(intent.ratios)
+                }
+            }
             is TransactionsIntent.ScreenAppear -> recalculate()
             is TransactionsIntent.ScreenDisappear -> Unit
         }
@@ -147,13 +153,10 @@ class TransactionsViewModel(
             AccountRepository.deserializeCustomAccounts(prefs.customAccounts)
             updateState {
                 copy(
-                    language = prefs.language,
-                    themeMode = prefs.themeMode,
-                    accentColor = prefs.accentColor,
-                    currencySymbol = prefs.currencySymbol,
-                    monthlyBudget = prefs.monthlyBudget,
-                    hideBalance = prefs.hideBalance,
-                    isDeveloperMode = prefs.isDeveloperMode
+                    language = prefs.language, themeMode = prefs.themeMode, accentColor = prefs.accentColor,
+                    currencySymbol = prefs.currencySymbol, monthlyBudget = prefs.monthlyBudget,
+                    categoryBudgetRatios = prefs.categoryBudgetRatios,
+                    hideBalance = prefs.hideBalance, isDeveloperMode = prefs.isDeveloperMode
                 )
             }
             recalculate()
@@ -221,16 +224,13 @@ class TransactionsViewModel(
         }
         val lang = currentState.language
         emitEffect(CommonUiEffect.ShowSnackbar(
-            message = AppStrings.UNDO_DELETE_TOAST.tr(lang),
-            actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(lang),
+            message = AppStrings.UNDO_DELETE_TOAST.tr(lang), actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(lang),
             onAction = { handleIntent(TransactionsIntent.RestoreDeletedTransaction(entity)) }
         ))
     }
 
     private fun restoreDeletedTransaction(tx: TransactionEntity, traceId: String) = viewModelScope.launch {
-        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
-            dao.insertTransaction(tx)
-        }
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) { dao.insertTransaction(tx) }
         emitEffect(CommonUiEffect.ShowToast(AppStrings.UNDO_SUCCESS_TOAST.tr(currentState.language)))
     }
 

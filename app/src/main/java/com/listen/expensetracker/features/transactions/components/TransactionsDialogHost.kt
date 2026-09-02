@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.features.budget.components.BudgetDialogMode
+import com.listen.expensetracker.features.budget.components.CategoryBudgetModalDialog
 import com.listen.expensetracker.features.common.components.MonthPickerDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
@@ -132,16 +134,19 @@ fun TransactionsDialogHost(
                 }
             )
         }
-        is TransactionsDialog.MonthlyBudget -> {
-            MonthlyBudgetDialog(
-                currentBudget = state.monthlyBudget,
+        is TransactionsDialog.MonthlyBudget, is TransactionsDialog.CategoryBudgetEdit -> {
+            CategoryBudgetModalDialog(
+                allTransactions = state.transactions,
+                monthlyBudget = state.monthlyBudget,
+                categoryRatios = state.categoryBudgetRatios,
                 currencySymbol = sym,
                 lang = lang,
-                spentAmount = state.totalExpense,
+                hideAmount = state.hideBalance,
+                initialMonthOffset = state.selectedMonthOffset,
+                initialMode = if (dialog is TransactionsDialog.CategoryBudgetEdit) BudgetDialogMode.EDIT else BudgetDialogMode.VIEW,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
-                onConfirm = { newBudget ->
-                    onIntent(TransactionsIntent.UpdateMonthlyBudget(newBudget))
-                    onIntent(TransactionsIntent.DismissDialog)
+                onSave = { newBudget, newRatios ->
+                    onIntent(TransactionsIntent.UpdateCategoryBudgets(newBudget, newRatios))
                 }
             )
         }

@@ -28,6 +28,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_LAST_BACKUP_HASH = stringPreferencesKey("expense_last_backup_hash")
         val KEY_DEVELOPER_MODE = booleanPreferencesKey("expense_developer_mode")
         val KEY_HIDE_BALANCE = booleanPreferencesKey("expense_hide_balance")
+        val KEY_CATEGORY_BUDGETS = stringPreferencesKey("expense_category_budgets")
     }
 
     val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
@@ -45,6 +46,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             },
             currencySymbol = prefs[KEY_CURRENCY_SYMBOL] ?: "￥",
             monthlyBudget = prefs[KEY_MONTHLY_BUDGET] ?: 5000.0,
+            categoryBudgetRatios = parseCategoryRatios(prefs[KEY_CATEGORY_BUDGETS]),
             customAccounts = prefs[KEY_CUSTOM_ACCOUNTS] ?: "",
             autoBackupDrive = prefs[KEY_AUTO_BACKUP_DRIVE] ?: true,
             autoBackupWifiOnly = prefs[KEY_AUTO_BACKUP_WIFI_ONLY] ?: false,
@@ -115,5 +117,22 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
 
     suspend fun setHideBalance(hide: Boolean) {
         context.archDataStore.edit { prefs -> prefs[KEY_HIDE_BALANCE] = hide }
+    }
+
+    suspend fun setCategoryBudgetRatios(ratios: Map<String, Float>) {
+        val serialized = ratios.entries.joinToString(",") { "${it.key}:${it.value}" }
+        context.archDataStore.edit { prefs -> prefs[KEY_CATEGORY_BUDGETS] = serialized }
+    }
+
+    private fun parseCategoryRatios(raw: String?): Map<String, Float> {
+        if (raw.isNullOrBlank()) return com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios
+        return try {
+            raw.split(",").mapNotNull { part ->
+                val kv = part.split(":")
+                if (kv.size == 2) kv[0].trim() to (kv[1].trim().toFloatOrNull() ?: return@mapNotNull null) else null
+            }.toMap().ifEmpty { com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios }
+        } catch (_: Exception) {
+            com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios
+        }
     }
 }

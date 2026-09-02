@@ -21,6 +21,7 @@ data class ExpensePreferences(
     val accentColor: AccentColor = AccentColor.EMERALD,
     val currencySymbol: String = "￥",
     val monthlyBudget: Double = 5000.0,
+    val categoryBudgetRatios: Map<String, Float> = com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios,
     val customAccounts: String = "",
     val autoBackupDrive: Boolean = true,
     val autoBackupWifiOnly: Boolean = false,
