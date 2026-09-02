@@ -181,10 +181,12 @@ fun TransactionSheet(
                 val amt = amountExpression.toDoubleOrNull() ?: 0.0
                 if (amt > 0) {
                     val cat = selectedCategory.getDisplayName(lang)
+                    val now = System.currentTimeMillis()
+                    val ts = if (isSameCalendarDay(selectedTimestamp, now)) maxOf(now, selectedTimestamp) else selectedTimestamp
                     (transaction ?: TransactionEntity(type = type, categoryId = "", categoryName = "", categoryIcon = "", categoryColorHex = "", amount = 0.0)).copy(
                         type = type, categoryId = selectedCategory.id, categoryName = cat,
                         categoryIcon = selectedCategory.id, categoryColorHex = selectedCategory.colorHex,
-                        amount = amt, note = note.trim(), accountType = selectedAccount, timestamp = selectedTimestamp
+                        amount = amt, note = note.trim(), accountType = selectedAccount, timestamp = ts
                     )
                 } else null
             }
@@ -206,8 +208,11 @@ fun TransactionSheet(
                 doneText = AppStrings.COMMON_DONE.tr(lang) + " ✓",
                 onContinuePress = if (!isEditMode && onSaveAndContinue != null) {
                     {
-                        createTransaction()?.let {
-                            onSaveAndContinue(it); amountExpression = "0"; note = ""
+                        createTransaction()?.let { tx ->
+                            onSaveAndContinue(tx)
+                            amountExpression = "0"; note = ""
+                            val now = System.currentTimeMillis()
+                            selectedTimestamp = if (isSameCalendarDay(tx.timestamp, now)) maxOf(now, tx.timestamp + 1000L) else tx.timestamp + 1000L
                             Toast.makeText(context, AppStrings.MSG_SAVED_CONTINUE.tr(lang), Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -230,18 +235,15 @@ fun TransactionSheet(
                 AccountRepository.deleteAccount(acct.key); accountVersion++
                 if (selectedAccount == acct.key) selectedAccount = "CASH"
                 accountToDelete = null
-            },
-            lang = lang
+            }, lang = lang
         )
     }
 
     if (showDeleteConfirmDialog) {
         TransactionDeleteConfirmDialog(
             categoryName = selectedCategory.getDisplayName(lang), currencySymbol = currencySymbol,
-            amount = amountExpression.toDoubleOrNull() ?: 0.0,
-            onDismiss = { showDeleteConfirmDialog = false },
-            onConfirm = { showDeleteConfirmDialog = false; onDelete?.invoke() },
-            lang = lang
+            amount = amountExpression.toDoubleOrNull() ?: 0.0, onDismiss = { showDeleteConfirmDialog = false },
+            onConfirm = { showDeleteConfirmDialog = false; onDelete?.invoke() }, lang = lang
         )
     }
 }

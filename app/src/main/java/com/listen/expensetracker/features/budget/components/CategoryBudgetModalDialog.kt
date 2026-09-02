@@ -52,6 +52,7 @@ fun CategoryBudgetModalDialog(
     initialMode: BudgetDialogMode = BudgetDialogMode.VIEW
 ) {
     var mode by remember(initialMode) { mutableStateOf(initialMode) }
+    var activeMonthOffset by remember(initialMonthOffset) { androidx.compose.runtime.mutableIntStateOf(initialMonthOffset) }
 
     var editBudgetInput by remember(monthlyBudget) {
         mutableStateOf(if (monthlyBudget > 0) "%.0f".format(monthlyBudget) else "5000")
@@ -155,7 +156,8 @@ fun CategoryBudgetModalDialog(
                         currencySymbol = currencySymbol,
                         lang = lang,
                         hideAmount = hideAmount,
-                        initialMonthOffset = initialMonthOffset,
+                        initialMonthOffset = activeMonthOffset,
+                        onMonthOffsetChange = { activeMonthOffset = it },
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {

@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.transactions.components
+package com.listen.expensetracker.features.transactions.components
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke
@@ -222,4 +222,11 @@ fun TransactionDatePickerButton(
         Spacer(modifier = Modifier.width(6.dp))
         Text(sdf.format(Date(selectedTimestamp)), fontSize = AppDimens.TextSmall)
     }
+}
+
+fun isSameCalendarDay(t1: Long, t2: Long): Boolean {
+    val c1 = Calendar.getInstance().apply { timeInMillis = t1 }
+    val c2 = Calendar.getInstance().apply { timeInMillis = t2 }
+    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
+            c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
 }

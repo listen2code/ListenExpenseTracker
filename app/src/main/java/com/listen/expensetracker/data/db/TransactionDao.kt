@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
+    @Query("SELECT * FROM transactions ORDER BY timestamp DESC, rowid DESC")
     fun getAllTransactionsFlow(): Flow<List<TransactionEntity>>
 
-    @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
+    @Query("SELECT * FROM transactions ORDER BY timestamp DESC, rowid DESC")
     suspend fun getAllTransactions(): List<TransactionEntity>
 
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
