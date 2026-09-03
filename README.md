@@ -10,7 +10,7 @@
 2. **Google 官方原生账户连携与 Google Drive 云端实时备份恢复**：
    - 接入官方最新的 **AndroidX `CredentialManager`**，调起系统原生半屏 Google 账户选择面板（直接授权本机登录的 Google 账户）。
    - **Google Drive REST API v3 真实直连**：一键将加密账单快照 (`lexpense_backup.json`) 备份至个人的 Google 云端硬盘，并支持跨设备一键还原。
-   - 多账户独立隔离存储，云端备份携带 MD5 校验和与 APM 链路耗时打点。详细配置见 [Google 登录与 Drive 同步指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)。
+   - 多账户独立隔离存储，云端备份携带 MD5 校验和与 APM 链路耗时打点。详细配置见 [Google 登录与 Drive 同步指南](docs/google_auth_and_drive_sync_guide.md)。
 3. **高信息密度流水明细与日聚合视图**：
    - 流水列表按日自动分组 (`20 星期四 2026.08`) 并实时汇总每日总支出与总收入。
    - 极致紧凑的 24dp 圆形分类图标与微型内边距，单屏展示信息量翻倍。
@@ -79,9 +79,9 @@ UIPkg ..> ArchPkg
 @enduml
 ```
 
-* **[ListenArch](file:///C:/Users/liste/Downloads/github/ListenArch)**：MVI 模式基类 (`BaseViewModel`, `CommonUiEffect`)、通用 DataStore 存储 (`BaseDataStoreManager`)、APM 监控 (`ApmLogger`)、TraceId 链路追踪 (`TraceManager`)、通用 Payload 云端同步引擎 (`CloudSyncManager`) 与通用本地化引擎 (`StringsRes`)。
-* **[ListenUiComponent](file:///C:/Users/liste/Downloads/github/ListenUiComponent)**：通用数字输入键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `LineChart`, `BarChart`)、通用分段进度条、Material 3 主题系统、`BaseScreenScaffold` 顶部栏与 APM 日志浮窗。
-* **[ListenExpenseTracker](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker)**：主 App 业务编排、Room 本地数据库 (`AppDatabase`, `TransactionDao`, `TransactionEntity`)、记账专属偏好 (`ExpenseDataStoreManager`)、记账多语言字典 (`ExpenseStrings`)、JSON/CSV 备份导入导出 (`TransactionBackupManager`)、Feature-First 独立 ViewModel 业务页面与桌面小组件。
+* **`ListenArch`**：MVI 模式基类 (`BaseViewModel`, `CommonUiEffect`)、通用 DataStore 存储 (`BaseDataStoreManager`)、APM 监控 (`ApmLogger`)、TraceId 链路追踪 (`TraceManager`)、通用 Payload 云端同步引擎 (`CloudSyncManager`) 与通用本地化引擎 (`StringsRes`)。
+* **`ListenUiComponent`**：通用数字输入键盘 (`NumericKeypad`)、Canvas 图表组件 (`DonutChart`, `LineChart`, `BarChart`)、通用分段进度条、Material 3 主题系统、`BaseScreenScaffold` 顶部栏与 APM 日志浮窗。
+* **`ListenExpenseTracker`**：主 App 业务编排、Room 本地数据库 (`AppDatabase`, `TransactionDao`, `TransactionEntity`)、记账专属偏好 (`ExpenseDataStoreManager`)、记账多语言字典 (`ExpenseStrings`)、JSON/CSV 备份导入导出 (`TransactionBackupManager`)、Feature-First 独立 ViewModel 业务页面与桌面小组件。
 
 ---
 
@@ -132,16 +132,16 @@ app/src/main/java/com/listen/expensetracker/
 
 | 文档路径 | 核心内容 |
 | :--- | :--- |
-| [docs/project_development_guide.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/project_development_guide.md) | 项目开发指南、工程规范与代码风格基线 |
-| [docs/google_auth_and_drive_sync_guide.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md) | Google 登录与 Google Drive 云端同步配置与开发全指南 |
-| [docs/api_reference.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/api_reference.md) | 全模块 API、DAO、DataStore Flow、Google Auth 与 SDK 接口手册 |
-| [docs/architecture_decision_records.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/architecture_decision_records.md) | 架构决策记录 (ADR-001 ~ ADR-009) 与技术选型权衡 |
-| [docs/apm_performance_monitoring_design.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/apm_performance_monitoring_design.md) | APM 性能监控与可观测性设计规范 |
-| [docs/repository_caching_strategy.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/repository_caching_strategy.md) | 数据源缓存与 Google 云端快照同步规范 |
-| [docs/error_codes_reference.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/error_codes_reference.md) | 错误码收敛与 Kotlin 原生 Result 统一异常处理模型 |
-| [docs/custom_lint_rules.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/custom_lint_rules.md) | 静态分析与 Lint 代码审查红线规范 |
-| [docs/push_and_widgets_specification.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/push_and_widgets_specification.md) | 桌面 Widget 与本地记账定时提醒通知规格 |
-| [docs/todo.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/todo.md) | 演进路线图与全阶段任务追踪清单 (100% Completed) |
+| [docs/project_development_guide.md](docs/project_development_guide.md) | 项目开发指南、工程规范与代码风格基线 |
+| [docs/google_auth_and_drive_sync_guide.md](docs/google_auth_and_drive_sync_guide.md) | Google 登录与 Google Drive 云端同步配置与开发全指南 |
+| [docs/api_reference.md](docs/api_reference.md) | 全模块 API、DAO、DataStore Flow、Google Auth 与 SDK 接口手册 |
+| [docs/architecture_decision_records.md](docs/architecture_decision_records.md) | 架构决策记录 (ADR-001 ~ ADR-009) 与技术选型权衡 |
+| [docs/apm_performance_monitoring_design.md](docs/apm_performance_monitoring_design.md) | APM 性能监控与可观测性设计规范 |
+| [docs/repository_caching_strategy.md](docs/repository_caching_strategy.md) | 数据源缓存与 Google 云端快照同步规范 |
+| [docs/error_codes_reference.md](docs/error_codes_reference.md) | 错误码收敛与 Kotlin 原生 Result 统一异常处理模型 |
+| [docs/custom_lint_rules.md](docs/custom_lint_rules.md) | 静态分析与 Lint 代码审查红线规范 |
+| [docs/push_and_widgets_specification.md](docs/push_and_widgets_specification.md) | 桌面 Widget 与本地记账定时提醒通知规格 |
+| [docs/todo.md](docs/todo.md) | 演进路线图与全阶段任务追踪清单 (100% Completed) |
 
 ---
 

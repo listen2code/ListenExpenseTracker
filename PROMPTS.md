@@ -1,7 +1,7 @@
 # ListenExpenseTracker - AI 协作提示词与工程规范 (Coding Standards & Constraints)
 
 > [!NOTE]
-> 架构设计、分层拓扑与核心设计模式详见系统架构设计文档：[ARCHITECTURE.md](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/ARCHITECTURE.md)。
+> 架构设计、分层拓扑与核心设计模式详见系统架构设计文档：[docs/architecture.md](docs/architecture.md)。
 
 ---
 

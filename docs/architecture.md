@@ -160,7 +160,7 @@ UI 组件严格遵循 `PROMPTS.md` 规范落地：
 1. **认证层 (`GoogleAuthManager`)**：基于 Android 官方最新的 `androidx.credentials.CredentialManager`，通过 Web Client ID 获得安全的 ID Token 与用户信息，账号状态经由 `DataStore` 安全持久化；
 2. **存储层 (`GoogleDriveService`)**：基于轻量级 HTTP 请求调用 Google Drive REST API v3，在用户个人 Google 云盘根目录下通过 `multipart/related` 自动维护加密备份文件 `lexpense_backup.json`；
 3. **动态提权机制**：拦截 `UserRecoverableAuthException` 并自动调起 Google 原生授权面板，获得用户明确同意后无缝执行多端云备份与快照恢复；
-4. **架构详述**：参见专属文档 [Google 登录与 Drive 同步全指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)。
+4. **架构详述**：参见专属文档 [Google 登录与 Drive 同步全指南](google_auth_and_drive_sync_guide.md)。
 
 ---
 

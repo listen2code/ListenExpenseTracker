@@ -41,7 +41,7 @@ graph LR
 - **二级缓存与降级策略**：
   1. 优先读取本地 Room SQLite / DataStore 数据库。
   2. 离线/无网络时使用本地快照兜底。
-  3. 联网且用户授权时触发 Google Drive REST API 增量同步（操作与配置详见 [Google 登录与 Drive 同步全指南](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/docs/google_auth_and_drive_sync_guide.md)）。
+  3. 联网且用户授权时触发 Google Drive REST API 增量同步（操作与配置详见 [Google 登录与 Drive 同步全指南](google_auth_and_drive_sync_guide.md)）。
 
 ---
 

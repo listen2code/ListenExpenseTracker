@@ -74,7 +74,7 @@ sequenceDiagram
 
 ### 2.1 客户端 ID 配置核心原则
 1. **代码中仅配置 1 个 Web 客户端 ID**：
-   - 在 [`GoogleAuthManager.kt`](file:///C:/Users/liste/Downloads/github/ListenExpenseTracker/app/src/main/java/com/listen/expensetracker/auth/GoogleAuthManager.kt) 中，`DEFAULT_WEB_CLIENT_ID` 必须配置为 **【Web 应用程序 (Web application)】** 类型的 OAuth 客户端 ID（用于获取 Audience / ID Token）。
+   - 在 [`GoogleAuthManager.kt`](../app/src/main/java/com/listen/expensetracker/auth/GoogleAuthManager.kt) 中，`DEFAULT_WEB_CLIENT_ID` 必须配置为 **【Web 应用程序 (Web application)】** 类型的 OAuth 客户端 ID（用于获取 Audience / ID Token）。
 2. **所有 Android 客户端 ID 仅需在 Google Cloud Console 中注册，代码中无需声明**：
    - 手机端底层的 Google Play Services 在调用登录时，会自动从手机系统层提取当前安装包的 `包名`（`com.listen.expensetracker`）和 `实际签名 SHA-1`，并在云端自动匹配放行。
 

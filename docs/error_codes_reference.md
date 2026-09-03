@@ -12,7 +12,7 @@
 
 ---
 
-## 2. 核心扩展方法实现 ([ResultExtensions.kt](file:///C:/Users/liste/Downloads/github/ListenArch/app/src/main/java/com/listen/arch/mvi/ResultExtensions.kt))
+## 2. 核心扩展方法实现 (`ResultExtensions.kt`)
 
 ```kotlin
 // 安全调用并捕获异常转为 Result<T>

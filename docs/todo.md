@@ -178,7 +178,11 @@
 
 ## 阶段八：高优先级功能规划与深度体验跃升 (Stage 8 Roadmap & Todo)
 
+> [!NOTE]
+> 阶段八核心功能详细设计与实现规范已沉淀至 `docs/` 目录下，可点击对应链接查阅完整架构方案。
+
 ### 1. 周期性固定收支与订阅管理 (Recurring Transactions & Subscriptions) - [P0, 核心高频记账]
+* **详细设计文档**：[recurring_transactions_and_subscriptions_design.md](recurring_transactions_and_subscriptions_design.md)
 - [ ] **周期性规则数据架构**
   - [ ] 定义 `RecurringRuleEntity`：支持周期类型（每日 / 每周 / 每月固定日 / 每年）、收支类型、分类、金额、账户、备注、自动记账开关及下次执行时间戳。
   - [ ] 实现 `RecurringRuleDao`：提供规则的增删改查及按状态过滤 Flow。
@@ -190,6 +194,7 @@
   - [ ] 汇总计算每月固定生活成本 Baseline（如“每月固定支出 ¥4,280，占月预算 42.8%”），直观管理房租、宽带、流媒体等服务订阅状态。
 
 ### 2. 桌面小部件体验 2.0 (App Widget 2.0 - 快速记账与预算看板) - [P0, 极速记账触达]
+* **详细设计文档**：[app_widget_2_0_design.md](app_widget_2_0_design.md)
 - [ ] **现代化 4x2 智能预算看板小部件**
   - [ ] 桌面即时展示：当月总支出、剩余预算额度、收支环形/线性进度条及三态健康度（正常 / 预警 / 超支）。
   - [ ] 数据联动：接入 `ListenExpenseAppWidgetProvider`，在流水发生任何变动时实时刷新小部件。
@@ -200,6 +205,7 @@
   - [ ] 支持 Android 12+ Material You 动态色彩提取与 App 内部自定义 AccentColor 统一着色，支持深浅色无缝切换。
 
 ### 3. 智能财务洞察与深度环比分析 (Smart Financial Insights & MoM) - [P1, 数据价值挖掘]
+* **详细设计文档**：[smart_financial_insights_design.md](smart_financial_insights_design.md)
 - [ ] **财务诊断与环比分析引擎**
   - [ ] 实现 `FinancialInsightEngine`：自动比对上月同期开销（月环比 MoM Analysis），如“本月餐饮相比上月同期增长 15.2%”。
   - [ ] 智能消费波峰诊断：自动识别当月单日开销最大峰值日及消费最密集时间段。
@@ -208,16 +214,8 @@
   - [ ] 统计页顶部轮播展示「财务洞察卡片 (Insight Cards)」。
   - [ ] 增设「年度 12 个月收支走势 (Annual Overview)」柱状走势图，支持横向查看全年收支结余健康曲线。
 
-### 4. 小票收据凭证附件与场景标签系统 (Receipt Attachments & Tags) - [P1, 场景化记账]
-- [ ] **小票与发票凭证图片附件**
-  - [ ] 扩展 `TransactionEntity` 增加 `attachmentPath: String?` 字段。
-  - [ ] 记账界面增设「上传凭证」按钮：调用系统拍照相机或相册选择器，图片安全复制并压缩至 App 私有文件目录。
-  - [ ] 流水明细支持微缩图预览与点击大图查看、手势缩放及保存。
-- [ ] **多场景标签归类系统 (#Tags)**
-  - [ ] 支持为账单添加一个或多个标签（如 `#出差报销`、`#日本旅行`、`#装修`、`#婚礼`）。
-  - [ ] 流水页搜索与多维筛选器全面支持按标签过滤，统计页支持按特定标签查看专项账本总开销。
-
-### 5. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全]
+### 4. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全]
+* **详细设计文档**：[biometric_security_and_privacy_design.md](biometric_security_and_privacy_design.md)
 - [ ] **生物识别指纹与面容安全锁**
   - [ ] 接入 AndroidX `BiometricPrompt`：在设置页提供「开启应用锁」开关。
   - [ ] 切换至后台超过设定时间（立即 / 1分钟 / 5分钟）后重新回到前台时，强制弹出指纹/面容解锁浮层。
@@ -225,16 +223,21 @@
   - [ ] 在多任务切换器（Recent Apps）中隐藏敏感金额截图（`FLAG_SECURE` 或毛玻璃虚化）。
   - [ ] 手势防窥：支持“摇一摇手机”或“双击结余区域”快速切换全局隐额模式。
 
-### 6. 分类预算系统深度演进 (Category Budget Enhancements) - [P2, 预算闭环]
-- [ ] **预算超支本地通知预警**
-  - [ ] 当某分类或总预算达到 80% 警戒线或 100% 超支时，后台触发通知栏即时预警提示。
-- [ ] **分类预算跨月结转 (Budget Rollover)**
-  - [ ] 支持可选开关“上月分类结余滚入下月”：上月未用完的分类预算自动累加至下月该分类可用额度中。
+### 5. 预算超支与警戒线本地通知预警 (Budget Overrun Alert System) - [P1, 预算闭环]
+* **详细设计文档**：[budget_overrun_notification_design.md](budget_overrun_notification_design.md)
+- [ ] **预算预警状态机与决策引擎**
+  - [ ] 实现 `BudgetAlertGuard`：检测单次记账后月度总预算或分类预算是否首次跨越 80% 或 100% 警戒线。
+  - [ ] 去重防骚扰（Dedup）：按 `月度:分类:状态` 维护已通知标记，当月同级别预警仅通知 1 次。
+- [ ] **系统通知通道与 DeepLink 穿透**
+  - [ ] 创建 `channel_budget_alerts` 高优先级通知渠道，适配 Android 13+ 通知运行时权限。
+  - [ ] 点击通知直达分类预算管理模态弹窗 (`CategoryBudgetModalDialog`)，即时调整预算或排查明细。
 
 ---
 
 ## 需求池 (Backlog - 探索性功能备选)
 
+- [ ] **小票收据凭证附件与多场景标签系统 (#Tags)**：支持拍照上传小票、压缩沙盒存储与跨分类专项账本标签聚合。
+- [ ] **分类预算跨月结转机制 (Budget Rollover)**：支持将上月分类未用完的结余自动滚入下月可用额度。
 - [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：提供全局可拖拽、吸边的半透明调试悬浮球，点击快速调出日志与慢查询控制台。
 - [ ] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
 - [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。
