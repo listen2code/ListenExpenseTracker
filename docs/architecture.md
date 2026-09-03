@@ -27,23 +27,40 @@ graph TD
 
 ## 2. 核心设计模式与架构实践
 
-### 2.1 泛型路由与状态提升 (`CommonRoute` Pattern)
+### 2.1 泛型路由与分离式状态代理 (`StateHolder` & `Delegate` Pattern)
 
-为了彻底消除为每个页面编写样板式 `XxxRoute` 的负担，采用泛型路由组件统一状态订阅与意图分发：
+为了彻底解耦 UI 渲染与状态管理逻辑，消除为每个页面编写样板式路由的负担，并在遵循 Google 官方指南的前提下提升复杂页面的可维护性，系统采用了泛型路由组件并演进至 **StateHolder** 与 **Delegate** 模式：
 
 ```kotlin
 @Composable
-inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I, *>> CommonRoute(
+inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I>> CommonRoute(
     viewModel: VM = viewModel(),
     crossinline content: @Composable (state: S, onIntent: (I) -> Unit) -> Unit
 ) {
+    // ... 生命周期绑定逻辑
     val state by viewModel.viewState.collectAsState()
     content(state, viewModel::handleIntent)
 }
+
+// 结合 StateHolder 与 Delegate 模式的页面解耦
+@Composable
+fun SettingsScreen(
+    stateHolder: SettingsStateHolder = rememberSettingsStateHolder(),
+    syncDelegate: SettingsSyncDelegate = koinInject()
+) {
+    val state by stateHolder.uiState.collectAsState()
+    // ...
+}
 ```
 
-- **`CommonRoute`**：统一负责从 ViewModel 订阅不可变 State，并将 `handleIntent` 方法引用传递给子组件；
-- **`FeatureScreen` (Stateless 纯视图)**：每个页面只需编写纯 Stateless Composable，只接收不可变 `State` 与 `onIntent: (Intent) -> Unit`，保证 100% 纯函数化，极大简化 UI 预览（`@Preview`）与单元测试。
+#### 设计思路与技术难点解决方案 (Design Rationale & Solutions)
+
+- **泛型路由 `CommonRoute`**：统一负责从 `BaseViewModel` 订阅不可变 State，并将 `handleIntent` 方法引用传递给子组件。通过 `LocalLifecycleOwner` 自动监听系统生命周期（`ON_RESUME`/`ON_PAUSE`）与跨 Tab 挂载/卸载事件，并统一转换为 `LifecycleEvent` 分发至 ViewModel，解决了手动管理生命周期回调带来的样板代码膨胀问题。
+- **UI 状态容器 (`StateHolder`)**：例如 `SettingsStateHolder.kt`。
+  - **设计亮点**：分离业务逻辑与 UI 框架状态。ViewModel 仅管理纯数据结构（如语言、主题），而 StateHolder 负责持有与 Compose 树强绑定的系统级契约（如 `ActivityResultLauncher` 处理文件导入/导出）、动画状态和列表滚动位置 (`LazyListState`)。
+  - **技术难点**：在屏幕旋转或折叠屏折叠时，滚动位置极易丢失。通过在 StateHolder 中使用 `rememberSaveable` 结合 `Saver` 保存状态快照，完美解决了此问题。
+- **业务委托代理 (`Delegate`)**：例如 `SettingsSyncDelegate.kt`。通过依赖注入，专门负责特定子领域的复杂异步逻辑（如云同步、大数据量生成），保持 ViewModel 的纯粹性，避免单个 ViewModel 退化为“上帝类 (God Object)”。
+- **无状态视图 (`FeatureScreen`)**：每个页面只需编写纯 Stateless Composable，极大简化了 UI 预览（`@Preview`）与单元级测试。
 
 ---
 
@@ -115,6 +132,17 @@ UI 组件严格遵循 `PROMPTS.md` 规范落地：
 - **参数签名规范 (Rule 13)**：所有独立 Composable 组件首个可选参数统一为 `modifier: Modifier = Modifier`。
 - **高危操作标准 (Rule 15)**：删除类二次确认统一采用 `CommonButtonStyle.Danger` 红色危险确认按钮。
 - **零硬编码 (Rule 5)**：所有展示文案通过 `AppStrings` + `StringsRes.get()` / `ExpenseStrings` 动态解析。
+
+---
+
+### 2.6 统一记账弹窗与状态提升 (Unified Transaction Sheet)
+
+系统中记账最核心的入口采用了统一的 `TransactionSheet` 架构设计。
+- **设计亮点**：将“新增 (Add)”与“编辑 (Edit)”逻辑合并入同一个组件中，通过可选的 `transaction: TransactionEntity?` 参数区分。显著减少了代码重复（DRY 原则）。
+- **技术难点与解决方案**：
+  - **状态重置异常**：在不同账单之间快速点击编辑时，弹窗可能会残留上一个账单的数据。通过 `remember(transaction)` / `remember(initialTimestamp)` 巧妙触发局部状态重组，确保数据精准初始化。
+  - **收支分类动态过滤**：利用 `remember(type, categoryVersion)` 实现收支类型切换或新增分类时的列表实时过滤，避免了复杂的回调传参。
+- **状态提升 (State Hoisting)**：弹窗内部所有的输入字段（金额、备注、类型、分类等）均为本地 `mutableStateOf` 状态，只在用户点击“完成”时才打包为完整的 `TransactionEntity` 通过回调向上传递，使外部父组件彻底屏蔽了零碎的输入过程。
 
 ---
 

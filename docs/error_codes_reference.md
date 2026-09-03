@@ -17,7 +17,7 @@
 ```kotlin
 // 安全调用并捕获异常转为 Result<T>
 inline fun <T> safeCall(block: () -> T): Result<T> {
-    return runCatching { block() }
+    return runCatching(block)
 }
 
 // 将 Flow<T> 转换为 Flow<Result<T>>

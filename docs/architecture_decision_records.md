@@ -225,3 +225,52 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
    - 解决 `LazyColumn` 上下滑动时子项回收挂载导致重复触发 `snapTo(0f)` 动画的问题。
    - 所有图表引入 `dataSignature = remember(data) { data.hashCode().toString() }` 配合 `rememberSaveable { mutableStateOf("") }`。
    - 组件挂载时若已播放过相同签名的动画，直接以满格值初始渲染，仅当 `dataSignature` 发生实质性变更时才触发重置与播放。不仅消除了上下滚动时的重复动画干扰，更保证了真实数据刷新时动效的准时触发。
+
+---
+
+## ADR-017: 引入 StateHolder 模式管理 UI 框架状态
+
+### 背景 (Context)
+随着页面复杂度增加，直接在 Composable 函数内部维护大量的 `remember` 状态（如系统文件选择器 `ActivityResultLauncher`、滚动位置 `LazyListState`）和副作用生命周期，导致 UI 代码急剧膨胀，与纯粹的布局逻辑混杂，违背了单一职责原则。
+
+### 决策 (Decision)
+1. 全面引入 **StateHolder (UI 状态容器)** 模式，将页面级的非业务状态提升至独立的 `XxxStateHolder.kt` 中。
+2. 明确职责边界：`ViewModel` 仅负责业务领域与偏好数据的流转；`StateHolder` 专职负责持有与 Compose 生命周期绑定的框架级对象和事件。
+3. 采用 `rememberSaveable` 结合 `Saver` 在 StateHolder 内部保护关键滚动状态等，防止配置变更（如屏幕旋转）导致的丢失。
+
+---
+
+## ADR-018: 统一合并新增与编辑弹窗 (Unified Transaction Sheet)
+
+### 背景 (Context)
+早期设计中“记一笔 (Add)”与“编辑账单 (Edit)”分别为两个独立的 BottomSheet 组件，导致键盘、日期选择、分类选择等大量核心交互逻辑冗余。每次调整输入体验时都需要同步修改两处，极易出现不一致的 Bug。
+
+### 决策 (Decision)
+1. 废弃分离设计，重构为单一的 `TransactionSheet.kt` 核心组件。
+2. 通过引入 `transaction: TransactionEntity? = null` 参数，内部依据是否为空自动在新增/编辑两种模式间无缝切换。
+3. 严格遵循**状态提升 (State Hoisting)** 原则，Sheet 内部维护所有临时输入状态（避免 ViewModel 频繁介入未完成的输入过程），仅在用户最终点击“完成/保存”时，才将组装好的数据通过 Lambda 向上层业务层抛出。
+
+---
+
+## ADR-019: 分类维度精细化预算系统 (Category-based Budget)
+
+### 背景 (Context)
+初始版本仅支持“全局月度预算”，无法满足用户对不同领域（如餐饮、购物、娱乐）差异化管控的诉求，缺乏直观的超支预警机制。
+
+### 决策 (Decision)
+1. 设计并引入独立弹窗系统 `CategoryBudgetCenterDialog` 及底层计算逻辑。
+2. 不直接在数据库保存每月的绝对值预算额，而是建立“动态分类占比权重 (Category Ratio)”，结合全局月度预算动态换算各类别的额度，降低用户跨月设置的维护成本。
+3. 提供直观的平滑动效进度条指示各类别的预算使用情况。
+
+---
+
+## ADR-020: 统一生命周期事件分发代理 (LifecycleEvent Integration)
+
+### 背景 (Context)
+在 Compose MVI 架构中，某些业务（如云同步状态的检查、本地数据的及时拉取）需要精确获知页面的前后台切换状态。然而，在各个业务 Composable 中手动监听 `LocalLifecycleOwner` 导致大量样板代码。
+
+### 决策 (Decision)
+1. 在 `CommonRoute` 泛型组件中，集中捕获 `ON_RESUME` 和 `ON_PAUSE` 等系统级事件。
+2. 将这些系统事件统一定义为 `LifecycleEvent`（`ON_APPEAR` / `ON_DISAPPEAR`），并通过 `BaseViewModel.dispatchLifecycleEvent` 分发入 ViewModel 状态机。
+3. 各个业务 ViewModel 仅需按需重写 `toLifecycleIntent(event)` 即可，零成本获取生命周期感知能力，同时保持了核心业务流处理与 Compose 框架层的严格解耦。
+

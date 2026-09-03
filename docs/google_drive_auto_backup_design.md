@@ -61,9 +61,18 @@ flowchart TD
 - **网络约束（Wi-Fi Only Guard）**：
   - 支持用户开启「仅在 Wi-Fi 下自动备份」选项。在蜂窝数据网络下自动推迟备份，连上 Wi-Fi 后自动补发。
 
-### 3.3 存储与权限隔离
+### 3.3 技术实现难点与亮点 (Implementation Highlights)
+1. **轻量级协程防抖 (Coroutine-based Debounce)**：
+   在 `GoogleDriveAutoBackupManager` 中，利用全局 `CoroutineScope(SupervisorJob() + Dispatchers.IO)` 管理异步任务。通过 `pendingDebounceJob?.cancel()` 结合 `delay(5000L)`，极为优雅地实现了防抖逻辑，避免了短时间内高频修改引发的网络洪峰。
+2. **基于 SHA-256 的强一致性脏数据检查**：
+   在序列化数据库全量 JSON 之后，采用 `MessageDigest` 计算 SHA-256 摘要（Hash），并与 DataStore 中的 `lastBackupHash` 比对。这确保了只要数据内容（含字符级别的细微变动）一致就不上传，极大节省了网络流量和云端存储配额。
+3. **精准的网络状态探测**：
+   通过 Android 现代的 `ConnectivityManager` 和 `NetworkCapabilities`，精确探测当前活动网络是否包含 `TRANSPORT_WIFI`，杜绝了由于传统 `NetworkInfo` 废弃导致的判断不准确问题。
+
+### 3.4 存储与权限隔离
 - **权限最小化**：仅申请 `https://www.googleapis.com/auth/drive.file` Scope。
 - **文件命名与隔离**：在 Google Drive 根目录下创建并覆盖 `lexpense_backup.json`，不会窥探或干扰用户的其他任何个人云端文件。
+
 
 ---
 

@@ -29,10 +29,12 @@ graph LR
 ```
 
 ### 2.1 表现层规范 (Presentation Layer)
-- **ViewModel 规范**：继承自 `ListenArch` 提供的 `BaseViewModel<ViewState, UserIntent, ViewEffect>`。
-- **状态收口**：全局 UI 状态必须通过不可变的 `StateFlow<ViewState>` 驱动，页面重绘完全依赖 ViewModel 的 `ViewState` 状态快照。
-- **单次事件 (Side Effects)**：页面导航、Toast 提示、弹窗触发等单次动作必须通过 `SharedFlow<ViewEffect>` 发送，防止配置变更（如屏幕旋转）导致的重复触发。
-- **组件粒度控制**：Compose View 层代码需保持短小精悍，复杂或可复用的子 UI 模块必须按单一职责抽取至组件文件（如 `ui/components/`）。
+- **ViewModel 规范**：继承自 `ListenArch` 提供的 `BaseViewModel<State, Intent>`。单次副作用 (Effect) 已在基类层面被统一固化为泛型无关的 `CommonUiEffect`。
+- **状态收口**：全局 UI 状态必须通过不可变的 `StateFlow<State>` 驱动，页面重绘完全依赖 ViewModel 的 `ViewState` 状态快照。
+- **单次事件 (Side Effects)**：页面导航、Toast 提示、弹窗触发等单次动作必须通过基类方法 `emitEffect(CommonUiEffect)` 发送，防止配置变更（如屏幕旋转）导致的重复触发。
+- **生命周期感知**：通过重写 `toLifecycleIntent(event: LifecycleEvent)` 接入生命周期回调，无需在 UI 层写样板式的生命周期观察代码。
+- **状态分离与容器**：复杂页面需引入 `StateHolder` 模式（例如 `SettingsStateHolder`）管理框架级事件契约与 UI 动画/滚动状态，严禁将此类状态与业务逻辑混杂在 ViewModel 中。
+- **组件粒度控制**：Compose View 层代码需保持短小精悍，单个文件行数必须控制在 **200 ~ 250 行** 以内。复杂或可复用的子 UI 模块必须按单一职责抽取至组件文件（如 `features/**/components/`）。
 
 ### 2.2 数据与网络层规范 (Data & Network Layer)
 - **错误收敛**：所有数据源操作（Room 读写、Google Drive REST API 请求）统一使用 Kotlin 官方原生的 `Result<T>`（结合 `safeCall {}` 或 `Flow.asResult()`）封装，严禁在 UI 层直接抛出未捕获的 Exception。

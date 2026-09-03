@@ -60,6 +60,21 @@ TraceManager.trace(
 
 ---
 
-## 5. 日志导出与系统分享
+## 5. 技术难点与解决方案 (Technical Challenges & Implementation Details)
 
-在 [LogInspectorSheet.kt](file:///C:/Users/liste/Downloads/github/ListenUiComponent/app/src/main/java/com/listen/uicomponent/apm/LogInspectorSheet.kt) 中提供 **“导出 / 分享”** 功能，通过 Android 原生 `Intent.ACTION_SEND` 将格式化的纯文本日志一键导出到邮件、微信或剪贴板，极大简化远程排查。
+### 5.1 并发安全的环形缓冲区 (Concurrency-Safe Ring Buffer)
+在多线程或协程中并发写入日志时，常规的 `ArrayList` 极易抛出 `ConcurrentModificationException`。
+**解决方案**：在 `ApmLogger.kt` 中，日志存储采用 `CopyOnWriteArrayList<ApmLogEntry>`。当缓冲区达到 `MAX_LOG_SIZE`（500 条）时，移除首部元素以维持环形队列的性质。通过每次修改时直接更新底层数组，实现了高并发下的线程安全写入。
+
+### 5.2 响应式流数据驱动与无缝 UI 渲染 (StateFlow Driven UI)
+日志的实时渲染需要保证 UI 层始终展示最新的数据而不会产生不必要的重组或阻塞主线程。
+**解决方案**：在 `ApmLogger` 中对外暴露 `logsFlow: StateFlow<List<ApmLogEntry>>`。每次缓冲池更新后，通过 `_logsFlow.value = buffer.toList()` 分发不可变的列表切片。UI 层通过 `collectAsState()` 直接观察流的变化。
+
+### 5.3 Inspector 国际化支持 (Internationalization)
+`LogInspectorSheet` 支持中英日多语言 (en, ja, zh)，可动态根据用户的应用内语言或系统语言展示对应的文案（如 "APM 性能与日志" / "APM Logs & Observability"），并内置了按频道过滤、关键字搜索的功能，所有这些逻辑均下沉至通用 UI 组件层，保证各宿主 App 的表现一致性。
+
+---
+
+## 6. 日志导出与系统分享
+
+在 `LogInspectorSheet.kt` 中提供 **“导出 / 分享”** 与 **“清空 (Clear)”** 功能，通过 Android 原生 `Intent.ACTION_SEND` 将格式化的纯文本日志一键导出到邮件、微信或剪贴板，极大简化远程排查。

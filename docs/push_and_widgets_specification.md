@@ -6,13 +6,13 @@
 
 ## 1. 桌面小组件 (AppWidget) — 已实现 ✅
 
-### 1.1 今日结余与快捷记账组件 (4x2 / 2x2)
+### 1.1 今日结余与快捷记账组件
 * **核心内容**：
-  * 显示今日支出总额与当月结余进度。
-  * 包含快捷入口按钮：`[+ 记一笔]`、`[扫码记账]`。
+  * 仅显示今日支出总额（实时从数据库拉取今日的 Expense 加总）。
+  * 包含快捷入口按钮（拉起 `MainActivity`）。
 * **技术方案**：
-  * 使用传统 Android `AppWidgetProvider` + `RemoteViews` 实现。
-  * 通过 `ListenExpenseAppWidgetProvider.updateAllWidgets(...)` 在账单数据变更时（如新增/删除交易）自动刷新 Widget 显示内容。
+  * 使用传统 Android `AppWidgetProvider` + `RemoteViews` 实现（对应 `ListenExpenseAppWidgetProvider`）。
+  * 每次账单数据变更后，通过 `updateFromTransactions(...)` 过滤 `todayStart` 之后的开销，重新渲染 Widget 内容。
 
 ---
 
@@ -26,4 +26,4 @@
 * **防骚扰策略**：
   * 若用户今日已有记账记录（`count(todayTransactions) > 0`），则自动静默跳过提醒。
   * 若今日无记录，弹出通知：*"今天还没有记账哦，点击快速记录今天的花销吧~"*。
-* **点击行为**：点击通知直接拉起 `MainActivity` 并自动弹出 `AddTransactionSheet`。
+* **点击行为**：点击通知直接拉起 `MainActivity` 并自动弹出 `TransactionSheet`。

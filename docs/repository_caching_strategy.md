@@ -28,10 +28,11 @@ graph TD
 
 ## 3. 缓存与数据流控策略
 
-### 3.1 单一事实来源 (Single Source of Truth)
-- 本地 Room 数据库是整个 App 的 **唯一数据事实来源**。
-- ViewModel 只观察 DAO 暴露的响应式 `Flow<List<TransactionEntity>>`。
-- 新增账单通过 `dao.insertTransaction(...)` 写入数据库，Room 自动派发最新的数据列表触发 UI 重绘。
+### 3.1 单一事实来源与混合缓存架构 (Hybrid Caching Architecture)
+- **大盘业务数据 (Room-First)**：本地 Room 数据库是交易流水等大盘数据的 **唯一数据事实来源**。
+  - ViewModel 只观察 `TransactionDao` 暴露的响应式 `Flow<List<TransactionEntity>>`。
+  - 新增账单通过 `dao.insertTransaction(...)` 写入数据库，Room 自动派发最新的数据列表触发 UI 重绘。
+- **轻量级配置数据 (In-Memory + Serialization)**：如账户类型 (`AccountRepository`) 等，采用内存级可变列表（`customAccounts`）进行一级缓存以达到绝对的零延迟，底层通过 `serializeCustomAccounts()` 序列化为 JSON 字符串持久化到 DataStore，修改时触发回调更新 UI。
 
 ### 3.2 离线测试与数据运维
 - **一键填充测试数据 (`seedDemoData`)**：支持快速向本地数据库注入涵盖多类目、多账户的典型记账明细。

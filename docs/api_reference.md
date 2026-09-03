@@ -6,16 +6,20 @@
 
 ## 1. `ListenArch` 核心接口与模块
 
-### 1.1 `BaseViewModel<State, Intent, Effect>`
+### 1.1 `BaseViewModel<State, Intent>`
 * **包名**：`com.listen.arch.mvi`
 * **职责**：MVI 模式抽象基类，规范单向数据流。
 * **方法**：
   * `val viewState: StateFlow<State>`：只读 UI 状态流。
-  * `val viewEffect: SharedFlow<Effect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
+  * `val viewEffect: SharedFlow<CommonUiEffect>`：只读单次副作用事件流（Toast、页面跳转、撤销 Snackbar）。
   * `fun handleIntent(intent: Intent)`：接收并处理外部意图。
   * `protected fun updateState(reducer: State.() -> State)`：原子更新状态。
-  * `protected fun emitEffect(effect: Effect)`：发射单次事件（内部通过 `viewModelScope.launch` 异步发射）。
-  * `protected fun emitEffect(builder: () -> Effect)`：通过构建器 Lambda 发射单次事件。
+  * `protected fun emitEffect(effect: CommonUiEffect)`：发射单次事件（内部通过 `viewModelScope.launch` 异步发射）。
+  * `protected fun emitEffect(builder: () -> CommonUiEffect)`：通过构建器 Lambda 发射单次事件。
+  * `protected open fun toLifecycleIntent(event: LifecycleEvent): Intent?`：生命周期事件转换为 Intent 的映射。
+  * `fun dispatchLifecycleEvent(event: LifecycleEvent)`：分发并处理生命周期事件。
+  * `open fun toLifecycleIntent(event: LifecycleEvent): Intent?`：将生命周期事件映射为业务 Intent，默认返回 null。
+  * `fun dispatchLifecycleEvent(event: LifecycleEvent)`：由顶层路由统一调用，自动分发生命周期 Intent。
 
 ### 1.2 `TransactionDao` (Room DAO)
 * **包名**：`com.listen.expensetracker.data.db`
@@ -144,6 +148,8 @@
   * `suspend fun clearCredentials(context: Context)`：清除所有凭据状态并登出用户。
 
 ### 3.5 业务特化 UI 组件 (`features/**/components/`)
+* **`TransactionSheet`** (`features.transactions.components`)：统一记账弹窗。核心入参：`transaction: TransactionEntity?` (为空则为新增，非空则为编辑模式)。内部实现了**状态提升**，输入过程本地化，点击完成时才抛出组装好的实体数据。
+* **`CategoryBudgetCenterDialog`** (`features.budget.components`)：分类预算管理中心看板与设置弹窗。通过动态计算 `categoryRatios` 与全局预算额度，分配各个类别的花销限制。
 * **`AccountCardItem`** (`features.transactions.components`)：单个账户行卡片，含视觉图标、内置/自定义胶囊徽标、编辑与删除按钮。
 * **`AccountEditDialog`** (`features.transactions.components`)：输入与编辑账户名称对话框。
 * **`AccountDeleteConfirmDialog`** (`features.transactions.components`)：账户删除确认对话框，使用 `CommonButtonStyle.Danger` 红色危险确认按钮。
@@ -153,3 +159,12 @@
 * **`RankingCategoryItem`** (`features.statistics.components`)：现代分类排行榜行项，含领奖台名次勋章、图标光晕气泡、百分比胶囊与全宽平滑补间进度条。
 * **`SettingsVersionFooter`** (`features.settings.components`)：设置页底部版本号展示与连击进入开发者模式触发器。
 * **`AboutAppDialog`** (`features.settings.components`)：关于应用信息对话框，含 Dedicated App Icon 与技术栈展示。
+
+### 3.6 状态容器与业务代理 (StateHolder & Delegate)
+* **`SettingsStateHolder`** (`features.settings.ui`)：设置页系统状态容器。
+  * **职责**：持有 `LazyListState` 保护滚动位置；封装 `exportJsonLauncher` 与 `importJsonLauncher` 系统文件选择器契约回调；绑定 Effect 监听。
+  * **API**：`rememberSettingsStateHolder(...)`
+* **`SettingsSyncDelegate`** (`features.settings.viewmodel`)：设置页数据同步业务代理。
+  * **职责**：将繁重的云端全量数据备份、快照恢复、JSON 导出/导入等耗时协程逻辑抽离出 ViewModel，保障 ViewModel 代码的纯粹度。
+  * **技术实现**：内部注入 `CloudSyncManager` 与 `TransactionDao`，返回 Kotlin `Result<T>` 供 ViewModel 安全解析并抛出反馈 Toast。
+

@@ -26,7 +26,7 @@
   - [x] `BaseDataStoreManager` 语言 (zh/en/ja)、主题模式 (Light/Dark/System)、AccentColor、多币种符号 (￥/$/€/£/円)、月度预算持久化 Flow
   - [x] Google 账户登录状态、邮箱、用户名与头像 URL 持久化 Flow
 - [x] **MVI 架构基类与错误收敛实装 (ListenArch)**
-  - [x] `BaseViewModel<State, Intent, Effect>` 核心基类 (`handleIntent`, `updateState`, `emitEffect`)
+  - [x] `BaseViewModel<State, Intent>` 核心基类 (`handleIntent`, `updateState`, `emitEffect`)，Effect 统一固化为 `CommonUiEffect`
   - [x] `ResultExtensions.kt` Kotlin 原生 `Result<T>` 函数式异常处理模型
   - [x] `LocaleManager` 多语言调度器与 `StringsRes` 字典系统
 - [x] **通用 UI 组件与设计系统实装 (ListenUiComponent)**
@@ -84,7 +84,7 @@
   - [x] `ApmLogger` 500 条环形内存日志管理器（APP / DB / SYNC / CRASH）
   - [x] `TraceManager` 全链路毫秒耗时打点
   - [x] `CrashHandler` 全局未捕获异常保护
-- [x] **16 套自动化单元测试全矩阵 (100% Pass，覆盖率超 60%)**
+- [x] **21 套自动化单元测试全矩阵 (100% Pass，ListenExpenseTracker 模块全覆盖)**
   - [x] `ApmLoggerTest`
   - [x] `TraceManagerTest`
   - [x] `CloudSyncManagerTest`
@@ -143,6 +143,8 @@
 
 ---
 
+## 阶段六：异步更新机制与版本调度 (Stage 6 - 100% Completed)
+
 - [x] **异步检查版本更新与更新引导 (In-App Version Checker)**
   - [x] 实现 `UpdateCheckerService`：异步请求静态配置 (`https://listen2code.github.io/ListenExpenseTracker/pages/version.json`)，毫秒级响应、免鉴权且无 API 频控限制。
   - [x] 语义化版本比对（SemVer）与构建号（BuildNumber）双重比对：识别新版本并完成单元测试覆盖 (`UpdateCheckerServiceTest`)。
@@ -150,37 +152,90 @@
 
 ---
 
-## 阶段六：图表交互穿透、双向联动与手势体验精细化 (Stage 6 - 100% Completed)
+## 阶段七：严格分类预算管理与全功能交互体验升级 (Stage 7 - 100% Completed)
 
-- [x] **统计与流水跨页双向穿透与下钻 (Cross-Screen Drill-Down & Navigation)**
-  - [x] 支出/收入分类排行榜点击穿透：轻触排行榜条目直接跳转至流水页，自动同步当前统计月份并筛选该分类流水。
-  - [x] 跨月份状态同步：解决统计页切月后跳转至流水页月份不一致问题，通过 `ExpenseAppState` 实现全 App 月份全局联动。
-- [x] **环形图与分段进度条双向高亮联动 (Two-Way Highlight & Tooltip Sync)**
-  - [x] 点击 `DonutChart` 扇区：计算圆弧中心坐标弹出 `DonutChartTooltip` 悬浮框，并同步高亮 `SegmentedProgressBar` 对应分段，其他分段平滑淡化（`animateColorAsState`）。
-  - [x] 点击 `SegmentedProgressBar` 分段：反向高亮 `DonutChart` 对应区块并触发扇区悬浮框展示，再次点击支持 Toggle 取消聚焦。
-- [x] **曲线图长按拖拽指示与流水日期自动滚动聚焦 (LineChart Scrubbing & Auto-Scroll)**
-  - [x] 手势优化：改用 `detectDragGesturesAfterLongPress`，确保用户上下滑动统计页面时零触控拦截，仅在长按曲线时激活手势指示。
-  - [x] 实时指示与悬浮气泡：长按并横向拖拽时动态呈现竖直虚线（Dashed Line）、高亮光晕点与 `LineChartTooltip` 气泡框，展示具体日期与金额。
-  - [x] 气泡框穿透跳转：轻触折线气泡框直达流水页，并自动平滑滚动（`animateScrollToItem`）精准对齐到对应日期列表分组。
-- [x] **X 轴时间刻度像素级精准对齐与高密度展示 (X-Axis Pixel Alignment)**
-  - [x] 解决虚线与日期偏差（如 17 vs 16）：使用自定义 Compose `Layout` 将每个日期标签的中心强制对准 Canvas 的 `x = (index / (N-1)) * width`，实现 100% 像素级吻合。
-  - [x] 字体缩小（8.5sp）并提升采样密度（每 2 天 1 刻度，单月呈现多达 16 个刻度），在无重叠前提下最大化展现时间轴。
-- [x] **微胶囊徽章（Pill Badge）统一设计语言与极值联动**
-  - [x] 曲线图右上角与指标卡片：统一消除生硬小箭头，采用 `RoundedCornerShape(12.dp)` + `0.09f` 微透光强调色的精致微胶囊徽章设计，天然暗示可点击性。
-  - [x] 极值双层联动：轻触曲线右上角峰值胶囊，图表直接自动锁定当月峰值点；轻触指标卡片单笔最大支出胶囊，直达流水页并平滑滚动停靠在对应单笔交易处。
+- [x] **分类预算核心体系与健康度模型 (Category Budget Architecture)**
+  - [x] 核心模型：定义 `BudgetHealthStatus`（正常 `<80%`、预警 `80%~100%`、超支 `≥100%`）、`CategoryBudgetConfig` 与 `CategoryBudgetStatus`。
+  - [x] 核算引擎：实现 `CategoryBudgetEngine.calculate()`，精准计算各分类月度支出、预算额、剩余/超支额及健康度，优先将超支与预警分类置顶排序。
+  - [x] 数据持久化：扩展 DataStore `KEY_CATEGORY_BUDGETS`，支持分类比率的逗号分隔字符串序列化/反序列化与实时观察更新。
+- [x] **分类预算管理中心与统一模态宿主 (CategoryBudgetModalDialog)**
+  - [x] 单一宿主零闪烁：消除双 `AlertDialog` 切换导致的窗口销毁与蒙层闪烁，常驻同一 Dialog 窗口。
+  - [x] 440dp 恒定高度锁定：外层容器绝对锁定 440dp 高度，分类列表采用 `weight(1f)` 自适应填充，彻底消灭页面切换时的高度拉伸与跳动感。
+  - [x] 平滑推移与交叉淡入淡出动效：`AnimatedContent` 配合 `slideInHorizontally + fadeIn` 驱动看板与编辑模式平滑过渡。
+  - [x] `HorizontalPager` 水平左右滑动手势切月：基于 `PAGER_BASE_INDEX` 接入 1:1 跟手滑动切月体验，双向无限滑动，联动顶部胶囊与平滑动画。
+  - [x] 活跃月份记忆保持：在编辑比例与看板之间切换时，保持当前浏览的月份不变。
+  - [x] 纯整数分区均分算法 (Integer Partitioning)：「均分剩余」采用基础商与余数分配，数学保证分配总额严格恒等于 100%，彻底消除 2%~3% 浮点舍入漂移。
+- [x] **记账与分类管理交互细节修复**
+  - [x] 修复 `CategoryManageDialog` 添加自定义新分类时未即时刷新列表问题（补全 `refreshKey++` 触发重组）。
+  - [x] 修复连续点击“继续”添加账单时时间戳未递增导致的逆序倒挂问题（当天记账实时取值、历史记账自动递增 1 秒、Room DAO 引入 `rowid DESC` 次级排序加固）。
+  - [x] 修复 `CommonEditText` 在带标签时单行高度过小导致金额数字底部被裁剪遮挡问题（`heightIn(min = 64.dp)`）。
+  - [x] 移除看板中多余的「分类预算明细」标题，将三态健康徽章直接内嵌至总览卡片底部，界面通透干练。
+- [x] **多维复合过滤器与复杂业务查询 (Compound Filter Engine)**
+  - [x] 引擎侧扩展 `TransactionCalculationEngine` 支持收支类型 (`typeFilter`)、自定义金额区间 (`amountPreset`)、多分类交叉选择 (`selectedCategories`) 等多维度 AND 逻辑组合筛选。
+  - [x] UI 侧落地 `TransactionFilterBottomSheet`，在抽屉内可视化呈现金额预设（如 `<50`、`50-500`）、分类 Tag 墙以及排序偏好，实时响应状态重组并高亮 Active Filter Chip。
 
 ---
 
-## 需求池 (Backlog - 待办任务清单)
+## 阶段八：高优先级功能规划与深度体验跃升 (Stage 8 Roadmap & Todo)
 
-- [ ] **1. 账单全文搜索与多维复合筛选 (Transaction Search & Multi-filter)**
-  - 支持在流水页顶部提供实时搜索栏，按分类名、备注文本模糊搜索。
-  - 支持快捷金额区间筛选（如大额支出 > ¥500）与自定义日期区间筛选。
-- [ ] **2. 月度预算超支预警与动态告警 (Budget Overrun Alert System)**
-  - 支出达到 80% 警戒线时，进度条渐变呈现琥珀色预警。
-  - 超出 100% 预算时，主页展示高醒目红色告警横幅，展示超支金额，并可触发本地预警推送通知。
-- [ ] **3. APM 日志全局悬浮窗 (Log Overlay Inspector)**
-  - 提供全局可拖拽、吸边的半透明调试悬浮球。
-  - 点击悬浮球在任意画面快速滑出调试控制台，实时查看日志流、Room 慢查询与崩溃排查。
-- [ ] **4. 架构设计全景可视化面板 (Architecture Visualizer)**
-  - 在设置页/开发者面板以现代化图形拓扑展示当前系统的分层架构（MVI 响应式流、Clean Architecture、Room 本地持久化、Google Drive 云端同步、ListenArch 与 ListenUiComponent 双基座解耦设计）。
+### 1. 周期性固定收支与订阅管理 (Recurring Transactions & Subscriptions) - [P0, 核心高频记账]
+- [ ] **周期性规则数据架构**
+  - [ ] 定义 `RecurringRuleEntity`：支持周期类型（每日 / 每周 / 每月固定日 / 每年）、收支类型、分类、金额、账户、备注、自动记账开关及下次执行时间戳。
+  - [ ] 实现 `RecurringRuleDao`：提供规则的增删改查及按状态过滤 Flow。
+- [ ] **后台触发与自动记账调度**
+  - [ ] 接入 AndroidX `WorkManager` 定时守护任务或应用冷启动检查：在到达指定日期时，根据开关自动向 `TransactionDao` 写入流水记录。
+  - [ ] 支持到期发送系统本地通知提醒确认，用户可在通知栏一键点击「已扣款，立即记入」或「跳过本次」。
+- [ ] **订阅管理与固定成本看板 UI**
+  - [ ] 在流水或设置页增设「周期账单 / 订阅中心」入口。
+  - [ ] 汇总计算每月固定生活成本 Baseline（如“每月固定支出 ¥4,280，占月预算 42.8%”），直观管理房租、宽带、流媒体等服务订阅状态。
+
+### 2. 桌面小部件体验 2.0 (App Widget 2.0 - 快速记账与预算看板) - [P0, 极速记账触达]
+- [ ] **现代化 4x2 智能预算看板小部件**
+  - [ ] 桌面即时展示：当月总支出、剩余预算额度、收支环形/线性进度条及三态健康度（正常 / 预警 / 超支）。
+  - [ ] 数据联动：接入 `ListenExpenseAppWidgetProvider`，在流水发生任何变动时实时刷新小部件。
+- [ ] **闪电分类直达快捷记账**
+  - [ ] 小部件内置 4 个高频快捷分类按钮（🍔 餐饮、🚗 交通、🛍️ 购物、📦 杂项）。
+  - [ ] 轻触图标通过 DeepLink / Intent 零延迟直达 App 并直接拉起记账弹窗，预选对应分类与账户，实现 2 秒内闪电记账。
+- [ ] **动态主题适配**
+  - [ ] 支持 Android 12+ Material You 动态色彩提取与 App 内部自定义 AccentColor 统一着色，支持深浅色无缝切换。
+
+### 3. 智能财务洞察与深度环比分析 (Smart Financial Insights & MoM) - [P1, 数据价值挖掘]
+- [ ] **财务诊断与环比分析引擎**
+  - [ ] 实现 `FinancialInsightEngine`：自动比对上月同期开销（月环比 MoM Analysis），如“本月餐饮相比上月同期增长 15.2%”。
+  - [ ] 智能消费波峰诊断：自动识别当月单日开销最大峰值日及消费最密集时间段。
+  - [ ] 预算消耗速率预测：根据当前日历进度计算每日平均开销斜率，生成预测预警（如“按照当前消耗速度，预计将于 9月21日 耗尽预算”）。
+- [ ] **统计页高阶视图增强**
+  - [ ] 统计页顶部轮播展示「财务洞察卡片 (Insight Cards)」。
+  - [ ] 增设「年度 12 个月收支走势 (Annual Overview)」柱状走势图，支持横向查看全年收支结余健康曲线。
+
+### 4. 小票收据凭证附件与场景标签系统 (Receipt Attachments & Tags) - [P1, 场景化记账]
+- [ ] **小票与发票凭证图片附件**
+  - [ ] 扩展 `TransactionEntity` 增加 `attachmentPath: String?` 字段。
+  - [ ] 记账界面增设「上传凭证」按钮：调用系统拍照相机或相册选择器，图片安全复制并压缩至 App 私有文件目录。
+  - [ ] 流水明细支持微缩图预览与点击大图查看、手势缩放及保存。
+- [ ] **多场景标签归类系统 (#Tags)**
+  - [ ] 支持为账单添加一个或多个标签（如 `#出差报销`、`#日本旅行`、`#装修`、`#婚礼`）。
+  - [ ] 流水页搜索与多维筛选器全面支持按标签过滤，统计页支持按特定标签查看专项账本总开销。
+
+### 5. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全]
+- [ ] **生物识别指纹与面容安全锁**
+  - [ ] 接入 AndroidX `BiometricPrompt`：在设置页提供「开启应用锁」开关。
+  - [ ] 切换至后台超过设定时间（立即 / 1分钟 / 5分钟）后重新回到前台时，强制弹出指纹/面容解锁浮层。
+- [ ] **防窥与隐额模式增强**
+  - [ ] 在多任务切换器（Recent Apps）中隐藏敏感金额截图（`FLAG_SECURE` 或毛玻璃虚化）。
+  - [ ] 手势防窥：支持“摇一摇手机”或“双击结余区域”快速切换全局隐额模式。
+
+### 6. 分类预算系统深度演进 (Category Budget Enhancements) - [P2, 预算闭环]
+- [ ] **预算超支本地通知预警**
+  - [ ] 当某分类或总预算达到 80% 警戒线或 100% 超支时，后台触发通知栏即时预警提示。
+- [ ] **分类预算跨月结转 (Budget Rollover)**
+  - [ ] 支持可选开关“上月分类结余滚入下月”：上月未用完的分类预算自动累加至下月该分类可用额度中。
+
+---
+
+## 需求池 (Backlog - 探索性功能备选)
+
+- [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：提供全局可拖拽、吸边的半透明调试悬浮球，点击快速调出日志与慢查询控制台。
+- [ ] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
+- [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。
+

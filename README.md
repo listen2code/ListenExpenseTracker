@@ -15,10 +15,14 @@
    - 流水列表按日自动分组 (`20 星期四 2026.08`) 并实时汇总每日总支出与总收入。
    - 极致紧凑的 24dp 圆形分类图标与微型内边距，单屏展示信息量翻倍。
    - 长按流水条目呼出确认对话框 (`ConfirmDelete`) 进行安全删除，防止误触。
-4. **专属年月快速选择器 (`MonthPickerDialog`)**：
+   - 隐私金额遮罩功能，保护个人财务隐私。
+   - 生命周期感知自动刷新，后台切换前台自动拉取最新数据。
+4. **分类预算管理与预算中心 (Category-based Budget Management)**：
+   - 基于 HorizontalPager 的预算中心看板，直观展示各分类预算消耗比例与剩余额度。
+5. **专属年月快速选择器 (`MonthPickerDialog`)**：
    - 独立的年份 `< 2026年 >` 快速切换与 3x4 12 月份方块网格，单次点击直达目标月份，彻底告别冗长的日历选择。
    - 流水与统计页面均集成超轻量居中时间胶囊 (`[ < 2026年08月 > ]`)。
-5. **动态收支分类与支付账户管理系统**：
+6. **动态收支分类与支付账户管理系统**：
    - **双入口设计**：在记账弹窗分类横向滚动列表末尾提供 `[+ 管理]` 即时入口，并在设置中心提供集中管理入口。
    - 分类多语言采用 `nameKey` 查表机制，用户自定义分类直接单语言存储。
    - 账户类型（银行卡/现金/信用卡/自定义账户）支持动态拓展与过滤。
@@ -97,24 +101,28 @@ app/src/main/java/com/listen/expensetracker/
 │   └── state/                             # ExpenseAppState 应用级状态
 ├── data/                                   # 数据层
 │   ├── backup/                             # 账单 JSON / CSV 导出与导入引擎
+│   ├── cloud/                              # GoogleDriveService, GoogleDriveAutoBackupManager
 │   ├── db/                                 # Room 数据库单例、DAO 与 Entity 表结构
 │   ├── engine/                             # 纯函数账单与多维统计计算引擎
 │   ├── i18n/                               # ExpenseStrings 记账专属多语言字典
 │   ├── model/                              # Category, Account 常量与 AppDimens Token
-│   └── pref/                               # ExpenseDataStoreManager 偏好持久化
+│   ├── pref/                               # ExpenseDataStoreManager 偏好持久化
+│   └── update/                             # UpdateCheckerService
 ├── features/                               # 核心业务特性层（按 Feature 隔离）
+│   ├── budget/                             # Category-based budget management
+│   ├── common/                             # 通用业务组件
 │   ├── transactions/                       # 1. 流水与记账
-│   │   ├── components/                     # 流水卡片、日分组头、列表项等
-│   │   ├── ui/                             # TransactionsScreen, Add/EditSheet
+│   │   ├── components/                     # TransactionSheet, TransactionFormComponents, TransactionFilterBottomSheet, 等
+│   │   ├── ui/                             # TransactionsScreen, TransactionsStateHolder, TransactionsEffects
 │   │   └── viewmodel/                      # TransactionsViewModel & UiState
 │   ├── statistics/                         # 2. 多维统计与图表
 │   │   ├── components/                     # 统计卡片、分类排行榜等
-│   │   ├── ui/                             # StatisticsScreen
+│   │   ├── ui/                             # StatisticsScreen, StatisticsStateHolder, StatisticsEffects
 │   │   └── viewmodel/                      # StatisticsViewModel & UiState
 │   └── settings/                           # 3. 设置中心与云备份
-│       ├── components/                     # 各设置分组卡片与弹窗
-│       ├── ui/                             # SettingsScreen, ImportBackupSheet
-│       └── viewmodel/                      # SettingsViewModel & UiState
+│       ├── components/                     # GoogleAccountProfileCard, SettingsFinanceSection, SettingsDataCenterSection, SettingsVersionFooter, UpdateAvailableDialog
+│       ├── ui/                             # SettingsScreen, SettingsStateHolder, SettingsEffects
+│       └── viewmodel/                      # SettingsViewModel, SettingsUiState, SettingsSyncDelegate
 └── widget/                                 # Android 桌面快捷记账小组件 (AppWidget)
 ```
 

@@ -58,6 +58,16 @@ sequenceDiagram
     VM-->>UI: 弹出「已从 Google Drive 成功恢复 N 条账单」Toast
 ```
 
+### 1.1 技术亮点与设计细节
+
+1. **零废弃 API 的 Google Identity 整合 (Zero-Deprecated APIs)**：
+   在 `GoogleAuthManager.kt` 中，全面舍弃了旧版的 `GoogleSignInClient`，采用了全新的 **AndroidX CredentialManager** 与 `GetGoogleIdOption`。通过统一的凭证入口，为用户提供原生的无缝身份验证体验。
+2. **REST API v3 原生接入与授权守卫 (Authorization Guard)**：
+   在 `GoogleDriveService.kt` 中，抛弃了笨重的 Google API Client 库，直接基于轻量级 HttpURLConnection 实现 Drive REST API v3 的访问。
+   **难点突破**：在获取 `OAuth Token` 时，若由于权限变更等原因抛出 `UserRecoverableAuthException`，系统会通过该异常中的 `Intent` 自动弹出 Google 的原生授权修复弹窗，实现了自愈合的鉴权逻辑。
+3. **通用云端同步状态机 (Universal Cloud Sync State Machine)**：
+   由 `ListenArch` 提供的 `CloudSyncManager` 接管了全局的同步状态（IDLE, SYNCING, SUCCESS, ERROR）。它通过 `StateFlow<SyncState>` 向外广播状态流，使得任何 UI 界面都可以优雅地响应同步状态，且内置基于国际化 key (`sync_msg_syncing` 等) 的文案推送机制。
+
 ---
 
 ## 2. Google Cloud Console 凭据全矩阵配置（核心重点）
