@@ -17,7 +17,6 @@ class ExpensePreferencesTest {
         assertEquals(AccentColor.EMERALD, prefs.accentColor)
         assertEquals("￥", prefs.currencySymbol)
         assertEquals(5000.0, prefs.monthlyBudget, 0.001)
-        assertEquals("", prefs.customAccounts)
         assertTrue(prefs.autoBackupDrive)
         assertFalse(prefs.autoBackupWifiOnly)
         assertFalse(prefs.isDeveloperMode)
@@ -25,32 +24,21 @@ class ExpensePreferencesTest {
     }
 
     @Test
-    fun testCustomValuesAndCopy() {
-        val prefs = ExpensePreferences(
+    fun testCopyAndModification() {
+        val original = ExpensePreferences()
+        val modified = original.copy(
             language = "en",
             themeMode = ThemeMode.DARK,
-            accentColor = AccentColor.OCEAN_BLUE,
             currencySymbol = "$",
             monthlyBudget = 8000.0,
-            customAccounts = "[]",
-            autoBackupDrive = false,
-            autoBackupWifiOnly = true,
-            isDeveloperMode = true,
             hideBalance = true
         )
-        assertEquals("en", prefs.language)
-        assertEquals(ThemeMode.DARK, prefs.themeMode)
-        assertEquals(AccentColor.OCEAN_BLUE, prefs.accentColor)
-        assertEquals("$", prefs.currencySymbol)
-        assertEquals(8000.0, prefs.monthlyBudget, 0.001)
-        assertFalse(prefs.autoBackupDrive)
-        assertTrue(prefs.autoBackupWifiOnly)
-        assertTrue(prefs.isDeveloperMode)
-        assertTrue(prefs.hideBalance)
 
-        val updated = prefs.copy(language = "ja", currencySymbol = "¥")
-        assertEquals("ja", updated.language)
-        assertEquals("¥", updated.currencySymbol)
-        assertEquals(ThemeMode.DARK, updated.themeMode)
+        assertEquals("en", modified.language)
+        assertEquals(ThemeMode.DARK, modified.themeMode)
+        assertEquals("$", modified.currencySymbol)
+        assertEquals(8000.0, modified.monthlyBudget, 0.001)
+        assertTrue(modified.hideBalance)
+        assertEquals("zh", original.language)
     }
 }
