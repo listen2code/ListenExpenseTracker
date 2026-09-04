@@ -94,16 +94,17 @@ fun RecurringRuleItemCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Tier 1: 规则名称 (独占整行，最少展示 2 行，防止长标题展示不下)
+            // Tier 1: 规则名称 (全宽独占整行，同行无其他任何项目，最多展示 2 行)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(28.dp)
                         .clip(CircleShape)
                         .background(catColor.copy(alpha = 0.16f)),
                     contentAlignment = Alignment.Center
@@ -112,7 +113,7 @@ fun RecurringRuleItemCard(
                         imageVector = category?.icon ?: Icons.Default.Repeat,
                         contentDescription = rule.title,
                         tint = catColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
@@ -123,38 +124,23 @@ fun RecurringRuleItemCard(
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    minLines = 2,
-                    maxLines = 3,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Switch(
-                    checked = rule.isEnabled,
-                    onCheckedChange = onToggleEnabled,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Tier 2: 属性与金额 (左侧频次、账户与倒计时，其下方展示加粗金额)
+            // 底部内容区：左侧第2行徽标与第3行金额靠左顶格，右侧 Switch 居中对齐
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 40.dp), // 对齐上方标题起始处
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
+                    // 第 2 行: 属性徽标行 ([每月 15日] [微信支付] 倒计时)
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -194,7 +180,7 @@ fun RecurringRuleItemCard(
                         )
                     }
 
-                    // 金额放在“每月 X日”等频次标签下方，绝不挤占标题
+                    // 第 3 行: 完整金额 (左对齐顶格，不缩略)
                     val isExp = rule.type == TransactionType.EXPENSE
                     CommonText(
                         text = "${if (isExp) "-" else "+"}$currencySymbol%.2f".format(rule.amount),
@@ -203,6 +189,18 @@ fun RecurringRuleItemCard(
                         color = if (isExp) ExpenseRed else IncomeGreen
                     )
                 }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Switch 与 2、3 行整体垂直居中
+                Switch(
+                    checked = rule.isEnabled,
+                    onCheckedChange = onToggleEnabled,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
             }
         }
     }
