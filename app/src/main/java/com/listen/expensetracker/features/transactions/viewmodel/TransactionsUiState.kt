@@ -28,7 +28,10 @@ enum class TransactionSortOrder(val displayNameKey: String) {
  * Dialog presentation state for Transactions feature.
  */
 sealed interface TransactionsDialog {
-    data object AddTransaction : TransactionsDialog
+    data class AddTransaction(
+        val initialCategoryId: String? = null,
+        val initialType: String = com.listen.expensetracker.data.db.TransactionType.EXPENSE
+    ) : TransactionsDialog
     data class EditTransaction(val transaction: TransactionEntity) : TransactionsDialog
     data class ConfirmDelete(val transaction: TransactionEntity) : TransactionsDialog
     data object MonthPicker : TransactionsDialog

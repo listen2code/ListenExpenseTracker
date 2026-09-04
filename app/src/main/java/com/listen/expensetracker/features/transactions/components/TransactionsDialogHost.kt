@@ -48,6 +48,8 @@ fun TransactionsDialogHost(
             TransactionSheet(
                 currencySymbol = sym,
                 initialTimestamp = initialDate,
+                initialCategoryId = dialog.initialCategoryId,
+                initialType = dialog.initialType,
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
                 onSave = { entity ->
                     onIntent(TransactionsIntent.AddTransaction(

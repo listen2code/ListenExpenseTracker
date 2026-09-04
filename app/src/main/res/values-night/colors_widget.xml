@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 小部件整体背景与边框 (深色模式) -->
+    <color name="widget_bg">#FF1E293B</color>
+    <color name="widget_stroke">#FF334155</color>
+    <color name="widget_card_bg">#FF0F172A</color>
+    <color name="widget_card_stroke">#FF1E293B</color>
+
+    <!-- 文本颜色 -->
+    <color name="widget_text_primary">#FFF8FAFC</color>
+    <color name="widget_text_secondary">#FF94A3B8</color>
+    <color name="widget_text_muted">#FF64748B</color>
+
+    <!-- 预算健康度与指示条 -->
+    <color name="widget_health_normal">#34D399</color>
+    <color name="widget_health_normal_bg">#064E3B</color>
+    <color name="widget_health_warning">#FBBF24</color>
+    <color name="widget_health_warning_bg">#78350F</color>
+    <color name="widget_health_over">#F87171</color>
+    <color name="widget_health_over_bg">#7F1D1D</color>
+    <color name="widget_progress_track">#FF334155</color>
+
+    <!-- 4 大快捷分类按压色彩 (深色) -->
+    <color name="widget_btn_food_bg">#451A1A</color>
+    <color name="widget_btn_food_text">#F87171</color>
+
+    <color name="widget_btn_transport_bg">#172554</color>
+    <color name="widget_btn_transport_text">#60A5FA</color>
+
+    <color name="widget_btn_shopping_bg">#500724</color>
+    <color name="widget_btn_shopping_text">#F472B6</color>
+
+    <color name="widget_btn_daily_bg">#1E293B</color>
+    <color name="widget_btn_daily_text">#CBD5E1</color>
+
+    <!-- 通用记一笔主操作色彩 -->
+    <color name="widget_btn_general_bg">#059669</color>
+</resources>

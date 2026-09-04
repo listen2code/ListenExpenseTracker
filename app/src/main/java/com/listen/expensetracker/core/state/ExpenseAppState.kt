@@ -19,6 +19,7 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -151,6 +152,24 @@ class ExpenseAppState(
             NavTab.STATISTICS -> statisticsViewModel.handleIntent(StatisticsIntent.ScrollToTop)
             NavTab.SETTINGS -> settingsViewModel.handleIntent(SettingsIntent.ScrollToTop)
         }
+    }
+
+    /**
+     * 快捷拉起记账弹窗，预选指定分类与收支类型
+     */
+    fun openQuickAdd(
+        categoryId: String? = null,
+        type: String = com.listen.expensetracker.data.db.TransactionType.EXPENSE
+    ) {
+        switchTab(NavTab.TRANSACTIONS)
+        transactionsViewModel.handleIntent(
+            TransactionsIntent.OpenDialog(
+                TransactionsDialog.AddTransaction(
+                    initialCategoryId = categoryId,
+                    initialType = type
+                )
+            )
+        )
     }
 }
 

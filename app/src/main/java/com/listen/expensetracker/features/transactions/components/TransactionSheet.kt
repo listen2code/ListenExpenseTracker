@@ -61,6 +61,8 @@ fun TransactionSheet(
     onDelete: (() -> Unit)? = null,
     onSaveAndContinue: ((TransactionEntity) -> Unit)? = null,
     initialTimestamp: Long = System.currentTimeMillis(),
+    initialCategoryId: String? = null,
+    initialType: String = TransactionType.EXPENSE,
     lang: String = "zh"
 ) {
     val isEditMode = transaction != null
@@ -68,15 +70,17 @@ fun TransactionSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // --- 状态驱动层 ---
-    var type by remember { mutableStateOf(transaction?.type ?: TransactionType.EXPENSE) }
+    var type by remember { mutableStateOf(transaction?.type ?: initialType) }
     var categoryVersion by remember { mutableIntStateOf(0) }
     
     // 自动过滤分类列表
     val categories = remember(type, categoryVersion) { if (type == TransactionType.EXPENSE) CategoryRepository.expenseCategories else CategoryRepository.incomeCategories }
     
-    // 选中分类，编辑模式下尝试匹配
+    // 选中分类，编辑模式或快速指定分类下尝试匹配
     var selectedCategory: Category by remember(categories) {
-        mutableStateOf(if (isEditMode) categories.find { it.id == transaction.categoryId } ?: categories.first() else categories.first())
+        val matched = if (isEditMode) categories.find { it.id == transaction.categoryId }
+        else if (initialCategoryId != null) categories.find { it.id == initialCategoryId } else null
+        mutableStateOf(matched ?: categories.first())
     }
 
     var amountExpression by remember { mutableStateOf(if (isEditMode) "%.2f".format(transaction.amount ?: 0.0) else "0") }
@@ -158,14 +162,8 @@ fun TransactionSheet(
             )
 
             // 5. 日期选择胶囊
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TransactionDatePickerButton(
-                    selectedTimestamp = selectedTimestamp,
-                    onDateSelected = { selectedTimestamp = it }
-                )
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                TransactionDatePickerButton(selectedTimestamp = selectedTimestamp, onDateSelected = { selectedTimestamp = it })
             }
 
             // 6. 支付账户选择（支持长按管理）

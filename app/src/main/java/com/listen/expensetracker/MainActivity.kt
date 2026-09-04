@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -43,7 +44,12 @@ import com.listen.uicomponent.theme.ListenTheme
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
+import android.content.Intent
+import androidx.compose.runtime.LaunchedEffect
+
 class MainActivity : ComponentActivity() {
+
+    private val pendingQuickAddIntent = mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -51,12 +57,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ExpenseStrings.init()
         CrashHandler.init(this)
+        pendingQuickAddIntent.value = intent
 
         setContent {
             // One-line registration for all ViewModels, Navigation Tabs, and State
             val appState = rememberExpenseAppState()
             val settingsState by appState.settingsViewModel.viewState.collectAsState()
             val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
+
+            val currentIntent = pendingQuickAddIntent.value
+            LaunchedEffect(currentIntent) {
+                currentIntent?.let { targetIntent ->
+                    handleQuickAddIntent(targetIntent, appState)
+                    pendingQuickAddIntent.value = null
+                }
+            }
 
             splashScreen.setKeepOnScreenCondition { transactionsState.isLoading }
 
@@ -82,9 +97,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingQuickAddIntent.value = intent
+    }
+
     override fun onStop() {
         super.onStop()
         GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
+    }
+
+    private fun handleQuickAddIntent(intent: Intent, appState: ExpenseAppState) {
+        val uri = intent.data
+        val isQuickAddUri = uri != null && uri.scheme == "lexpense" && uri.host == "quick_add"
+        val isQuickAddExtra = intent.hasExtra(EXTRA_QUICK_ADD_CATEGORY) || intent.hasExtra(EXTRA_QUICK_ADD_TYPE)
+        if (isQuickAddUri || isQuickAddExtra) {
+            val rawCategory = uri?.getQueryParameter("category") ?: intent.getStringExtra(EXTRA_QUICK_ADD_CATEGORY)
+            val type = uri?.getQueryParameter("type") ?: intent.getStringExtra(EXTRA_QUICK_ADD_TYPE) ?: com.listen.expensetracker.data.db.TransactionType.EXPENSE
+            val categoryId = normalizeCategoryId(rawCategory)
+            appState.openQuickAdd(categoryId, type)
+        }
+    }
+
+    companion object {
+        const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
+        const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
+
+        fun normalizeCategoryId(raw: String?): String? = when (raw) {
+            "cat_food", "c_food" -> "c_food"
+            "cat_transport", "c_transport" -> "c_transport"
+            "cat_shopping", "c_shopping" -> "c_shopping"
+            "cat_daily", "cat_other", "c_other_exp" -> "c_other_exp"
+            else -> raw
+        }
     }
 }
 

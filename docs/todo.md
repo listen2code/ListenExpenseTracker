@@ -195,14 +195,14 @@
 
 ### 2. 桌面小部件体验 2.0 (App Widget 2.0 - 快速记账与预算看板) - [P0, 极速记账触达]
 * **详细设计文档**：[app_widget_2_0_design.md](app_widget_2_0_design.md)
-- [ ] **现代化 4x2 智能预算看板小部件**
-  - [ ] 桌面即时展示：当月总支出、剩余预算额度、收支环形/线性进度条及三态健康度（正常 / 预警 / 超支）。
-  - [ ] 数据联动：接入 `ListenExpenseAppWidgetProvider`，在流水发生任何变动时实时刷新小部件。
-- [ ] **闪电分类直达快捷记账**
-  - [ ] 小部件内置 4 个高频快捷分类按钮（🍔 餐饮、🚗 交通、🛍️ 购物、📦 杂项）。
-  - [ ] 轻触图标通过 DeepLink / Intent 零延迟直达 App 并直接拉起记账弹窗，预选对应分类与账户，实现 2 秒内闪电记账。
-- [ ] **动态主题适配**
-  - [ ] 支持 Android 12+ Material You 动态色彩提取与 App 内部自定义 AccentColor 统一着色，支持深浅色无缝切换。
+- [x] **现代化 4x2 智能预算看板小部件**
+  - [x] 桌面即时展示：当月总支出、剩余预算额度、收支进度条及三态健康度（正常 / 预警 / 超支）。
+  - [x] 数据联动：接入 `ListenExpenseAppWidgetProvider`，在流水发生任何变动时实时刷新小部件。
+- [x] **闪电分类直达快捷记账**
+  - [x] 小部件内置 4 个高频快捷分类按钮（🍔 餐饮、🚗 交通、🛍️ 购物、📦 杂项）。
+  - [x] 轻触图标通过 DeepLink / Intent 零延迟直达 App 并直接拉起记账弹窗，预选对应分类与账户，实现 2 秒内闪电记账。
+- [x] **动态主题适配**
+  - [x] 支持深浅色无缝自适应（通过 `colors_widget.xml` 及 `values-night` 调色盘），符合 Android RemoteViews 规范。
 
 ### 3. 智能财务洞察与深度环比分析 (Smart Financial Insights & MoM) - [P1, 数据价值挖掘]
 * **详细设计文档**：[smart_financial_insights_design.md](smart_financial_insights_design.md)

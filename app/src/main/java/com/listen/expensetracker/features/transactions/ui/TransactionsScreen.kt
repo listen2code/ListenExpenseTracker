@@ -75,7 +75,7 @@ fun TransactionsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction)) },
+                onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction())) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {

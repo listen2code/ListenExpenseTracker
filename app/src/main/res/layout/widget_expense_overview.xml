@@ -3,39 +3,192 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white"
-    android:padding="12dp">
+    android:orientation="horizontal"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
 
-    <TextView
-        android:id="@+id/widget_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="lExpense · 今日支出"
-        android:textColor="#64748B"
-        android:textSize="12sp" />
+    <!-- 左侧：月度预算与收支仪表看板 -->
+    <LinearLayout
+        android:id="@+id/widget_budget_card"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="12"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:background="@drawable/widget_card_bg"
+        android:padding="10dp">
 
-    <TextView
-        android:id="@+id/widget_amount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="￥0.00"
-        android:textColor="#0F172A"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        <!-- 标题行：月份与三态健康度徽章 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/widget_action_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="#10B981"
-        android:gravity="center"
-        android:paddingVertical="6dp"
-        android:text="+ 快速记一笔"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_month_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="本月支出"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_health_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_badge_normal"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="正常"
+                android:textColor="@color/widget_health_normal"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 当月总支出金额 -->
+        <TextView
+            android:id="@+id/widget_spent_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="￥0.00"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <!-- 剩余预算提示 -->
+        <TextView
+            android:id="@+id/widget_budget_remaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="剩余 ￥5,000.00"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="11sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <!-- 水平预算消耗进度条 -->
+        <ProgressBar
+            android:id="@+id/widget_budget_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="6dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/widget_progress_normal" />
+    </LinearLayout>
+
+    <!-- 左右分区间隔 -->
+    <View
+        android:layout_width="8dp"
+        android:layout_height="match_parent" />
+
+    <!-- 右侧：4 大高频快捷分类按钮 + 通用记一笔主按钮 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="11"
+        android:orientation="vertical">
+
+        <!-- 第 1 行快捷分类：餐饮与交通 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_btn_food"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/widget_btn_food_bg"
+                android:text="🍔 餐饮"
+                android:textColor="@color/widget_btn_food_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/widget_btn_transport"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/widget_btn_transport_bg"
+                android:text="🚗 交通"
+                android:textColor="@color/widget_btn_transport_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="6dp" />
+
+        <!-- 第 2 行快捷分类：购物与日用 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_btn_shopping"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/widget_btn_shopping_bg"
+                android:text="🛍️ 购物"
+                android:textColor="@color/widget_btn_shopping_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/widget_btn_daily"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/widget_btn_daily_bg"
+                android:text="📦 日用"
+                android:textColor="@color/widget_btn_daily_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="6dp" />
+
+        <!-- 底部通用快速记一笔按钮 -->
+        <TextView
+            android:id="@+id/widget_btn_general"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:gravity="center"
+            android:background="@drawable/widget_btn_general_bg"
+            android:text="+ 记一笔"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </LinearLayout>

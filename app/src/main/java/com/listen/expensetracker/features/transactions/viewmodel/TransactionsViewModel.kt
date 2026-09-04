@@ -164,6 +164,7 @@ class TransactionsViewModel(
                 )
             }
             recalculate()
+            ListenExpenseAppWidgetProvider.updateFromTransactions(application, currentState.transactions, prefs.currencySymbol, prefs.monthlyBudget)
         }
     }
 
@@ -171,7 +172,7 @@ class TransactionsViewModel(
         viewModelScope.launch {
             dao.getAllTransactionsFlow().collectLatest { allList ->
                 applyCalculations(allList)
-                ListenExpenseAppWidgetProvider.updateFromTransactions(application, allList, currentState.currencySymbol)
+                ListenExpenseAppWidgetProvider.updateFromTransactions(application, allList, currentState.currencySymbol, currentState.monthlyBudget)
                 GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }

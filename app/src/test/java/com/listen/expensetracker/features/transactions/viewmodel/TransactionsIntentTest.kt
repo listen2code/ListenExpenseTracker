@@ -36,8 +36,8 @@ class TransactionsIntentTest {
         val sortIntent = TransactionsIntent.ChangeSortOrder(TransactionSortOrder.AMOUNT_DESC)
         assertEquals(TransactionSortOrder.AMOUNT_DESC, sortIntent.order)
         
-        val dialogIntent = TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction)
-        assertEquals(TransactionsDialog.AddTransaction, dialogIntent.dialog)
+        val dialogIntent = TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction(initialCategoryId = "c_food"))
+        assertEquals(TransactionsDialog.AddTransaction(initialCategoryId = "c_food"), dialogIntent.dialog)
 
         val appearIntent = TransactionsIntent.ScreenAppear
         val disappearIntent = TransactionsIntent.ScreenDisappear
