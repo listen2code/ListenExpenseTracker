@@ -160,7 +160,18 @@
 * **`SettingsVersionFooter`** (`features.settings.components`)：设置页底部版本号展示与连击进入开发者模式触发器。
 * **`AboutAppDialog`** (`features.settings.components`)：关于应用信息对话框，含 Dedicated App Icon 与技术栈展示。
 
-### 3.6 状态容器与业务代理 (StateHolder & Delegate)
+### 3.6 周期性收支与订阅管理模块 (`features/recurring/`)
+* **`RecurringTransactionEngine`** (`data.engine`)：周期履约与固定生活成本 Baseline 纯函数/协程计算引擎。
+  * `calculateNextExecutionDate(frequency, dayOfPeriod, fromDate): Long`：周期下次触发时间递推算法，自动平滑处理大小月与闰年月末。
+  * `calculateMonthlyBaseline(rules: List<RecurringRuleEntity>): RecurringMonthlyBaseline`：折算每日/每周/每月/每年规则至月度刚性开销总额与净值。
+  * `suspend fun processDueRules(recurringDao, txDao, currentTime): Int`：批量履约到期自动记账，写入带有 `[周期]` 标识的流水记录并推进下次扣款日。
+* **`RecurringTransactionsDialog`** (`features.recurring.components`)：周期记账与订阅管理统一模态宿主，固定 420dp 容器高度配合 `AnimatedContent` 平滑滑动切换列表与编辑态。
+* **`RecurringOverviewCard`** (`features.recurring.components`)：顶部每月固定支出看板卡片，展示支出基线与预算占比。
+* **`RecurringRuleItemCard`** (`features.recurring.components`)：高空间利用率的三层规则卡片，第 1 行全宽最多 2 行标题独占，第 2 行周期/账户徽标与第 3 行完整金额靠左顶格，右侧垂直居中 Switch。
+* **`RecurringFrequencySelector`** (`features.recurring.components`)：全频次分段选择器与水平滑动日期药丸（支持每日/每周/每月/每年）。
+* **`RecurringEditState`** (`features.recurring.components`)：纯 Kotlin 状态持有者，负责表单字段输入过滤、金额最大值约束与 `RecurringRuleEntity` 构建。
+
+### 3.7 状态容器与业务代理 (StateHolder & Delegate)
 * **`SettingsStateHolder`** (`features.settings.ui`)：设置页系统状态容器。
   * **职责**：持有 `LazyListState` 保护滚动位置；封装 `exportJsonLauncher` 与 `importJsonLauncher` 系统文件选择器契约回调；绑定 Effect 监听。
   * **API**：`rememberSettingsStateHolder(...)`
