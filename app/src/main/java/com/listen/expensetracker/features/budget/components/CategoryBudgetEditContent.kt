@@ -61,14 +61,14 @@ fun CategoryBudgetEditContent(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // 1. 总预算输入框
+        // 1. 总预算输入框 (默认支持2位小数)
         CommonEditText(
             value = budgetInput,
-            onValueChange = { input -> onBudgetInputChange(input.filter { it.isDigit() }.take(8)) },
+            onValueChange = { input -> onBudgetInputChange(input.take(10)) },
             label = AppStrings.MONTHLY_BUDGET.tr(lang),
             placeholder = "5000",
             leadingIcon = { CommonText(text = currencySymbol, fontWeight = FontWeight.Bold) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth()
         )
 

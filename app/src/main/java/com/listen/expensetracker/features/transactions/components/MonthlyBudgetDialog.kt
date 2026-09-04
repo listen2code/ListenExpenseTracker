@@ -55,7 +55,11 @@ fun MonthlyBudgetDialog(
     spentAmount: Double? = null
 ) {
     var budgetInput by remember {
-        mutableStateOf(if (currentBudget > 0) "%.0f".format(currentBudget) else "5000")
+        mutableStateOf(
+            if (currentBudget > 0) {
+                if (currentBudget % 1.0 == 0.0) "%.0f".format(currentBudget) else "%.2f".format(currentBudget)
+            } else "5000"
+        )
     }
     val presets = remember { listOf(3000.0, 5000.0, 8000.0, 10000.0, 15000.0, 20000.0) }
     val isValid = budgetInput.isNotBlank() && (budgetInput.toDoubleOrNull() ?: 0.0) > 0
@@ -103,10 +107,10 @@ fun MonthlyBudgetDialog(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
-            // 1. Budget Amount Input Field
+            // 1. Budget Amount Input Field (默认支持2位小数)
             CommonEditText(
                 value = budgetInput,
-                onValueChange = { budgetInput = it.filter { ch -> ch.isDigit() } },
+                onValueChange = { budgetInput = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -119,7 +123,7 @@ fun MonthlyBudgetDialog(
                         color = MaterialTheme.colorScheme.primary
                     )
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )
 
