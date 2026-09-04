@@ -133,7 +133,7 @@ fun RecurringTransactionsDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(410.dp)
+                .height(420.dp)
         ) {
             AnimatedContent(
                 targetState = mode,

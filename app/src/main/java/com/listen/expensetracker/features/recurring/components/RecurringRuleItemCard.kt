@@ -96,10 +96,10 @@ fun RecurringRuleItemCard(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
-            // Tier 1: 头部行 (左侧图标 + 规则名称，右侧大字金额)
+            // Tier 1: 规则名称 (独占整行，最少展示 2 行，防止长标题展示不下)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Box(
                     modifier = Modifier
@@ -118,73 +118,16 @@ fun RecurringRuleItemCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                CommonText(
+                androidx.compose.material3.Text(
                     text = rule.title,
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    minLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                val isExp = rule.type == TransactionType.EXPENSE
-                CommonText(
-                    text = "${if (isExp) "-" else "+"}$currencySymbol%.2f".format(rule.amount),
-                    fontSize = AppDimens.TextSubtitle,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isExp) ExpenseRed else IncomeGreen
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Tier 2: 属性与操作行 (左侧频次、账户胶囊与倒计时，右侧 Switch)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(3.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f)
-                    ) {
-                        CommonText(
-                            text = freqLabel,
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(3.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    ) {
-                        CommonText(
-                            text = accountName,
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                        )
-                    }
-
-                    CommonText(
-                        text = countdownText,
-                        fontSize = AppDimens.TextMicro,
-                        color = if (daysDiff <= 0 && rule.isEnabled) ExpenseRed else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -196,6 +139,70 @@ fun RecurringRuleItemCard(
                         checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Tier 2: 属性与金额 (左侧频次、账户与倒计时，其下方展示加粗金额)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 40.dp), // 对齐上方标题起始处
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f)
+                        ) {
+                            CommonText(
+                                text = freqLabel,
+                                fontSize = AppDimens.TextMicro,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ) {
+                            CommonText(
+                                text = accountName,
+                                fontSize = AppDimens.TextMicro,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                            )
+                        }
+
+                        CommonText(
+                            text = countdownText,
+                            fontSize = AppDimens.TextMicro,
+                            color = if (daysDiff <= 0 && rule.isEnabled) ExpenseRed else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    // 金额放在“每月 X日”等频次标签下方，绝不挤占标题
+                    val isExp = rule.type == TransactionType.EXPENSE
+                    CommonText(
+                        text = "${if (isExp) "-" else "+"}$currencySymbol%.2f".format(rule.amount),
+                        fontSize = AppDimens.TextTitle,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isExp) ExpenseRed else IncomeGreen
+                    )
+                }
             }
         }
     }
