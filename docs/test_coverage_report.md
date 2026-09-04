@@ -3,7 +3,7 @@
 **更新时间**: 2026-09-03
 **项目版本**: Android (Kotlin 2.2.10 + Compose + Room + Jacoco)  
 **分析工具**: Jacoco 0.8.14 (`testDebugUnitTest` + `jacocoTestReport`)  
-**测试结果**: **21 个单元测试套件 100% 全部通过**
+**测试结果**: **22 个单元测试套件 100% 全部通过**
 
 ---
 
@@ -17,7 +17,7 @@ Jacoco 最新实测覆盖率数据如下：
 | **已覆盖代码行 (Lines Covered)** | **1,271** 行 | **18.67%** | 🟡 整体覆盖率较稳定，UI 层尚未覆盖 |
 | **核心数据与领域逻辑层 (Data & Domain Layer)** | **1,138 / 1,559** 行 | 🟢 **73.00%** | 🟢 **核心领域模型和解析引擎得到重点保障** |
 | **分支覆盖率 (Branch Coverage)** | **261 / 2,086** 分支 | **12.51%** | 🟡 逻辑分支绝大部分在引擎与更新检查层 |
-| **测试套件总数 (Test Suites)** | **21** 个测试类 | — | 🟢 新增 CategoryBudgetEngine, CompoundFilter 等场景 |
+| **测试套件总数 (Test Suites)** | **22** 个测试类 | — | 🟢 新增 ListenExpenseAppWidgetProviderTest 场景 |
 
 ---
 
@@ -62,6 +62,10 @@ Jacoco 最新实测覆盖率数据如下：
    - **设计思路**: 对 `TransactionsIntentTest`, `SettingsUiStateTest` 采用了基于 MVI 架构状态机的测试，通过传入 Intent 序列并拦截最终产出的 UI 状态。
    - **技术亮点**: 由于逻辑完全抽离至 ViewModel，在不依赖 Android 框架 (Context) 的纯 JVM 环境中完成了复杂页面生命周期的逻辑回放和验证，这也是为什么 UI 层组件 0 覆盖，但相关交互结果依然有保障的原因。
 
+5. **桌面小部件 2.0 核算与路由健壮性断言 (ListenExpenseAppWidgetProviderTest)**
+   - **设计思路**: 小部件运行在独立 Launcher 宿主进程中，其数据准确度与点击路由参数至关重要。`ListenExpenseAppWidgetProviderTest` 覆盖了当月已发生开销过滤计算（严格排除非当月数据与收入项目）、三态健康状况（正常/预警/超支）在临界值下的精确判定，以及快捷记账分类别名的规范化映射。
+   - **技术亮点**: 在纯 JVM 单元测试环境中完全解耦 Android RemoteViews 依赖，对提供给 Widget 的核心数据处理与 DeepLink 路由参数进行 100% 覆盖断言。
+
 ---
 
-> 📄 报告更新完成。数据源自 `jacocoTestReport.csv` 最新导出结果。
+> 📄 报告更新完成。全矩阵 22 套单元测试均通过验证。

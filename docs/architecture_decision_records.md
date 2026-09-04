@@ -274,3 +274,28 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 2. 将这些系统事件统一定义为 `LifecycleEvent`（`ON_APPEAR` / `ON_DISAPPEAR`），并通过 `BaseViewModel.dispatchLifecycleEvent` 分发入 ViewModel 状态机。
 3. 各个业务 ViewModel 仅需按需重写 `toLifecycleIntent(event)` 即可，零成本获取生命周期感知能力，同时保持了核心业务流处理与 Compose 框架层的严格解耦。
 
+---
+
+## ADR-021: 桌面小部件体验 2.0 (App Widget 2.0 - 4x2 智能双模看板与闪电分类直达记账)
+
+### 背景 (Context)
+早期小部件仅支持展示单日开销且无法查看月度预算执行健康度；记账时用户必须解锁手机、查找图标、打开 App、寻找分类并输入金额，平均耗时 5~10 秒。在碎片化即时消费场景（如超市结算、地铁闸机、餐厅点单）下极易导致用户放弃记账。此外，传统定时器定期轮询小部件造成不必要的后台电池消耗。
+
+### 决策 (Decision)
+1. **4x2 智能双模看板布局**：
+   - 左侧集成收支仪表盘：当月总支出、剩余可用额度、水平进度条及“正常/预警/超支”三态健康度徽章，轻触直达流水页面；
+   - 右侧集成 4 大高频分类快捷记账按钮（🍔 餐饮、🚗 交通、🛍️ 购物、📦 日用）与通用添加入口。
+2. **DeepLink 零延迟穿透与预选参数**：
+   - 绑定 `lexpense://quick_add?category={cat}&type=EXPENSE` 专属 PendingIntent；
+   - `MainActivity` 声明为 `singleTop` 并在 `onNewIntent` 与 `onCreate` 中高效捕获意图，通过 `ExpenseAppState.openQuickAdd` 自动唤醒并预选中对应分类，达成 2 秒闪电记账。
+3. **变动驱动刷新 (Zero-Polling)**：
+   - 小部件元数据设置 `updatePeriodMillis="0"`，杜绝定时器频繁唤醒；
+   - 仅在 Room 数据库账单增删改或 DataStore 预算/币种变更时，由 Flow 响应式毫秒级推送到 RemoteViews。
+4. **原生动态主题适配**：
+   - 引入 `colors_widget.xml` 及 `values-night/` 调色盘，完美遵循 Android RemoteViews 规范在深浅模式间自适应切换。
+
+### 影响 (Consequences)
+- 优点：碎片化即时记账路径从 10 秒缩短至 2 秒以内；桌面实时掌控预算健康度；无后台轮询开销，极致节能。
+- 成本：需在 `TransactionSheet` 中支持 `initialCategoryId` 预选分类并在 `TransactionsDialog.AddTransaction` 中扩展参数兼容。
+
+

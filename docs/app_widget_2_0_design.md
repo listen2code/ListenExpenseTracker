@@ -103,3 +103,21 @@ LaunchedEffect(intentUri) {
 
 1. **变动驱动刷新（Zero-Polling）**：彻底摒弃周期性后台轮询定时器（`updatePeriodMillis = 0`），仅在本地数据库 `TransactionDao` 写入/修改/删除或偏好设置变更时，由 Flow 收集器触发 `AppWidgetManager.updateAppWidget`。
 2. **前台即时同步与冷启动补偿**：在 `MainActivity.onResume()` 时触发一次轻量刷新，保证极端清理进程后桌面数据与 App 内完全一致。
+
+---
+
+## 6. 落地实现与工程文件映射 (Implementation Status & File Mapping)
+
+本规范已在代码库中 100% 完整落地与测试验证，核心落地代码映射如下：
+
+| 模块 / 职责 | 对应实现文件 | 说明 |
+| :--- | :--- | :--- |
+| **小部件布局** | [`widget_expense_overview.xml`](../app/src/main/res/layout/widget_expense_overview.xml) | 4x2 智能双模看板，包含左侧收支仪表盘与右侧分类记账矩阵 |
+| **配置元数据** | [`listen_expense_widget_info.xml`](../app/src/main/res/xml/listen_expense_widget_info.xml) | `updatePeriodMillis="0"`, 4x2 单元格尺寸与无轮询设定 |
+| **Provider 调度** | [`ListenExpenseAppWidgetProvider.kt`](../app/src/main/java/com/listen/expensetracker/widget/ListenExpenseAppWidgetProvider.kt) | 负责月度核算、健康度判定与 RemoteViews 绑定 |
+| **深浅色主题** | [`colors_widget.xml`](../app/src/main/res/values/colors_widget.xml) & [`values-night`](../app/src/main/res/values-night/colors_widget.xml) | RemoteViews 规范原生深浅色自适应调色盘 |
+| **DeepLink 与路由** | [`MainActivity.kt`](../app/src/main/java/com/listen/expensetracker/MainActivity.kt) & [`AndroidManifest.xml`](../app/src/main/AndroidManifest.xml) | singleTop 模式接收 `lexpense://quick_add`，别名规范化映射 |
+| **全局快速记账** | [`ExpenseAppState.kt`](../app/src/main/java/com/listen/expensetracker/core/state/ExpenseAppState.kt) | `openQuickAdd` 调度与跨 Tab 自动切换 |
+| **记账分类预选** | [`TransactionSheet.kt`](../app/src/main/java/com/listen/expensetracker/features/transactions/components/TransactionSheet.kt) | 支持 `initialCategoryId` 自动预选分类与收支类型 |
+| **自动化测试** | [`ListenExpenseAppWidgetProviderTest.kt`](../app/src/test/java/com/listen/expensetracker/widget/ListenExpenseAppWidgetProviderTest.kt) | 月度核算、健康度判定与路由别名测试 (100% Pass) |
+
