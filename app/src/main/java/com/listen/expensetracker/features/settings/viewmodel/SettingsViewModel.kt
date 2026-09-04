@@ -36,14 +36,16 @@ class SettingsViewModel(
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
+    private val recurringDao = db.recurringRuleDao()
     private val prefManager = ExpenseDataStoreManager(application)
-    private val syncDelegate = SettingsSyncDelegate(application, dao, prefManager)
+    private val syncDelegate = SettingsSyncDelegate(application, dao, recurringDao, prefManager)
 
     init {
         ApmLogger.i(tag = "VM", message = "SettingsViewModel initialized")
         observeSettings()
         observeGoogleAccount()
         observeSyncState()
+        observeRecurringRules()
     }
 
     override fun handleIntent(intent: SettingsIntent) {
@@ -73,6 +75,17 @@ class SettingsViewModel(
                 prefManager.setMonthlyBudget(intent.budget)
                 prefManager.setCategoryBudgetRatios(intent.ratios)
                 updateState { copy(monthlyBudget = intent.budget, categoryBudgetRatios = intent.ratios) }
+            }
+            is SettingsIntent.SaveRecurringRule -> viewModelScope.launch {
+                recurringDao.insertRule(intent.rule)
+                emitEffect(CommonUiEffect.ShowToast("已保存周期规则"))
+            }
+            is SettingsIntent.DeleteRecurringRule -> viewModelScope.launch {
+                recurringDao.deleteRuleById(intent.ruleId)
+                emitEffect(CommonUiEffect.ShowToast("已删除周期规则"))
+            }
+            is SettingsIntent.ToggleRecurringRule -> viewModelScope.launch {
+                recurringDao.updateRule(intent.rule.copy(isEnabled = intent.isEnabled))
             }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
@@ -112,31 +125,29 @@ class SettingsViewModel(
                     onToast = { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) })
             }
             is SettingsIntent.SeedDemoData -> viewModelScope.launch {
-                syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { msg ->
-                    emitEffect(CommonUiEffect.ShowToast(msg))
-                }
+                syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
             }
             is SettingsIntent.ClearAllData -> viewModelScope.launch {
-                syncDelegate.clearAllData(currentState.language) { msg ->
-                    emitEffect(CommonUiEffect.ShowToast(msg))
-                }
+                syncDelegate.clearAllData(currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
             }
             is SettingsIntent.ExportJsonToFile -> viewModelScope.launch {
-                syncDelegate.exportJsonToFile(intent.uri, currentState.language) { msg ->
-                    emitEffect(CommonUiEffect.ShowToast(msg))
-                }
+                syncDelegate.exportJsonToFile(intent.uri, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
             }
             is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch {
-                syncDelegate.importJsonFromFile(intent.uri, currentState.language) { msg ->
-                    emitEffect(CommonUiEffect.ShowToast(msg))
-                }
+                syncDelegate.importJsonFromFile(intent.uri, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
             }
-            is SettingsIntent.TriggerGoogleSignIn -> {
-                emitEffect(SettingsEffect.LaunchGoogleSignIn)
-            }
+            is SettingsIntent.TriggerGoogleSignIn -> { emitEffect(SettingsEffect.LaunchGoogleSignIn) }
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is SettingsIntent.CheckForUpdates -> checkForUpdates(intent.currentVersion)
+        }
+    }
+
+    private fun observeRecurringRules() {
+        viewModelScope.launch {
+            recurringDao.getAllRulesFlow().collectLatest { rules ->
+                updateState { copy(recurringRules = rules) }
+            }
         }
     }
 

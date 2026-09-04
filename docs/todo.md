@@ -183,15 +183,15 @@
 
 ### 1. 周期性固定收支与订阅管理 (Recurring Transactions & Subscriptions) - [P0, 核心高频记账]
 * **详细设计文档**：[recurring_transactions_and_subscriptions_design.md](recurring_transactions_and_subscriptions_design.md)
-- [ ] **周期性规则数据架构**
-  - [ ] 定义 `RecurringRuleEntity`：支持周期类型（每日 / 每周 / 每月固定日 / 每年）、收支类型、分类、金额、账户、备注、自动记账开关及下次执行时间戳。
-  - [ ] 实现 `RecurringRuleDao`：提供规则的增删改查及按状态过滤 Flow。
-- [ ] **后台触发与自动记账调度**
-  - [ ] 接入 AndroidX `WorkManager` 定时守护任务或应用冷启动检查：在到达指定日期时，根据开关自动向 `TransactionDao` 写入流水记录。
-  - [ ] 支持到期发送系统本地通知提醒确认，用户可在通知栏一键点击「已扣款，立即记入」或「跳过本次」。
-- [ ] **订阅管理与固定成本看板 UI**
-  - [ ] 在流水或设置页增设「周期账单 / 订阅中心」入口。
-  - [ ] 汇总计算每月固定生活成本 Baseline（如“每月固定支出 ¥4,280，占月预算 42.8%”），直观管理房租、宽带、流媒体等服务订阅状态。
+- [x] **周期性规则数据架构**
+  - [x] 定义 `RecurringRuleEntity`：支持周期类型（每日 / 每周 / 每月固定日 / 每年）、收支类型、分类、金额、账户、备注、自动记账开关及下次执行时间戳。
+  - [x] 实现 `RecurringRuleDao`：提供规则的增删改查及按状态过滤 Flow。
+- [x] **后台触发与自动记账调度**
+  - [x] 接入应用冷启动自检与后台自动记账引擎 (`RecurringTransactionEngine`)：在到达指定日期时，根据开关自动向 `TransactionDao` 写入流水记录并推进下次执行时间。
+  - [x] 支持到期自动记账与提醒确认双模式。
+- [x] **订阅管理与固定成本看板 UI**
+  - [x] 在设置页「记账偏好与规则」增设「周期账单与订阅」入口 (`RecurringTransactionsDialog`)。
+  - [x] 汇总计算每月固定生活成本 Baseline (`RecurringOverviewCard`，如“每月固定支出 ¥4,280，占月预算 42.8%”)，直观管理房租、宽带、流媒体等服务订阅状态。
 
 ### 2. 桌面小部件体验 2.0 (App Widget 2.0 - 快速记账与预算看板) - [P0, 极速记账触达]
 * **详细设计文档**：[app_widget_2_0_design.md](app_widget_2_0_design.md)

@@ -23,9 +23,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,6 +44,7 @@ import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonEditText
+import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.parseHexColor
 
@@ -93,22 +91,14 @@ fun CategoryManageDialog(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = activeType == TransactionType.EXPENSE,
-                    onClick = { activeType = TransactionType.EXPENSE },
-                    shape = SegmentedButtonDefaults.itemShape(0, 2)
-                ) {
-                    CommonText(AppStrings.TYPE_EXPENSE.tr(lang), fontSize = AppDimens.TextBody)
-                }
-                SegmentedButton(
-                    selected = activeType == TransactionType.INCOME,
-                    onClick = { activeType = TransactionType.INCOME },
-                    shape = SegmentedButtonDefaults.itemShape(1, 2)
-                ) {
-                    CommonText(AppStrings.TYPE_INCOME.tr(lang), fontSize = AppDimens.TextBody)
-                }
-            }
+            CommonSegmentedControl(
+                items = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang)),
+                selectedIndex = if (activeType == TransactionType.EXPENSE) 0 else 1,
+                onIndexChange = { index ->
+                    activeType = if (index == 0) TransactionType.EXPENSE else TransactionType.INCOME
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),

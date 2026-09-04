@@ -46,6 +46,7 @@ class TransactionsViewModel(
         }
         observeSettings()
         observeTransactions()
+        checkDueRecurringRules()
     }
 
     override fun handleIntent(intent: TransactionsIntent) {
@@ -116,10 +117,7 @@ class TransactionsViewModel(
                 emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset))
                 emitEffect(TransactionsEffect.ScrollToTransaction(intent.transactionId))
             }
-            is TransactionsIntent.ChangeTypeFilter -> {
-                updateState { copy(typeFilter = intent.type) }
-                recalculate()
-            }
+            is TransactionsIntent.ChangeTypeFilter -> { updateState { copy(typeFilter = intent.type) }; recalculate() }
             is TransactionsIntent.ApplyCompoundFilter -> {
                 updateState { copy(typeFilter = intent.type, selectedCategories = intent.categories, amountPreset = intent.preset, customMinAmount = intent.min, customMaxAmount = intent.max, sortOrder = intent.sortOrder) }; recalculate()
             }
@@ -138,8 +136,14 @@ class TransactionsViewModel(
                     prefManager.setCategoryBudgetRatios(intent.ratios)
                 }
             }
-            is TransactionsIntent.ScreenAppear -> recalculate()
+            is TransactionsIntent.ScreenAppear -> { checkDueRecurringRules(); recalculate() }
             is TransactionsIntent.ScreenDisappear -> Unit
+        }
+    }
+
+    private fun checkDueRecurringRules() {
+        viewModelScope.launch {
+            com.listen.expensetracker.data.engine.RecurringTransactionEngine.processDueRules(db.recurringRuleDao(), dao)
         }
     }
 
@@ -198,30 +202,22 @@ class TransactionsViewModel(
         }
     }
 
-    private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) {
-        viewModelScope.launch {
-            val entity = TransactionEntity(
-                type = intent.type, categoryId = intent.categoryId, categoryName = intent.categoryName,
-                categoryIcon = intent.categoryIcon, categoryColorHex = intent.categoryColorHex,
-                amount = intent.amount, note = intent.note, accountType = intent.accountType, timestamp = intent.timestamp
-            )
-            TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) {
-                dao.insertTransaction(entity)
-            }
-        }
+    private fun addTransaction(intent: TransactionsIntent.AddTransaction, traceId: String) = viewModelScope.launch {
+        val entity = TransactionEntity(
+            type = intent.type, categoryId = intent.categoryId, categoryName = intent.categoryName,
+            categoryIcon = intent.categoryIcon, categoryColorHex = intent.categoryColorHex,
+            amount = intent.amount, note = intent.note, accountType = intent.accountType, timestamp = intent.timestamp
+        )
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "InsertTransaction", traceId = traceId) { dao.insertTransaction(entity) }
     }
 
     private fun updateTransaction(transaction: TransactionEntity, traceId: String) = viewModelScope.launch {
-        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) {
-            dao.updateTransaction(transaction)
-        }
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "UpdateTransaction", traceId = traceId) { dao.updateTransaction(transaction) }
     }
 
     private fun deleteTransaction(id: String, traceId: String) = viewModelScope.launch {
         val entity = dao.getTransactionById(id) ?: return@launch
-        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) {
-            dao.deleteTransaction(entity)
-        }
+        TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "DeleteTransaction", traceId = traceId) { dao.deleteTransaction(entity) }
         val lang = currentState.language
         emitEffect(CommonUiEffect.ShowSnackbar(
             message = AppStrings.UNDO_DELETE_TOAST.tr(lang), actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(lang),

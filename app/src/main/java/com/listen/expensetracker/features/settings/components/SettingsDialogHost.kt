@@ -67,6 +67,18 @@ fun SettingsDialogHost(
                 lang = lang
             )
         }
+        is SettingsDialog.RecurringManage -> {
+            com.listen.expensetracker.features.recurring.components.RecurringTransactionsDialog(
+                rules = state.recurringRules,
+                monthlyBudget = state.monthlyBudget,
+                currencySymbol = sym,
+                lang = lang,
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                onSaveRule = { onIntent(SettingsIntent.SaveRecurringRule(it)) },
+                onDeleteRule = { onIntent(SettingsIntent.DeleteRecurringRule(it)) },
+                onToggleRule = { rule, isEnabled -> onIntent(SettingsIntent.ToggleRecurringRule(rule, isEnabled)) }
+            )
+        }
         is SettingsDialog.MonthlyBudget -> {
             CategoryBudgetModalDialog(
                 allTransactions = emptyList(),

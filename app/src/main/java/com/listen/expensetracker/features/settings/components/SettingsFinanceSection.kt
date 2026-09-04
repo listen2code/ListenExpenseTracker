@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.settings.components
+package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,6 +44,7 @@ fun SettingsFinanceSection(
     onOpenBudgetDialog: () -> Unit,
     onOpenCategoryDialog: () -> Unit,
     onOpenAccountDialog: () -> Unit,
+    onOpenRecurringDialog: () -> Unit,
     modifier: Modifier = Modifier,
     lang: String = "zh"
 ) {
@@ -79,6 +80,22 @@ fun SettingsFinanceSection(
                     Icon(
                         imageVector = Icons.Default.Savings,
                         contentDescription = "Budget",
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Recurring Transactions & Subscriptions Button
+            CommonButton(
+                text = AppStrings.RECURRING_TITLE.tr(lang),
+                onClick = onOpenRecurringDialog,
+                style = CommonButtonStyle.Outlined,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.AccountBalanceWallet,
+                        contentDescription = "Recurring",
                         modifier = Modifier.size(18.dp)
                     )
                 },

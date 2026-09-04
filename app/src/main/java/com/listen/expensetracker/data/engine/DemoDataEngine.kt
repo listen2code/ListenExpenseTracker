@@ -1,6 +1,9 @@
 package com.listen.expensetracker.data.engine
 
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.db.ExecutionType
+import com.listen.expensetracker.data.db.RecurringFrequency
+import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -112,6 +115,110 @@ object DemoDataEngine {
             )
         }
 
+        // 3. Generate a recurring subscription expense with [周期] prefix
+        val subCal = (cal.clone() as Calendar).apply {
+            val subDay = if (currentDay >= 5) 5 else 1
+            set(Calendar.DAY_OF_MONTH, subDay)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+        }
+        val subNote = if (lang == "zh") "[周期] 流媒体月度订阅" else if (lang == "ja") "[周期] サブスクリプション" else "[周期] Streaming Subscription"
+        generated.add(
+            TransactionEntity(
+                id = UUID.randomUUID().toString(),
+                type = TransactionType.EXPENSE,
+                categoryId = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
+                categoryIcon = "c_entertainment",
+                categoryColorHex = "#8B5CF6",
+                amount = 45.0,
+                timestamp = subCal.timeInMillis,
+                note = subNote,
+                accountType = "BANK"
+            )
+        )
+
         return generated
+    }
+
+    fun generateDefaultRecurringRules(lang: String = "zh"): List<RecurringRuleEntity> {
+        val now = System.currentTimeMillis()
+        fun getNextExec(day: Int): Long = Calendar.getInstance().apply {
+            add(Calendar.MONTH, 1)
+            set(Calendar.DAY_OF_MONTH, day)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+        }.timeInMillis
+
+        return listOf(
+            RecurringRuleEntity(
+                id = UUID.randomUUID().toString(),
+                title = if (lang == "zh") "住房租金" else if (lang == "ja") "家賃" else "Apartment Rent",
+                type = TransactionType.EXPENSE,
+                categoryId = "c_shopping",
+                categoryName = AppStrings.CAT_SHOPPING.tr(lang),
+                categoryIcon = "c_shopping",
+                categoryColorHex = "#EC4899",
+                amount = 2600.0,
+                accountType = "BANK",
+                note = if (lang == "zh") "每月1日房租" else "Monthly Rent",
+                frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 1,
+                startDate = now,
+                nextExecutionDate = getNextExec(1),
+                executionType = ExecutionType.AUTO_INSERT
+            ),
+            RecurringRuleEntity(
+                id = UUID.randomUUID().toString(),
+                title = if (lang == "zh") "Netflix 会员" else if (lang == "ja") "Netflix 会員" else "Netflix",
+                type = TransactionType.EXPENSE,
+                categoryId = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
+                categoryIcon = "c_entertainment",
+                categoryColorHex = "#8B5CF6",
+                amount = 45.0,
+                accountType = "BANK",
+                note = if (lang == "zh") "高级家庭套餐" else "Premium",
+                frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 5,
+                startDate = now,
+                nextExecutionDate = getNextExec(5),
+                executionType = ExecutionType.AUTO_INSERT
+            ),
+            RecurringRuleEntity(
+                id = UUID.randomUUID().toString(),
+                title = if (lang == "zh") "每月薪资" else if (lang == "ja") "毎月の給与" else "Monthly Salary",
+                type = TransactionType.INCOME,
+                categoryId = "c_salary",
+                categoryName = AppStrings.CAT_SALARY.tr(lang),
+                categoryIcon = "c_salary",
+                categoryColorHex = "#10B981",
+                amount = 18000.0,
+                accountType = "BANK",
+                note = if (lang == "zh") "固定工资发放" else "Base Salary",
+                frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 10,
+                startDate = now,
+                nextExecutionDate = getNextExec(10),
+                executionType = ExecutionType.NOTIFY_CONFIRM
+            ),
+            RecurringRuleEntity(
+                id = UUID.randomUUID().toString(),
+                title = if (lang == "zh") "iCloud 云存储" else if (lang == "ja") "iCloud ストレージ" else "iCloud Storage",
+                type = TransactionType.EXPENSE,
+                categoryId = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
+                categoryIcon = "c_entertainment",
+                categoryColorHex = "#8B5CF6",
+                amount = 21.0,
+                accountType = "CREDIT",
+                note = if (lang == "zh") "200GB 空间" else "200GB Plan",
+                frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 15,
+                startDate = now,
+                nextExecutionDate = getNextExec(15),
+                executionType = ExecutionType.AUTO_INSERT
+            )
+        )
     }
 }

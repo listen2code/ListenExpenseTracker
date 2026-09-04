@@ -8,9 +8,10 @@ import androidx.room.RoomDatabase
 /**
  * Persistent Room SQLite Database for ListenExpenseTracker.
  */
-@Database(entities = [TransactionEntity::class], version = 1, exportSchema = false)
+@Database(entities = [TransactionEntity::class, RecurringRuleEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
+    abstract fun recurringRuleDao(): RecurringRuleDao
 
     companion object {
         @Volatile

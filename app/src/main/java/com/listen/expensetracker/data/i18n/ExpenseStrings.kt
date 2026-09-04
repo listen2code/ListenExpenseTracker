@@ -205,9 +205,28 @@ object ExpenseStrings {
         AppStrings.ALREADY_LATEST_VERSION to "当前已是最新版本 (v%s)",
         AppStrings.UPDATE_FOUND_TITLE to "发现新版本 (v%s)",
         AppStrings.UPDATE_NOW_BTN to "立即下载更新",
+        AppStrings.VIEW_ON_GITHUB_BTN to "在 GitHub 查看",
         AppStrings.CHECK_UPDATE_FAILED to "检查更新失败，请稍后重试",
         AppStrings.CHANGELOG_TITLE to "更新日志",
-        AppStrings.TRANSACTION_NOTE_HINT to "添加备注 (选填)..."
+        AppStrings.TRANSACTION_NOTE_HINT to "添加备注 (选填)...",
+        AppStrings.RECURRING_TITLE to "周期账单与订阅",
+        AppStrings.RECURRING_SUBTITLE to "管理固定收支、会员订阅与自动记账",
+        AppStrings.RECURRING_MONTHLY_BASELINE to "每月固定支出",
+        AppStrings.RECURRING_BASELINE_DESC to "占月预算 %s (共 %d 项定期支出)",
+        AppStrings.RECURRING_ADD_RULE to "添加周期规则",
+        AppStrings.RECURRING_EDIT_RULE to "编辑周期规则",
+        AppStrings.RECURRING_NAME_HINT to "如：房租、Netflix",
+        AppStrings.RECURRING_FREQ_DAILY to "每天",
+        AppStrings.RECURRING_FREQ_WEEKLY to "每周",
+        AppStrings.RECURRING_FREQ_MONTHLY to "每月",
+        AppStrings.RECURRING_FREQ_YEARLY to "每年",
+        AppStrings.RECURRING_EXEC_AUTO to "到期自动记账",
+        AppStrings.RECURRING_EXEC_NOTIFY to "到期提醒确认",
+        AppStrings.RECURRING_NEXT_EXEC to "下次执行",
+        AppStrings.RECURRING_EMPTY_TITLE to "暂无周期性规则",
+        AppStrings.RECURRING_EMPTY_DESC to "点击下方按钮添加房租、订阅会员等定期收支",
+        AppStrings.RECURRING_DUE_TODAY to "今天到期",
+        AppStrings.RECURRING_DAYS_LEFT to "%d天后"
     )
 
     private val enMap = mapOf(
@@ -403,7 +422,25 @@ object ExpenseStrings {
         AppStrings.VIEW_ON_GITHUB_BTN to "View on GitHub",
         AppStrings.CHECK_UPDATE_FAILED to "Failed to check for updates, please try again",
         AppStrings.CHANGELOG_TITLE to "Changelog",
-        AppStrings.TRANSACTION_NOTE_HINT to "Add note (optional)..."
+        AppStrings.TRANSACTION_NOTE_HINT to "Add note (optional)...",
+        AppStrings.RECURRING_TITLE to "Recurring & Subscriptions",
+        AppStrings.RECURRING_SUBTITLE to "Manage fixed expenses, subscriptions & auto-tracking",
+        AppStrings.RECURRING_MONTHLY_BASELINE to "Monthly Fixed Expenses",
+        AppStrings.RECURRING_BASELINE_DESC to "%s of budget (%d recurring items)",
+        AppStrings.RECURRING_ADD_RULE to "Add Recurring Rule",
+        AppStrings.RECURRING_EDIT_RULE to "Edit Recurring Rule",
+        AppStrings.RECURRING_NAME_HINT to "e.g. Rent, Netflix",
+        AppStrings.RECURRING_FREQ_DAILY to "Daily",
+        AppStrings.RECURRING_FREQ_WEEKLY to "Weekly",
+        AppStrings.RECURRING_FREQ_MONTHLY to "Monthly",
+        AppStrings.RECURRING_FREQ_YEARLY to "Yearly",
+        AppStrings.RECURRING_EXEC_AUTO to "Auto Insert",
+        AppStrings.RECURRING_EXEC_NOTIFY to "Notify Confirm",
+        AppStrings.RECURRING_NEXT_EXEC to "Next run",
+        AppStrings.RECURRING_EMPTY_TITLE to "No recurring rules yet",
+        AppStrings.RECURRING_EMPTY_DESC to "Add rent, salary, or subscriptions to automate your tracking",
+        AppStrings.RECURRING_DUE_TODAY to "Due today",
+        AppStrings.RECURRING_DAYS_LEFT to "In %dd"
     )
 
     private val jaMap = mapOf(
@@ -599,6 +636,24 @@ object ExpenseStrings {
         AppStrings.VIEW_ON_GITHUB_BTN to "GitHub で見る",
         AppStrings.CHECK_UPDATE_FAILED to "更新の確認に失敗しました。もう一度お試しください",
         AppStrings.CHANGELOG_TITLE to "更新内容",
-        AppStrings.TRANSACTION_NOTE_HINT to "メモを追加 (任意)..."
+        AppStrings.TRANSACTION_NOTE_HINT to "メモを追加 (任意)...",
+        AppStrings.RECURRING_TITLE to "定期収支・サブスク管理",
+        AppStrings.RECURRING_SUBTITLE to "固定費・サブスク・自動記帳の管理",
+        AppStrings.RECURRING_MONTHLY_BASELINE to "毎月の固定支出",
+        AppStrings.RECURRING_BASELINE_DESC to "予算の %s（定期支出 %d 件）",
+        AppStrings.RECURRING_ADD_RULE to "定期ルールを追加",
+        AppStrings.RECURRING_EDIT_RULE to "定期ルールを編集",
+        AppStrings.RECURRING_NAME_HINT to "例：家賃、Netflix",
+        AppStrings.RECURRING_FREQ_DAILY to "毎日",
+        AppStrings.RECURRING_FREQ_WEEKLY to "毎週",
+        AppStrings.RECURRING_FREQ_MONTHLY to "毎月",
+        AppStrings.RECURRING_FREQ_YEARLY to "毎年",
+        AppStrings.RECURRING_EXEC_AUTO to "自動記帳",
+        AppStrings.RECURRING_EXEC_NOTIFY to "通知で確認",
+        AppStrings.RECURRING_NEXT_EXEC to "次回実行",
+        AppStrings.RECURRING_EMPTY_TITLE to "定期ルールがありません",
+        AppStrings.RECURRING_EMPTY_DESC to "家賃やサブスクなどの定期的な収支を追加してください",
+        AppStrings.RECURRING_DUE_TODAY to "今日期日",
+        AppStrings.RECURRING_DAYS_LEFT to "%d日後"
     )
 }

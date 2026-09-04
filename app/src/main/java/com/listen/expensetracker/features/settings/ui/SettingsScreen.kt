@@ -62,7 +62,7 @@ fun SettingsScreen(
             contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
         ) {
-            // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts)
+            // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts, Recurring)
             item(key = "finance_section") {
                 SettingsFinanceSection(
                     monthlyBudget = state.monthlyBudget,
@@ -70,6 +70,7 @@ fun SettingsScreen(
                     onOpenBudgetDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
                     onOpenCategoryDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
                     onOpenAccountDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AccountManage)) },
+                    onOpenRecurringDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.RecurringManage)) },
                     lang = lang
                 )
             }

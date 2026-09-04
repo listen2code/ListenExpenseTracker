@@ -6,6 +6,7 @@ import com.listen.arch.i18n.tr
 import com.listen.arch.sync.CloudSyncManager
 import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.cloud.GoogleDriveService
+import com.listen.expensetracker.data.db.RecurringRuleDao
 import com.listen.expensetracker.data.db.TransactionDao
 import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 class SettingsSyncDelegate(
     private val application: Application,
     private val dao: TransactionDao,
+    private val recurringDao: RecurringRuleDao,
     private val prefManager: ExpenseDataStoreManager
 ) {
     suspend fun triggerCloudBackup(
@@ -115,12 +117,20 @@ class SettingsSyncDelegate(
         val accounts = if (accountList.isEmpty()) listOf("CASH", "BANK", "CREDIT") else accountList
         val generated = DemoDataEngine.generate(monthOffset, lang, accounts)
         dao.insertTransactions(generated)
+        val defaultRules = DemoDataEngine.generateDefaultRecurringRules(lang)
+        val existingRules = recurringDao.getAllRules()
+        defaultRules.forEach { demoRule ->
+            if (existingRules.none { it.title == demoRule.title }) {
+                recurringDao.insertRule(demoRule)
+            }
+        }
         val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
         onToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(lang).format(title, generated.size))
     }
 
     suspend fun clearAllData(lang: String, onToast: (String) -> Unit) {
         dao.deleteAll()
+        recurringDao.deleteAll()
         onToast(AppStrings.CLEAR_ALL_SUCCESS_TOAST.tr(lang))
     }
 

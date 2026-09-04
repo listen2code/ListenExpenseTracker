@@ -19,6 +19,7 @@ sealed interface SettingsDialog {
     data object MonthlyBudget : SettingsDialog
     data object CategoryManage : SettingsDialog
     data object AccountManage : SettingsDialog
+    data object RecurringManage : SettingsDialog
     data object CurrencySelect : SettingsDialog
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
@@ -36,6 +37,7 @@ data class SettingsUiState(
     val currencySymbol: String = "￥",
     val monthlyBudget: Double = 5000.0,
     val categoryBudgetRatios: Map<String, Float> = com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios,
+    val recurringRules: List<com.listen.expensetracker.data.db.RecurringRuleEntity> = emptyList(),
     val autoBackupDrive: Boolean = true,
     val autoBackupWifiOnly: Boolean = false,
     val syncState: SyncState = SyncState(),
@@ -60,6 +62,9 @@ sealed interface SettingsIntent {
     data class ChangeCurrencySymbol(val symbol: String) : SettingsIntent
     data class UpdateMonthlyBudget(val budget: Double) : SettingsIntent
     data class UpdateCategoryBudgets(val budget: Double, val ratios: Map<String, Float>) : SettingsIntent
+    data class SaveRecurringRule(val rule: com.listen.expensetracker.data.db.RecurringRuleEntity) : SettingsIntent
+    data class DeleteRecurringRule(val ruleId: String) : SettingsIntent
+    data class ToggleRecurringRule(val rule: com.listen.expensetracker.data.db.RecurringRuleEntity, val isEnabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupDrive(val enabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
     data class ToggleDeveloperMode(val enabled: Boolean) : SettingsIntent
