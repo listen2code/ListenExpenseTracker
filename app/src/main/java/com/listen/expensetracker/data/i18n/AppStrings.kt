@@ -264,4 +264,23 @@ object AppStrings {
     const val BUDGET_REMAINING_HINT = "budget_remaining_hint"
     const val JUMP_TO_THIS_MONTH = "jump_to_this_month"
     const val WIDGET_MONTH_EXPENSE = "widget_month_expense"
+
+    // Financial Insights & Annual Overview
+    const val INSIGHT_SECTION_TITLE = "insight_section_title"
+    const val INSIGHT_MOM_INC_TITLE = "insight_mom_inc_title"
+    const val INSIGHT_MOM_INC_DESC = "insight_mom_inc_desc"
+    const val INSIGHT_MOM_DEC_TITLE = "insight_mom_dec_title"
+    const val INSIGHT_MOM_DEC_DESC = "insight_mom_dec_desc"
+    const val INSIGHT_BURN_RATE_TITLE = "insight_burn_rate_title"
+    const val INSIGHT_BURN_RATE_DESC = "insight_burn_rate_desc"
+    const val INSIGHT_CAT_JUMP_TITLE = "insight_cat_jump_title"
+    const val INSIGHT_CAT_JUMP_DESC = "insight_cat_jump_desc"
+    const val INSIGHT_PEAK_DAY_TITLE = "insight_peak_day_title"
+    const val INSIGHT_PEAK_DAY_DESC = "insight_peak_day_desc"
+    const val INSIGHT_STEADY_TITLE = "insight_steady_title"
+    const val INSIGHT_STEADY_DESC = "insight_steady_desc"
+    const val INSIGHT_OVER_TITLE = "insight_over_title"
+    const val INSIGHT_OVER_DESC = "insight_over_desc"
+    const val ANNUAL_OVERVIEW_TITLE = "annual_overview_title"
+    const val ANNUAL_OVERVIEW_SUBTITLE = "annual_overview_subtitle"
 }

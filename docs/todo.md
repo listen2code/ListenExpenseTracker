@@ -206,13 +206,13 @@
 
 ### 3. 智能财务洞察与深度环比分析 (Smart Financial Insights & MoM) - [P1, 数据价值挖掘]
 * **详细设计文档**：[smart_financial_insights_design.md](smart_financial_insights_design.md)
-- [ ] **财务诊断与环比分析引擎**
-  - [ ] 实现 `FinancialInsightEngine`：自动比对上月同期开销（月环比 MoM Analysis），如“本月餐饮相比上月同期增长 15.2%”。
-  - [ ] 智能消费波峰诊断：自动识别当月单日开销最大峰值日及消费最密集时间段。
-  - [ ] 预算消耗速率预测：根据当前日历进度计算每日平均开销斜率，生成预测预警（如“按照当前消耗速度，预计将于 9月21日 耗尽预算”）。
-- [ ] **统计页高阶视图增强**
-  - [ ] 统计页顶部轮播展示「财务洞察卡片 (Insight Cards)」。
-  - [ ] 增设「年度 12 个月收支走势 (Annual Overview)」柱状走势图，支持横向查看全年收支结余健康曲线。
+- [x] **财务诊断与环比分析引擎**
+  - [x] 实现 `FinancialInsightEngine`：自动比对上月同期开销（月环比 MoM Analysis），如“本月餐饮相比上月同期增长 15.2%”。
+  - [x] 智能消费波峰诊断：自动识别当月单日开销最大峰值日及消费最密集时间段。
+  - [x] 预算消耗速率预测：根据当前日历进度计算每日平均开销斜率，生成预测预警（如“按照当前消耗速度，预计将于 9月21日 耗尽预算”）。
+- [x] **统计页高阶视图增强**
+  - [x] 统计页顶部轮播展示「财务洞察卡片 (Insight Cards)」。
+  - [x] 增设「年度 12 个月收支走势 (Annual Overview)」柱状走势图，支持横向查看全年收支结余健康曲线。
 
 ### 4. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全]
 * **详细设计文档**：[biometric_security_and_privacy_design.md](biometric_security_and_privacy_design.md)
@@ -241,4 +241,4 @@
 - [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：提供全局可拖拽、吸边的半透明调试悬浮球，点击快速调出日志与慢查询控制台。
 - [ ] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
 - [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。
-
+- [ ] 给每个components，下面的@Composable都生成preview代码

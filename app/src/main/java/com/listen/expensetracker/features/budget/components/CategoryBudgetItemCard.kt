@@ -36,11 +36,11 @@ import kotlin.math.abs
  */
 @Composable
 fun CategoryBudgetItemCard(
+    modifier: Modifier = Modifier,
     status: CategoryBudgetStatus,
     currencySymbol: String,
     lang: String,
     hideAmount: Boolean = false,
-    modifier: Modifier = Modifier
 ) {
     val statusColor = when (status.status) {
         BudgetHealthStatus.NORMAL -> Color(0xFF10B981)
