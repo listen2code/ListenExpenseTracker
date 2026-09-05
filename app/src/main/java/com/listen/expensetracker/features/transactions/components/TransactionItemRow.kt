@@ -31,6 +31,7 @@ import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
@@ -166,12 +167,14 @@ fun TransactionItemRow(
             val amountPrefix = if (isExpense) "-" else "+"
             val amountColor = if (isExpense) ExpenseRed else IncomeGreen
 
-            Text(
+            CommonText(
                 text = if (hideAmount) "••••" else "$amountPrefix$currencySymbol${"%.2f".format(transaction.amount)}",
                 fontWeight = FontWeight.Bold,
                 fontSize = AppDimens.TextSubtitle,
+                minFontSize = 10.sp,
                 color = amountColor,
-                maxLines = 1
+                maxLines = 1,
+                autoResize = true
             )
         }
     }

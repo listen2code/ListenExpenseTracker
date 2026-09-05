@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.engine.CategoryBudgetCalculationResult
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import kotlin.math.abs
 
@@ -55,11 +56,14 @@ fun BudgetOverviewHeaderCard(
                 Row(verticalAlignment = Alignment.Bottom) {
                     val spentStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(result.totalSpent)}"
                     val budgetStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(result.totalBudget)}"
-                    Text(
+                    CommonText(
                         text = spentStr,
                         fontSize = 17.sp,
+                        minFontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        autoResize = true
                     )
                     Text(
                         text = " / $budgetStr",

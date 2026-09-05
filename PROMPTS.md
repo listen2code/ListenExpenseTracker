@@ -198,3 +198,17 @@
   - 必须遵循 Kotlin 惯用的“一行一语句”原则；
   - 严禁通过分号来刻意压缩代码行数（如 `applyA(); updateB()`），这会严重破坏代码的可读性、调试断点的精准度以及 Git Diff 的清晰度；
   - 除非是在极少数为了配合特定语法（如枚举类中带方法时必须在枚举项末尾加分号）的情况，否则全项目严禁出现任何不必要的分号。
+
+---
+
+## 20. 金额展示禁止省略号截断与自适应缩放规范 (Amount Display Auto-Resize Standard)
+
+- **严禁对任何财务金额文本使用省略号截断（`TextOverflow.Ellipsis` / `android:ellipsize="end"`）**：
+  - 金额是记账类 App 的核心生命线，省略号截断（如 `￥12...` 或 `￥99...`）会造成极严重的误导与信息丢失；
+- **自适应缩放替代截断**：
+  1. **Compose UI 视图**：
+     - 所有金额展示优先使用通用组件 `CommonText`，配置 `maxLines = 1` 并显式开启 `autoResize = true`；
+     - 必须配合设置合适的 `minFontSize`（例如主金额 `minFontSize = 14.sp`、副金额 `minFontSize = 10.sp`），确保在极端大金额或窄屏设备上字体平滑等比缩小，完整展示每一位数字与小数；
+  2. **桌面小部件 / RemoteViews XML**：
+     - 严禁在金额 `TextView` 上声明 `android:ellipsize="end"`；
+     - 必须配置原生自适应字号属性 `android:autoSizeTextType="uniform"` / `app:autoSizeTextType="uniform"`，配合 `autoSizeMinTextSize` 与 `autoSizeMaxTextSize`，确保 RemoteViews 在不同启动器分辨率下完整呈现无缺漏。

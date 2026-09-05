@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.RecurringMonthlyBaseline
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -61,16 +62,22 @@ fun RecurringOverviewCard(
             CommonText(
                 text = "$currencySymbol%.2f".format(baseline.totalExpense),
                 fontSize = AppDimens.TextDisplay,
+                minFontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = ExpenseRed
+                color = ExpenseRed,
+                maxLines = 1,
+                autoResize = true
             )
 
             if (baseline.totalIncome > 0) {
                 CommonText(
                     text = "+$currencySymbol%.2f".format(baseline.totalIncome),
                     fontSize = AppDimens.TextBody,
+                    minFontSize = 10.sp,
                     fontWeight = FontWeight.Medium,
-                    color = IncomeGreen
+                    color = IncomeGreen,
+                    maxLines = 1,
+                    autoResize = true
                 )
             }
         }

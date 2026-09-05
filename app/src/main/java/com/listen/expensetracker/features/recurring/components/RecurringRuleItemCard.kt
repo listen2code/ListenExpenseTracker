@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.db.RecurringRuleEntity
@@ -180,13 +181,16 @@ fun RecurringRuleItemCard(
                         )
                     }
 
-                    // 第 3 行: 完整金额 (左对齐顶格，不缩略)
+                    // 第 3 行: 完整金额 (左对齐顶格，自适应缩小，不缩略)
                     val isExp = rule.type == TransactionType.EXPENSE
                     CommonText(
                         text = "${if (isExp) "-" else "+"}$currencySymbol%.2f".format(rule.amount),
                         fontSize = AppDimens.TextTitle,
+                        minFontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isExp) ExpenseRed else IncomeGreen
+                        color = if (isExp) ExpenseRed else IncomeGreen,
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
 

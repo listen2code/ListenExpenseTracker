@@ -22,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
@@ -64,12 +66,14 @@ fun MetricsSummaryCard(
                     modifier = Modifier.height(24.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(
+                    CommonText(
                         text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(dailyAverage)}",
                         fontSize = AppDimens.TextTitle,
+                        minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isExpenseTab) ExpenseRed else IncomeGreen,
-                        maxLines = 1
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
             }
@@ -106,12 +110,14 @@ fun MetricsSummaryCard(
                     modifier = Modifier.height(24.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
-                    Text(
+                    CommonText(
                         text = maxDisplay,
                         fontSize = AppDimens.TextTitle,
+                        minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = themeColor,
-                        maxLines = 1
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
             }

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.StringsRes
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
@@ -90,12 +91,14 @@ fun BalanceOverviewCard(
                     modifier = Modifier.height(30.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
-                    Text(
+                    CommonText(
                         text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(netBalance)}",
                         fontSize = AppDimens.TextDisplay,
+                        minFontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
             }
@@ -115,12 +118,14 @@ fun BalanceOverviewCard(
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
+                    CommonText(
                         text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalExpense)}",
                         fontSize = AppDimens.TextBody,
+                        minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = ExpenseRed,
-                        maxLines = 1
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
 
@@ -133,12 +138,14 @@ fun BalanceOverviewCard(
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
+                    CommonText(
                         text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalIncome)}",
                         fontSize = AppDimens.TextBody,
+                        minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = IncomeGreen,
-                        maxLines = 1
+                        maxLines = 1,
+                        autoResize = true
                     )
                 }
             }
