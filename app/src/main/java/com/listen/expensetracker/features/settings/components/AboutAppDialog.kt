@@ -2,7 +2,10 @@ package com.listen.expensetracker.features.settings.components
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,18 +13,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Shop
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -30,8 +40,6 @@ import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.listen.expensetracker.R
 
 /**
@@ -54,20 +62,44 @@ fun AboutAppDialog(
         Pair("0.0.1", 1L)
     }
 
+    val appIconBitmap = remember(context) {
+        try {
+            val drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher)
+                ?: context.packageManager.getApplicationIcon(context.packageName)
+            drawable.toBitmap(128, 128).asImageBitmap()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     CommonDialog(
         onDismissRequest = onDismiss,
         title = "lExpense",
         icon = {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(R.mipmap.ic_launcher)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "lExpense",
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(AppDimens.CornerButton))
-            )
+            if (appIconBitmap != null) {
+                Image(
+                    bitmap = appIconBitmap,
+                    contentDescription = "lExpense",
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(AppDimens.CornerButton))
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(AppDimens.CornerButton))
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBalanceWallet,
+                        contentDescription = "lExpense",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
         }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
