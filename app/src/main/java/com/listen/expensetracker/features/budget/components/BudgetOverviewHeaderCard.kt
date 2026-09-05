@@ -20,7 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.CategoryBudgetCalculationResult
+import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import kotlin.math.abs
@@ -54,8 +57,8 @@ fun BudgetOverviewHeaderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    val spentStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(result.totalSpent)}"
-                    val budgetStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(result.totalBudget)}"
+                    val spentStr = if (hideAmount) "••••" else "$currencySymbol${result.totalSpent.formatAmount()}"
+                    val budgetStr = if (hideAmount) "••••" else "$currencySymbol${result.totalBudget.formatAmount()}"
                     CommonText(
                         text = spentStr,
                         fontSize = 17.sp,
@@ -80,8 +83,9 @@ fun BudgetOverviewHeaderCard(
                         .background(healthColor.copy(alpha = 0.12f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    val remStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(abs(result.remainingBudget))}"
-                    val remText = if (result.remainingBudget >= 0) "余 $remStr" else "超 $remStr"
+                    val remStr = if (hideAmount) "••••" else "$currencySymbol${abs(result.remainingBudget).formatAmount()}"
+                    val prefix = if (result.remainingBudget >= 0) AppStrings.BUDGET_REMAINING_PREFIX.tr(lang) else AppStrings.BUDGET_OVER_PREFIX.tr(lang)
+                    val remText = "$prefix $remStr"
                     Text(
                         text = "${(result.usageRatio * 100).toInt()}% · $remText",
                         fontSize = 11.sp,
@@ -110,12 +114,12 @@ fun BudgetOverviewHeaderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (result.overBudgetCount > 0) {
-                    CompactStatusDot(text = "${result.overBudgetCount}超支", color = Color(0xFFEF4444))
+                    CompactStatusDot(text = AppStrings.BUDGET_COUNT_OVER.tr(lang).format(result.overBudgetCount), color = Color(0xFFEF4444))
                 }
                 if (result.warningCount > 0) {
-                    CompactStatusDot(text = "${result.warningCount}预警", color = Color(0xFFF59E0B))
+                    CompactStatusDot(text = AppStrings.BUDGET_COUNT_WARNING.tr(lang).format(result.warningCount), color = Color(0xFFF59E0B))
                 }
-                CompactStatusDot(text = "${result.normalCount}正常", color = Color(0xFF10B981))
+                CompactStatusDot(text = AppStrings.BUDGET_COUNT_NORMAL.tr(lang).format(result.normalCount), color = Color(0xFF10B981))
             }
         }
     }

@@ -17,6 +17,7 @@ import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.DemoDataEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -102,9 +103,7 @@ class TransactionsViewModel(
                 emitEffect(TransactionsEffect.ScrollToDay(intent.day))
             }
             is TransactionsIntent.FilterByTransaction -> {
-                val amtStr = if (intent.amount != null) {
-                    if (intent.amount % 1.0 == 0.0) "%.0f".format(intent.amount) else "%.2f".format(intent.amount)
-                } else ""
+                val amtStr = intent.amount?.formatAmount() ?: ""
                 updateState {
                     copy(
                         selectedMonthOffset = intent.monthOffset, searchQuery = amtStr,
@@ -164,7 +163,9 @@ class TransactionsViewModel(
                 )
             }
             recalculate()
-            ListenExpenseAppWidgetProvider.updateFromTransactions(application, currentState.transactions, prefs.currencySymbol, prefs.monthlyBudget)
+            ListenExpenseAppWidgetProvider.updateFromTransactions(
+                application, currentState.transactions, prefs.currencySymbol, prefs.monthlyBudget, prefs.language
+            )
         }
     }
 
@@ -172,7 +173,9 @@ class TransactionsViewModel(
         viewModelScope.launch {
             dao.getAllTransactionsFlow().collectLatest { allList ->
                 applyCalculations(allList)
-                ListenExpenseAppWidgetProvider.updateFromTransactions(application, allList, currentState.currencySymbol, currentState.monthlyBudget)
+                ListenExpenseAppWidgetProvider.updateFromTransactions(
+                    application, allList, currentState.currencySymbol, currentState.monthlyBudget, currentState.language
+                )
                 GoogleDriveAutoBackupManager.scheduleAutoBackup(application)
             }
         }

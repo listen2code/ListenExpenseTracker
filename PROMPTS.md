@@ -212,3 +212,27 @@
   2. **桌面小部件 / RemoteViews XML**：
      - 严禁在金额 `TextView` 上声明 `android:ellipsize="end"`；
      - 必须配置原生自适应字号属性 `android:autoSizeTextType="uniform"` / `app:autoSizeTextType="uniform"`，配合 `autoSizeMinTextSize` 与 `autoSizeMaxTextSize`，确保 RemoteViews 在不同启动器分辨率下完整呈现无缺漏。
+
+---
+
+## 21. 金额格式化末尾零省略与整数精简规范 (Trailing Zero Amount Truncation Standard)
+
+- **核心原则**：
+  - 在全项目所有金额展示场景中，若金额格式化后末尾为 `".00"` 或 `".0"`，**必须自动转换为纯整数格式，移除小数点及后续无意义的零**；
+  - 示例：
+    - `100.00` -> `"100"`（展示为 `￥100`，而不是 `￥100.00`）
+    - `50.0` -> `"50"`（展示为 `￥50`）
+    - `12.50` -> `"12.50"` 或 `"12.5"`（若有非零小数如 `12.34`，则完整保留展示为 `￥12.34`）
+- **统一扩展函数规范**：
+  - 全局统一使用封装好的标准金额格式化扩展：
+    ```kotlin
+    fun Double.formatAmount(): String {
+        val str = "%.2f".format(this)
+        return when {
+            str.endsWith(".00") -> str.removeSuffix(".00")
+            str.endsWith(".0") -> str.removeSuffix(".0")
+            else -> str
+        }
+    }
+    ```
+  - 禁止在各个 UI 处手动拼装不一致的正则或字符串截断，确保全 App（流水明细、结余卡片、预算看板、桌面小部件等）风格统一清爽，进一步提升屏幕空间利用率并杜绝挤压溢出。

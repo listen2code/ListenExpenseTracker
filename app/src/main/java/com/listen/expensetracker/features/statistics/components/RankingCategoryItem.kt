@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -196,7 +197,7 @@ fun RankingCategoryItem(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(share.value)}",
+                    text = if (hideAmount) "••••" else "$currencySymbol${share.value.formatAmount()}",
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextSubtitle,
                     color = MaterialTheme.colorScheme.onSurface,

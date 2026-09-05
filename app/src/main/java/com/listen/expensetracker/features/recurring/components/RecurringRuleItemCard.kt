@@ -37,6 +37,7 @@ import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
@@ -70,13 +71,13 @@ fun RecurringRuleItemCard(
     val freqLabel = when (rule.frequency) {
         RecurringFrequency.DAILY -> AppStrings.RECURRING_FREQ_DAILY.tr(lang)
         RecurringFrequency.WEEKLY -> "${AppStrings.RECURRING_FREQ_WEEKLY.tr(lang)}${getWeekdayName(rule.dayOfPeriod, lang)}"
-        RecurringFrequency.MONTHLY -> "${AppStrings.RECURRING_FREQ_MONTHLY.tr(lang)} ${rule.dayOfPeriod}日"
+        RecurringFrequency.MONTHLY -> "${AppStrings.RECURRING_FREQ_MONTHLY.tr(lang)} ${AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(rule.dayOfPeriod)}"
         RecurringFrequency.YEARLY -> "${AppStrings.RECURRING_FREQ_YEARLY.tr(lang)}"
     }
 
     val daysDiff = ((rule.nextExecutionDate - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)).toInt()
     val countdownText = if (!rule.isEnabled) {
-        "已暂停"
+        AppStrings.RECURRING_PAUSED.tr(lang)
     } else if (daysDiff <= 0) {
         AppStrings.RECURRING_DUE_TODAY.tr(lang)
     } else {
@@ -184,7 +185,7 @@ fun RecurringRuleItemCard(
                     // 第 3 行: 完整金额 (左对齐顶格，自适应缩小，不缩略)
                     val isExp = rule.type == TransactionType.EXPENSE
                     CommonText(
-                        text = "${if (isExp) "-" else "+"}$currencySymbol%.2f".format(rule.amount),
+                        text = "${if (isExp) "-" else "+"}$currencySymbol${rule.amount.formatAmount()}",
                         fontSize = AppDimens.TextTitle,
                         minFontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -211,11 +212,11 @@ fun RecurringRuleItemCard(
 }
 
 private fun getWeekdayName(day: Int, lang: String): String = when (day) {
-    1 -> "一"
-    2 -> "二"
-    3 -> "三"
-    4 -> "四"
-    5 -> "五"
-    6 -> "六"
-    else -> "日"
+    1 -> AppStrings.WEEKDAY_MON.tr(lang)
+    2 -> AppStrings.WEEKDAY_TUE.tr(lang)
+    3 -> AppStrings.WEEKDAY_WED.tr(lang)
+    4 -> AppStrings.WEEKDAY_THU.tr(lang)
+    5 -> AppStrings.WEEKDAY_FRI.tr(lang)
+    6 -> AppStrings.WEEKDAY_SAT.tr(lang)
+    else -> AppStrings.WEEKDAY_SUN.tr(lang)
 }

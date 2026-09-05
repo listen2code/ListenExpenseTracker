@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
@@ -156,8 +157,8 @@ fun ActiveFilterTagsRow(
         // 3. Amount Range Tag
         if (state.amountPreset != AmountFilterPreset.ALL) {
             val amountLabel = if (state.amountPreset == AmountFilterPreset.CUSTOM) {
-                val minStr = state.customMinAmount?.let { "${state.currencySymbol}${"%.0f".format(it)}" } ?: "0"
-                val maxStr = state.customMaxAmount?.let { "${state.currencySymbol}${"%.0f".format(it)}" } ?: "∞"
+                val minStr = state.customMinAmount?.let { "${state.currencySymbol}${it.formatAmount()}" } ?: "0"
+                val maxStr = state.customMaxAmount?.let { "${state.currencySymbol}${it.formatAmount()}" } ?: "∞"
                 "$minStr ~ $maxStr"
             } else {
                 state.amountPreset.labelKey.tr(lang)

@@ -33,7 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
@@ -92,7 +92,7 @@ fun BalanceOverviewCard(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     CommonText(
-                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(netBalance)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${netBalance.formatAmount()}",
                         fontSize = AppDimens.TextDisplay,
                         minFontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -119,7 +119,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     CommonText(
-                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalExpense)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${totalExpense.formatAmount()}",
                         fontSize = AppDimens.TextBody,
                         minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -139,7 +139,7 @@ fun BalanceOverviewCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     CommonText(
-                        text = if (hideBalance) "••••" else "$currencySymbol${"%.2f".format(totalIncome)}",
+                        text = if (hideBalance) "••••" else "$currencySymbol${totalIncome.formatAmount()}",
                         fontSize = AppDimens.TextBody,
                         minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -192,7 +192,7 @@ fun BalanceOverviewCard(
                         )
                         if (monthlyBudget > 0.0) {
                             Text(
-                                text = if (hideBalance) "(••••)" else "($currencySymbol${"%.0f".format(monthlyBudget)})",
+                                text = if (hideBalance) "(••••)" else "($currencySymbol${monthlyBudget.formatAmount()})",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -209,7 +209,7 @@ fun BalanceOverviewCard(
                         text = if (hideBalance) {
                             if (isOverBudget) "${AppStrings.OVER_BUDGET.tr(lang)} ••••" else "${AppStrings.USED_BUDGET.tr(lang)} ••••"
                         } else if (isOverBudget) {
-                            "${AppStrings.OVER_BUDGET.tr(lang)} $currencySymbol${"%.0f".format(totalExpense - monthlyBudget)}"
+                            "${AppStrings.OVER_BUDGET.tr(lang)} $currencySymbol${(totalExpense - monthlyBudget).formatAmount()}"
                         } else {
                             "${AppStrings.USED_BUDGET.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
                         },

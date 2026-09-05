@@ -109,11 +109,11 @@ fun RecurringRuleEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CommonText(
-                        text = "名称",
+                        text = AppStrings.RECURRING_RULE_NAME.tr(lang),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(38.dp)
+                        modifier = Modifier.width(42.dp)
                     )
                     BasicTextField(
                         value = state.title,
@@ -128,7 +128,7 @@ fun RecurringRuleEditContent(
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (state.title.isEmpty()) {
                                     CommonText(
-                                        text = "如：房租、Netflix",
+                                        text = AppStrings.RECURRING_NAME_HINT.tr(lang),
                                         fontSize = AppDimens.TextSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                     )
@@ -147,11 +147,11 @@ fun RecurringRuleEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CommonText(
-                        text = "金额",
+                        text = AppStrings.RECURRING_AMOUNT_LABEL.tr(lang),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(38.dp)
+                        modifier = Modifier.width(42.dp)
                     )
                     CommonText(
                         text = currencySymbol,

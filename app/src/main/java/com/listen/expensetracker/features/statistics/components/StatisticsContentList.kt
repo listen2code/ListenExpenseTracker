@@ -29,6 +29,7 @@ import com.listen.uicomponent.charts.PieChartItem
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
@@ -113,7 +114,7 @@ fun StatisticsContentList(
                                 items = shares,
                                 totalValue = amount,
                                 centerTitle = if (expenseTab) AppStrings.TOTAL_EXPENSE.tr(lang) else AppStrings.TOTAL_INCOME.tr(lang),
-                                centerValueText = if (state.hideAmount) "••••" else "$sym${"%.2f".format(amount)}",
+                                centerValueText = if (state.hideAmount) "••••" else "$sym${amount.formatAmount()}",
                                 currencySymbol = sym,
                                 hideAmount = state.hideAmount,
                                 selectedItem = selectedDonutItem,
@@ -157,7 +158,7 @@ fun StatisticsContentList(
                             currencySymbol = sym,
                             hideAmount = state.hideAmount,
                             maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxDailyVal),
-                            totalLabel = if (state.hideAmount) "••••" else "$sym${"%.2f".format(calc.totalExpense)}",
+                            totalLabel = if (state.hideAmount) "••••" else "$sym${calc.totalExpense.formatAmount()}",
                             onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { day -> cb(day, pt.subLabel ?: "") } } },
                             modifier = Modifier.fillMaxWidth()
                         )

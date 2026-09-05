@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
@@ -67,7 +68,7 @@ fun MetricsSummaryCard(
                     contentAlignment = Alignment.CenterStart
                 ) {
                     CommonText(
-                        text = if (hideAmount) "••••" else "$currencySymbol${"%.2f".format(dailyAverage)}",
+                        text = if (hideAmount) "••••" else "$currencySymbol${dailyAverage.formatAmount()}",
                         fontSize = AppDimens.TextTitle,
                         minFontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -104,7 +105,7 @@ fun MetricsSummaryCard(
                 val maxDisplay = if (hideAmount) {
                     "••••"
                 } else {
-                    maxTransaction?.let { "$currencySymbol${"%.2f".format(it.amount)} (${it.categoryName})" } ?: noneText
+                    maxTransaction?.let { "$currencySymbol${it.amount.formatAmount()} (${it.categoryName})" } ?: noneText
                 }
                 Box(
                     modifier = Modifier.height(24.dp),

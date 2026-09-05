@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -73,7 +74,7 @@ fun SettingsFinanceSection(
 
             // Monthly Budget Button (Full Width)
             CommonButton(
-                text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${"%.0f".format(monthlyBudget)}",
+                text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${monthlyBudget.formatAmount()}",
                 onClick = onOpenBudgetDialog,
                 style = CommonButtonStyle.Outlined,
                 icon = {

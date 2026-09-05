@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.theme.IncomeGreen
 import java.util.Calendar
@@ -72,14 +73,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = if (hideAmount) "${AppStrings.TYPE_EXPENSE.tr(lang)} ••••" else "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${"%.2f".format(dayExpense)}",
+                    text = if (hideAmount) "${AppStrings.TYPE_EXPENSE.tr(lang)} ••••" else "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${dayExpense.formatAmount()}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = if (hideAmount) "${AppStrings.TYPE_INCOME.tr(lang)} ••••" else "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${"%.2f".format(dayIncome)}",
+                    text = if (hideAmount) "${AppStrings.TYPE_INCOME.tr(lang)} ••••" else "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${dayIncome.formatAmount()}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

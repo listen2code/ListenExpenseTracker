@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.budget.components
+package com.listen.expensetracker.features.budget.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.BudgetHealthStatus
 import com.listen.expensetracker.data.model.CategoryBudgetStatus
 import com.listen.uicomponent.components.SurfaceCard
@@ -115,16 +118,16 @@ fun CategoryBudgetItemCard(
                     // 右侧状态文本
                     val badgeText = when (status.status) {
                         BudgetHealthStatus.NORMAL -> {
-                            val remStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(status.remainingAmount)}"
-                            "余 $remStr"
+                            val remStr = if (hideAmount) "••••" else "$currencySymbol${status.remainingAmount.formatAmount()}"
+                            "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} $remStr"
                         }
                         BudgetHealthStatus.WARNING -> {
-                            val remStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(status.remainingAmount)}"
-                            "仅余 $remStr"
+                            val remStr = if (hideAmount) "••••" else "$currencySymbol${status.remainingAmount.formatAmount()}"
+                            "${AppStrings.BUDGET_ONLY_REMAINING_PREFIX.tr(lang)} $remStr"
                         }
                         BudgetHealthStatus.OVERBUDGET -> {
-                            val overStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(abs(status.spentAmount - status.budgetAmount))}"
-                            "超支 $overStr"
+                            val overStr = if (hideAmount) "••••" else "$currencySymbol${abs(status.spentAmount - status.budgetAmount).formatAmount()}"
+                            "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} $overStr"
                         }
                     }
                     Text(
@@ -152,8 +155,8 @@ fun CategoryBudgetItemCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val spentStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(status.spentAmount)}"
-                    val budgetStr = if (hideAmount) "••••" else "$currencySymbol${"%.0f".format(status.budgetAmount)}"
+                    val spentStr = if (hideAmount) "••••" else "$currencySymbol${status.spentAmount.formatAmount()}"
+                    val budgetStr = if (hideAmount) "••••" else "$currencySymbol${status.budgetAmount.formatAmount()}"
                     Text(
                         text = "$spentStr / $budgetStr",
                         fontSize = 10.sp,

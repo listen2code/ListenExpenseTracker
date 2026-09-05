@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 
@@ -33,6 +35,7 @@ import com.listen.uicomponent.components.CommonText
 @Composable
 fun MonthlyDaySelector(
     dayOfPeriod: Int,
+    lang: String,
     onDayChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -45,7 +48,7 @@ fun MonthlyDaySelector(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CommonText(text = "每月扣款日期", fontSize = AppDimens.TextSmall)
+            CommonText(text = AppStrings.RECURRING_DUE_DAY_LABEL.tr(lang), fontSize = AppDimens.TextSmall)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -62,8 +65,13 @@ fun MonthlyDaySelector(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                     modifier = Modifier.padding(horizontal = 4.dp)
                 ) {
+                    val dayLabel = if (dayOfPeriod == 28) {
+                        AppStrings.RECURRING_MONTH_END_DETAIL.tr(lang)
+                    } else {
+                        AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(dayOfPeriod)
+                    }
                     CommonText(
-                        text = if (dayOfPeriod == 28) "月末 (28日)" else "${dayOfPeriod}日",
+                        text = dayLabel,
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -96,8 +104,13 @@ fun MonthlyDaySelector(
                         .clip(RoundedCornerShape(AppDimens.CornerButton))
                         .clickable { onDayChange(day) }
                 ) {
+                    val quickLabel = if (day == 28) {
+                        AppStrings.RECURRING_MONTH_END.tr(lang)
+                    } else {
+                        AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(day)
+                    }
                     CommonText(
-                        text = if (day == 28) "月末" else "${day}日",
+                        text = quickLabel,
                         fontSize = AppDimens.TextCaption,
                         color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,

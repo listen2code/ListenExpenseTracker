@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -81,8 +82,8 @@ fun CategoryBudgetEditContent(
                 val isSelected = totalBudget == preset
                 FilterChip(
                     selected = isSelected,
-                    onClick = { onBudgetInputChange("%.0f".format(preset)) },
-                    label = { Text("$currencySymbol${"%.0f".format(preset)}", fontSize = 12.sp) },
+                    onClick = { onBudgetInputChange(preset.formatAmount()) },
+                    label = { Text("$currencySymbol${preset.formatAmount()}", fontSize = 12.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -109,15 +110,15 @@ fun CategoryBudgetEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "已分配: $totalAllocatedPercent%",
+                        text = AppStrings.BUDGET_ALLOCATED.tr(lang).format(totalAllocatedPercent),
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = allocColor
                     )
                     val hintText = when {
-                        totalAllocatedPercent == 100 -> "已完全分配"
-                        totalAllocatedPercent > 100 -> "超出 ${totalAllocatedPercent - 100}%"
-                        else -> "剩余 ${100 - totalAllocatedPercent}% 可分配"
+                        totalAllocatedPercent == 100 -> AppStrings.BUDGET_FULLY_ALLOCATED.tr(lang)
+                        totalAllocatedPercent > 100 -> AppStrings.BUDGET_EXCEED_HINT.tr(lang).format(totalAllocatedPercent - 100)
+                        else -> AppStrings.BUDGET_REMAINING_HINT.tr(lang).format(100 - totalAllocatedPercent)
                     }
                     Text(text = hintText, fontSize = 11.sp, color = allocColor, fontWeight = FontWeight.Medium)
                 }

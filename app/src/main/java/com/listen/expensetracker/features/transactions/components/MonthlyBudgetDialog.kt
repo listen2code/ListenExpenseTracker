@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -56,9 +57,7 @@ fun MonthlyBudgetDialog(
 ) {
     var budgetInput by remember {
         mutableStateOf(
-            if (currentBudget > 0) {
-                if (currentBudget % 1.0 == 0.0) "%.0f".format(currentBudget) else "%.2f".format(currentBudget)
-            } else "5000"
+            if (currentBudget > 0) currentBudget.formatAmount() else "5000"
         )
     }
     val presets = remember { listOf(3000.0, 5000.0, 8000.0, 10000.0, 15000.0, 20000.0) }
@@ -136,7 +135,7 @@ fun MonthlyBudgetDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 presets.forEach { preset ->
-                    val presetStr = "%.0f".format(preset)
+                    val presetStr = preset.formatAmount()
                     val isSelected = budgetInput == presetStr
                     FilterChip(
                         selected = isSelected,
@@ -170,7 +169,7 @@ fun MonthlyBudgetDialog(
                         modifier = Modifier.size(16.dp)
                     )
                     CommonText(
-                        text = "${AppStrings.TOTAL_EXPENSE.tr(lang)}: $currencySymbol${"%.2f".format(spentAmount)}",
+                        text = "${AppStrings.TOTAL_EXPENSE.tr(lang)}: $currencySymbol${spentAmount.formatAmount()}",
                         fontSize = AppDimens.TextCaption,
                         color = if (isOver) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )

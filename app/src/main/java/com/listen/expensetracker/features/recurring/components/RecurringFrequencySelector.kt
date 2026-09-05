@@ -84,12 +84,14 @@ fun RecurringFrequencySelector(
             RecurringFrequency.WEEKLY -> {
                 WeeklyDayPicker(
                     selectedDay = dayOfPeriod,
+                    lang = lang,
                     onDayChange = onDayChange
                 )
             }
             RecurringFrequency.MONTHLY -> {
                 MonthlyDaySelector(
                     dayOfPeriod = dayOfPeriod,
+                    lang = lang,
                     onDayChange = onDayChange
                 )
             }
@@ -103,12 +105,18 @@ fun RecurringFrequencySelector(
 @Composable
 private fun WeeklyDayPicker(
     selectedDay: Int,
+    lang: String,
     onDayChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val weekdays = listOf(
-        1 to "周一", 2 to "周二", 3 to "周三",
-        4 to "周四", 5 to "周五", 6 to "周六", 7 to "周日"
+        1 to AppStrings.WEEKDAY_MON.tr(lang),
+        2 to AppStrings.WEEKDAY_TUE.tr(lang),
+        3 to AppStrings.WEEKDAY_WED.tr(lang),
+        4 to AppStrings.WEEKDAY_THU.tr(lang),
+        5 to AppStrings.WEEKDAY_FRI.tr(lang),
+        6 to AppStrings.WEEKDAY_SAT.tr(lang),
+        7 to AppStrings.WEEKDAY_SUN.tr(lang)
     )
 
     Row(

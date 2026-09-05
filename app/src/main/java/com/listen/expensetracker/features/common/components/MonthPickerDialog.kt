@@ -96,7 +96,7 @@ fun MonthPickerDialog(
                 }
             ) {
                 CommonText(
-                    text = if (lang == "en") "Current Month" else "跳转至本月",
+                    text = AppStrings.JUMP_TO_THIS_MONTH.tr(lang),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

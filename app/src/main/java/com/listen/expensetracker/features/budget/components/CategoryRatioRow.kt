@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.budget.components
+package com.listen.expensetracker.features.budget.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.Category
 import kotlin.math.roundToInt
 
@@ -71,7 +72,7 @@ fun CategoryRatioRow(
             }
             Column {
                 Text(text = category.getDisplayName(lang), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                Text(text = "$currencySymbol${"%.0f".format(amount)}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "$currencySymbol${amount.formatAmount()}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 

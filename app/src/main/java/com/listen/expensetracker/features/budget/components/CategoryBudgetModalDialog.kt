@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -55,7 +56,7 @@ fun CategoryBudgetModalDialog(
     var activeMonthOffset by remember(initialMonthOffset) { androidx.compose.runtime.mutableIntStateOf(initialMonthOffset) }
 
     var editBudgetInput by remember(monthlyBudget) {
-        mutableStateOf(if (monthlyBudget > 0) "%.0f".format(monthlyBudget) else "5000")
+        mutableStateOf(if (monthlyBudget > 0) monthlyBudget.formatAmount() else "5000")
     }
     var editRatios by remember(categoryRatios) { mutableStateOf(categoryRatios) }
 
@@ -117,7 +118,7 @@ fun CategoryBudgetModalDialog(
                     text = AppStrings.COMMON_CANCEL.tr(lang),
                     onClick = {
                         if (initialMode == BudgetDialogMode.VIEW) {
-                            editBudgetInput = if (monthlyBudget > 0) "%.0f".format(monthlyBudget) else "5000"
+                            editBudgetInput = if (monthlyBudget > 0) monthlyBudget.formatAmount() else "5000"
                             editRatios = categoryRatios
                             mode = BudgetDialogMode.VIEW
                         } else {
