@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 
 /**
  * 桌面小部件 2.0 (App Widget 2.0 - 快速记账与预算看板)。
- * 负责桌面 4x2 智能双模看板渲染、4 大高频分类闪电记账快捷直达与数据实时联动。
+ * 负责桌面 5x2 智能双模看板渲染、4 大高频分类闪电记账快捷直达与数据实时联动。
  */
 class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
@@ -176,11 +176,11 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             }
             views.setProgressBar(activeProgressBarId, 100, progressPercent, false)
 
-            // 3. 动态配置 4 大高频快捷分类按钮文案（支持多语言国际化切换）
-            views.setTextViewText(R.id.widget_btn_food, "🍔 ${AppStrings.CAT_FOOD.tr(lang)}")
-            views.setTextViewText(R.id.widget_btn_transport, "🚗 ${AppStrings.CAT_TRANSPORT.tr(lang)}")
-            views.setTextViewText(R.id.widget_btn_shopping, "🛍️ ${AppStrings.CAT_SHOPPING.tr(lang)}")
-            views.setTextViewText(R.id.widget_btn_daily, "📦 ${AppStrings.CAT_OTHER_EXP.tr(lang)}")
+            // 3. 动态配置 4 大高频快捷分类按钮文案（上下布局，仅需更新文本子控件）
+            views.setTextViewText(R.id.widget_btn_food_text, AppStrings.CAT_FOOD.tr(lang))
+            views.setTextViewText(R.id.widget_btn_transport_text, AppStrings.CAT_TRANSPORT.tr(lang))
+            views.setTextViewText(R.id.widget_btn_shopping_text, AppStrings.CAT_SHOPPING.tr(lang))
+            views.setTextViewText(R.id.widget_btn_daily_text, AppStrings.CAT_OTHER_EXP.tr(lang))
 
             // 4. 意图路由绑定
             val openAppPendingIntent = createOpenAppPendingIntent(context)

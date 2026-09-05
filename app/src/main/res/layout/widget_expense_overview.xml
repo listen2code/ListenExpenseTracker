@@ -126,7 +126,7 @@
             android:progressDrawable="@drawable/widget_progress_over" />
     </LinearLayout>
 
-    <!-- 右侧：4 大高频快捷分类按钮 (2x2 饱满矩阵) -->
+    <!-- 右侧：4 大高频快捷分类按钮 (2x2 饱满矩阵，上下垂直精美排布) -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -141,30 +141,84 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/widget_btn_food"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:background="@drawable/widget_btn_food_bg"
-                android:textColor="@color/widget_btn_food_text"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="🍔 餐饮" />
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="2dp">
 
-            <TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🍔"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/widget_btn_food_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/widget_btn_food_text"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="10.5sp"
+                    android:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="8sp"
+                    app:autoSizeMaxTextSize="10.5sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    android:includeFontPadding="false"
+                    tools:text="餐饮" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/widget_btn_transport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:background="@drawable/widget_btn_transport_bg"
-                android:textColor="@color/widget_btn_transport_text"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="🚗 交通" />
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🚗"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/widget_btn_transport_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/widget_btn_transport_text"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="10.5sp"
+                    android:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="8sp"
+                    app:autoSizeMaxTextSize="10.5sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    android:includeFontPadding="false"
+                    tools:text="交通" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- 第 2 行快捷分类：购物与日用 -->
@@ -175,30 +229,84 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/widget_btn_shopping"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:background="@drawable/widget_btn_shopping_bg"
-                android:textColor="@color/widget_btn_shopping_text"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="🛍️ 购物" />
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="2dp">
 
-            <TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🛍️"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/widget_btn_shopping_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/widget_btn_shopping_text"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="10.5sp"
+                    android:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="8sp"
+                    app:autoSizeMaxTextSize="10.5sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    android:includeFontPadding="false"
+                    tools:text="购物" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/widget_btn_daily"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:background="@drawable/widget_btn_daily_bg"
-                android:textColor="@color/widget_btn_daily_text"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                tools:text="📦 日用" />
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📦"
+                    android:textSize="15sp"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/widget_btn_daily_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/widget_btn_daily_text"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeMaxTextSize="10.5sp"
+                    android:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="8sp"
+                    app:autoSizeMaxTextSize="10.5sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    android:includeFontPadding="false"
+                    tools:text="日用" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
