@@ -86,15 +86,11 @@
             android:progressDrawable="@drawable/widget_progress_normal" />
     </LinearLayout>
 
-    <!-- 左右分区间隔 -->
-    <View
-        android:layout_width="8dp"
-        android:layout_height="match_parent" />
-
     <!-- 右侧：4 大高频快捷分类按钮 + 通用记一笔主按钮 -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
         android:layout_weight="11"
         android:orientation="vertical">
 
@@ -117,14 +113,11 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <View
-                android:layout_width="6dp"
-                android:layout_height="match_parent" />
-
             <TextView
                 android:id="@+id/widget_btn_transport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:background="@drawable/widget_btn_transport_bg"
@@ -134,14 +127,11 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="6dp" />
-
         <!-- 第 2 行快捷分类：购物与日用 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="6dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
@@ -157,14 +147,11 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <View
-                android:layout_width="6dp"
-                android:layout_height="match_parent" />
-
             <TextView
                 android:id="@+id/widget_btn_daily"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:background="@drawable/widget_btn_daily_bg"
@@ -174,15 +161,12 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="6dp" />
-
         <!-- 底部通用快速记一笔按钮 -->
         <TextView
             android:id="@+id/widget_btn_general"
             android:layout_width="match_parent"
             android:layout_height="28dp"
+            android:layout_marginTop="6dp"
             android:gravity="center"
             android:background="@drawable/widget_btn_general_bg"
             android:text="+ 记一笔"
