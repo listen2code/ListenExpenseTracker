@@ -72,7 +72,7 @@ fun RecurringRuleItemCard(
         RecurringFrequency.DAILY -> AppStrings.RECURRING_FREQ_DAILY.tr(lang)
         RecurringFrequency.WEEKLY -> "${AppStrings.RECURRING_FREQ_WEEKLY.tr(lang)}${getWeekdayName(rule.dayOfPeriod, lang)}"
         RecurringFrequency.MONTHLY -> "${AppStrings.RECURRING_FREQ_MONTHLY.tr(lang)} ${AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(rule.dayOfPeriod)}"
-        RecurringFrequency.YEARLY -> "${AppStrings.RECURRING_FREQ_YEARLY.tr(lang)}"
+        RecurringFrequency.YEARLY -> AppStrings.RECURRING_FREQ_YEARLY.tr(lang)
     }
 
     val daysDiff = ((rule.nextExecutionDate - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)).toInt()
