@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 /**
  * 桌面小部件 2.0 (App Widget 2.0 - 快速记账与预算看板)。
@@ -212,9 +213,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             val intent = Intent(context, MainActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
                 data = if (categoryId != null) {
-                    Uri.parse("lexpense://quick_add?category=$categoryId&type=$type")
+                    "lexpense://quick_add?category=$categoryId&type=$type".toUri()
                 } else {
-                    Uri.parse("lexpense://quick_add?type=$type")
+                    "lexpense://quick_add?type=$type".toUri()
                 }
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 if (categoryId != null) {
