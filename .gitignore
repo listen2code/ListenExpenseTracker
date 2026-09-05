@@ -12,3 +12,8 @@ local.properties
 # Android signing keystore
 keystore/*.jks
 keystore/keystore.properties
+
+# Temporary scratch scripts & artifacts
+scratch/
+Thumbs.db
+
