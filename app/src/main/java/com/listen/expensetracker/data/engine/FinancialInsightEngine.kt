@@ -27,8 +27,10 @@ data class FinancialInsightItem(
     val severity: InsightSeverity,
     val categoryId: String? = null,
     val targetDay: Int? = null,
+    val targetDateLabel: String? = null,
     val diffPercentage: Float? = null,
-    val isCategoryAction: Boolean = false
+    val isCategoryAction: Boolean = false,
+    val isBudgetAction: Boolean = false
 )
 
 /**
@@ -111,7 +113,7 @@ object FinancialInsightEngine {
                             exhaustedDay
                         ),
                         severity = InsightSeverity.WARNING,
-                        targetDay = exhaustedDay
+                        isBudgetAction = true // 未来预测值不触发日期过滤，点击唤起月预算管理 (Rule 22)
                     )
                 )
             }
@@ -152,16 +154,21 @@ object FinancialInsightEngine {
         if (maxDayEntry != null) {
             val peakDayAmount = maxDayEntry.value.sumOf { it.amount }
             if (peakDayAmount > 0 && currentTotal > 0 && peakDayAmount >= currentTotal * 0.35 && currentExpenses.size > 2) {
+                val cal = Calendar.getInstance().apply { add(Calendar.MONTH, currentOffset) }
+                val month = cal.get(Calendar.MONTH) + 1
+                val peakDay = maxDayEntry.key
+                val dateLabel = "${month}月${peakDay}日"
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_peak_day",
                         title = AppStrings.INSIGHT_PEAK_DAY_TITLE.tr(lang),
                         description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr(lang).format(
-                            maxDayEntry.key,
+                            peakDay,
                             "$currencySymbol${peakDayAmount.formatAmount()}"
                         ),
                         severity = InsightSeverity.INFO,
-                        targetDay = maxDayEntry.key
+                        targetDay = peakDay,
+                        targetDateLabel = dateLabel
                     )
                 )
             }

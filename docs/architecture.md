@@ -148,10 +148,13 @@ UI 组件严格遵循 `PROMPTS.md` 规范落地：
 
 ## 3. 本地存储与计算架构 (Local-First Engine)
 
-1. **Room SQLite**：`TransactionEntity` 存储全部单笔账单流水，`TransactionDao` 提供响应式 Flow 监听；
+1. **Room SQLite**：`TransactionEntity` 存储全部单笔账单流水，`RecurringRuleEntity` 存储周期规则，通过 `Dao` 提供响应式 Flow 监听；
 2. **DataStore Preferences**：`ExpenseDataStoreManager` 承载用户个性化偏好（语言、主题、主色调、月预算、币种符号、自定义账户列表 JSON）；
-3. **TransactionCalculationEngine**：纯 Kotlin 高性能数据计算引擎，负责内存多维过滤（按月份、账户、搜索关键字）、收支聚合、预算消耗比率测算，与 UI 完全解耦。
-
+3. **高阶纯计算引擎 (Engines)**：
+   - `TransactionCalculationEngine`：纯 Kotlin 数据计算引擎，负责多维过滤、收支聚合、分类预算消耗比率测算。
+   - `FinancialInsightEngine`：智能诊断引擎，负责月环比波动 (MoM)、突发消费波峰侦测、预算消耗速率预测及年度概览计算。
+   - `RecurringTransactionEngine`：后台周期调度与履约引擎，处理按日/周/月/年自动复用记账逻辑。
+   
 ---
 
 ## 4. Google 身份鉴权与 Google Drive 云同步架构

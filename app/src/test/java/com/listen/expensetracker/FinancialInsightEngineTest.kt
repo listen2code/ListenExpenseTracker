@@ -146,6 +146,7 @@ class FinancialInsightEngineTest {
             val burnRate = insights.find { it.id == "insight_burn_rate" }
             assertNotNull("Should detect burn rate warning", burnRate)
             assertEquals(InsightSeverity.WARNING, burnRate?.severity)
+            assertTrue("Burn rate should trigger budget adjustment action", burnRate?.isBudgetAction == true)
         }
     }
 
@@ -172,6 +173,8 @@ class FinancialInsightEngineTest {
         val peakDay = insights.find { it.id == "insight_peak_day" }
         assertNotNull("Should detect peak day", peakDay)
         assertEquals(1, peakDay?.targetDay)
+        val expectedMonth = cal.get(Calendar.MONTH) + 1
+        assertEquals("${expectedMonth}月1日", peakDay?.targetDateLabel)
     }
 
     @Test

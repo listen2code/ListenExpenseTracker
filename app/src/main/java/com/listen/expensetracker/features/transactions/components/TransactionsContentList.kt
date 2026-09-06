@@ -135,7 +135,12 @@ fun TransactionsContentList(
                 monthlyBudget = calc.monthlyBudget,
                 remainingBudget = calc.remainingBudget,
                 onBudgetClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget)) },
-                onToggleHideBalance = { onIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) },
+                // [Bugfix] 解决设置中关闭「手势防窥」后仍可通过双击结余卡片切换隐额模式的问题 (Rule 22)
+                // 原因分析：之前无条件传入回调，导致 BalanceOverviewCard 的 detectTapGestures(onDoubleTap) 始终挂载；
+                // 解决的问题：在 state.shakeToHideBalanceEnabled 为 false 时传入 null，完全解绑双击手势，彻底遵循设置项。
+                onToggleHideBalance = if (state.shakeToHideBalanceEnabled) {
+                    { onIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) }
+                } else null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppDimens.SpaceExtraSmall)

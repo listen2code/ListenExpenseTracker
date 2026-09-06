@@ -125,6 +125,20 @@ class ExpenseAppState(
     }
 
     /**
+     * Navigates directly from Statistics to Transactions with Monthly Budget dialog opened.
+     */
+    fun navigateToBudgetAdjustment(monthOffset: Int) {
+        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
+            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        }
+        if (transactionsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
+            transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(monthOffset))
+        }
+        transactionsViewModel.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget))
+        currentTab = NavTab.TRANSACTIONS
+    }
+
+    /**
      * Top-level active overlay state. Controlled entirely via openOverlay / dismissOverlay.
      */
     var activeOverlay by mutableStateOf<AppOverlay?>(null)

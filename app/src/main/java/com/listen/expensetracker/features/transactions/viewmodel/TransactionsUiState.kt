@@ -72,7 +72,8 @@ data class TransactionsUiState(
     val accentColor: AccentColor = AccentColor.EMERALD,
     val activeDialog: TransactionsDialog? = null,
     val isLoading: Boolean = false,
-    val isDeveloperMode: Boolean = false
+    val isDeveloperMode: Boolean = false,
+    val shakeToHideBalanceEnabled: Boolean = true
 ) {
     val categoryFilter: String
         get() = if (selectedCategories.isEmpty()) "ALL" else selectedCategories.first()

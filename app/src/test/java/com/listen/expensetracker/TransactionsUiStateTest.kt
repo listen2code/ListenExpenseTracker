@@ -30,6 +30,7 @@ class TransactionsUiStateTest {
         assertFalse(state.hideBalance)
         assertFalse(state.isLoading)
         assertFalse(state.isDeveloperMode)
+        assertTrue(state.shakeToHideBalanceEnabled)
         assertEquals("￥", state.currencySymbol)
         assertEquals("zh", state.language)
         assertEquals(ThemeMode.SYSTEM, state.themeMode)

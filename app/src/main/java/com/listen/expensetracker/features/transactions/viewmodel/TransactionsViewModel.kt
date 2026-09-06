@@ -58,7 +58,12 @@ class TransactionsViewModel(
             is TransactionsIntent.UpdateTransaction -> updateTransaction(intent.transaction, traceId)
             is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id, traceId)
             is TransactionsIntent.RestoreDeletedTransaction -> restoreDeletedTransaction(intent.transaction, traceId)
-            is TransactionsIntent.ToggleHideBalance -> { viewModelScope.launch { prefManager.setHideBalance(intent.hide) } }
+            is TransactionsIntent.ToggleHideBalance -> {
+                // [Bugfix] 手势防窥关闭时禁止隐额触发，仅在已隐藏时允许恢复显示 (Rule 22)
+                if (currentState.shakeToHideBalanceEnabled || !intent.hide) {
+                    viewModelScope.launch { prefManager.setHideBalance(intent.hide) }
+                }
+            }
             is TransactionsIntent.SearchQueryChange -> { updateState { copy(searchQuery = intent.query) }; recalculate() }
             is TransactionsIntent.FilterAccountChange -> { updateState { copy(selectedAccountFilter = intent.accountType) }; recalculate() }
             is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta) }; recalculate() }
@@ -159,7 +164,8 @@ class TransactionsViewModel(
                     language = prefs.language, themeMode = prefs.themeMode, accentColor = prefs.accentColor,
                     currencySymbol = prefs.currencySymbol, monthlyBudget = prefs.monthlyBudget,
                     categoryBudgetRatios = prefs.categoryBudgetRatios,
-                    hideBalance = prefs.hideBalance, isDeveloperMode = prefs.isDeveloperMode
+                    hideBalance = prefs.hideBalance, isDeveloperMode = prefs.isDeveloperMode,
+                    shakeToHideBalanceEnabled = prefs.shakeToHideBalanceEnabled
                 )
             }
             recalculate()

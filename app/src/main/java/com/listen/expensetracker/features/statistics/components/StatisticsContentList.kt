@@ -34,6 +34,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.LineChart
 import com.listen.uicomponent.components.SurfaceCard
+import java.util.Calendar
 
 /**
  * LazyColumn Statistics Content List view for a specific month page (monthOffset).
@@ -48,7 +49,8 @@ fun StatisticsContentList(
     listState: LazyListState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() },
     onCategoryClick: ((categoryName: String) -> Unit)? = null,
     onDateClick: ((day: Int, dateLabel: String) -> Unit)? = null,
-    onTransactionClick: ((TransactionEntity) -> Unit)? = null
+    onTransactionClick: ((TransactionEntity) -> Unit)? = null,
+    onBudgetClick: (() -> Unit)? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -109,8 +111,15 @@ fun StatisticsContentList(
                         if (item.isCategoryAction && item.categoryId != null) {
                             val catName = state.allTransactions.firstOrNull { it.categoryId == item.categoryId }?.categoryName ?: item.categoryId
                             onCategoryClick?.invoke(catName)
+                        } else if (item.isBudgetAction) {
+                            onBudgetClick?.invoke()
                         } else if (item.targetDay != null) {
-                            onDateClick?.invoke(item.targetDay, "${item.targetDay}")
+                            // [Bugfix] 消费峰值日跳转对齐走势图逻辑，携带具体日期（如 "9月2日"）关键字精准匹配 (Rule 22)
+                            val dateLabel = item.targetDateLabel ?: run {
+                                val c = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }
+                                "${c.get(Calendar.MONTH) + 1}月${item.targetDay}日"
+                            }
+                            onDateClick?.invoke(item.targetDay, dateLabel)
                         }
                     }
                 )

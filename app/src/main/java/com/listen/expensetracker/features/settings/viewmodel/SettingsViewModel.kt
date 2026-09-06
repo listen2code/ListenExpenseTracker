@@ -74,7 +74,14 @@ class SettingsViewModel(
             is SettingsIntent.ToggleBiometricLock -> viewModelScope.launch { prefManager.setBiometricLockEnabled(intent.enabled); updateState { copy(biometricLockEnabled = intent.enabled) } }
             is SettingsIntent.ChangeLockTimeout -> viewModelScope.launch { prefManager.setLockTimeoutSeconds(intent.seconds); updateState { copy(lockTimeoutSeconds = intent.seconds) } }
             is SettingsIntent.ToggleRecentAppsShield -> viewModelScope.launch { prefManager.setRecentAppsShieldEnabled(intent.enabled); updateState { copy(recentAppsShieldEnabled = intent.enabled) } }
-            is SettingsIntent.ToggleShakeToHideBalance -> viewModelScope.launch { prefManager.setShakeToHideBalanceEnabled(intent.enabled); updateState { copy(shakeToHideBalanceEnabled = intent.enabled) } }
+            is SettingsIntent.ToggleShakeToHideBalance -> viewModelScope.launch {
+                prefManager.setShakeToHideBalanceEnabled(intent.enabled)
+                // [Bugfix] 若关闭手势防窥，自动将当前隐额遮罩解除并恢复金额明文展示 (Rule 22)
+                if (!intent.enabled) {
+                    prefManager.setHideBalance(false)
+                }
+                updateState { copy(shakeToHideBalanceEnabled = intent.enabled) }
+            }
             is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
                 prefManager.setDeveloperMode(intent.enabled)

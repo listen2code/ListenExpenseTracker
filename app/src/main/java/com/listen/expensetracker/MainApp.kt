@@ -102,6 +102,9 @@ fun App(
                         onNavigateToTransaction = { monthOffset, tx ->
                             appState.navigateToTransaction(monthOffset, tx)
                         },
+                        onNavigateToBudget = { monthOffset ->
+                            appState.navigateToBudgetAdjustment(monthOffset)
+                        },
                         modifier = screenModifier
                     )
                 }

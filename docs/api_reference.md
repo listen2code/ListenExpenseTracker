@@ -171,11 +171,24 @@
 * **`RecurringFrequencySelector`** (`features.recurring.components`)：全频次分段选择器与水平滑动日期药丸（支持每日/每周/每月/每年）。
 * **`RecurringEditState`** (`features.recurring.components`)：纯 Kotlin 状态持有者，负责表单字段输入过滤、金额最大值约束与 `RecurringRuleEntity` 构建。
 
-### 3.7 状态容器与业务代理 (StateHolder & Delegate)
+### 3.7 生物识别与应用锁模块 (`core.security`)
+* **`BiometricSecurityManager`** (`core.security`)：生物识别验证核心调度。
+  * `isBiometricOrCredentialAvailable(context): Boolean`：检测设备是否支持指纹/面容/锁屏密码。
+  * `promptUnlock(activity, title, subtitle, onSuccess, onError)`：拉起系统安全认证弹窗。
+* **`BiometricLockOverlay`** (`core.security`)：基于 Compose 的全局强制安全拦截浮层。
+
+### 3.8 智能财务洞察与年度概览引擎 (`data.engine`)
+* **`FinancialInsightEngine`** (`data.engine`)：智能数据挖掘与诊断引擎。
+  * `generateInsights(allTransactions, currentOffset, monthlyBudget, currencySymbol, lang): List<FinancialInsightItem>`：计算生成月环比波动、突发支出波峰、预算消耗预测等诊断卡片数据。
+  * `calculateAnnualOverview(allTransactions, currentOffset, lang): List<AnnualMonthSummary>`：聚合计算全年 12 个月的收支与净结余数据。
+
+### 3.9 桌面小部件与快速触达 (`widget`)
+* **`ListenExpenseAppWidgetProvider`** (`widget`)：4x2 智能预算看板小部件。
+  * 提供当月支出、预算进度、健康度状态更新，及 4 大高频场景（餐饮/交通/购物/杂项）闪电记账 DeepLink 入口。
+
+### 3.10 状态容器与业务代理 (StateHolder & Delegate)
 * **`SettingsStateHolder`** (`features.settings.ui`)：设置页系统状态容器。
-  * **职责**：持有 `LazyListState` 保护滚动位置；封装 `exportJsonLauncher` 与 `importJsonLauncher` 系统文件选择器契约回调；绑定 Effect 监听。
-  * **API**：`rememberSettingsStateHolder(...)`
+  * **职责**：持有 `LazyListState` 保护滚动位置；封装 `exportJsonLauncher` 等系统文件选择器回调。
 * **`SettingsSyncDelegate`** (`features.settings.viewmodel`)：设置页数据同步业务代理。
-  * **职责**：将繁重的云端全量数据备份、快照恢复、JSON 导出/导入等耗时协程逻辑抽离出 ViewModel，保障 ViewModel 代码的纯粹度。
-  * **技术实现**：内部注入 `CloudSyncManager` 与 `TransactionDao`，返回 Kotlin `Result<T>` 供 ViewModel 安全解析并抛出反馈 Toast。
+  * **职责**：剥离并处理耗时的云端全量数据备份、恢复、导入导出。
 

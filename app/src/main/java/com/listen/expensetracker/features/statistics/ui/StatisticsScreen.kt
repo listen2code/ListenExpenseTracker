@@ -46,7 +46,8 @@ fun StatisticsScreen(
     viewModel: StatisticsViewModel? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
     onNavigateToTransactionsDate: ((monthOffset: Int, day: Int, dateLabel: String) -> Unit)? = null,
-    onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null
+    onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null,
+    onNavigateToBudget: ((monthOffset: Int) -> Unit)? = null
 ) {
     // 🌟 一行收口所有 Pager、ListState 与副作用协同逻辑
     val holder = rememberStatisticsStateHolder(state, onIntent, viewModel)
@@ -114,6 +115,9 @@ fun StatisticsScreen(
                     },
                     onTransactionClick = onNavigateToTransaction?.let { callback ->
                         { tx -> callback(pageOffset, tx) }
+                    },
+                    onBudgetClick = onNavigateToBudget?.let { callback ->
+                        { callback(pageOffset) }
                     }
                 )
             }

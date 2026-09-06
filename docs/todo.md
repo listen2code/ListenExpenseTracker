@@ -241,4 +241,4 @@
 - [ ] **APM 日志全局悬浮窗 (Log Overlay Inspector)**：提供全局可拖拽、吸边的半透明调试悬浮球，点击快速调出日志与慢查询控制台。
 - [ ] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
 - [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。
-- [ ] 给每个components，下面的@Composable都生成preview代码
+- [x] **为所有功能组件生成 @Preview 预览代码**：覆盖 features 目录下的核心 UI 组件，提升开发与调试效率。
