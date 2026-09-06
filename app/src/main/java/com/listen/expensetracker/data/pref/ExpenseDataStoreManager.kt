@@ -34,6 +34,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_LOCK_TIMEOUT_SECONDS = intPreferencesKey("expense_lock_timeout_seconds")
         val KEY_RECENT_APPS_SHIELD_ENABLED = booleanPreferencesKey("expense_recent_apps_shield_enabled")
         val KEY_SHAKE_TO_HIDE_BALANCE_ENABLED = booleanPreferencesKey("expense_shake_to_hide_balance_enabled")
+        val KEY_APM_FLOATING_WINDOW_ENABLED = booleanPreferencesKey("expense_apm_floating_enabled")
     }
 
     val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
@@ -60,7 +61,8 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             biometricLockEnabled = prefs[KEY_BIOMETRIC_LOCK_ENABLED] ?: false,
             lockTimeoutSeconds = prefs[KEY_LOCK_TIMEOUT_SECONDS] ?: 0,
             recentAppsShieldEnabled = prefs[KEY_RECENT_APPS_SHIELD_ENABLED] ?: true,
-            shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true
+            shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true,
+            apmFloatingWindowEnabled = prefs[KEY_APM_FLOATING_WINDOW_ENABLED] ?: false
         )
     }
 
@@ -142,6 +144,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
 
     suspend fun setShakeToHideBalanceEnabled(enabled: Boolean) {
         context.archDataStore.edit { prefs -> prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] = enabled }
+    }
+
+    suspend fun setApmFloatingWindowEnabled(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_APM_FLOATING_WINDOW_ENABLED] = enabled }
     }
 
     suspend fun setCategoryBudgetRatios(ratios: Map<String, Float>) {

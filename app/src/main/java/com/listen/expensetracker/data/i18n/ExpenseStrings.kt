@@ -284,7 +284,16 @@ object ExpenseStrings {
         AppStrings.SECURITY_LOCKED_TITLE to "应用已锁定",
         AppStrings.SECURITY_LOCKED_DESC to "为保护您的个人财务隐私，请先完成安全验证",
         AppStrings.SECURITY_SHAKE_TOGGLE_ON to "已遮罩隐藏敏感金额",
-        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "已恢复显示账单金额"
+        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "已恢复显示账单金额",
+        AppStrings.APM_INSPECTOR to "APM 日志面板",
+        AppStrings.APM_FLOATING_WINDOW_TITLE to "APM 性能监控悬浮球",
+        AppStrings.APM_FLOATING_WINDOW_DESC to "在全局显示可拖动的调试悬浮球，支持快速展开性能日志与分析",
+        AppStrings.APM_LOGS_TITLE to "APM 性能与日志",
+        AppStrings.APM_SEARCH_PLACEHOLDER to "搜索 TraceId / Tag / 关键词...",
+        AppStrings.APM_BTN_CLEAR to "清空",
+        AppStrings.APM_BTN_EXPORT to "导出",
+        AppStrings.APM_EMPTY_LOGS to "暂无匹配日志",
+        AppStrings.APM_SHARE_TITLE to "分享 APM 日志"
     )
 
     private val enMap = mapOf(
@@ -556,7 +565,16 @@ object ExpenseStrings {
         AppStrings.SECURITY_LOCKED_TITLE to "App is Locked",
         AppStrings.SECURITY_LOCKED_DESC to "Please authenticate to protect your financial data",
         AppStrings.SECURITY_SHAKE_TOGGLE_ON to "Amounts hidden for privacy",
-        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "Amounts visible"
+        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "Amounts visible",
+        AppStrings.APM_INSPECTOR to "APM Logs Panel",
+        AppStrings.APM_FLOATING_WINDOW_TITLE to "APM Floating Bubble",
+        AppStrings.APM_FLOATING_WINDOW_DESC to "Display a draggable floating bubble for real-time logs and metrics",
+        AppStrings.APM_LOGS_TITLE to "APM Observability & Logs",
+        AppStrings.APM_SEARCH_PLACEHOLDER to "Search TraceId / Tag / Keyword...",
+        AppStrings.APM_BTN_CLEAR to "Clear",
+        AppStrings.APM_BTN_EXPORT to "Export",
+        AppStrings.APM_EMPTY_LOGS to "No matching logs found",
+        AppStrings.APM_SHARE_TITLE to "Share APM Logs"
     )
 
     private val jaMap = mapOf(
@@ -828,6 +846,15 @@ object ExpenseStrings {
         AppStrings.SECURITY_LOCKED_TITLE to "アプリはロックされています",
         AppStrings.SECURITY_LOCKED_DESC to "資産データを保護するため認証を完了してください",
         AppStrings.SECURITY_SHAKE_TOGGLE_ON to "金額をマスクしました",
-        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "金額を表示しました"
+        AppStrings.SECURITY_SHAKE_TOGGLE_OFF to "金額を表示しました",
+        AppStrings.APM_INSPECTOR to "APM ログパネル",
+        AppStrings.APM_FLOATING_WINDOW_TITLE to "APM フローティングバブル",
+        AppStrings.APM_FLOATING_WINDOW_DESC to "画面上にドラッグ可能なAPMデバッグバブルを表示し、ログを確認します",
+        AppStrings.APM_LOGS_TITLE to "APM 観測とログ",
+        AppStrings.APM_SEARCH_PLACEHOLDER to "TraceId / Tag / キーワード検索...",
+        AppStrings.APM_BTN_CLEAR to "消去",
+        AppStrings.APM_BTN_EXPORT to "出力",
+        AppStrings.APM_EMPTY_LOGS to "一致するログはありません",
+        AppStrings.APM_SHARE_TITLE to "APM ログを共有"
     )
 }

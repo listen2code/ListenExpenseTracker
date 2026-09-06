@@ -42,7 +42,6 @@ fun SettingsScreen(
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
-    onOpenApm: () -> Unit = {},
     viewModel: SettingsViewModel? = null
 ) {
     // 🌟 一行收拢所有列表滚动、月份标题与系统文件选择器
@@ -138,7 +137,8 @@ fun SettingsScreen(
             if (state.isDeveloperMode) {
                 item(key = "apm_section") {
                     SettingsApmSection(
-                        onOpenApmInspector = onOpenApm,
+                        apmFloatingWindowEnabled = state.apmFloatingWindowEnabled,
+                        onToggleApmFloatingWindow = { onIntent(SettingsIntent.ToggleApmFloatingWindow(it)) },
                         onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,

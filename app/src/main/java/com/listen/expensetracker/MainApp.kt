@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.core.route.CommonRoute
-import com.listen.expensetracker.core.state.AppOverlay
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.features.settings.ui.SettingsScreen
@@ -113,7 +112,6 @@ fun App(
                         state = state,
                         onIntent = onIntent,
                         targetMonthOffset = appState.activeMonthOffset,
-                        onOpenApm = { appState.openOverlay(AppOverlay.ApmInspector) },
                         viewModel = appState.settingsViewModel,
                         modifier = screenModifier
                     )

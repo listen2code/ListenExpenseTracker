@@ -30,7 +30,8 @@ data class ExpensePreferences(
     val biometricLockEnabled: Boolean = false,
     val lockTimeoutSeconds: Int = 0,
     val recentAppsShieldEnabled: Boolean = true,
-    val shakeToHideBalanceEnabled: Boolean = true
+    val shakeToHideBalanceEnabled: Boolean = true,
+    val apmFloatingWindowEnabled: Boolean = false
 )
 
 /**

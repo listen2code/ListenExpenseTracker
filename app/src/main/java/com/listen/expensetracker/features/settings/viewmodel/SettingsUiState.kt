@@ -54,7 +54,8 @@ data class SettingsUiState(
     val lockTimeoutSeconds: Int = 0,
     val recentAppsShieldEnabled: Boolean = true,
     val shakeToHideBalanceEnabled: Boolean = true,
-    val isBiometricSupported: Boolean = false
+    val isBiometricSupported: Boolean = false,
+    val apmFloatingWindowEnabled: Boolean = false
 )
 
 /**
@@ -77,6 +78,7 @@ sealed interface SettingsIntent {
     data class ChangeLockTimeout(val seconds: Int) : SettingsIntent
     data class ToggleRecentAppsShield(val enabled: Boolean) : SettingsIntent
     data class ToggleShakeToHideBalance(val enabled: Boolean) : SettingsIntent
+    data class ToggleApmFloatingWindow(val enabled: Boolean) : SettingsIntent
     data object TriggerGoogleSignIn : SettingsIntent
     data object ScrollToTop : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent

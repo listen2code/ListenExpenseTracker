@@ -275,3 +275,28 @@
 - **全量单测触发时机**：
   1. 涉及底层核心基础设施（`ListenArch` 底座架构、Room 数据库迁移、跨模块核心拦截器等）的破坏性改造；
   2. 准备发版打包、或用户明确要求“跑一下全量测试 / 完整回归”。
+
+---
+
+## 25. 国际化通用收口与 Compose Modifier 优先规范 (Universal i18n & Modifier-First Hygiene Rule)
+
+- **国际化通用代码规范（严禁局部语言分支硬编码）**：
+  - **核心原则**：所有 UI 文本展示必须走统一的全局多语言框架（`AppStrings.KEY.tr(lang)` 或 `ExpenseStrings.get(key, lang)`），**严禁在 Composable 组件或 ViewModel 内部使用 `when (lang)`、`if (lang == "en") ...` 等方式单独判断和硬编码多语言字符串**；
+  - **标准执行流程**：任何新增文案均应先在 `AppStrings.kt` 声明键常量，在 `ExpenseStrings.kt`（中/英/日三个 Map）中统一配置对应翻译，UI 中仅通过 `AppStrings.XXX.tr(lang)` 无条件调用；
+  - **设计初衷**：确保多语言维护集中收敛，杜绝漏翻，杜绝在各个 UI 视图中散落重复冗余的语言判断。
+
+- **Compose Modifier 首个可选参数规范 (Modifier First Optional Parameter Standard)**：
+  - **核心原则**：在所有发射 UI Layout 的 Composable 函数中，`modifier: Modifier = Modifier` **必须严格作为“第一个可选参数”（First Optional Parameter）**；
+  - **严禁错误**：严禁将 `modifier: Modifier = Modifier` 声明在其它带有默认值的形参（如 `lang: String = "zh"`、`enabled: Boolean = true`）之后，否则会直接触发 Compose Lint 警告：`Modifier parameter should be the first optional parameter`；
+  - **标准签名模式**：
+    ```kotlin
+    // 正确范式：必填形参 -> modifier (首个可选参数) -> 其他带默认值可选形参 -> 尾部 Lambda
+    @Composable
+    fun ExampleComponent(
+        data: CustomData,                      // 1. 无默认值的必选数据
+        onAction: () -> Unit,                  // 2. 无默认值的回调函数
+        modifier: Modifier = Modifier,         // 3. 必须是第一个带有默认值的参数
+        lang: String = "zh",                   // 4. 后续其他带默认值的可选配置
+        content: @Composable () -> Unit = {}   // 5. 尾部 Lambda 放在最末尾
+    )
+    ```

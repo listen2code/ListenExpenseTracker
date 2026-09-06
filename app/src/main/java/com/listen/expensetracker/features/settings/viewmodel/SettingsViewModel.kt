@@ -77,10 +77,12 @@ class SettingsViewModel(
             is SettingsIntent.ToggleShakeToHideBalance -> viewModelScope.launch {
                 prefManager.setShakeToHideBalanceEnabled(intent.enabled)
                 // [Bugfix] 若关闭手势防窥，自动将当前隐额遮罩解除并恢复金额明文展示 (Rule 22)
-                if (!intent.enabled) {
-                    prefManager.setHideBalance(false)
-                }
+                if (!intent.enabled) prefManager.setHideBalance(false)
                 updateState { copy(shakeToHideBalanceEnabled = intent.enabled) }
+            }
+            is SettingsIntent.ToggleApmFloatingWindow -> viewModelScope.launch {
+                prefManager.setApmFloatingWindowEnabled(intent.enabled)
+                updateState { copy(apmFloatingWindowEnabled = intent.enabled) }
             }
             is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
@@ -141,7 +143,7 @@ class SettingsViewModel(
                     isDeveloperMode = prefs.isDeveloperMode,
                     biometricLockEnabled = prefs.biometricLockEnabled, lockTimeoutSeconds = prefs.lockTimeoutSeconds,
                     recentAppsShieldEnabled = prefs.recentAppsShieldEnabled, shakeToHideBalanceEnabled = prefs.shakeToHideBalanceEnabled,
-                    isBiometricSupported = isBioSupported
+                    isBiometricSupported = isBioSupported, apmFloatingWindowEnabled = prefs.apmFloatingWindowEnabled
                 )
             }
         }
