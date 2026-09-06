@@ -41,11 +41,10 @@ import com.listen.expensetracker.features.settings.ui.SettingsScreen
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
 import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 import com.listen.uicomponent.theme.ListenTheme
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 
 import android.content.Intent
 import androidx.compose.runtime.LaunchedEffect
+import com.listen.expensetracker.data.db.TransactionType
 
 class MainActivity : ComponentActivity() {
 
@@ -114,7 +113,7 @@ class MainActivity : ComponentActivity() {
         val isQuickAddExtra = intent.hasExtra(EXTRA_QUICK_ADD_CATEGORY) || intent.hasExtra(EXTRA_QUICK_ADD_TYPE)
         if (isQuickAddUri || isQuickAddExtra) {
             val rawCategory = uri?.getQueryParameter("category") ?: intent.getStringExtra(EXTRA_QUICK_ADD_CATEGORY)
-            val type = uri?.getQueryParameter("type") ?: intent.getStringExtra(EXTRA_QUICK_ADD_TYPE) ?: com.listen.expensetracker.data.db.TransactionType.EXPENSE
+            val type = uri?.getQueryParameter("type") ?: intent.getStringExtra(EXTRA_QUICK_ADD_TYPE) ?: TransactionType.EXPENSE
             val categoryId = normalizeCategoryId(rawCategory)
             appState.openQuickAdd(categoryId, type)
         }

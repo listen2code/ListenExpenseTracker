@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -99,5 +103,18 @@ fun SettingsVersionFooter(
                 fontWeight = FontWeight.Medium
             )
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun SettingsVersionFooterPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        SettingsVersionFooter(
+            isDeveloperMode = false,
+            onToggleDeveloperMode = {},
+            onOpenAboutDialog = {},
+            lang = "zh"
+        )
     }
 }

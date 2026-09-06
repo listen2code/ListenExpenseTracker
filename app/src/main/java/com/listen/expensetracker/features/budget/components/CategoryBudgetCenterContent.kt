@@ -1,5 +1,9 @@
 ﻿package com.listen.expensetracker.features.budget.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -156,5 +160,20 @@ fun CategoryBudgetCenterContent(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun CategoryBudgetCenterContentPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        CategoryBudgetCenterContent(
+            allTransactions = emptyList(),
+            monthlyBudget = 5000.0,
+            categoryRatios = mapOf("c_food" to 0.4f, "c_transport" to 0.2f),
+            currencySymbol = "$",
+            lang = "zh",
+            hideAmount = false
+        )
     }
 }

@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.runtime.Composable
 import com.listen.expensetracker.features.common.components.MonthPickerDialog
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
@@ -24,5 +28,14 @@ fun StatisticsDialogHost(
             onDismiss = { onIntent(StatisticsIntent.DismissMonthPicker) },
             lang = state.language
         )
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun StatisticsDialogHostPreview() {
+    ExpenseStrings.init()
+    val state = StatisticsUiState()
+    ListenTheme {
+        StatisticsDialogHost(state = state, onIntent = {})
     }
 }

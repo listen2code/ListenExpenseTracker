@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -178,5 +182,23 @@ fun SettingsAppearanceSection(
                 )
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun SettingsAppearanceSectionPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        SettingsAppearanceSection(
+            themeMode = ThemeMode.SYSTEM,
+            accentColor = AccentColor.EMERALD,
+            currencySymbol = "$",
+            language = "zh",
+            onChangeThemeMode = {},
+            onChangeAccentColor = {},
+            onOpenCurrencyDialog = {},
+            onLanguageChange = {},
+            lang = "zh"
+        )
     }
 }

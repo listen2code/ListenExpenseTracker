@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -178,5 +182,24 @@ private fun openUrlInBrowser(context: Context, url: String) {
         context.startActivity(intent)
     } catch (_: Exception) {
         // Fallback or ignore
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun UpdateAvailableDialogPreview() {
+    ExpenseStrings.init()
+    val sampleRelease = ReleaseInfo(
+        tagName = "v0.0.30",
+        title = "Version 0.0.30",
+        changelog = "New UI features and bug fixes.",
+        htmlUrl = "https://github.com/listen2code/ListenExpenseTracker",
+        apkDownloadUrl = null
+    )
+    ListenTheme {
+        UpdateAvailableDialog(
+            releaseInfo = sampleRelease,
+            onDismiss = {},
+            lang = "zh"
+        )
     }
 }

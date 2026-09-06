@@ -13,15 +13,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.RecurringMonthlyBaseline
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * 周期账单中心 - 每月固定收支 Baseline 总览卡片。
@@ -86,6 +89,27 @@ fun RecurringOverviewCard(
             text = AppStrings.RECURRING_BASELINE_DESC.tr(lang).format(budgetRatioStr, baseline.expenseCount),
             fontSize = AppDimens.TextMicro,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RecurringOverviewCardPreview() {
+    ExpenseStrings.init()
+    val sampleBaseline = RecurringMonthlyBaseline(
+        totalExpense = 1250.0,
+        totalIncome = 5000.0,
+        netMonthly = 3750.0,
+        expenseCount = 8,
+        incomeCount = 1
+    )
+    ListenTheme {
+        RecurringOverviewCard(
+            baseline = sampleBaseline,
+            monthlyBudget = 3000.0,
+            currencySymbol = "$",
+            lang = "en"
         )
     }
 }

@@ -1,5 +1,9 @@
 ﻿package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -170,4 +174,16 @@ fun SyncStatusIndicator(
         }
     }
 }
-
+@Preview(showBackground = true)
+@Composable
+fun GoogleAccountProfileCardPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        GoogleAccountProfileCard(
+            email = "user@example.com",
+            displayName = "Listen User",
+            avatarUrl = null,
+            onLogout = {}
+        )
+    }
+}

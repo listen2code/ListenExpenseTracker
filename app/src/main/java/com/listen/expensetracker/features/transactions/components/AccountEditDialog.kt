@@ -1,5 +1,9 @@
 ﻿package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -61,5 +65,19 @@ fun AccountEditDialog(
                 singleLine = true
             )
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun AccountEditDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AccountEditDialog(
+            initialName = "My Wallet",
+            title = "Edit Account",
+            onDismiss = {},
+            onConfirm = {},
+            lang = "zh"
+        )
     }
 }

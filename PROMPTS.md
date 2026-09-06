@@ -246,3 +246,17 @@
   1. **原因分析 (Root Cause / Rationale)**：为什么要这样改？原先逻辑存在什么缺陷（如：为什么会发生时序冲突、闪烁、遮挡、白底白字不可见等）；
   2. **解决的问题 (Problem Solved / Expected Effect)**：通过这行/这段代码达成了什么效果，消除了什么具体问题；
 - **杜绝无意义或纯机械翻译的注释**（例如不要只写 `// 滚动到指定页面`），必须说明背后的工程思考（例如：`// [Bugfix] 解决跨 Tab 切换时旧月份卡片闪现问题：在首帧测量前同步对齐 Pager 目标月份，防止异步协程触发前的页面闪烁`）。
+
+---
+
+## 23. 组件目录 @Composable 预览全覆盖规范 (Component Directory @Preview Standard)
+
+- **核心原则**：全工程中所有位于 `components/` 目录下的可独立呈现的 `@Composable` 组件，**必须提供配套的 `@Preview` 预览支持**，以便在 Android Studio / IDE 中进行可视化走查与独立交互验证；
+- **分层与行数控制原则**：
+  1. **轻量组件（文件 $\le 195$ 行）**：直接在组件文件末尾追加简洁的 `@Preview` 函数；
+  2. **复杂/高行数组件（文件接近或超过 200 行）**：**严禁强行将 Preview 塞入原文件导致行数突破 250 行红线**，必须在同级 `components/` 目录下建立独立的 `[ComponentName]Preview.kt` 专用预览文件（如 `TransactionSheetPreview.kt`、`SettingsDataCenterSectionPreview.kt`）；
+- **Preview 编写基准要求**：
+  1. 必须使用 `@Preview(showBackground = true)` 注解，确保预览背景及边距清晰可见；
+  2. 必须统一包裹在 `ListenTheme` 主题容器中，确保主题色、字体排版、暗黑/明亮色阶生效；
+  3. 宿主 App 组件预览首行必须执行 `ExpenseStrings.init()`，确保多语言资源正常解析，杜绝预览渲染报错；
+  4. 优先覆盖有数据态（正常业务数据）与特殊状态（如空状态、告警态、编辑态等），提供具有一线参考价值的真实 Mock 参数。

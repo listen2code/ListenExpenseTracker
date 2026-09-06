@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
@@ -65,5 +69,18 @@ fun AccountDeleteConfirmDialog(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun AccountDeleteConfirmDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AccountDeleteConfirmDialog(
+            accountName = "Cash",
+            onDismiss = {},
+            onConfirm = {},
+            lang = "zh"
+        )
     }
 }

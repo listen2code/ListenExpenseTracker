@@ -1,5 +1,10 @@
 package com.listen.expensetracker.features.budget.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.CategoryRepository
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -100,5 +105,21 @@ fun CategoryRatioRow(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "+", modifier = Modifier.size(16.dp))
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun CategoryRatioRowPreview() {
+    ExpenseStrings.init()
+    val sampleCat = CategoryRepository.expenseCategories.first()
+    ListenTheme {
+        CategoryRatioRow(
+            category = sampleCat,
+            ratio = 0.35f,
+            totalBudget = 5000.0,
+            currencySymbol = "$",
+            lang = "zh",
+            onRatioChange = {}
+        )
     }
 }

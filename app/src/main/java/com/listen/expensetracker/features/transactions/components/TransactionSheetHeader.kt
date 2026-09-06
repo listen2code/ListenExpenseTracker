@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -79,5 +83,19 @@ fun TransactionSheetHeader(
                 )
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun TransactionSheetHeaderPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        TransactionSheetHeader(
+            selectedType = "EXPENSE",
+            onTypeChange = {},
+            typeOptions = listOf("EXPENSE", "INCOME"),
+            isEditMode = false,
+            onDeleteClick = {}
+        )
     }
 }

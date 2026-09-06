@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.recurring.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -119,5 +123,17 @@ fun MonthlyDaySelector(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun MonthlyDaySelectorPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        MonthlyDaySelector(
+            dayOfPeriod = 15,
+            lang = "zh",
+            onDayChange = {}
+        )
     }
 }

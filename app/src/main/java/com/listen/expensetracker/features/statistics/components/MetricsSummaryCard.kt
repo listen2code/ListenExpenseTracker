@@ -21,15 +21,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Key Metrics Summary Card Component displaying daily averages and peak transactions.
@@ -123,5 +127,30 @@ fun MetricsSummaryCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MetricsSummaryCardPreview() {
+    ExpenseStrings.init()
+    val sampleMaxTx = TransactionEntity(
+        type = TransactionType.EXPENSE,
+        categoryId = "c_shopping",
+        categoryName = "Shopping",
+        categoryIcon = "c_shopping",
+        categoryColorHex = "#EC4899",
+        amount = 899.0,
+        note = "New Headphones"
+    )
+    ListenTheme {
+        MetricsSummaryCard(
+            isExpenseTab = true,
+            dailyAverage = 142.5,
+            maxTransaction = sampleMaxTx,
+            currencySymbol = "$",
+            lang = "en",
+            onMaxTransactionClick = {}
+        )
     }
 }

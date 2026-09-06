@@ -17,14 +17,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Finance Preferences & Rules Section Card.
@@ -140,5 +143,22 @@ fun SettingsFinanceSection(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsFinanceSectionPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        SettingsFinanceSection(
+            monthlyBudget = 3000.0,
+            currencySymbol = "$",
+            onOpenBudgetDialog = {},
+            onOpenCategoryDialog = {},
+            onOpenAccountDialog = {},
+            onOpenRecurringDialog = {},
+            lang = "en"
+        )
     }
 }

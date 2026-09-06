@@ -14,10 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.theme.IncomeGreen
+import com.listen.uicomponent.theme.ListenTheme
 import java.util.Calendar
 
 /**
@@ -86,5 +89,20 @@ fun DateGroupHeader(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DateGroupHeaderPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        DateGroupHeader(
+            dateHeader = "23 Sunday 2026.08",
+            dayExpense = 150.0,
+            dayIncome = 0.0,
+            currencySymbol = "$",
+            lang = "en"
+        )
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
@@ -34,12 +35,14 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
 import com.listen.expensetracker.R
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * About Application Dialog displaying dynamic package version info and update triggers.
@@ -157,6 +160,18 @@ fun AboutAppDialog(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AboutAppDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AboutAppDialog(
+            onDismiss = {},
+            lang = "en"
+        )
     }
 }
 

@@ -14,16 +14,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.CalculationResult
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.charts.DonutChart
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.CommonEmpty
+import com.listen.uicomponent.components.ProgressSegment
 import com.listen.uicomponent.components.SegmentedProgressBar
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * 统计分类收支环形占比与分段比例条卡片 (StatisticsBreakdownCard)。
@@ -90,5 +94,51 @@ fun StatisticsBreakdownCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatisticsBreakdownCardPreview() {
+    ExpenseStrings.init()
+    val sampleShares = listOf(
+        PieChartItem("Food", "#EF4444", 1200.0, 0.4f),
+        PieChartItem("Transport", "#3B82F6", 600.0, 0.2f),
+        PieChartItem("Shopping", "#EC4899", 900.0, 0.3f),
+        PieChartItem("Others", "#6B7280", 300.0, 0.1f)
+    )
+    val sampleSegments = sampleShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
+    
+    val sampleCalc = CalculationResult(
+        filteredTransactions = emptyList(),
+        totalExpense = 3000.0,
+        totalIncome = 5000.0,
+        netBalance = 2000.0,
+        monthlyBudget = 4000.0,
+        remainingBudget = 1000.0,
+        budgetUsageRatio = 0.75f,
+        isOverBudget = false,
+        categoryShares = sampleShares,
+        progressSegments = sampleSegments,
+        incomeCategoryShares = emptyList(),
+        incomeProgressSegments = emptyList(),
+        dailyTrendBars = emptyList(),
+        dailyTrendPoints = emptyList(),
+        dailyAverageExpense = 100.0,
+        dailyAverageIncome = 166.0,
+        maxExpenseTransaction = null,
+        maxIncomeTransaction = null,
+        monthTitle = "Aug 2026"
+    )
+
+    ListenTheme {
+        StatisticsBreakdownCard(
+            calc = sampleCalc,
+            isExpenseTab = true,
+            monthOffset = 0,
+            currencySymbol = "$",
+            lang = "en",
+            hideAmount = false
+        )
     }
 }

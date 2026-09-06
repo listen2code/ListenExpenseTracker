@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -176,5 +180,19 @@ fun MonthlyBudgetDialog(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun MonthlyBudgetDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        MonthlyBudgetDialog(
+            currentBudget = 5000.0,
+            currencySymbol = "$",
+            lang = "zh",
+            onDismiss = {},
+            onConfirm = {}
+        )
     }
 }

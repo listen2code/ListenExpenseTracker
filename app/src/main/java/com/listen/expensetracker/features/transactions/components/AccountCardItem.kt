@@ -31,14 +31,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.ExpenseRed
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Polished single account card row with vibrant badge, clean typography, and action buttons.
@@ -181,6 +184,34 @@ private fun getAccountVisuals(key: String, isSystem: Boolean): Triple<ImageVecto
             if (isSystem) Icons.Default.AccountBalanceWallet else Icons.Default.Savings,
             MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
             MaterialTheme.colorScheme.tertiary
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AccountCardItemSystemPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AccountCardItem(
+            acct = AccountTypeItem(key = "CASH", nameKey = AppStrings.FILTER_CASH, isSystem = true),
+            onEdit = {},
+            onDelete = {},
+            lang = "en"
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AccountCardItemCustomPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AccountCardItem(
+            acct = AccountTypeItem(key = "ACC_123", nameKey = "", customName = "Travel Card", isSystem = false),
+            onEdit = {},
+            onDelete = {},
+            lang = "en"
         )
     }
 }

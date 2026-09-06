@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,5 +90,18 @@ fun CurrencySelectDialog(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun CurrencySelectDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        CurrencySelectDialog(
+            currentSymbol = "$",
+            onSymbolSelected = {},
+            onDismiss = {},
+            lang = "zh"
+        )
     }
 }

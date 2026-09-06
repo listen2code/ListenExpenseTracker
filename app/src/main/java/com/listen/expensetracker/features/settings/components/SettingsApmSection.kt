@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -99,5 +103,18 @@ fun SettingsApmSection(
             }
 
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun SettingsApmSectionPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        SettingsApmSection(
+            onOpenApmInspector = {},
+            onSeedDemoData = {},
+            onConfirmClearAll = {},
+            lang = "zh"
+        )
     }
 }

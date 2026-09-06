@@ -20,8 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.listen.uicomponent.theme.ListenTheme
 
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.runtime.getValue
@@ -119,5 +121,18 @@ fun MonthNavigationCapsule(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MonthNavigationCapsulePreview() {
+    ListenTheme {
+        MonthNavigationCapsule(
+            monthTitle = "This Month (Aug 2026)",
+            onPreviousMonth = {},
+            onNextMonth = {},
+            onTitleClick = {}
+        )
     }
 }

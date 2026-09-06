@@ -21,14 +21,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.BudgetHealthStatus
 import com.listen.expensetracker.data.model.CategoryBudgetStatus
+import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.theme.ListenTheme
 import kotlin.math.abs
 
 /**
@@ -171,5 +175,27 @@ fun CategoryBudgetItemCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CategoryBudgetItemCardPreview() {
+    ExpenseStrings.init()
+    val sampleStatus = CategoryBudgetStatus(
+        category = CategoryRepository.getCategoryById("c_food"),
+        budgetAmount = 2000.0,
+        spentAmount = 1650.0,
+        ratio = 0.45f,
+        usageRatio = 0.825f,
+        remainingAmount = 350.0,
+        status = BudgetHealthStatus.WARNING
+    )
+    ListenTheme {
+        CategoryBudgetItemCard(
+            status = sampleStatus,
+            currencySymbol = "$",
+            lang = "en"
+        )
     }
 }

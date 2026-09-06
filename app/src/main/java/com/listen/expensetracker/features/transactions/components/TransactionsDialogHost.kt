@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -153,5 +157,14 @@ fun TransactionsDialogHost(
             )
         }
         null -> Unit
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun TransactionsDialogHostPreview() {
+    ExpenseStrings.init()
+    val state = TransactionsUiState()
+    ListenTheme {
+        TransactionsDialogHost(state = state, onIntent = {})
     }
 }

@@ -1,5 +1,9 @@
 ﻿package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -57,5 +61,19 @@ fun AccountFilterChipItem(
                 color = labelColor
             )
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun AccountFilterChipItemPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        AccountFilterChipItem(
+            selected = true,
+            label = "Cash",
+            isCustom = false,
+            onClick = {},
+            onLongClick = {}
+        )
     }
 }

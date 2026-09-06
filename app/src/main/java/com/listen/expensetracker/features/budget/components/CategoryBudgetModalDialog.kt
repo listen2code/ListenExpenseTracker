@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.budget.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -174,5 +178,22 @@ fun CategoryBudgetModalDialog(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun CategoryBudgetModalDialogPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        CategoryBudgetModalDialog(
+            allTransactions = emptyList(),
+            monthlyBudget = 5000.0,
+            categoryRatios = mapOf("c_food" to 0.4f),
+            currencySymbol = "$",
+            lang = "zh",
+            hideAmount = false,
+            onDismiss = {},
+            onSave = { _, _ -> }
+        )
     }
 }

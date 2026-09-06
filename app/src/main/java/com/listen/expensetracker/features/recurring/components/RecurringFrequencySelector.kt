@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.recurring.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -137,5 +141,19 @@ private fun WeeklyDayPicker(
                 )
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun RecurringFrequencySelectorPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        RecurringFrequencySelector(
+            frequency = RecurringFrequency.MONTHLY,
+            dayOfPeriod = 1,
+            lang = "zh",
+            onFrequencyChange = {},
+            onDayChange = {}
+        )
     }
 }

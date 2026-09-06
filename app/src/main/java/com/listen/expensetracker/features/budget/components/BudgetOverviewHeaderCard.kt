@@ -18,14 +18,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.CategoryBudgetCalculationResult
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.theme.ListenTheme
 import kotlin.math.abs
 
 /**
@@ -134,5 +137,29 @@ private fun CompactStatusDot(text: String, color: Color) {
             .padding(horizontal = 5.dp, vertical = 2.dp)
     ) {
         Text(text = "● $text", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = color)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BudgetOverviewHeaderCardPreview() {
+    ExpenseStrings.init()
+    val sampleResult = CategoryBudgetCalculationResult(
+        totalBudget = 5000.0,
+        totalSpent = 3800.0,
+        remainingBudget = 1200.0,
+        usageRatio = 0.76f,
+        statusList = emptyList(),
+        overBudgetCount = 1,
+        warningCount = 2,
+        normalCount = 8
+    )
+    ListenTheme {
+        BudgetOverviewHeaderCard(
+            result = sampleResult,
+            currencySymbol = "$",
+            lang = "en",
+            hideAmount = false
+        )
     }
 }

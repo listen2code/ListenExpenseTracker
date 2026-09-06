@@ -1,5 +1,9 @@
 package com.listen.expensetracker.features.transactions.components
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.theme.ListenTheme
+
 import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -187,6 +191,17 @@ fun ActiveFilterTagsRow(
                 .clip(RoundedCornerShape(6.dp))
                 .clickable { onIntent(TransactionsIntent.ResetAllFilters) }
                 .padding(horizontal = 6.dp, vertical = 4.dp)
+        )
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun ActiveFilterChipItemPreview() {
+    ExpenseStrings.init()
+    ListenTheme {
+        ActiveFilterChipItem(
+            label = "Food",
+            onRemove = {}
         )
     }
 }

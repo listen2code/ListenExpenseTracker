@@ -35,13 +35,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.FinancialInsightItem
 import com.listen.expensetracker.data.engine.InsightSeverity
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * 智能财务洞察卡片轮播 (InsightCarouselCard)。
