@@ -157,24 +157,6 @@ fun AboutAppDialog(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // Google Play fallback button
-            CommonButton(
-                text = "Google Play",
-                onClick = {
-                    openGooglePlay(context)
-                    onDismiss()
-                },
-                style = CommonButtonStyle.Secondary,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Shop,
-                        contentDescription = "Google Play",
-                        modifier = Modifier.size(AppDimens.IconSizeMedium)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }

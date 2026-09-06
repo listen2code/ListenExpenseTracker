@@ -48,95 +48,125 @@ object DemoDataEngine {
         lang: String = "zh",
         accounts: List<String> = listOf("CASH", "BANK", "CREDIT")
     ): List<TransactionEntity> {
-        val cal = Calendar.getInstance().apply {
-            add(Calendar.MONTH, monthOffset)
-        }
-        val maxDayInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val cal = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }
+        val maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
         val currentDay = if (monthOffset == 0) {
-            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDayInMonth)
-        } else {
-            maxDayInMonth
-        }
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDay)
+        } else maxDay
 
-        val count = Random.nextInt(14, 20)
         val generated = mutableListOf<TransactionEntity>()
 
-        // 1. Generate 1-2 Income transactions
-        val incomeCount = Random.nextInt(1, 3)
-        for (i in 0 until incomeCount) {
-            val incomeItem = incomeTemplates.random()
-            val incAmt = Random.nextInt(incomeItem.minAmount, incomeItem.maxAmount).toDouble()
-            val incDay = Random.nextInt(1, currentDay.coerceAtLeast(2))
-            val incCal = (cal.clone() as Calendar).apply {
-                set(Calendar.DAY_OF_MONTH, incDay)
-                set(Calendar.HOUR_OF_DAY, Random.nextInt(9, 18))
-                set(Calendar.MINUTE, Random.nextInt(0, 59))
-            }
-            generated.add(
-                TransactionEntity(
-                    id = UUID.randomUUID().toString(),
-                    type = TransactionType.INCOME,
-                    categoryId = incomeItem.categoryId,
-                    categoryName = incomeItem.categoryNameKey.tr(lang),
-                    categoryIcon = incomeItem.categoryId,
-                    categoryColorHex = incomeItem.colorHex,
-                    amount = incAmt,
-                    timestamp = incCal.timeInMillis,
-                    note = incomeItem.notes.random(),
-                    accountType = "BANK"
-                )
-            )
+        // 1. 生成 1~2 笔真实收入
+        val incAmt = Random.nextInt(12000, 22000).toDouble()
+        val incCal = (cal.clone() as Calendar).apply {
+            set(Calendar.DAY_OF_MONTH, Random.nextInt(1, currentDay.coerceAtLeast(2)))
+            set(Calendar.HOUR_OF_DAY, 10); set(Calendar.MINUTE, 0)
         }
+        generated.add(
+            TransactionEntity(
+                id = UUID.randomUUID().toString(), type = TransactionType.INCOME,
+                categoryId = "c_salary", categoryName = AppStrings.CAT_SALARY.tr(lang),
+                categoryIcon = "c_salary", categoryColorHex = "#10B981",
+                amount = incAmt, timestamp = incCal.timeInMillis,
+                note = if (lang == "zh") "月度薪资发放" else "Monthly Salary", accountType = "BANK"
+            )
+        )
 
-        // 2. Generate varied Expense transactions
-        val expenseCount = count - incomeCount
-        for (i in 0 until expenseCount) {
+        // 2. 注入针对 4 种告警状态的关键特征支出数据
+        // 特征A：单日开销最大峰值 (Peak Day: >= 35% 总支出, 如 1280 元数码配件)
+        val peakDay = if (currentDay >= 3) 2 else 1
+        val peakCal = (cal.clone() as Calendar).apply {
+            set(Calendar.DAY_OF_MONTH, peakDay); set(Calendar.HOUR_OF_DAY, 14); set(Calendar.MINUTE, 30)
+        }
+        generated.add(
+            TransactionEntity(
+                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
+                categoryId = "c_shopping", categoryName = AppStrings.CAT_SHOPPING.tr(lang),
+                categoryIcon = "c_shopping", categoryColorHex = "#EC4899",
+                amount = 1280.0, timestamp = peakCal.timeInMillis,
+                note = if (lang == "zh") "降噪无线耳机" else "Noise Canceling Earbuds", accountType = "CREDIT"
+            )
+        )
+
+        // 特征B：突发分类异动 (Category Spike: 娱乐消费达 480 元，结合上月仅 60 元触发 >1.8x)
+        val spikeDay = if (currentDay >= 4) 3 else 1
+        val spikeCal = (cal.clone() as Calendar).apply {
+            set(Calendar.DAY_OF_MONTH, spikeDay); set(Calendar.HOUR_OF_DAY, 19); set(Calendar.MINUTE, 45)
+        }
+        generated.add(
+            TransactionEntity(
+                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
+                categoryId = "c_entertainment", categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
+                categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6",
+                amount = 480.0, timestamp = spikeCal.timeInMillis,
+                note = if (lang == "zh") "演唱会门票" else "Concert Tickets", accountType = "BANK"
+            )
+        )
+
+        // 3. 生成多笔日常随机分散支出 (共 14~18 笔，保证总额约 3000~3600 元，日均偏高触发预算预警)
+        val dailyCount = Random.nextInt(12, 16)
+        for (i in 0 until dailyCount) {
             val exp = expenseTemplates.random()
-            val amt = Random.nextInt(exp.minAmount, exp.maxAmount).toDouble()
-            val expDay = Random.nextInt(1, (currentDay + 1).coerceAtLeast(2).coerceAtMost(maxDayInMonth + 1))
+            val amt = Random.nextInt(exp.minAmount, (exp.maxAmount / 2).coerceAtLeast(exp.minAmount + 5)).toDouble()
+            val expDay = Random.nextInt(1, (currentDay + 1).coerceAtMost(maxDay + 1))
             val expCal = (cal.clone() as Calendar).apply {
-                set(Calendar.DAY_OF_MONTH, expDay.coerceIn(1, maxDayInMonth))
+                set(Calendar.DAY_OF_MONTH, expDay.coerceIn(1, maxDay))
                 set(Calendar.HOUR_OF_DAY, Random.nextInt(7, 23))
                 set(Calendar.MINUTE, Random.nextInt(0, 59))
             }
             generated.add(
                 TransactionEntity(
-                    id = UUID.randomUUID().toString(),
-                    type = TransactionType.EXPENSE,
-                    categoryId = exp.categoryId,
-                    categoryName = exp.categoryNameKey.tr(lang),
-                    categoryIcon = exp.categoryId,
-                    categoryColorHex = exp.colorHex,
-                    amount = amt,
-                    timestamp = expCal.timeInMillis,
-                    note = exp.notes.random(),
-                    accountType = accounts.random()
+                    id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
+                    categoryId = exp.categoryId, categoryName = exp.categoryNameKey.tr(lang),
+                    categoryIcon = exp.categoryId, categoryColorHex = exp.colorHex,
+                    amount = amt, timestamp = expCal.timeInMillis,
+                    note = exp.notes.random(), accountType = accounts.random()
                 )
             )
         }
 
-        // 3. Generate a recurring subscription expense with [周期] prefix
+        // 4. 生成周期订阅支出项
+        val subDay = if (currentDay >= 5) 5 else 1
         val subCal = (cal.clone() as Calendar).apply {
-            val subDay = if (currentDay >= 5) 5 else 1
-            set(Calendar.DAY_OF_MONTH, subDay)
-            set(Calendar.HOUR_OF_DAY, 9)
-            set(Calendar.MINUTE, 0)
+            set(Calendar.DAY_OF_MONTH, subDay); set(Calendar.HOUR_OF_DAY, 9); set(Calendar.MINUTE, 0)
         }
         val subNote = if (lang == "zh") "[周期] 流媒体月度订阅" else if (lang == "ja") "[周期] サブスクリプション" else "[周期] Streaming Subscription"
         generated.add(
             TransactionEntity(
-                id = UUID.randomUUID().toString(),
-                type = TransactionType.EXPENSE,
-                categoryId = "c_entertainment",
-                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
-                categoryIcon = "c_entertainment",
-                categoryColorHex = "#8B5CF6",
-                amount = 45.0,
-                timestamp = subCal.timeInMillis,
-                note = subNote,
-                accountType = "BANK"
+                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
+                categoryId = "c_entertainment", categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
+                categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6",
+                amount = 45.0, timestamp = subCal.timeInMillis, note = subNote, accountType = "BANK"
             )
         )
+
+        // 5. 跨月对比基准垫底生成：若为当月或特定月份，顺带注入上个月对比基准数据（支出总计约 1300 元）
+        // 从而直接触发 MoM 环比上涨 (+150% > 12%) 与娱乐分类突增 (> 1.8x)
+        val prevCal = Calendar.getInstance().apply {
+            add(Calendar.MONTH, monthOffset - 1)
+        }
+        val prevMaxDay = prevCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val prevBaselineList = listOf(
+            Triple("c_food", 450.0, if (lang == "zh") "上月日常餐饮" else "Past Dining"),
+            Triple("c_transport", 280.0, if (lang == "zh") "上月交通出行" else "Past Commute"),
+            Triple("c_shopping", 450.0, if (lang == "zh") "上月日常百货" else "Past Groceries"),
+            Triple("c_entertainment", 60.0, if (lang == "zh") "上月电影票" else "Past Movie")
+        )
+        prevBaselineList.forEachIndexed { idx, (catId, baseAmt, note) ->
+            val bCal = (prevCal.clone() as Calendar).apply {
+                set(Calendar.DAY_OF_MONTH, (idx * 5 + 3).coerceIn(1, prevMaxDay))
+                set(Calendar.HOUR_OF_DAY, 12); set(Calendar.MINUTE, 0)
+            }
+            val tpl = expenseTemplates.find { it.categoryId == catId }
+            generated.add(
+                TransactionEntity(
+                    id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
+                    categoryId = catId, categoryName = tpl?.categoryNameKey?.tr(lang) ?: catId,
+                    categoryIcon = catId, categoryColorHex = tpl?.colorHex ?: "#3B82F6",
+                    amount = baseAmt, timestamp = bCal.timeInMillis, note = note, accountType = "BANK"
+                )
+            )
+        }
 
         return generated
     }
@@ -144,80 +174,45 @@ object DemoDataEngine {
     fun generateDefaultRecurringRules(lang: String = "zh"): List<RecurringRuleEntity> {
         val now = System.currentTimeMillis()
         fun getNextExec(day: Int): Long = Calendar.getInstance().apply {
-            add(Calendar.MONTH, 1)
-            set(Calendar.DAY_OF_MONTH, day)
-            set(Calendar.HOUR_OF_DAY, 9)
-            set(Calendar.MINUTE, 0)
+            add(Calendar.MONTH, 1); set(Calendar.DAY_OF_MONTH, day); set(Calendar.HOUR_OF_DAY, 9); set(Calendar.MINUTE, 0)
         }.timeInMillis
 
         return listOf(
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "住房租金" else if (lang == "ja") "家賃" else "Apartment Rent",
-                type = TransactionType.EXPENSE,
-                categoryId = "c_shopping",
-                categoryName = AppStrings.CAT_SHOPPING.tr(lang),
-                categoryIcon = "c_shopping",
-                categoryColorHex = "#EC4899",
-                amount = 2600.0,
-                accountType = "BANK",
-                note = if (lang == "zh") "每月1日房租" else "Monthly Rent",
-                frequency = RecurringFrequency.MONTHLY,
-                dayOfPeriod = 1,
-                startDate = now,
-                nextExecutionDate = getNextExec(1),
-                executionType = ExecutionType.AUTO_INSERT
+                type = TransactionType.EXPENSE, categoryId = "c_shopping",
+                categoryName = AppStrings.CAT_SHOPPING.tr(lang), categoryIcon = "c_shopping",
+                categoryColorHex = "#EC4899", amount = 2600.0, accountType = "BANK",
+                note = if (lang == "zh") "每月1日房租" else "Monthly Rent", frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 1, startDate = now, nextExecutionDate = getNextExec(1), executionType = ExecutionType.AUTO_INSERT
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "Netflix 会员" else if (lang == "ja") "Netflix 会員" else "Netflix",
-                type = TransactionType.EXPENSE,
-                categoryId = "c_entertainment",
-                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
-                categoryIcon = "c_entertainment",
-                categoryColorHex = "#8B5CF6",
-                amount = 45.0,
-                accountType = "BANK",
-                note = if (lang == "zh") "高级家庭套餐" else "Premium",
-                frequency = RecurringFrequency.MONTHLY,
-                dayOfPeriod = 5,
-                startDate = now,
-                nextExecutionDate = getNextExec(5),
-                executionType = ExecutionType.AUTO_INSERT
+                type = TransactionType.EXPENSE, categoryId = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang), categoryIcon = "c_entertainment",
+                categoryColorHex = "#8B5CF6", amount = 45.0, accountType = "BANK",
+                note = if (lang == "zh") "高级家庭套餐" else "Premium", frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 5, startDate = now, nextExecutionDate = getNextExec(5), executionType = ExecutionType.AUTO_INSERT
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "每月薪资" else if (lang == "ja") "毎月の給与" else "Monthly Salary",
-                type = TransactionType.INCOME,
-                categoryId = "c_salary",
-                categoryName = AppStrings.CAT_SALARY.tr(lang),
-                categoryIcon = "c_salary",
-                categoryColorHex = "#10B981",
-                amount = 18000.0,
-                accountType = "BANK",
-                note = if (lang == "zh") "固定工资发放" else "Base Salary",
-                frequency = RecurringFrequency.MONTHLY,
-                dayOfPeriod = 10,
-                startDate = now,
-                nextExecutionDate = getNextExec(10),
-                executionType = ExecutionType.NOTIFY_CONFIRM
+                type = TransactionType.INCOME, categoryId = "c_salary",
+                categoryName = AppStrings.CAT_SALARY.tr(lang), categoryIcon = "c_salary",
+                categoryColorHex = "#10B981", amount = 18000.0, accountType = "BANK",
+                note = if (lang == "zh") "固定工资发放" else "Base Salary", frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 10, startDate = now, nextExecutionDate = getNextExec(10), executionType = ExecutionType.NOTIFY_CONFIRM
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "iCloud 云存储" else if (lang == "ja") "iCloud ストレージ" else "iCloud Storage",
-                type = TransactionType.EXPENSE,
-                categoryId = "c_entertainment",
-                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
-                categoryIcon = "c_entertainment",
-                categoryColorHex = "#8B5CF6",
-                amount = 21.0,
-                accountType = "CREDIT",
-                note = if (lang == "zh") "200GB 空间" else "200GB Plan",
-                frequency = RecurringFrequency.MONTHLY,
-                dayOfPeriod = 15,
-                startDate = now,
-                nextExecutionDate = getNextExec(15),
-                executionType = ExecutionType.AUTO_INSERT
+                type = TransactionType.EXPENSE, categoryId = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang), categoryIcon = "c_entertainment",
+                categoryColorHex = "#8B5CF6", amount = 21.0, accountType = "CREDIT",
+                note = if (lang == "zh") "200GB 空间" else "200GB Plan", frequency = RecurringFrequency.MONTHLY,
+                dayOfPeriod = 15, startDate = now, nextExecutionDate = getNextExec(15), executionType = ExecutionType.AUTO_INSERT
             )
         )
     }

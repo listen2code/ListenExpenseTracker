@@ -123,6 +123,83 @@ class FinancialInsightEngineTest {
     }
 
     @Test
+    fun testBurnRatePredictor() {
+        // 当月日均支出较高，推算整月将超出预算时触发
+        val cal = Calendar.getInstance()
+        val currentDay = cal.get(Calendar.DAY_OF_MONTH)
+        val maxDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        if (currentDay in 3..(maxDays - 2)) {
+            val dailyExpense = 200.0
+            val totalExpense = dailyExpense * currentDay
+            val txList = (1..currentDay).map { d ->
+                val c = (cal.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, d) }
+                createTx("tx_$d", dailyExpense, timestamp = c.timeInMillis)
+            }
+            // 预算设置为低于预估月总支出 (预估: 200 * maxDays >= 5600)，且高于当前支出
+            val budget = totalExpense + 500.0
+            val insights = FinancialInsightEngine.generateInsights(
+                allTransactions = txList,
+                currentOffset = 0,
+                monthlyBudget = budget,
+                lang = "zh"
+            )
+            val burnRate = insights.find { it.id == "insight_burn_rate" }
+            assertNotNull("Should detect burn rate warning", burnRate)
+            assertEquals(InsightSeverity.WARNING, burnRate?.severity)
+        }
+    }
+
+    @Test
+    fun testPeakDayDetection() {
+        val cal = Calendar.getInstance()
+        val c1 = (cal.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
+        val c2 = (cal.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 2) }
+        val c3 = (cal.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 3) }
+
+        val txList = listOf(
+            createTx("1", 1200.0, timestamp = c1.timeInMillis), // 峰值占 1200 / 2000 = 60% >= 35%
+            createTx("2", 400.0, timestamp = c2.timeInMillis),
+            createTx("3", 400.0, timestamp = c3.timeInMillis)
+        )
+
+        val insights = FinancialInsightEngine.generateInsights(
+            allTransactions = txList,
+            currentOffset = 0,
+            monthlyBudget = 5000.0,
+            lang = "zh"
+        )
+
+        val peakDay = insights.find { it.id == "insight_peak_day" }
+        assertNotNull("Should detect peak day", peakDay)
+        assertEquals(1, peakDay?.targetDay)
+    }
+
+    @Test
+    fun testDemoDataEngineMultiStateCoverage() {
+        val generated = com.listen.expensetracker.data.engine.DemoDataEngine.generate(
+            monthOffset = 0,
+            lang = "zh"
+        )
+        assertTrue(generated.isNotEmpty())
+
+        val insights = FinancialInsightEngine.generateInsights(
+            allTransactions = generated,
+            currentOffset = 0,
+            monthlyBudget = 5000.0,
+            lang = "zh"
+        )
+
+        // 验证 4 种主要告警洞察是否在生成的数据中得到覆盖
+        val hasMom = insights.any { it.id.startsWith("insight_mom_") }
+        val hasSpike = insights.any { it.id.startsWith("insight_cat_jump_") }
+        val hasPeak = insights.any { it.id == "insight_peak_day" }
+
+        assertTrue("Demo data should trigger MoM insight", hasMom)
+        assertTrue("Demo data should trigger category spike insight", hasSpike)
+        assertTrue("Demo data should trigger peak day insight", hasPeak)
+    }
+
+    @Test
     fun testAnnualOverviewCalculation() {
         val cal = Calendar.getInstance().apply {
             set(Calendar.MONTH, 0) // 1月
