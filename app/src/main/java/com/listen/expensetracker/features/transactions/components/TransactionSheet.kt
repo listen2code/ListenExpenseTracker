@@ -32,6 +32,7 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.settings.components.CategoryManageDialog
@@ -83,8 +84,8 @@ fun TransactionSheet(
         mutableStateOf(matched ?: categories.first())
     }
 
-    var amountExpression by remember { mutableStateOf(if (isEditMode) "%.2f".format(transaction.amount ?: 0.0) else "0") }
-    
+    // [Bugfix] 遵循 Rule 21：编辑模式下使用 formatAmount() 去除末尾 .00（如 78.00 还原为 78），保持与列表视觉一致
+    var amountExpression by remember { mutableStateOf(if (isEditMode) (transaction.amount ?: 0.0).formatAmount() else "0") }
     var note by remember { mutableStateOf(transaction?.note ?: "") }
     var accountVersion by remember { mutableIntStateOf(0) }
     val availableAccounts = remember(accountVersion) { AccountRepository.getAllAccounts() }
@@ -95,7 +96,6 @@ fun TransactionSheet(
     var showCategoryManageDialog by remember { mutableStateOf(false) }
     var accountToDelete by remember { mutableStateOf<AccountTypeItem?>(null) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-
     val typeOptions = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang))
 
     CommonBottomSheet(
@@ -115,7 +115,6 @@ fun TransactionSheet(
                 isEditMode = isEditMode && onDelete != null,
                 onDeleteClick = { showDeleteConfirmDialog = true }
             )
-
             // 2. 金额输入预览（只读，由下方数字键盘驱动；支持点击清除按钮重置为0）
             CommonEditText(
                 value = amountExpression,
@@ -192,7 +191,10 @@ fun TransactionSheet(
             // 7. 响应式数字键盘
             NumericKeypad(
                 onKeyPress = { key ->
+                    // [Bugfix] 解决键盘输入超出限制问题：限制最多2位小数并杜绝多重小数点
                     if (key == "." && amountExpression.contains(".")) return@NumericKeypad
+                    val dotIdx = amountExpression.indexOf('.')
+                    if (dotIdx != -1 && key != "." && amountExpression.length - dotIdx - 1 >= 2) return@NumericKeypad
                     if ((amountExpression == "0" || amountExpression.isEmpty()) && key != ".") {
                         amountExpression = key
                     } else if (amountExpression.length < 10) {

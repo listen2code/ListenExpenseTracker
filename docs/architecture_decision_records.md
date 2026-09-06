@@ -298,4 +298,49 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 - 优点：碎片化即时记账路径从 10 秒缩短至 2 秒以内；桌面实时掌控预算健康度；无后台轮询开销，极致节能。
 - 成本：需在 `TransactionSheet` 中支持 `initialCategoryId` 预选分类并在 `TransactionsDialog.AddTransaction` 中扩展参数兼容。
 
+---
 
+## ADR-022: 生物识别应用锁与生命周期拦截 (Biometric & Lifecycle Security)
+
+### 背景 (Context)
+财务应用涉及用户高隐私的收支数据与资产情况。设备即使被他人临时借用，也存在意外点开应用泄露资产金额的风险。同时，系统多任务卡片 (Recent Apps) 截图也会缓存包含敏感金额的界面快照。
+
+### 决策 (Decision)
+1. **基于 androidx.biometric**：引入标准 `BiometricPrompt`，收敛管理指纹、面容及后备锁屏密码 (PIN/图案)，保证最佳碎片化机型兼容性。
+2. **切后台延迟锁定**：在 `BiometricSecurityManager` 中记录 `ON_PAUSE` 时间戳，并在 `ON_RESUME` 时根据用户配置的宽限期（立即、1分钟、5分钟）决定是否弹出全局拦截层 `BiometricLockOverlay`。
+3. **FLAG_SECURE 与常驻防窥调度**：通过 `AppSecurityCoordinator` 统一管理 `Window.FLAG_SECURE`。当启用应用锁或常驻防窥 (`recentAppsShieldEnabled`) 时持续置位安全标志，防止应用在解锁状态下切到多任务界面时被系统截取并暴露财务快照。
+
+### 影响 (Consequences)
+- 优点：满足高度安全诉求；通过弹窗阻挡无需重构底层导航；
+- 成本：引入生物识别库依赖，需在各种厂商 ROM 层面做测试适配（如熄屏再亮的生命周期重入边界问题）。
+
+---
+
+## ADR-023: 智能财务洞察诊断与计算前置 (Financial Insight Engine)
+
+### 背景 (Context)
+用户除了记录账单外，更需要深度的财务诊断（例如月环比暴涨、预测超支日、异常单项花销突增）。将这些复杂分析逻辑揉杂在 ViewModel 或 View 层会导致代码极度臃肿且难以测试。
+
+### 决策 (Decision)
+1. **纯函数式引擎隔离**：将所有诊断分析逻辑收敛于单一无状态纯对象 `FinancialInsightEngine`。接收 `TransactionEntity` 原始列表与 `currentOffset`，返回标准的 `FinancialInsightItem` 领域实体列表。
+2. **分级情感化卡片**：洞察卡片区分 `INFO`、`POSITIVE`（翡翠绿）、`WARNING`（琥珀黄）、`DANGER`（珊瑚红）四个情感化级别，使核心财务状态对用户产生强直觉。
+3. **基于时间的局部快照对比**：针对环比分析 (MoM)，动态切片当月与上月同期的花销聚合并通过除法差值找出突增项。
+
+### 影响 (Consequences)
+- 优点：引擎函数可完全隔离 UI 在纯 JVM 环境进行 100% 单元测试覆盖；扩展新洞察策略（如年度概览）成本极低。
+- 成本：每次渲染均会在协程作用域下扫描历史两月的完整交易列表；但基于内存快照，耗时保持在几毫秒，无 UI 卡顿。
+
+---
+
+## ADR-024: 记账表单金额展示规范与双小数位输入防溢流 (Transaction Form Amount Formatting & Keypad Decimal Guard)
+
+### 背景 (Context)
+流水列表中展示整数金额如 `78`，但点击进入编辑弹窗时若初始化为 `"78.00"`，会破坏视觉一致性并违背全局金额去零规范（Rule 21）。此外，自定义数字键盘 `NumericKeypad` 早期仅限制了小数点唯一性与最大字符长度，缺少对小数位数的拦截，导致用户输入两位小数后仍可随意追加按键。
+
+### 决策 (Decision)
+1. **初始化严格对齐 Rule 21**：`TransactionSheet` 在编辑模式初始化金额表达式时，全量使用 `Double.formatAmount()` 扩展，自动去除末尾无意义的 `.00` 和 `.0`。
+2. **键盘级小数位拦截**：在 `NumericKeypad` 的 `onKeyPress` 中引入动态小数位校验 `amountExpression.indexOf('.') != -1 && key != "." && amountExpression.length - dotIdx - 1 >= 2`，在按键源头杜绝超出 2 位小数的输入行为。
+
+### 影响 (Consequences)
+- 优点：列表与编辑态金额表现 100% 统一；彻底消除非法小数输入风险；
+- 成本：无额外运行时性能损耗，逻辑内聚在键盘事件回调中。

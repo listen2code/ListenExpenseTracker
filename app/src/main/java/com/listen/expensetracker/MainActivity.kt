@@ -55,6 +55,11 @@ class MainActivity : FragmentActivity() {
             val settingsState by appState.settingsViewModel.viewState.collectAsState()
             val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
 
+            // [Security] 实时响应多任务防窥设置变更，常驻注入或按需解除 FLAG_SECURE (Rule 22)
+            LaunchedEffect(settingsState.recentAppsShieldEnabled) {
+                securityCoordinator.applyRecentAppsShield(this@MainActivity, settingsState.recentAppsShieldEnabled)
+            }
+
             val currentIntent = pendingQuickAddIntent.value
             LaunchedEffect(currentIntent) {
                 currentIntent?.let { targetIntent ->
@@ -86,7 +91,7 @@ class MainActivity : FragmentActivity() {
                     // 生物识别全屏锁屏遮罩层
                     if (securityCoordinator.isAppLocked) {
                         BiometricLockOverlay(
-                            onUnlockRequest = { securityCoordinator.promptUnlock(this@MainActivity, settingsState.language) },
+                            onUnlockRequest = { securityCoordinator.promptUnlock(this@MainActivity, settingsState.language, settingsState.recentAppsShieldEnabled) },
                             lang = settingsState.language
                         )
                     }
@@ -99,7 +104,7 @@ class MainActivity : FragmentActivity() {
         super.onStart()
         val s = activeAppState?.settingsViewModel?.viewState?.value
         if (s != null) {
-            securityCoordinator.onStart(this, s.biometricLockEnabled, s.isBiometricSupported, s.lockTimeoutSeconds, s.language)
+            securityCoordinator.onStart(this, s.biometricLockEnabled, s.isBiometricSupported, s.lockTimeoutSeconds, s.language, s.recentAppsShieldEnabled)
         }
     }
 

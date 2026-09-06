@@ -26,12 +26,23 @@ class AppSecurityCoordinator(
     private val shakeDetector = ShakeDetector(onShake = onShakeTriggered)
 
     /**
-     * Activity onPause 生命周期：若开启 Recent Apps Shield，注入 FLAG_SECURE 阻断多任务切屏截图
+     * 响应式调度窗口安全标志 (FLAG_SECURE)：
+     * 当开启 Recent Apps Shield 或处于生物识别锁定状态时，窗口常驻保持 FLAG_SECURE。
+     * 从根本上杜绝 Android 系统在多任务手势上滑瞬间窃取屏幕快照 (Task Snapshot)。
+     */
+    fun applyRecentAppsShield(activity: FragmentActivity, recentAppsShield: Boolean) {
+        if (recentAppsShield || isAppLocked) {
+            activity.window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        }
+    }
+
+    /**
+     * Activity onPause 生命周期：确保安全标志生效并暂停摇一摇传感器
      */
     fun onPause(activity: FragmentActivity, recentAppsShield: Boolean) {
-        if (recentAppsShield) {
-            activity.window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-        }
+        applyRecentAppsShield(activity, recentAppsShield)
         shakeDetector.stop()
     }
 
@@ -39,9 +50,7 @@ class AppSecurityCoordinator(
      * Activity onResume 生命周期：安全恢复窗口标志并按需激活摇一摇传感器
      */
     fun onResume(activity: FragmentActivity, recentAppsShield: Boolean, shakeEnabled: Boolean) {
-        if (!isAppLocked && !recentAppsShield) {
-            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        }
+        applyRecentAppsShield(activity, recentAppsShield)
         if (shakeEnabled) {
             shakeDetector.start(activity)
         }
@@ -62,13 +71,16 @@ class AppSecurityCoordinator(
         biometricEnabled: Boolean,
         isBioSupported: Boolean,
         timeoutSeconds: Int,
-        lang: String
+        lang: String,
+        recentAppsShield: Boolean
     ) {
+        applyRecentAppsShield(activity, recentAppsShield)
         if (biometricEnabled && isBioSupported) {
             val elapsedSeconds = (SystemClock.elapsedRealtime() - backgroundTimestamp) / 1000
             if (elapsedSeconds >= timeoutSeconds) {
                 isAppLocked = true
-                promptUnlock(activity, lang)
+                applyRecentAppsShield(activity, recentAppsShield)
+                promptUnlock(activity, lang, recentAppsShield)
             }
         }
     }
@@ -76,14 +88,14 @@ class AppSecurityCoordinator(
     /**
      * 调起系统生物识别/设备密码验证
      */
-    fun promptUnlock(activity: FragmentActivity, lang: String) {
+    fun promptUnlock(activity: FragmentActivity, lang: String, recentAppsShield: Boolean = true) {
         BiometricSecurityManager.promptUnlock(
             activity = activity,
             title = AppStrings.SECURITY_UNLOCK_PROMPT_TITLE.tr(lang),
             subtitle = AppStrings.SECURITY_UNLOCK_PROMPT_SUBTITLE.tr(lang),
             onSuccess = {
                 isAppLocked = false
-                activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                applyRecentAppsShield(activity, recentAppsShield)
             }
         )
     }

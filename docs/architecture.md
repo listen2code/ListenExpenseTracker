@@ -193,3 +193,21 @@ flowchart LR
 1. **工业级版本管理**：`versionCode` 随构建自动化递增，`versionName` 遵循 SemVer 标准；
 2. **产物安全性与极简化**：强制开启 `minifyEnabled` + `shrinkResources`，Secrets 凭据由 GitHub Actions Secrets 隔离，生成针对不同设备的切片 AAB 包；
 3. **发布成功精准通知**：工作流配置 `if: success()`，仅在 AAB 生成并成功发版至 Google Play 时发送推送邮件。
+
+---
+
+## 7. 生物识别与资产安全防窥 (Security & Privacy)
+
+**ListenExpenseTracker** 高度注重隐私，通过多重防线实现资产安全守护：
+1. **生物认证底座**：基于 `androidx.biometric.BiometricPrompt`，提供指纹、面容等强凭据验证。
+2. **生命周期拦截 (Lifecycle Interception)**：`BiometricSecurityManager` 监听 App 切后台的时间（立即/1分钟/5分钟），超时后重回前台强制弹出 `BiometricLockOverlay` 阻断 UI，防止敏感账单泄露。
+3. **多任务界面防窥 (Recent Apps Privacy Shield)**：`AppSecurityCoordinator` 统一调度窗口防窥状态。当配置开启应用锁或常驻多任务防窥 (`recentAppsShieldEnabled`) 时，在 `MainActivity` 生命周期持久化注入 `FLAG_SECURE`，阻断系统多任务卡片与外部截屏对敏感资产数据的刺探。
+
+---
+
+## 8. Widget 2.0 与系统桌面触达 (App Widget)
+
+**Widget 2.0** 架构在无需主应用长驻后台的前提下，实现了“看板展示 + 闪电唤起”的双核心价值。
+1. **4x2 智能卡片布局**：采用 `WidgetLayoutBinder` 渲染包含当月结余、预算进度条、健康度徽章。
+2. **动态渲染与主题适配**：使用 Android 标准的 `RemoteViews` 进行渲染，自动跟随系统深色/浅色模式切换 (`values-night`)，确保内存占用极小。
+3. **极速唤醒路由 (DeepLink Intents)**：提供针对餐饮、交通等高频类别的直达 `PendingIntent`，实现从桌面到记账弹窗的 0 级路径。
