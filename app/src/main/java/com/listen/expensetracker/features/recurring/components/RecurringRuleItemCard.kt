@@ -112,7 +112,7 @@ fun RecurringRuleItemCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = category?.icon ?: Icons.Default.Repeat,
+                        imageVector = category.icon,
                         contentDescription = rule.title,
                         tint = catColor,
                         modifier = Modifier.size(16.dp)

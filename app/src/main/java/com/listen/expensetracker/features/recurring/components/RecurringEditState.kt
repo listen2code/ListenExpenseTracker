@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.ExecutionType
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.db.RecurringRuleEntity

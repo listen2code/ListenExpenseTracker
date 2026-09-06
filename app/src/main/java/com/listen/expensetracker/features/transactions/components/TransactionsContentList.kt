@@ -115,7 +115,10 @@ fun TransactionsContentList(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = AppDimens.SpaceLarge),
-        contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
+        // [Bugfix] 解决流水列表右下角最后一条数据被浮动添加按钮 (FAB) 遮挡问题：
+        // 原因分析：原 contentPadding 底部仅预留 12.dp (SpaceLarge)，列表滑到最底端时，FAB (高度 56.dp + 边距) 会悬浮覆盖在最后一条 item 上方；
+        // 解决的问题：额外加上 SpaceBottomFab (72.dp) 的底部避让内边距，确保列表最后一项可以完全滑过 FAB 向上展示。
+        contentPadding = PaddingValues(bottom = AppDimens.SpaceBottomFab + AppDimens.SpaceLarge),
         verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
     ) {
         // Monthly Balance Overview Card

@@ -51,6 +51,14 @@ fun rememberStatisticsStateHolder(
         initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
         pageCount = { PAGER_PAGE_COUNT }
     )
+    // [Bugfix] 解决跨 Tab 切换月份时的“有数据到无数据”画面闪动问题：
+    // 原因分析：当用户在其他 Tab 改变月份再切回统计页时，SaveableStateProvider 会恢复上次离开统计页时的旧月份 page，
+    // 导致 Compose 首帧先渲染旧月份（满数据卡片），随后协程副作用才异步触发 scrollToPage 跳到新月份（空数据），产生肉眼可见闪烁。
+    // 解决的问题：在测量布局首帧前调用 requestScrollToPage 同步请求对齐到目标月份，杜绝异步滚动延迟与旧数据卡片闪现。
+    val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
+    if (pagerState.currentPage != targetPage && !pagerState.isScrollInProgress) {
+        pagerState.requestScrollToPage(targetPage)
+    }
 
     // 2. 初始化列表滚动状态并绑定 Saver
     val listState = rememberSaveable(pagerState.currentPage, saver = LazyListState.Saver) {

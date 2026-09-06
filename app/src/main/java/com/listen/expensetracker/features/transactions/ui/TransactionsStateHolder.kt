@@ -54,6 +54,14 @@ fun rememberTransactionsStateHolder(
         initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
         pageCount = { PAGER_PAGE_COUNT }
     )
+    // [Bugfix] 解决跨 Tab 切换月份时的页面位置对齐与首帧闪动问题：
+    // 原因分析：用户在统计页改变月份后切回流水页时，SaveableStateProvider 会从状态缓存中恢复出旧月份的 page，
+    // 若仅依赖协程副作用异步 scrollToPage，首帧会先渲染旧月份，随后突然跳变到新月份。
+    // 解决的问题：在测量布局首帧前调用 requestScrollToPage 同步请求对齐到目标月份，杜绝异步滚动延迟与旧数据卡片闪现。
+    val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
+    if (pagerState.currentPage != targetPage && !pagerState.isScrollInProgress) {
+        pagerState.requestScrollToPage(targetPage)
+    }
 
     // 2. 初始化列表滚动状态并绑定 Saver
     val listState = rememberSaveable(pagerState.currentPage, saver = LazyListState.Saver) {

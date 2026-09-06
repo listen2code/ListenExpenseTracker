@@ -21,8 +21,6 @@ import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
 import com.listen.expensetracker.data.update.UpdateCheckerService
 import com.listen.expensetracker.data.update.UpdateResult
-import com.listen.uicomponent.theme.AccentColor
-import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
