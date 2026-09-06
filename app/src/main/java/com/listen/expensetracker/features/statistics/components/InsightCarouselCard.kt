@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -32,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.FinancialInsightItem
@@ -108,16 +111,19 @@ fun InsightCarouselCard(
 
             Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
 
-            // 2. 轮播内容区域
+            // 2. 轮播内容区域（设置最小高度 72.dp 并让各页卡片填满高度，消除切换时高度跳动）
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 72.dp)
             ) { page ->
                 val item = insights[page]
                 SingleInsightCard(
                     item = item,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(AppDimens.CornerButton))
                         .clickable(enabled = onInsightClick != null) {
                             onInsightClick?.invoke(item)
@@ -187,6 +193,7 @@ private fun SingleInsightCard(
 
     Row(
         modifier = modifier
+            .heightIn(min = 72.dp)
             .background(bgColor)
             .padding(AppDimens.SpaceStandard),
         verticalAlignment = Alignment.Top,
@@ -219,7 +226,9 @@ private fun SingleInsightCard(
                 text = item.description,
                 fontSize = AppDimens.TextBody,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = AppDimens.TextHeader
+                lineHeight = AppDimens.TextHeader,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
