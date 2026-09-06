@@ -26,7 +26,11 @@ data class ExpensePreferences(
     val autoBackupDrive: Boolean = true,
     val autoBackupWifiOnly: Boolean = false,
     val isDeveloperMode: Boolean = false,
-    val hideBalance: Boolean = false
+    val hideBalance: Boolean = false,
+    val biometricLockEnabled: Boolean = false,
+    val lockTimeoutSeconds: Int = 0,
+    val recentAppsShieldEnabled: Boolean = true,
+    val shakeToHideBalanceEnabled: Boolean = true
 )
 
 /**

@@ -1,14 +1,13 @@
 package com.listen.expensetracker.features.transactions.components
 
 import com.listen.arch.i18n.tr
-
 import com.listen.expensetracker.data.i18n.AppStrings
-
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,18 +45,7 @@ import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Ultra-Compact Balance Overview Card Component.
- * Displays Net Balance, Monthly Expense, Income, and Budget Consumption Progress.
- * Optimized with fixed text metrics and maxLines to eliminate visual jitter when toggling privacy.
- *
- * @param currencySymbol Active currency symbol (e.g., "$", "¥")
- * @param netBalance Calculated net balance (Income - Expense)
- * @param totalExpense Total expense for the selected month
- * @param totalIncome Total income for the selected month
- * @param budgetUsageRatio Progress ratio of budget spent (0.0 to 1.0)
- * @param isOverBudget True if expense exceeds configured monthly budget
- * @param hideBalance True if privacy masking is active
- * @param lang ISO language code for internationalization
- * @param modifier Composable modifier
+ * Supports double-tap to toggle privacy mask (••••) on sensitive balance amounts.
  */
 @Composable
 fun BalanceOverviewCard(
@@ -68,15 +57,24 @@ fun BalanceOverviewCard(
     isOverBudget: Boolean,
     hideBalance: Boolean,
     lang: String,
+    modifier: Modifier = Modifier,
     monthlyBudget: Double = 0.0,
     remainingBudget: Double = 0.0,
     onBudgetClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onToggleHideBalance: (() -> Unit)? = null
 ) {
+    val cardModifier = if (onToggleHideBalance != null) {
+        modifier.fillMaxWidth().pointerInput(onToggleHideBalance) {
+            detectTapGestures(onDoubleTap = { onToggleHideBalance() })
+        }
+    } else {
+        modifier.fillMaxWidth()
+    }
+
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
         contentPadding = AppDimens.SpaceStandard,
-        modifier = modifier.fillMaxWidth()
+        modifier = cardModifier
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
             // Top Row: Balance Title & Primary Net Balance Amount

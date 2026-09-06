@@ -135,6 +135,7 @@ fun TransactionsContentList(
                 monthlyBudget = calc.monthlyBudget,
                 remainingBudget = calc.remainingBudget,
                 onBudgetClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget)) },
+                onToggleHideBalance = { onIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppDimens.SpaceExtraSmall)

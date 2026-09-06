@@ -11,8 +11,10 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 googleGmsGoogleServices = "4.4.4"
 material3 = "1.4.0"
+biometric = "1.2.0-alpha05"
 
 [libraries]
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

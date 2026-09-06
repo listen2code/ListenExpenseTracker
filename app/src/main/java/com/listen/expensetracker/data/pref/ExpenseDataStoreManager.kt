@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.data.pref.archDataStore
@@ -29,6 +30,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_DEVELOPER_MODE = booleanPreferencesKey("expense_developer_mode")
         val KEY_HIDE_BALANCE = booleanPreferencesKey("expense_hide_balance")
         val KEY_CATEGORY_BUDGETS = stringPreferencesKey("expense_category_budgets")
+        val KEY_BIOMETRIC_LOCK_ENABLED = booleanPreferencesKey("expense_biometric_lock_enabled")
+        val KEY_LOCK_TIMEOUT_SECONDS = intPreferencesKey("expense_lock_timeout_seconds")
+        val KEY_RECENT_APPS_SHIELD_ENABLED = booleanPreferencesKey("expense_recent_apps_shield_enabled")
+        val KEY_SHAKE_TO_HIDE_BALANCE_ENABLED = booleanPreferencesKey("expense_shake_to_hide_balance_enabled")
     }
 
     val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
@@ -51,7 +56,11 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             autoBackupDrive = prefs[KEY_AUTO_BACKUP_DRIVE] ?: true,
             autoBackupWifiOnly = prefs[KEY_AUTO_BACKUP_WIFI_ONLY] ?: false,
             isDeveloperMode = prefs[KEY_DEVELOPER_MODE] ?: false,
-            hideBalance = prefs[KEY_HIDE_BALANCE] ?: false
+            hideBalance = prefs[KEY_HIDE_BALANCE] ?: false,
+            biometricLockEnabled = prefs[KEY_BIOMETRIC_LOCK_ENABLED] ?: false,
+            lockTimeoutSeconds = prefs[KEY_LOCK_TIMEOUT_SECONDS] ?: 0,
+            recentAppsShieldEnabled = prefs[KEY_RECENT_APPS_SHIELD_ENABLED] ?: true,
+            shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true
         )
     }
 
@@ -117,6 +126,22 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
 
     suspend fun setHideBalance(hide: Boolean) {
         context.archDataStore.edit { prefs -> prefs[KEY_HIDE_BALANCE] = hide }
+    }
+
+    suspend fun setBiometricLockEnabled(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_BIOMETRIC_LOCK_ENABLED] = enabled }
+    }
+
+    suspend fun setLockTimeoutSeconds(seconds: Int) {
+        context.archDataStore.edit { prefs -> prefs[KEY_LOCK_TIMEOUT_SECONDS] = seconds }
+    }
+
+    suspend fun setRecentAppsShieldEnabled(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_RECENT_APPS_SHIELD_ENABLED] = enabled }
+    }
+
+    suspend fun setShakeToHideBalanceEnabled(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] = enabled }
     }
 
     suspend fun setCategoryBudgetRatios(ratios: Map<String, Float>) {

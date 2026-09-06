@@ -214,14 +214,14 @@
   - [x] 统计页顶部轮播展示「财务洞察卡片 (Insight Cards)」。
   - [x] 增设「年度 12 个月收支走势 (Annual Overview)」柱状走势图，支持横向查看全年收支结余健康曲线。
 
-### 4. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全]
+### 4. 生物识别应用锁与隐私防窥模式 (Biometric App Lock & Privacy Shield) - [P1, 资产安全] (Completed)
 * **详细设计文档**：[biometric_security_and_privacy_design.md](biometric_security_and_privacy_design.md)
-- [ ] **生物识别指纹与面容安全锁**
-  - [ ] 接入 AndroidX `BiometricPrompt`：在设置页提供「开启应用锁」开关。
-  - [ ] 切换至后台超过设定时间（立即 / 1分钟 / 5分钟）后重新回到前台时，强制弹出指纹/面容解锁浮层。
-- [ ] **防窥与隐额模式增强**
-  - [ ] 在多任务切换器（Recent Apps）中隐藏敏感金额截图（`FLAG_SECURE` 或毛玻璃虚化）。
-  - [ ] 手势防窥：支持“摇一摇手机”或“双击结余区域”快速切换全局隐额模式。
+- [x] **生物识别指纹与面容安全锁**
+  - [x] 接入 AndroidX `BiometricPrompt`：在设置页提供「开启应用锁」开关与硬件兼容性检测。
+  - [x] 切换至后台超过设定时间（立即 / 1分钟 / 5分钟）后重新回到前台时，强制弹出指纹/面容解锁浮层 (`BiometricLockOverlay`)。
+- [x] **防窥与隐额模式增强**
+  - [x] 在多任务切换器（Recent Apps）中隐藏敏感金额截图（`FLAG_SECURE` 动态注入）。
+  - [x] 手势防窥：支持加速度传感器“摇一摇手机” (`ShakeDetector`) 或“双击结余区域”快速切换全局隐额模式。
 
 ### 5. 预算超支与警戒线本地通知预警 (Budget Overrun Alert System) - [P1, 预算闭环]
 * **详细设计文档**：[budget_overrun_notification_design.md](budget_overrun_notification_design.md)

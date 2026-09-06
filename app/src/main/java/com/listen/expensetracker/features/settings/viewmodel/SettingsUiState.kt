@@ -49,7 +49,12 @@ data class SettingsUiState(
     val activeDialog: SettingsDialog? = null,
     val isOperating: Boolean = false,
     val isDeveloperMode: Boolean = false,
-    val isCheckingUpdate: Boolean = false
+    val isCheckingUpdate: Boolean = false,
+    val biometricLockEnabled: Boolean = false,
+    val lockTimeoutSeconds: Int = 0,
+    val recentAppsShieldEnabled: Boolean = true,
+    val shakeToHideBalanceEnabled: Boolean = true,
+    val isBiometricSupported: Boolean = false
 )
 
 /**
@@ -68,6 +73,10 @@ sealed interface SettingsIntent {
     data class ToggleAutoBackupDrive(val enabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
     data class ToggleDeveloperMode(val enabled: Boolean) : SettingsIntent
+    data class ToggleBiometricLock(val enabled: Boolean) : SettingsIntent
+    data class ChangeLockTimeout(val seconds: Int) : SettingsIntent
+    data class ToggleRecentAppsShield(val enabled: Boolean) : SettingsIntent
+    data class ToggleShakeToHideBalance(val enabled: Boolean) : SettingsIntent
     data object TriggerGoogleSignIn : SettingsIntent
     data object ScrollToTop : SettingsIntent
     data class LinkGoogleAccount(val email: String, val displayName: String? = null, val avatarUrl: String? = null) : SettingsIntent

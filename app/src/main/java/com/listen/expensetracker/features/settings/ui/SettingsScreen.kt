@@ -16,6 +16,7 @@ import com.listen.expensetracker.features.settings.components.SettingsAppearance
 import com.listen.expensetracker.features.settings.components.SettingsDataCenterSection
 import com.listen.expensetracker.features.settings.components.SettingsDialogHost
 import com.listen.expensetracker.features.settings.components.SettingsFinanceSection
+import com.listen.expensetracker.features.settings.components.SettingsSecuritySection
 import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
@@ -117,7 +118,23 @@ fun SettingsScreen(
                 )
             }
 
-            // 4. System Ops & APM Observability Section (Developer Mode only)
+            // 4. Security & Privacy Shield Section
+            item(key = "security_section") {
+                SettingsSecuritySection(
+                    biometricLockEnabled = state.biometricLockEnabled,
+                    lockTimeoutSeconds = state.lockTimeoutSeconds,
+                    recentAppsShieldEnabled = state.recentAppsShieldEnabled,
+                    shakeToHideBalanceEnabled = state.shakeToHideBalanceEnabled,
+                    isBiometricSupported = state.isBiometricSupported,
+                    onToggleBiometricLock = { onIntent(SettingsIntent.ToggleBiometricLock(it)) },
+                    onChangeLockTimeout = { onIntent(SettingsIntent.ChangeLockTimeout(it)) },
+                    onToggleRecentAppsShield = { onIntent(SettingsIntent.ToggleRecentAppsShield(it)) },
+                    onToggleShakeToHideBalance = { onIntent(SettingsIntent.ToggleShakeToHideBalance(it)) },
+                    lang = lang
+                )
+            }
+
+            // 5. System Ops & APM Observability Section (Developer Mode only)
             if (state.isDeveloperMode) {
                 item(key = "apm_section") {
                     SettingsApmSection(

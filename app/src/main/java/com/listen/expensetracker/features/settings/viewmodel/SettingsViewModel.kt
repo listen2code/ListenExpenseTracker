@@ -49,42 +49,19 @@ class SettingsViewModel(
     override fun handleIntent(intent: SettingsIntent) {
         val traceId = TraceManager.newTraceId()
         when (intent) {
-            is SettingsIntent.ChangeLanguage -> viewModelScope.launch {
-                prefManager.setLanguage(intent.langCode)
-                updateState { copy(language = intent.langCode) }
-            }
-            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch {
-                prefManager.setThemeMode(intent.mode.name)
-                updateState { copy(themeMode = intent.mode) }
-            }
-            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch {
-                prefManager.setAccentColor(intent.accent.name)
-                updateState { copy(accentColor = intent.accent) }
-            }
-            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch {
-                prefManager.setCurrencySymbol(intent.symbol)
-                updateState { copy(currencySymbol = intent.symbol) }
-            }
-            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch {
-                prefManager.setMonthlyBudget(intent.budget)
-                updateState { copy(monthlyBudget = intent.budget) }
-            }
+            is SettingsIntent.ChangeLanguage -> viewModelScope.launch { prefManager.setLanguage(intent.langCode); updateState { copy(language = intent.langCode) } }
+            is SettingsIntent.ChangeThemeMode -> viewModelScope.launch { prefManager.setThemeMode(intent.mode.name); updateState { copy(themeMode = intent.mode) } }
+            is SettingsIntent.ChangeAccentColor -> viewModelScope.launch { prefManager.setAccentColor(intent.accent.name); updateState { copy(accentColor = intent.accent) } }
+            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch { prefManager.setCurrencySymbol(intent.symbol); updateState { copy(currencySymbol = intent.symbol) } }
+            is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget); updateState { copy(monthlyBudget = intent.budget) } }
             is SettingsIntent.UpdateCategoryBudgets -> viewModelScope.launch {
                 prefManager.setMonthlyBudget(intent.budget)
                 prefManager.setCategoryBudgetRatios(intent.ratios)
                 updateState { copy(monthlyBudget = intent.budget, categoryBudgetRatios = intent.ratios) }
             }
-            is SettingsIntent.SaveRecurringRule -> viewModelScope.launch {
-                recurringDao.insertRule(intent.rule)
-                emitEffect(CommonUiEffect.ShowToast("已保存周期规则"))
-            }
-            is SettingsIntent.DeleteRecurringRule -> viewModelScope.launch {
-                recurringDao.deleteRuleById(intent.ruleId)
-                emitEffect(CommonUiEffect.ShowToast("已删除周期规则"))
-            }
-            is SettingsIntent.ToggleRecurringRule -> viewModelScope.launch {
-                recurringDao.updateRule(intent.rule.copy(isEnabled = intent.isEnabled))
-            }
+            is SettingsIntent.SaveRecurringRule -> viewModelScope.launch { recurringDao.insertRule(intent.rule); emitEffect(CommonUiEffect.ShowToast("已保存周期规则")) }
+            is SettingsIntent.DeleteRecurringRule -> viewModelScope.launch { recurringDao.deleteRuleById(intent.ruleId); emitEffect(CommonUiEffect.ShowToast("已删除周期规则")) }
+            is SettingsIntent.ToggleRecurringRule -> viewModelScope.launch { recurringDao.updateRule(intent.rule.copy(isEnabled = intent.isEnabled)) }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
                 updateState { copy(autoBackupDrive = intent.enabled) }
@@ -94,6 +71,10 @@ class SettingsViewModel(
                 prefManager.setAutoBackupWifiOnly(intent.enabled)
                 updateState { copy(autoBackupWifiOnly = intent.enabled) }
             }
+            is SettingsIntent.ToggleBiometricLock -> viewModelScope.launch { prefManager.setBiometricLockEnabled(intent.enabled); updateState { copy(biometricLockEnabled = intent.enabled) } }
+            is SettingsIntent.ChangeLockTimeout -> viewModelScope.launch { prefManager.setLockTimeoutSeconds(intent.seconds); updateState { copy(lockTimeoutSeconds = intent.seconds) } }
+            is SettingsIntent.ToggleRecentAppsShield -> viewModelScope.launch { prefManager.setRecentAppsShieldEnabled(intent.enabled); updateState { copy(recentAppsShieldEnabled = intent.enabled) } }
+            is SettingsIntent.ToggleShakeToHideBalance -> viewModelScope.launch { prefManager.setShakeToHideBalanceEnabled(intent.enabled); updateState { copy(shakeToHideBalanceEnabled = intent.enabled) } }
             is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
                 prefManager.setDeveloperMode(intent.enabled)
@@ -122,18 +103,10 @@ class SettingsViewModel(
                     onOperating = { op -> updateState { copy(isOperating = op) } },
                     onToast = { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) })
             }
-            is SettingsIntent.SeedDemoData -> viewModelScope.launch {
-                syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
-            }
-            is SettingsIntent.ClearAllData -> viewModelScope.launch {
-                syncDelegate.clearAllData(currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
-            }
-            is SettingsIntent.ExportJsonToFile -> viewModelScope.launch {
-                syncDelegate.exportJsonToFile(intent.uri, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
-            }
-            is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch {
-                syncDelegate.importJsonFromFile(intent.uri, currentState.language) { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) }
-            }
+            is SettingsIntent.SeedDemoData -> viewModelScope.launch { syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ClearAllData -> viewModelScope.launch { syncDelegate.clearAllData(currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ExportJsonToFile -> viewModelScope.launch { syncDelegate.exportJsonToFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch { syncDelegate.importJsonFromFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.TriggerGoogleSignIn -> { emitEffect(SettingsEffect.LaunchGoogleSignIn) }
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
@@ -150,6 +123,7 @@ class SettingsViewModel(
     }
 
     private fun observeSettings() {
+        val isBioSupported = com.listen.expensetracker.core.security.BiometricSecurityManager.isBiometricOrCredentialAvailable(application)
         observeExpensePreferences(prefManager) { prefs ->
             updateState {
                 copy(
@@ -157,7 +131,10 @@ class SettingsViewModel(
                     currencySymbol = prefs.currencySymbol, monthlyBudget = prefs.monthlyBudget,
                     categoryBudgetRatios = prefs.categoryBudgetRatios,
                     autoBackupDrive = prefs.autoBackupDrive, autoBackupWifiOnly = prefs.autoBackupWifiOnly,
-                    isDeveloperMode = prefs.isDeveloperMode
+                    isDeveloperMode = prefs.isDeveloperMode,
+                    biometricLockEnabled = prefs.biometricLockEnabled, lockTimeoutSeconds = prefs.lockTimeoutSeconds,
+                    recentAppsShieldEnabled = prefs.recentAppsShieldEnabled, shakeToHideBalanceEnabled = prefs.shakeToHideBalanceEnabled,
+                    isBiometricSupported = isBioSupported
                 )
             }
         }
