@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.data.engine
+package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType

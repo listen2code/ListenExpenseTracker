@@ -107,11 +107,9 @@ fun SettingsScreen(
                 SettingsAppearanceSection(
                     themeMode = state.themeMode,
                     accentColor = state.accentColor,
-                    currencySymbol = sym,
                     language = lang,
                     onChangeThemeMode = { onIntent(SettingsIntent.ChangeThemeMode(it)) },
                     onChangeAccentColor = { onIntent(SettingsIntent.ChangeAccentColor(it)) },
-                    onOpenCurrencyDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CurrencySelect)) },
                     onLanguageChange = { onIntent(SettingsIntent.ChangeLanguage(it)) },
                     lang = lang
                 )

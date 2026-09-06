@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.data.engine
+package com.listen.expensetracker.data.engine
 
 import java.util.Locale
 
@@ -29,4 +29,19 @@ fun Double.formatAmount(): String {
  */
 fun Double.formatWithCurrency(currencySymbol: String = "￥"): String {
     return currencySymbol + this.formatAmount()
+}
+
+/**
+ * 根据语言环境自动获取对应默认货币符号 (方案2: 跟随语言自动绑定)。
+ * - 中文 (zh) -> "￥"
+ * - 日文 (ja) -> "¥"
+ * - 英文 (en) 或其他 -> "$"
+ */
+fun defaultCurrencySymbolForLanguage(lang: String): String {
+    val lower = lang.lowercase()
+    return when {
+        lower.startsWith("zh") -> "￥"
+        lower.startsWith("ja") -> "¥"
+        else -> "$"
+    }
 }

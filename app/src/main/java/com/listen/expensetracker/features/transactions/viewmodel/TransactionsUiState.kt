@@ -2,7 +2,9 @@ package com.listen.expensetracker.features.transactions.viewmodel
 
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
+import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 
@@ -30,7 +32,7 @@ enum class TransactionSortOrder(val displayNameKey: String) {
 sealed interface TransactionsDialog {
     data class AddTransaction(
         val initialCategoryId: String? = null,
-        val initialType: String = com.listen.expensetracker.data.db.TransactionType.EXPENSE
+        val initialType: String = TransactionType.EXPENSE
     ) : TransactionsDialog
     data class EditTransaction(val transaction: TransactionEntity) : TransactionsDialog
     data class ConfirmDelete(val transaction: TransactionEntity) : TransactionsDialog
@@ -51,7 +53,7 @@ data class TransactionsUiState(
     val totalIncome: Double = 0.0,
     val netBalance: Double = 0.0,
     val monthlyBudget: Double = 5000.0,
-    val categoryBudgetRatios: Map<String, Float> = com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios,
+    val categoryBudgetRatios: Map<String, Float> = CategoryBudgetConfig.defaultRatios,
     val remainingBudget: Double = 5000.0,
     val budgetUsageRatio: Float = 0.0f,
     val isOverBudget: Boolean = false,

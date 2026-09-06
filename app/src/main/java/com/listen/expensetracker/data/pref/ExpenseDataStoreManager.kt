@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.data.pref.archDataStore
+import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
+import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
@@ -50,7 +52,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             } catch (_: Exception) {
                 AccentColor.EMERALD
             },
-            currencySymbol = prefs[KEY_CURRENCY_SYMBOL] ?: "￥",
+            currencySymbol = prefs[KEY_CURRENCY_SYMBOL] ?: defaultCurrencySymbolForLanguage(prefs[KEY_LANGUAGE] ?: "zh"),
             monthlyBudget = prefs[KEY_MONTHLY_BUDGET] ?: 5000.0,
             categoryBudgetRatios = parseCategoryRatios(prefs[KEY_CATEGORY_BUDGETS]),
             customAccounts = prefs[KEY_CUSTOM_ACCOUNTS] ?: "",
@@ -156,14 +158,14 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
     }
 
     private fun parseCategoryRatios(raw: String?): Map<String, Float> {
-        if (raw.isNullOrBlank()) return com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios
+        if (raw.isNullOrBlank()) return CategoryBudgetConfig.defaultRatios
         return try {
             raw.split(",").mapNotNull { part ->
                 val kv = part.split(":")
                 if (kv.size == 2) kv[0].trim() to (kv[1].trim().toFloatOrNull() ?: return@mapNotNull null) else null
-            }.toMap().ifEmpty { com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios }
+            }.toMap().ifEmpty { CategoryBudgetConfig.defaultRatios }
         } catch (_: Exception) {
-            com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios
+            CategoryBudgetConfig.defaultRatios
         }
     }
 }

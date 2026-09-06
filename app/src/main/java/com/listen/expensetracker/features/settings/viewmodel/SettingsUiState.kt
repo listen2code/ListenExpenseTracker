@@ -3,6 +3,8 @@ package com.listen.expensetracker.features.settings.viewmodel
 import android.net.Uri
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.arch.sync.SyncState
+import com.listen.expensetracker.data.db.RecurringRuleEntity
+import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -20,7 +22,6 @@ sealed interface SettingsDialog {
     data object CategoryManage : SettingsDialog
     data object AccountManage : SettingsDialog
     data object RecurringManage : SettingsDialog
-    data object CurrencySelect : SettingsDialog
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
@@ -36,8 +37,8 @@ data class SettingsUiState(
     val accentColor: AccentColor = AccentColor.EMERALD,
     val currencySymbol: String = "￥",
     val monthlyBudget: Double = 5000.0,
-    val categoryBudgetRatios: Map<String, Float> = com.listen.expensetracker.data.model.CategoryBudgetConfig.defaultRatios,
-    val recurringRules: List<com.listen.expensetracker.data.db.RecurringRuleEntity> = emptyList(),
+    val categoryBudgetRatios: Map<String, Float> = CategoryBudgetConfig.defaultRatios,
+    val recurringRules: List<RecurringRuleEntity> = emptyList(),
     val autoBackupDrive: Boolean = true,
     val autoBackupWifiOnly: Boolean = false,
     val syncState: SyncState = SyncState(),
@@ -65,12 +66,11 @@ sealed interface SettingsIntent {
     data class ChangeLanguage(val langCode: String) : SettingsIntent
     data class ChangeThemeMode(val mode: ThemeMode) : SettingsIntent
     data class ChangeAccentColor(val accent: AccentColor) : SettingsIntent
-    data class ChangeCurrencySymbol(val symbol: String) : SettingsIntent
     data class UpdateMonthlyBudget(val budget: Double) : SettingsIntent
     data class UpdateCategoryBudgets(val budget: Double, val ratios: Map<String, Float>) : SettingsIntent
-    data class SaveRecurringRule(val rule: com.listen.expensetracker.data.db.RecurringRuleEntity) : SettingsIntent
+    data class SaveRecurringRule(val rule: RecurringRuleEntity) : SettingsIntent
     data class DeleteRecurringRule(val ruleId: String) : SettingsIntent
-    data class ToggleRecurringRule(val rule: com.listen.expensetracker.data.db.RecurringRuleEntity, val isEnabled: Boolean) : SettingsIntent
+    data class ToggleRecurringRule(val rule: RecurringRuleEntity, val isEnabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupDrive(val enabled: Boolean) : SettingsIntent
     data class ToggleAutoBackupWifiOnly(val enabled: Boolean) : SettingsIntent
     data class ToggleDeveloperMode(val enabled: Boolean) : SettingsIntent

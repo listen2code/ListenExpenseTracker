@@ -21,6 +21,7 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
 import com.listen.expensetracker.features.budget.components.BudgetDialogMode
 import com.listen.expensetracker.features.budget.components.CategoryBudgetModalDialog
+import com.listen.expensetracker.features.recurring.components.RecurringTransactionsDialog
 import com.listen.expensetracker.features.transactions.components.AccountManageDialog
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -42,17 +43,6 @@ fun SettingsDialogHost(
     val sym = state.currencySymbol
 
     when (state.activeDialog) {
-        is SettingsDialog.CurrencySelect -> {
-            CurrencySelectDialog(
-                currentSymbol = sym,
-                onSymbolSelected = {
-                    onIntent(SettingsIntent.ChangeCurrencySymbol(it))
-                    onIntent(SettingsIntent.DismissDialog)
-                },
-                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
-                lang = lang
-            )
-        }
         is SettingsDialog.CategoryManage -> {
             CategoryManageDialog(
                 type = TransactionType.EXPENSE,
@@ -68,7 +58,7 @@ fun SettingsDialogHost(
             )
         }
         is SettingsDialog.RecurringManage -> {
-            com.listen.expensetracker.features.recurring.components.RecurringTransactionsDialog(
+            RecurringTransactionsDialog(
                 rules = state.recurringRules,
                 monthlyBudget = state.monthlyBudget,
                 currencySymbol = sym,

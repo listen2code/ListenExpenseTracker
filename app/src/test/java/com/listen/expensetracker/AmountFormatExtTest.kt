@@ -1,7 +1,7 @@
 package com.listen.expensetracker
 
+import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.engine.formatAmount
-import com.listen.expensetracker.data.engine.formatWithCurrency
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -38,9 +38,12 @@ class AmountFormatExtTest {
     }
 
     @Test
-    fun formatWithCurrency_appendsCurrencySymbol() {
-        assertEquals("￥100", 100.0.formatWithCurrency("￥"))
-        assertEquals("$" + "50", 50.00.formatWithCurrency("$"))
-        assertEquals("￥12.34", 12.34.formatWithCurrency("￥"))
+    fun defaultCurrencySymbolForLanguage_mapsCorrectly() {
+        assertEquals("￥", defaultCurrencySymbolForLanguage("zh"))
+        assertEquals("¥", defaultCurrencySymbolForLanguage("ja"))
+        assertEquals("$", defaultCurrencySymbolForLanguage("en"))
+        assertEquals("$", defaultCurrencySymbolForLanguage("fr"))
+        assertEquals("$", defaultCurrencySymbolForLanguage(""))
     }
 }
+

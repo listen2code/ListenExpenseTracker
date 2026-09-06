@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.settings.components
+package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.listen.expensetracker.data.i18n.ExpenseStrings

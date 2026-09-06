@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
@@ -173,7 +174,7 @@ class ExpenseAppState(
      */
     fun openQuickAdd(
         categoryId: String? = null,
-        type: String = com.listen.expensetracker.data.db.TransactionType.EXPENSE
+        type: String = TransactionType.EXPENSE
     ) {
         switchTab(NavTab.TRANSACTIONS)
         transactionsViewModel.handleIntent(

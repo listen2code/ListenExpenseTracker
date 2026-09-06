@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.widget
+package com.listen.expensetracker.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager

@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.transactions.components
+package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -42,20 +42,18 @@ import com.listen.uicomponent.theme.ThemeMode
 import com.listen.uicomponent.theme.parseHexColor
 
 /**
- * Settings Card for Theme Mode, Accent Color, Currency, and Language customization.
+ * Settings Card for Theme Mode, Accent Color, and Language customization.
  */
 @Composable
 fun SettingsAppearanceSection(
     themeMode: ThemeMode,
     accentColor: AccentColor,
-    currencySymbol: String,
     language: String,
     onChangeThemeMode: (ThemeMode) -> Unit,
     onChangeAccentColor: (AccentColor) -> Unit,
-    onOpenCurrencyDialog: () -> Unit,
     onLanguageChange: (String) -> Unit,
-    lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lang: String = language
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -149,38 +147,26 @@ fun SettingsAppearanceSection(
                 }
             }
 
-            // Currency & Language Selectors with Single-Line AutoResize Protection
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
-            ) {
-                CommonButton(
-                    text = "${AppStrings.SETTINGS_CURRENCY.tr(lang)} ($currencySymbol)",
-                    onClick = onOpenCurrencyDialog,
-                    style = CommonButtonStyle.Outlined,
-                    modifier = Modifier.weight(1f)
-                )
-
-                val currentLangLabel = when (language) {
-                    "en" -> "English"
-                    "ja" -> "日本語"
-                    else -> "简体中文"
-                }
-
-                CommonButton(
-                    text = "${AppStrings.SETTINGS_LANGUAGE.tr(lang)}: $currentLangLabel",
-                    onClick = {
-                        val next = when (language) {
-                            "zh" -> "en"
-                            "en" -> "ja"
-                            else -> "zh"
-                        }
-                        onLanguageChange(next)
-                    },
-                    style = CommonButtonStyle.Outlined,
-                    modifier = Modifier.weight(1f)
-                )
+            // Language Selector
+            val currentLangLabel = when (language) {
+                "en" -> "English"
+                "ja" -> "日本語"
+                else -> "简体中文"
             }
+
+            CommonButton(
+                text = "${AppStrings.SETTINGS_LANGUAGE.tr(lang)}: $currentLangLabel",
+                onClick = {
+                    val next = when (language) {
+                        "zh" -> "en"
+                        "en" -> "ja"
+                        else -> "zh"
+                    }
+                    onLanguageChange(next)
+                },
+                style = CommonButtonStyle.Outlined,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -192,11 +178,9 @@ fun SettingsAppearanceSectionPreview() {
         SettingsAppearanceSection(
             themeMode = ThemeMode.SYSTEM,
             accentColor = AccentColor.EMERALD,
-            currencySymbol = "$",
             language = "zh",
             onChangeThemeMode = {},
             onChangeAccentColor = {},
-            onOpenCurrencyDialog = {},
             onLanguageChange = {},
             lang = "zh"
         )

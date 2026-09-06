@@ -14,8 +14,10 @@ import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.arch.sync.CloudSyncManager
 import com.listen.expensetracker.auth.GoogleAuthManager
+import com.listen.expensetracker.core.security.BiometricSecurityManager
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
+import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
@@ -49,10 +51,14 @@ class SettingsViewModel(
     override fun handleIntent(intent: SettingsIntent) {
         val traceId = TraceManager.newTraceId()
         when (intent) {
-            is SettingsIntent.ChangeLanguage -> viewModelScope.launch { prefManager.setLanguage(intent.langCode); updateState { copy(language = intent.langCode) } }
+            is SettingsIntent.ChangeLanguage -> viewModelScope.launch {
+                val symbol = defaultCurrencySymbolForLanguage(intent.langCode)
+                prefManager.setLanguage(intent.langCode)
+                prefManager.setCurrencySymbol(symbol)
+                updateState { copy(language = intent.langCode, currencySymbol = symbol) }
+            }
             is SettingsIntent.ChangeThemeMode -> viewModelScope.launch { prefManager.setThemeMode(intent.mode.name); updateState { copy(themeMode = intent.mode) } }
             is SettingsIntent.ChangeAccentColor -> viewModelScope.launch { prefManager.setAccentColor(intent.accent.name); updateState { copy(accentColor = intent.accent) } }
-            is SettingsIntent.ChangeCurrencySymbol -> viewModelScope.launch { prefManager.setCurrencySymbol(intent.symbol); updateState { copy(currencySymbol = intent.symbol) } }
             is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget); updateState { copy(monthlyBudget = intent.budget) } }
             is SettingsIntent.UpdateCategoryBudgets -> viewModelScope.launch {
                 prefManager.setMonthlyBudget(intent.budget)
@@ -132,7 +138,7 @@ class SettingsViewModel(
     }
 
     private fun observeSettings() {
-        val isBioSupported = com.listen.expensetracker.core.security.BiometricSecurityManager.isBiometricOrCredentialAvailable(application)
+        val isBioSupported = BiometricSecurityManager.isBiometricOrCredentialAvailable(application)
         observeExpensePreferences(prefManager) { prefs ->
             updateState {
                 copy(

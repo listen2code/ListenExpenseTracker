@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.transactions.components
+package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

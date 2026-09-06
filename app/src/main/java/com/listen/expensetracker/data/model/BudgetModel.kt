@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.data.model
+package com.listen.expensetracker.data.model
 
 /**
  * 预算健康状况枚举 (BudgetHealthStatus)。

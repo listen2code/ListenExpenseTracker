@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.features.settings.components
+package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -16,6 +16,7 @@ import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.DemoDataEngine
+import com.listen.expensetracker.data.engine.RecurringTransactionEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -145,10 +146,8 @@ class TransactionsViewModel(
         }
     }
 
-    private fun checkDueRecurringRules() {
-        viewModelScope.launch {
-            com.listen.expensetracker.data.engine.RecurringTransactionEngine.processDueRules(db.recurringRuleDao(), dao)
-        }
+    private fun checkDueRecurringRules() = viewModelScope.launch {
+        RecurringTransactionEngine.processDueRules(db.recurringRuleDao(), dao)
     }
 
     override fun toLifecycleIntent(event: LifecycleEvent): TransactionsIntent? = when (event) {
