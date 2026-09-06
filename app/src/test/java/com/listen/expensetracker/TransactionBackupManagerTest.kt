@@ -3,7 +3,6 @@ package com.listen.expensetracker
 import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.db.TransactionEntity
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

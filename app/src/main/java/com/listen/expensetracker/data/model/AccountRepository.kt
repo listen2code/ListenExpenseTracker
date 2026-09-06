@@ -4,8 +4,6 @@ import com.listen.arch.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
-import com.listen.arch.i18n.StringsRes
-
 data class AccountTypeItem(
     val key: String,
     val nameKey: String = "",

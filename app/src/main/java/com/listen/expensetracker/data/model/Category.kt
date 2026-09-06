@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.listen.arch.i18n.StringsRes
 
 data class Category(
     val id: String,
