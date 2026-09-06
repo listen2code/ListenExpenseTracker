@@ -1,6 +1,7 @@
 package com.listen.expensetracker.core.apm
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,7 +84,10 @@ fun ApmFloatingInspectorCard(
         modifier = modifier
             .fillMaxWidth(0.95f)
             .fillMaxHeight(0.82f)
-            .clickable(enabled = false) {}
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {}
     ) {
         Column(
             modifier = Modifier

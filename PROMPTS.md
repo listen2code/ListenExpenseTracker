@@ -51,9 +51,12 @@
 
 ---
 
-## 5. 国际化与硬编码消灭规范 (No Hardcoded Strings/Magic Numbers)
+## 5. 国际化通用收口与硬编码消灭规范 (Universal i18n & Zero Hardcoding Rule)
 
-- **字符串国际化 (No Hardcoded Strings)**：禁止在 Composable UI 中硬编码任何用户可见的中/英/日文字符串。所有展示文本必须通过 `StringsRes.get(key, lang)` / `ExpenseStrings.get(key, lang)` 进行三语收口。
+- **字符串国际化与零硬编码 (No Hardcoded Strings)**：
+  - **核心原则**：禁止在 Composable UI 中硬编码任何用户可见的中/英/日文字符串；所有展示文本必须走统一的全局多语言框架（`AppStrings.KEY.tr(lang)` 或 `ExpenseStrings.get(key, lang)`）；
+  - **严禁局部语言分支硬编码**：**严禁在 Composable 组件或 ViewModel 内部使用 `when (lang)`、`if (lang == "en") ...` 等方式单独判断和硬编码多语言字符串**；
+  - **标准执行流程**：任何新增文案均应先在 `AppStrings.kt` 声明键常量，并在 `ExpenseStrings.kt`（中/英/日三个 Map）中集中统一配置对应翻译，UI 中仅通过 `AppStrings.XXX.tr(lang)` 无条件通用调用，确保多语言维护集中收敛，杜绝漏翻与散落判断。
 - **数值与尺寸 Token 化 (No Magic Numbers)**：禁止在 UI 中散落硬编码尺寸（如 `8.dp`、`16.sp`）或颜色 Hex（如 `Color(0xFF123456)`）。必须统一使用 `AppDimens` 常量、`MaterialTheme.colorScheme` 或定义好的主题 Token。
 
 ---
@@ -128,8 +131,20 @@
 根据 Android Jetpack Compose 官方 API 设计准则与 Compose Lint（`ModifierParameter` 规则）：
 - **所有发射 Layout 的 Composable 函数均应接收 `modifier: Modifier = Modifier` 参数**；
 - **`modifier` 参数必须作为“第一个可选参数”（First Optional Parameter）**（即紧跟在所有无默认值的必填形参之后，放置在所有有默认值的可选形参之前）；
+- **严禁错误**：严禁将 `modifier: Modifier = Modifier` 声明在其它带有默认值的形参（如 `lang: String = "zh"`、`enabled: Boolean = true`）之后，否则会直接触发 Compose Lint 警告：`Modifier parameter should be the first optional parameter`；
 - **若组件无任何必填参数（所有参数均有默认值），`modifier: Modifier = Modifier` 必须放在最前面的第一个参数**；
-- **尾部 Lambda（如 `content: @Composable () -> Unit`）必须保持在参数列表的最末尾**。
+- **标准函数签名范式**：
+  ```kotlin
+  // 正确范式：必填形参 -> modifier (首个可选参数) -> 其他带默认值可选形参 -> 尾部 Lambda
+  @Composable
+  fun ExampleComponent(
+      data: CustomData,                      // 1. 无默认值的必选数据
+      onAction: () -> Unit,                  // 2. 无默认值的回调函数
+      modifier: Modifier = Modifier,         // 3. 必须是第一个带有默认值的可选参数
+      lang: String = "zh",                   // 4. 后续其他带默认值的可选配置
+      content: @Composable () -> Unit = {}   // 5. 尾部 Lambda 保持在最末尾
+  )
+  ```
 
 ---
 
@@ -275,28 +290,3 @@
 - **全量单测触发时机**：
   1. 涉及底层核心基础设施（`ListenArch` 底座架构、Room 数据库迁移、跨模块核心拦截器等）的破坏性改造；
   2. 准备发版打包、或用户明确要求“跑一下全量测试 / 完整回归”。
-
----
-
-## 25. 国际化通用收口与 Compose Modifier 优先规范 (Universal i18n & Modifier-First Hygiene Rule)
-
-- **国际化通用代码规范（严禁局部语言分支硬编码）**：
-  - **核心原则**：所有 UI 文本展示必须走统一的全局多语言框架（`AppStrings.KEY.tr(lang)` 或 `ExpenseStrings.get(key, lang)`），**严禁在 Composable 组件或 ViewModel 内部使用 `when (lang)`、`if (lang == "en") ...` 等方式单独判断和硬编码多语言字符串**；
-  - **标准执行流程**：任何新增文案均应先在 `AppStrings.kt` 声明键常量，在 `ExpenseStrings.kt`（中/英/日三个 Map）中统一配置对应翻译，UI 中仅通过 `AppStrings.XXX.tr(lang)` 无条件调用；
-  - **设计初衷**：确保多语言维护集中收敛，杜绝漏翻，杜绝在各个 UI 视图中散落重复冗余的语言判断。
-
-- **Compose Modifier 首个可选参数规范 (Modifier First Optional Parameter Standard)**：
-  - **核心原则**：在所有发射 UI Layout 的 Composable 函数中，`modifier: Modifier = Modifier` **必须严格作为“第一个可选参数”（First Optional Parameter）**；
-  - **严禁错误**：严禁将 `modifier: Modifier = Modifier` 声明在其它带有默认值的形参（如 `lang: String = "zh"`、`enabled: Boolean = true`）之后，否则会直接触发 Compose Lint 警告：`Modifier parameter should be the first optional parameter`；
-  - **标准签名模式**：
-    ```kotlin
-    // 正确范式：必填形参 -> modifier (首个可选参数) -> 其他带默认值可选形参 -> 尾部 Lambda
-    @Composable
-    fun ExampleComponent(
-        data: CustomData,                      // 1. 无默认值的必选数据
-        onAction: () -> Unit,                  // 2. 无默认值的回调函数
-        modifier: Modifier = Modifier,         // 3. 必须是第一个带有默认值的参数
-        lang: String = "zh",                   // 4. 后续其他带默认值的可选配置
-        content: @Composable () -> Unit = {}   // 5. 尾部 Lambda 放在最末尾
-    )
-    ```

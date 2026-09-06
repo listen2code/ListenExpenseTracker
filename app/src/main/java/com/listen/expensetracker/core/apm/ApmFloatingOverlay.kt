@@ -1,14 +1,22 @@
 package com.listen.expensetracker.core.apm
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -88,7 +96,6 @@ fun ApmFloatingOverlay(
     var offsetX by remember { mutableFloatStateOf(-1f) }
     var offsetY by remember { mutableFloatStateOf(-1f) }
     var isDragging by remember { mutableStateOf(false) }
-    var dragAccumulator by remember { mutableFloatStateOf(0f) }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidthPx = with(density) { maxWidth.toPx() }
@@ -102,43 +109,71 @@ fun ApmFloatingOverlay(
             offsetY = (screenHeightPx * 0.65f).coerceIn(marginPx, screenHeightPx - bubbleSizePx - marginPx)
         }
 
+        // 动态计算气泡中心锚点作为大面板展开/收拢的 TransformOrigin
+        val pivotX = if (screenWidthPx > 0f) ((offsetX + bubbleSizePx / 2f) / screenWidthPx).coerceIn(0f, 1f) else 0.85f
+        val pivotY = if (screenHeightPx > 0f) ((offsetY + bubbleSizePx / 2f) / screenHeightPx).coerceIn(0f, 1f) else 0.65f
+        val transformOrigin = remember(pivotX, pivotY) { TransformOrigin(pivotX, pivotY) }
+
         val bubbleScale by animateFloatAsState(
             targetValue = if (isDragging) 1.12f else 1.0f,
             label = "bubbleDragScale"
         )
 
-        // 1. 收起状态：圆形可拖动悬浮球（仅在非展开状态展示）
-        if (!isExpanded) {
+        // 1. 收起状态：圆形可拖动悬浮球（平滑缩放淡入淡出，杜绝生硬闪烁）
+        AnimatedVisibility(
+            visible = !isExpanded,
+            modifier = Modifier
+                .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                .scale(bubbleScale),
+            enter = fadeIn(animationSpec = tween(180)) + scaleIn(
+                initialScale = 0.5f,
+                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow)
+            ),
+            exit = fadeOut(animationSpec = tween(120)) + scaleOut(
+                targetScale = 0.5f,
+                animationSpec = tween(120, easing = FastOutSlowInEasing)
+            )
+        ) {
             Box(
-                modifier = Modifier
-                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                    .scale(bubbleScale)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-                                isDragging = true
-                                dragAccumulator = 0f
-                            },
-                            onDragEnd = {
-                                isDragging = false
-                                if (dragAccumulator < 12f) {
+                modifier = Modifier.pointerInput(screenWidthPx, screenHeightPx) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val touchSlop = viewConfiguration.touchSlop
+                        var isDragStarted = false
+                        var totalDragDistance = 0f
+
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+
+                            if (change.changedToUp()) {
+                                change.consume()
+                                if (!isDragStarted) {
                                     isExpanded = true
                                 }
-                            },
-                            onDragCancel = {
-                                isDragging = false
-                                dragAccumulator = 0f
-                            },
-                            onDrag = { change, dragAmount ->
+                                break
+                            }
+
+                            if (!change.pressed) break
+
+                            val drag = change.positionChange()
+                            totalDragDistance += hypot(drag.x, drag.y)
+                            if (!isDragStarted && totalDragDistance > touchSlop) {
+                                isDragStarted = true
+                                isDragging = true
+                            }
+
+                            if (isDragStarted) {
                                 change.consume()
-                                dragAccumulator += hypot(dragAmount.x, dragAmount.y)
                                 val maxX = (screenWidthPx - bubbleSizePx).coerceAtLeast(0f)
                                 val maxY = (screenHeightPx - bubbleSizePx).coerceAtLeast(0f)
-                                offsetX = (offsetX + dragAmount.x).coerceIn(0f, maxX)
-                                offsetY = (offsetY + dragAmount.y).coerceIn(0f, maxY)
+                                offsetX = (offsetX + drag.x).coerceIn(0f, maxX)
+                                offsetY = (offsetY + drag.y).coerceIn(0f, maxY)
                             }
-                        )
+                        }
+                        isDragging = false
                     }
+                }
             ) {
                 Surface(
                     shape = CircleShape,
@@ -175,11 +210,11 @@ fun ApmFloatingOverlay(
             }
         }
 
-        // 2. 展开状态：居中全功能 APM 调试控制台面板
+        // 2. 展开状态：居中全功能 APM 调试控制台面板（以悬浮球坐标为锚点绽放展开/收拢）
         AnimatedVisibility(
             visible = isExpanded,
-            enter = fadeIn() + scaleIn(initialScale = 0.85f),
-            exit = fadeOut() + scaleOut(targetScale = 0.85f)
+            enter = fadeIn(animationSpec = tween(220)),
+            exit = fadeOut(animationSpec = tween(160))
         ) {
             Box(
                 modifier = Modifier
@@ -188,19 +223,37 @@ fun ApmFloatingOverlay(
                     .clickable { isExpanded = false },
                 contentAlignment = Alignment.Center
             ) {
-                ApmFloatingInspectorCard(
-                    logs = logs,
-                    onClearLogs = { ApmLogger.clear() },
-                    onExportLogs = {
-                        val shareTitle = AppStrings.APM_SHARE_TITLE.tr(lang)
-                        val logText = logs.joinToString("\n") {
-                            "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}"
-                        }
-                        shareSystemText(context, logText, shareTitle)
-                    },
-                    onCollapse = { isExpanded = false },
-                    lang = lang
-                )
+                Box(
+                    modifier = Modifier.animateEnterExit(
+                        enter = scaleIn(
+                            initialScale = 0.15f,
+                            transformOrigin = transformOrigin,
+                            animationSpec = spring(
+                                dampingRatio = 0.78f,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        ) + fadeIn(animationSpec = tween(180)),
+                        exit = scaleOut(
+                            targetScale = 0.15f,
+                            transformOrigin = transformOrigin,
+                            animationSpec = tween(160, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(140))
+                    )
+                ) {
+                    ApmFloatingInspectorCard(
+                        logs = logs,
+                        onClearLogs = { ApmLogger.clear() },
+                        onExportLogs = {
+                            val shareTitle = AppStrings.APM_SHARE_TITLE.tr(lang)
+                            val logText = logs.joinToString("\n") {
+                                "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}"
+                            }
+                            shareSystemText(context, logText, shareTitle)
+                        },
+                        onCollapse = { isExpanded = false },
+                        lang = lang
+                    )
+                }
             }
         }
     }
