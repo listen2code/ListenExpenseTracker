@@ -26,7 +26,7 @@ import com.listen.uicomponent.theme.ListenTheme
 
 import android.content.Intent
 import androidx.compose.runtime.LaunchedEffect
-import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 
 class MainActivity : FragmentActivity() {
 
@@ -130,27 +130,11 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleQuickAddIntent(intent: Intent, appState: ExpenseAppState) {
-        val uri = intent.data
-        val isQuickAddUri = uri != null && uri.scheme == "lexpense" && uri.host == "quick_add"
-        val isQuickAddExtra = intent.hasExtra(EXTRA_QUICK_ADD_CATEGORY) || intent.hasExtra(EXTRA_QUICK_ADD_TYPE)
-        if (isQuickAddUri || isQuickAddExtra) {
-            val rawCategory = uri?.getQueryParameter("category") ?: intent.getStringExtra(EXTRA_QUICK_ADD_CATEGORY)
-            val type = uri?.getQueryParameter("type") ?: intent.getStringExtra(EXTRA_QUICK_ADD_TYPE) ?: TransactionType.EXPENSE
-            val categoryId = normalizeCategoryId(rawCategory)
-            appState.openQuickAdd(categoryId, type)
-        }
+        val (categoryId, type) = ListenExpenseAppWidgetProvider.parseQuickAddIntent(intent) ?: return
+        appState.openQuickAdd(categoryId, type)
     }
 
     companion object {
-        const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
-        const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
-
-        fun normalizeCategoryId(raw: String?): String? = when (raw) {
-            "cat_food", "c_food" -> "c_food"
-            "cat_transport", "c_transport" -> "c_transport"
-            "cat_shopping", "c_shopping" -> "c_shopping"
-            "cat_daily", "cat_other", "c_other_exp" -> "c_other_exp"
-            else -> raw
-        }
+        fun normalizeCategoryId(raw: String?): String? = ListenExpenseAppWidgetProvider.normalizeCategoryId(raw)
     }
 }

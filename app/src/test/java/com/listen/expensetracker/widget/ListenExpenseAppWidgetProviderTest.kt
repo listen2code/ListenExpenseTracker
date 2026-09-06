@@ -51,14 +51,23 @@ class ListenExpenseAppWidgetProviderTest {
 
     @Test
     fun normalizeCategoryId_mapsAliasesCorrectly() {
+        assertEquals("c_food", ListenExpenseAppWidgetProvider.normalizeCategoryId("cat_food"))
+        assertEquals("c_food", ListenExpenseAppWidgetProvider.normalizeCategoryId("c_food"))
+        assertEquals("c_transport", ListenExpenseAppWidgetProvider.normalizeCategoryId("cat_transport"))
+        assertEquals("c_shopping", ListenExpenseAppWidgetProvider.normalizeCategoryId("cat_shopping"))
+        assertEquals("c_other_exp", ListenExpenseAppWidgetProvider.normalizeCategoryId("cat_daily"))
+        assertEquals("c_other_exp", ListenExpenseAppWidgetProvider.normalizeCategoryId("cat_other"))
+        assertEquals("c_other_exp", ListenExpenseAppWidgetProvider.normalizeCategoryId("c_other_exp"))
+        assertEquals("custom_123", ListenExpenseAppWidgetProvider.normalizeCategoryId("custom_123"))
+        assertEquals(null, ListenExpenseAppWidgetProvider.normalizeCategoryId(null))
+
+        // 验证 MainActivity 静态委托向后兼容
         assertEquals("c_food", MainActivity.normalizeCategoryId("cat_food"))
-        assertEquals("c_food", MainActivity.normalizeCategoryId("c_food"))
-        assertEquals("c_transport", MainActivity.normalizeCategoryId("cat_transport"))
-        assertEquals("c_shopping", MainActivity.normalizeCategoryId("cat_shopping"))
-        assertEquals("c_other_exp", MainActivity.normalizeCategoryId("cat_daily"))
-        assertEquals("c_other_exp", MainActivity.normalizeCategoryId("cat_other"))
-        assertEquals("c_other_exp", MainActivity.normalizeCategoryId("c_other_exp"))
-        assertEquals("custom_123", MainActivity.normalizeCategoryId("custom_123"))
         assertEquals(null, MainActivity.normalizeCategoryId(null))
+    }
+
+    @Test
+    fun parseQuickAddIntent_returnsNullForNullIntent() {
+        assertEquals(null, ListenExpenseAppWidgetProvider.parseQuickAddIntent(null))
     }
 }

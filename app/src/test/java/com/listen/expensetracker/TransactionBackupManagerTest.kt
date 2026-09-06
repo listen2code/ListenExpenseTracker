@@ -73,7 +73,7 @@ class TransactionBackupManagerTest {
         )
 
         val csv = TransactionBackupManager.exportToCsv(sampleList)
-        assertTrue(csv.startsWith("ID,类型,分类,金额,账户,备注,时间"))
-        assertTrue(csv.contains("tx-200,支出,交通,15.0,CREDIT,打车"))
+        assertTrue(csv.startsWith("ID,Type,Category,Amount,Account,Note,Date"))
+        assertTrue(csv.contains("tx-200,EXPENSE,交通,15.0,CREDIT,打车"))
     }
 }

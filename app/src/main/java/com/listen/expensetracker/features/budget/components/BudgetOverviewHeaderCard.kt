@@ -26,6 +26,9 @@ import com.listen.expensetracker.data.engine.CategoryBudgetCalculationResult
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.components.CommonBadge
+import com.listen.uicomponent.components.CommonBadgeSize
+import com.listen.uicomponent.components.CommonBadgeStyle
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
@@ -110,33 +113,36 @@ fun BudgetOverviewHeaderCard(
                 trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
             )
 
-            // 3. 底部状态汇总标签 (优雅内嵌在总览卡片中)
+            // 3. 底部状态汇总标签（统一接入 ListenUiComponent 的 CommonBadge，使用 Error/Warning/Success 语义风格）
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (result.overBudgetCount > 0) {
-                    CompactStatusDot(text = AppStrings.BUDGET_COUNT_OVER.tr(lang).format(result.overBudgetCount), color = Color(0xFFEF4444))
+                    CommonBadge(
+                        text = AppStrings.BUDGET_COUNT_OVER.tr(lang).format(result.overBudgetCount),
+                        style = CommonBadgeStyle.Error,
+                        showDot = true,
+                        size = CommonBadgeSize.Small
+                    )
                 }
                 if (result.warningCount > 0) {
-                    CompactStatusDot(text = AppStrings.BUDGET_COUNT_WARNING.tr(lang).format(result.warningCount), color = Color(0xFFF59E0B))
+                    CommonBadge(
+                        text = AppStrings.BUDGET_COUNT_WARNING.tr(lang).format(result.warningCount),
+                        style = CommonBadgeStyle.Warning,
+                        showDot = true,
+                        size = CommonBadgeSize.Small
+                    )
                 }
-                CompactStatusDot(text = AppStrings.BUDGET_COUNT_NORMAL.tr(lang).format(result.normalCount), color = Color(0xFF10B981))
+                CommonBadge(
+                    text = AppStrings.BUDGET_COUNT_NORMAL.tr(lang).format(result.normalCount),
+                    style = CommonBadgeStyle.Success,
+                    showDot = true,
+                    size = CommonBadgeSize.Small
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun CompactStatusDot(text: String, color: Color) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 5.dp, vertical = 2.dp)
-    ) {
-        Text(text = "● $text", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = color)
     }
 }
 

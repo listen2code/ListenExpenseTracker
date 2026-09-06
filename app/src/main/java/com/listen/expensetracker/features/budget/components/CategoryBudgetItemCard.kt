@@ -31,6 +31,9 @@ import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.BudgetHealthStatus
 import com.listen.expensetracker.data.model.CategoryBudgetStatus
 import com.listen.expensetracker.data.model.CategoryRepository
+import com.listen.uicomponent.components.CommonBadge
+import com.listen.uicomponent.components.CommonBadgeSize
+import com.listen.uicomponent.components.CommonBadgeStyle
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
 import kotlin.math.abs
@@ -104,19 +107,12 @@ fun CategoryBudgetItemCard(
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                                .padding(horizontal = 4.dp, vertical = 1.dp)
-                        ) {
-                            Text(
-                                text = "${(status.ratio * 100).toInt()}%",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        // 分类预算占比标签（接入设计系统 CommonBadge Neutral 语义风格）
+                        CommonBadge(
+                            text = "${(status.ratio * 100).toInt()}%",
+                            style = CommonBadgeStyle.Neutral,
+                            size = CommonBadgeSize.Small
+                        )
                     }
 
                     // 右侧状态文本

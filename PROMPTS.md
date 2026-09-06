@@ -79,7 +79,7 @@
    - 验证动作：**仅做极速编译语法检查 (`./gradlew compileDebugKotlin`) 或不执行耗时构建**，追求秒级响应，不让用户等待。
 2. **中大型修改 / 核心业务变更 (Feature Additions / Refactoring / Logic Changes)**：
    - 范围：新增业务功能、跨文件架构重构、数据库或计算引擎逻辑变更。
-   - 验证动作：**仅执行单元测试与编译检查 (`./gradlew test compileDebugKotlin`)**，确保业务逻辑正确、无编译错误即可。
+   - 验证动作：**优先执行改动文件直接关联的针对性单测 (`--tests "TargetTestClass"`) 与编译检查**，无需无脑全量执行，确保核心逻辑正确无误即可。
 3. **全量构建 / 发版发布 (Full Release & Integration Verification)**：
    - 范围：仅在**用户明确要求完整打包、准备发版发布、或排查 CI Release 专用报错时**才执行。
    - 验证动作：执行 `./gradlew test jacocoTestReport assembleRelease`。
@@ -260,3 +260,18 @@
   2. 必须统一包裹在 `ListenTheme` 主题容器中，确保主题色、字体排版、暗黑/明亮色阶生效；
   3. 宿主 App 组件预览首行必须执行 `ExpenseStrings.init()`，确保多语言资源正常解析，杜绝预览渲染报错；
   4. 优先覆盖有数据态（正常业务数据）与特殊状态（如空状态、告警态、编辑态等），提供具有一线参考价值的真实 Mock 参数。
+
+---
+
+## 24. 针对性单测与局部验证规范 (Targeted Unit Testing & Diff-Driven Verification Rule)
+
+- **核心原则**：日常功能迭代、简单修改、局部缺陷修复或代码重构时，**严禁每次修改都无脑运行耗时极长（数分钟）的全量单测（如 `:app:testDebugUnitTest` 或全模块 `test`）**；
+- **精准运行目标单测**：
+  - **原则**：**只需定向单测与本次修改文件直接相关的测试类或测试方法**，以实现秒级验证与敏捷反馈；
+  - **精准单测命令示例**：
+    - 针对具体单测类：`./gradlew.bat :app:testDebugUnitTest --tests "com.listen.expensetracker.widget.ListenExpenseAppWidgetProviderTest"`
+    - 针对特定方法：`./gradlew.bat :app:testDebugUnitTest --tests "*.ListenExpenseAppWidgetProviderTest.normalizeCategoryId*"`
+  - **纯 UI / 文案调整**：若修改仅涉及 Composable 视觉呈现、Strings 文案字典或样式微调，优先执行极速语法编译检查（`./gradlew compileDebugKotlin`）甚至跳过测试构建，杜绝让用户陷入漫长等待；
+- **全量单测触发时机**：
+  1. 涉及底层核心基础设施（`ListenArch` 底座架构、Room 数据库迁移、跨模块核心拦截器等）的破坏性改造；
+  2. 准备发版打包、或用户明确要求“跑一下全量测试 / 完整回归”。

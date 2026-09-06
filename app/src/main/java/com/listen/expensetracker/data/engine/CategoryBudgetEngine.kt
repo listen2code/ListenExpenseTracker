@@ -3,7 +3,6 @@
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.model.BudgetHealthStatus
-import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryBudgetStatus
 import com.listen.expensetracker.data.model.CategoryRepository
 
