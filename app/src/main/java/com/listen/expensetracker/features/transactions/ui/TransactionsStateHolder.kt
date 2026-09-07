@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
@@ -26,17 +27,21 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsVie
  * 3. 【极致纯净的 Screen】：将状态初始化与效应调度全部收拢在此，使 Screen Composable 开门见山只写 UI 布局。
  */
 class TransactionsStateHolder(
-    val pagerState: PagerState,
+    val monthPagerState: PagerState,
+    val yearPagerState: PagerState,
     val listState: LazyListState,
     val groupedTransactions: Map<String, List<TransactionEntity>>,
     val currentMonthTitle: String,
-    val currentMonthOffset: Int
-)
+    val currentMonthOffset: Int,
+    val currentYearTitle: String,
+    val currentYearOffset: Int
+) {
+    val pagerState: PagerState get() = monthPagerState
+}
 
 /**
  * 创建并记住 [TransactionsStateHolder] 的 Composable 辅助函数。
  *
- * 
  * - 使用 [rememberPagerState] 与虚拟基准页 [PAGER_BASE_INDEX] 支撑双向无限滑动；
  * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现进程死亡或配置变更后的列表位置恢复；
  * - 在状态容器内部安全挂载 [TransactionsEffects]，避免向 Screen 暴露杂乱的效应监听逻辑。
@@ -49,57 +54,81 @@ fun rememberTransactionsStateHolder(
 ): TransactionsStateHolder {
     val lang = state.language
 
-    // 1. 初始化 Pager 状态
-    val pagerState = rememberPagerState(
+    // 1. 初始化月度 Pager 状态
+    val monthPagerState = rememberPagerState(
         initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
         pageCount = { PAGER_PAGE_COUNT }
     )
-    // [Bugfix] 解决跨 Tab 切换月份时的页面位置对齐与首帧闪动问题：
-    // 原因分析：用户在统计页改变月份后切回流水页时，SaveableStateProvider 会从状态缓存中恢复出旧月份的 page，
-    // 若仅依赖协程副作用异步 scrollToPage，首帧会先渲染旧月份，随后突然跳变到新月份。
-    // 解决的问题：在测量布局首帧前调用 requestScrollToPage 同步请求对齐到目标月份，杜绝异步滚动延迟与旧数据卡片闪现。
-    val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
-    if (pagerState.currentPage != targetPage && !pagerState.isScrollInProgress) {
-        pagerState.requestScrollToPage(targetPage)
+    val targetMonthPage = PAGER_BASE_INDEX + state.selectedMonthOffset
+    if (monthPagerState.currentPage != targetMonthPage && !monthPagerState.isScrollInProgress) {
+        monthPagerState.requestScrollToPage(targetMonthPage)
     }
 
-    // 2. 初始化列表滚动状态并绑定 Saver
-    val listState = rememberSaveable(pagerState.currentPage, saver = LazyListState.Saver) {
+    // 2. 初始化年度 Pager 状态
+    val yearPagerState = rememberPagerState(
+        initialPage = PAGER_BASE_INDEX + state.selectedYearOffset,
+        pageCount = { PAGER_PAGE_COUNT }
+    )
+    val targetYearPage = PAGER_BASE_INDEX + state.selectedYearOffset
+    if (yearPagerState.currentPage != targetYearPage && !yearPagerState.isScrollInProgress) {
+        yearPagerState.requestScrollToPage(targetYearPage)
+    }
+
+    // 3. 初始化列表滚动状态并绑定 Saver
+    val listState = rememberSaveable(monthPagerState.currentPage, yearPagerState.currentPage, saver = LazyListState.Saver) {
         LazyListState()
     }
 
-    // 3. 动态按天分组流水，利用 remember 避免不必要的集合重算
+    // 4. 动态按天分组流水，利用 remember 避免不必要的集合重算
     val groupedTransactions = remember(state.filteredTransactions) {
         state.filteredTransactions.groupBy { formatDayGroupHeader(it.timestamp) }
     }
 
-    // 4. 根据当前滑动手势或状态机实时计算顶部胶囊标题与月份偏移（避免跨 Tab 切换时的闪烁）
-    val activeOffset = if (pagerState.isScrollInProgress) {
-        pagerState.currentPage - PAGER_BASE_INDEX
+    // 5. 根据当前滑动手势或状态机实时计算顶部胶囊标题与月份/年份偏移
+    val activeMonthOffset = if (monthPagerState.isScrollInProgress) {
+        monthPagerState.currentPage - PAGER_BASE_INDEX
     } else {
         state.selectedMonthOffset
     }
-    val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
-        TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
+    val (_, _, currentMonthTitle) = remember(activeMonthOffset, lang) {
+        TransactionCalculationEngine.getMonthRangeAndTitle(activeMonthOffset, lang)
     }
 
-    // 5. 挂载画面专用副作用与手势监听
+    val activeYearOffset = if (yearPagerState.isScrollInProgress) {
+        yearPagerState.currentPage - PAGER_BASE_INDEX
+    } else {
+        state.selectedYearOffset
+    }
+    val (_, _, currentYearTitle) = remember(activeYearOffset, lang) {
+        AnnualCalculationEngine.getYearRangeAndTitle(activeYearOffset, lang)
+    }
+
+    // 6. 挂载画面专用副作用与手势监听
     TransactionsEffects(
         viewModel = viewModel,
-        pagerState = pagerState,
+        monthPagerState = monthPagerState,
+        yearPagerState = yearPagerState,
         listState = listState,
         groupedTransactions = groupedTransactions,
         selectedMonthOffset = state.selectedMonthOffset,
+        selectedYearOffset = state.selectedYearOffset,
         onIntent = onIntent
     )
 
-    return remember(pagerState, listState, groupedTransactions, currentMonthTitle, activeOffset) {
+    return remember(
+        monthPagerState, yearPagerState, listState, groupedTransactions,
+        currentMonthTitle, activeMonthOffset,
+        currentYearTitle, activeYearOffset
+    ) {
         TransactionsStateHolder(
-            pagerState = pagerState,
+            monthPagerState = monthPagerState,
+            yearPagerState = yearPagerState,
             listState = listState,
             groupedTransactions = groupedTransactions,
             currentMonthTitle = currentMonthTitle,
-            currentMonthOffset = activeOffset
+            currentMonthOffset = activeMonthOffset,
+            currentYearTitle = currentYearTitle,
+            currentYearOffset = activeYearOffset
         )
     }
 }

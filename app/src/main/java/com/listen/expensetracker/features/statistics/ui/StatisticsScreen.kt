@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.statistics.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -20,22 +21,21 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
+import com.listen.expensetracker.features.statistics.components.AnnualStatisticsContentList
 import com.listen.expensetracker.features.statistics.components.StatisticsContentList
 import com.listen.expensetracker.features.statistics.components.StatisticsDialogHost
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
 import com.listen.uicomponent.components.CommonSegmentedControl
+import java.util.Calendar
 
 /**
  * 纯无状态统计分析主画面 (StatisticsScreen)。
- *
- * Google 官方 UI State Holder 架构规范：
- * 1. 业务只读数据由 [state] ([StatisticsUiState]) 纯数据类驱动；
- * 2. 交互状态与动画控制器（PagerState、LazyListState、副作用监听）统一由 [rememberStatisticsStateHolder] 承接；
- * 3. 顶部收支切换栏（Expense / Income Toggle）与底部图表卡片彻底解耦。
+ * 完美支持按月 (Month) 与按年 (Year) 双维度无缝切换展示。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +45,12 @@ fun StatisticsScreen(
     modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
+    onNavigateToTransactionsAnnualCategory: ((year: Int, categoryName: String) -> Unit)? = null,
     onNavigateToTransactionsDate: ((monthOffset: Int, day: Int, dateLabel: String) -> Unit)? = null,
+    onNavigateToTransactionsMonth: ((monthOffset: Int) -> Unit)? = null,
     onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null,
     onNavigateToBudget: ((monthOffset: Int) -> Unit)? = null
 ) {
-    // 🌟 一行收口所有 Pager、ListState 与副作用协同逻辑
     val holder = rememberStatisticsStateHolder(state, onIntent, viewModel)
     val lang = state.language
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
@@ -57,12 +58,20 @@ fun StatisticsScreen(
     BaseScreenScaffold(
         titleSlot = {
             MonthNavigationCapsule(
-                monthTitle = holder.currentMonthTitle,
+                monthTitle = if (state.period == StatisticsPeriod.MONTH) holder.currentMonthTitle else holder.currentYearTitle,
                 onPreviousMonth = {
-                    onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                    if (state.period == StatisticsPeriod.MONTH) {
+                        onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                    } else {
+                        onIntent(StatisticsIntent.SelectYear(holder.currentYearOffset - 1))
+                    }
                 },
                 onNextMonth = {
-                    onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                    if (state.period == StatisticsPeriod.MONTH) {
+                        onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                    } else {
+                        onIntent(StatisticsIntent.SelectYear(holder.currentYearOffset + 1))
+                    }
                 },
                 onTitleClick = { onIntent(StatisticsIntent.OpenMonthPicker) }
             )
@@ -83,7 +92,7 @@ fun StatisticsScreen(
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
-            // 1. Pinned Top Expense vs Income Segmented Toggle (Stationary)
+            // 1. 顶部支出/收入分析切换栏
             val tabs = listOf(AppStrings.TAB_EXPENSE_ANALYSIS.tr(lang), AppStrings.TAB_INCOME_ANALYSIS.tr(lang))
             CommonSegmentedControl(
                 items = tabs,
@@ -92,34 +101,55 @@ fun StatisticsScreen(
                     onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) StatisticsTab.EXPENSE else StatisticsTab.INCOME))
                 },
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = AppDimens.SpaceLarge)
                     .padding(bottom = AppDimens.SpaceExtraSmall)
             )
 
-            // 2. Horizontal PageView Slider with month-specific analytics calculation
-            HorizontalPager(
-                state = holder.pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                val pageOffset = page - PAGER_BASE_INDEX
-                StatisticsContentList(
-                    state = state,
-                    monthOffset = pageOffset,
-                    onIntent = onIntent,
-                    listState = if (page == holder.pagerState.currentPage) holder.listState else rememberLazyListState(),
-                    onCategoryClick = onNavigateToTransactions?.let { callback ->
-                        { categoryName -> callback(pageOffset, categoryName) }
-                    },
-                    onDateClick = onNavigateToTransactionsDate?.let { callback ->
-                        { day, dateLabel -> callback(pageOffset, day, dateLabel) }
-                    },
-                    onTransactionClick = onNavigateToTransaction?.let { callback ->
-                        { tx -> callback(pageOffset, tx) }
-                    },
-                    onBudgetClick = onNavigateToBudget?.let { callback ->
-                        { callback(pageOffset) }
-                    }
-                )
+            // 2. 根据周期模式切换 HorizontalPager
+            if (state.period == StatisticsPeriod.MONTH) {
+                HorizontalPager(
+                    state = holder.monthPagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val pageOffset = page - PAGER_BASE_INDEX
+                    StatisticsContentList(
+                        state = state,
+                        monthOffset = pageOffset,
+                        onIntent = onIntent,
+                        listState = if (page == holder.monthPagerState.currentPage) holder.listState else rememberLazyListState(),
+                        onCategoryClick = onNavigateToTransactions?.let { callback ->
+                            { categoryName -> callback(pageOffset, categoryName) }
+                        },
+                        onDateClick = onNavigateToTransactionsDate?.let { callback ->
+                            { day, dateLabel -> callback(pageOffset, day, dateLabel) }
+                        },
+                        onTransactionClick = onNavigateToTransaction?.let { callback ->
+                            { tx -> callback(pageOffset, tx) }
+                        },
+                        onBudgetClick = onNavigateToBudget?.let { callback ->
+                            { callback(pageOffset) }
+                        }
+                    )
+                }
+            } else {
+                HorizontalPager(
+                    state = holder.yearPagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val pageOffset = page - PAGER_BASE_INDEX
+                    AnnualStatisticsContentList(
+                        state = state,
+                        yearOffset = pageOffset,
+                        onIntent = onIntent,
+                        listState = if (page == holder.yearPagerState.currentPage) holder.listState else rememberLazyListState(),
+                        onAnnualCategoryClick = onNavigateToTransactionsAnnualCategory,
+                        onTransactionClick = onNavigateToTransaction?.let { callback ->
+                            { tx -> callback(0, tx) }
+                        },
+                        onNavigateToTransactionsMonth = onNavigateToTransactionsMonth
+                    )
+                }
             }
         }
     }

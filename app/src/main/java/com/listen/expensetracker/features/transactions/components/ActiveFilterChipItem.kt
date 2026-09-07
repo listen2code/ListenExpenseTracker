@@ -120,7 +120,8 @@ fun ActiveFilterTagsRow(
     val hasDialogFilters = state.typeFilter != "ALL" ||
             state.selectedCategories.isNotEmpty() ||
             state.amountPreset != AmountFilterPreset.ALL ||
-            state.sortOrder != TransactionSortOrder.DATE_DESC
+            state.sortOrder != TransactionSortOrder.DATE_DESC ||
+            state.activeAnnualFilter != null
 
     if (!hasDialogFilters) return
 
@@ -131,8 +132,17 @@ fun ActiveFilterTagsRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 0. Annual Category Filter Tag (Scheme B)
+        state.activeAnnualFilter?.let { annual ->
+            val tagText = AppStrings.FILTER_ANNUAL_TAG.tr(lang).format(annual.year, annual.categoryName)
+            ActiveFilterChipItem(
+                label = tagText,
+                onRemove = { onIntent(TransactionsIntent.ClearAnnualFilter) }
+            )
+        }
+
         // 1. Transaction Type Tag
-        if (state.typeFilter != TransactionType.ALL) {
+        if (state.typeFilter != TransactionType.ALL && state.activeAnnualFilter == null) {
             ActiveFilterChipItem(
                 label = if (state.typeFilter == TransactionType.EXPENSE) AppStrings.TYPE_EXPENSE.tr(lang) else AppStrings.TYPE_INCOME.tr(lang),
                 onRemove = { onIntent(TransactionsIntent.ClearTypeFilter) }

@@ -8,6 +8,7 @@ import com.listen.arch.apm.ApmLogger
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
@@ -34,20 +35,37 @@ class StatisticsViewModel(
 
     override fun handleIntent(intent: StatisticsIntent) {
         when (intent) {
+            is StatisticsIntent.ChangePeriod -> {
+                updateState { copy(period = intent.period) }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+            }
             is StatisticsIntent.ChangeMonthOffset -> {
                 val newOffset = currentState.selectedMonthOffset + intent.offsetDelta
                 updateState { copy(selectedMonthOffset = newOffset) }
-                viewModelScope.launch {
-                    val allList = dao.getAllTransactions()
-                    applyCalculations(allList)
-                }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
             }
             is StatisticsIntent.SetMonthOffset -> {
                 updateState { copy(selectedMonthOffset = intent.offset) }
-                viewModelScope.launch {
-                    val allList = dao.getAllTransactions()
-                    applyCalculations(allList)
-                }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+            }
+            is StatisticsIntent.SelectMonth -> {
+                updateState { copy(selectedMonthOffset = intent.offset) }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+                emitEffect(StatisticsEffect.ScrollToMonth(intent.offset))
+            }
+            is StatisticsIntent.ChangeYearOffset -> {
+                val newOffset = currentState.selectedYearOffset + intent.offsetDelta
+                updateState { copy(selectedYearOffset = newOffset) }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+            }
+            is StatisticsIntent.SetYearOffset -> {
+                updateState { copy(selectedYearOffset = intent.offset) }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+            }
+            is StatisticsIntent.SelectYear -> {
+                updateState { copy(selectedYearOffset = intent.offset) }
+                viewModelScope.launch { applyCalculations(dao.getAllTransactions()) }
+                emitEffect(StatisticsEffect.ScrollToYear(intent.offset))
             }
             is StatisticsIntent.ChangeStatisticsTab -> {
                 updateState { copy(statisticsTab = intent.tab) }
@@ -58,14 +76,6 @@ class StatisticsViewModel(
             is StatisticsIntent.OpenMonthPicker -> updateState { copy(showMonthPicker = true) }
             is StatisticsIntent.DismissMonthPicker -> updateState { copy(showMonthPicker = false) }
             is StatisticsIntent.ScrollToTop -> { emitEffect(StatisticsEffect.ScrollToTop) }
-            is StatisticsIntent.SelectMonth -> {
-                updateState { copy(selectedMonthOffset = intent.offset) }
-                viewModelScope.launch {
-                    val allList = dao.getAllTransactions()
-                    applyCalculations(allList)
-                }
-                emitEffect(StatisticsEffect.ScrollToMonth(intent.offset))
-            }
         }
     }
 
@@ -99,40 +109,73 @@ class StatisticsViewModel(
     }
 
     private fun applyCalculations(allList: List<TransactionEntity>) {
-        val calculated = TransactionCalculationEngine.filterAndCalculate(
-            allList = allList,
-            currentOffset = currentState.selectedMonthOffset,
-            query = "",
-            accountFilter = "ALL",
-            budget = currentState.monthlyBudget,
-            sortOrder = TransactionSortOrder.DATE_DESC,
-            currencySymbol = currentState.currencySymbol,
-            lang = currentState.language
-        )
-
-        updateState {
-            copy(
-                allTransactions = allList,
-                categoryShares = calculated.categoryShares,
-                progressSegments = calculated.progressSegments,
-                incomeCategoryShares = calculated.incomeCategoryShares,
-                incomeProgressSegments = calculated.incomeProgressSegments,
-                dailyTrendBars = calculated.dailyTrendBars,
-                dailyTrendPoints = calculated.dailyTrendPoints,
-                totalExpense = calculated.totalExpense,
-                totalIncome = calculated.totalIncome,
-                netBalance = calculated.netBalance,
-                monthlyBudget = calculated.monthlyBudget,
-                remainingBudget = calculated.remainingBudget,
-                budgetUsageRatio = calculated.budgetUsageRatio,
-                isOverBudget = calculated.isOverBudget,
-                dailyAverageExpense = calculated.dailyAverageExpense,
-                dailyAverageIncome = calculated.dailyAverageIncome,
-                maxExpenseTransaction = calculated.maxExpenseTransaction,
-                maxIncomeTransaction = calculated.maxIncomeTransaction,
-                monthTitle = calculated.monthTitle,
-                isLoading = false
+        if (currentState.period == StatisticsPeriod.YEAR) {
+            val annualResult = AnnualCalculationEngine.filterAndCalculateYear(
+                allList = allList,
+                yearOffset = currentState.selectedYearOffset,
+                lang = currentState.language
             )
+            val annualBudget = currentState.monthlyBudget * 12
+            val annualRatio = if (annualBudget > 0) (annualResult.totalExpense / annualBudget).toFloat() else 0f
+            updateState {
+                copy(
+                    allTransactions = allList,
+                    categoryShares = annualResult.categoryShares,
+                    progressSegments = annualResult.progressSegments,
+                    incomeCategoryShares = annualResult.incomeCategoryShares,
+                    incomeProgressSegments = annualResult.incomeProgressSegments,
+                    dailyTrendBars = emptyList(),
+                    dailyTrendPoints = annualResult.monthlyTrendPoints,
+                    totalExpense = annualResult.totalExpense,
+                    totalIncome = annualResult.totalIncome,
+                    netBalance = annualResult.netBalance,
+                    remainingBudget = (annualBudget - annualResult.totalExpense).coerceAtLeast(0.0),
+                    budgetUsageRatio = annualRatio,
+                    isOverBudget = annualResult.totalExpense > annualBudget,
+                    dailyAverageExpense = annualResult.monthlyAverageExpense,
+                    dailyAverageIncome = annualResult.monthlyAverageIncome,
+                    maxExpenseTransaction = annualResult.maxExpenseTransaction,
+                    maxIncomeTransaction = annualResult.maxIncomeTransaction,
+                    yearTitle = annualResult.yearTitle,
+                    isLoading = false
+                )
+            }
+        } else {
+            val calculated = TransactionCalculationEngine.filterAndCalculate(
+                allList = allList,
+                currentOffset = currentState.selectedMonthOffset,
+                query = "",
+                accountFilter = "ALL",
+                budget = currentState.monthlyBudget,
+                sortOrder = TransactionSortOrder.DATE_DESC,
+                currencySymbol = currentState.currencySymbol,
+                lang = currentState.language
+            )
+
+            updateState {
+                copy(
+                    allTransactions = allList,
+                    categoryShares = calculated.categoryShares,
+                    progressSegments = calculated.progressSegments,
+                    incomeCategoryShares = calculated.incomeCategoryShares,
+                    incomeProgressSegments = calculated.incomeProgressSegments,
+                    dailyTrendBars = calculated.dailyTrendBars,
+                    dailyTrendPoints = calculated.dailyTrendPoints,
+                    totalExpense = calculated.totalExpense,
+                    totalIncome = calculated.totalIncome,
+                    netBalance = calculated.netBalance,
+                    monthlyBudget = calculated.monthlyBudget,
+                    remainingBudget = calculated.remainingBudget,
+                    budgetUsageRatio = calculated.budgetUsageRatio,
+                    isOverBudget = calculated.isOverBudget,
+                    dailyAverageExpense = calculated.dailyAverageExpense,
+                    dailyAverageIncome = calculated.dailyAverageIncome,
+                    maxExpenseTransaction = calculated.maxExpenseTransaction,
+                    maxIncomeTransaction = calculated.maxIncomeTransaction,
+                    monthTitle = calculated.monthTitle,
+                    isLoading = false
+                )
+            }
         }
     }
 

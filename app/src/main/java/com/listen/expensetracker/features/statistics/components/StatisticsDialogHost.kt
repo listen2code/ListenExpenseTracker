@@ -7,6 +7,7 @@ import com.listen.uicomponent.theme.ListenTheme
 import androidx.compose.runtime.Composable
 import com.listen.expensetracker.features.common.components.MonthPickerDialog
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 
 /**
@@ -20,9 +21,17 @@ fun StatisticsDialogHost(
 ) {
     if (state.showMonthPicker) {
         MonthPickerDialog(
-            currentOffset = state.selectedMonthOffset,
+            currentMonthOffset = state.selectedMonthOffset,
+            currentYearOffset = state.selectedYearOffset,
+            isYearMode = state.period == StatisticsPeriod.YEAR,
             onOffsetSelected = { offset ->
+                onIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
                 onIntent(StatisticsIntent.SelectMonth(offset))
+                onIntent(StatisticsIntent.DismissMonthPicker)
+            },
+            onYearSelected = { offset ->
+                onIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
+                onIntent(StatisticsIntent.SelectYear(offset))
                 onIntent(StatisticsIntent.DismissMonthPicker)
             },
             onDismiss = { onIntent(StatisticsIntent.DismissMonthPicker) },

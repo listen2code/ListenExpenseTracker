@@ -19,7 +19,9 @@ import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
@@ -72,70 +74,90 @@ class ExpenseAppState(
             transactionsViewModel.viewState.value.selectedMonthOffset
         }
 
+    val activeYearOffset: Int
+        get() = if (currentTab == NavTab.STATISTICS) {
+            statisticsViewModel.viewState.value.selectedYearOffset
+        } else {
+            transactionsViewModel.viewState.value.selectedYearOffset
+        }
+
+    private var lastTimeTab: NavTab = NavTab.TRANSACTIONS
+
+    private fun syncTimeState(fromTab: NavTab, toTab: NavTab) {
+        if (fromTab == NavTab.TRANSACTIONS && toTab == NavTab.STATISTICS) {
+            val tx = transactionsViewModel.viewState.value
+            val targetPeriod = if (tx.period == TransactionPeriod.YEAR) StatisticsPeriod.YEAR else StatisticsPeriod.MONTH
+            if (statisticsViewModel.viewState.value.period != targetPeriod) statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(targetPeriod))
+            if (statisticsViewModel.viewState.value.selectedMonthOffset != tx.selectedMonthOffset) statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(tx.selectedMonthOffset))
+            if (statisticsViewModel.viewState.value.selectedYearOffset != tx.selectedYearOffset) statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(tx.selectedYearOffset))
+        } else if (fromTab == NavTab.STATISTICS && toTab == NavTab.TRANSACTIONS) {
+            val stats = statisticsViewModel.viewState.value
+            val targetPeriod = if (stats.period == StatisticsPeriod.YEAR) TransactionPeriod.YEAR else TransactionPeriod.MONTH
+            if (transactionsViewModel.viewState.value.period != targetPeriod) transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(targetPeriod))
+            if (transactionsViewModel.viewState.value.selectedMonthOffset != stats.selectedMonthOffset) transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(stats.selectedMonthOffset))
+            if (transactionsViewModel.viewState.value.selectedYearOffset != stats.selectedYearOffset) transactionsViewModel.handleIntent(TransactionsIntent.SetYearOffset(stats.selectedYearOffset))
+        }
+    }
+
     fun switchTab(tab: NavTab) {
-        val currentOffset = when (currentTab) {
-            NavTab.TRANSACTIONS -> transactionsViewModel.viewState.value.selectedMonthOffset
-            NavTab.STATISTICS -> statisticsViewModel.viewState.value.selectedMonthOffset
-            NavTab.SETTINGS -> activeMonthOffset
+        if (tab != currentTab) {
+            val sourceTab = if (currentTab == NavTab.SETTINGS) lastTimeTab else currentTab
+            syncTimeState(fromTab = sourceTab, toTab = tab)
+            if (tab != NavTab.SETTINGS) lastTimeTab = tab
+            currentTab = tab
         }
-        if (tab == NavTab.STATISTICS) {
-            if (statisticsViewModel.viewState.value.selectedMonthOffset != currentOffset) {
-                statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(currentOffset))
-            }
-        } else if (tab == NavTab.TRANSACTIONS) {
-            if (transactionsViewModel.viewState.value.selectedMonthOffset != currentOffset) {
-                transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(currentOffset))
-            }
-        }
-        currentTab = tab
     }
 
-    /**
-     * Navigates directly from Statistics to Transactions filtered by month and category.
-     */
     fun navigateToTransactionsCategory(categoryName: String, monthOffset: Int) {
-        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
-            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        }
+        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByCategory(categoryName, monthOffset))
+        lastTimeTab = NavTab.TRANSACTIONS
         currentTab = NavTab.TRANSACTIONS
     }
 
-    /**
-     * Navigates directly from Statistics to Transactions focused on a specific date in a month.
-     */
+    fun navigateToTransactionsAnnualCategory(year: Int, categoryName: String) {
+        val curYear = Calendar.getInstance().get(Calendar.YEAR)
+        statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(year - curYear))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByAnnualCategory(year, categoryName))
+        lastTimeTab = NavTab.TRANSACTIONS
+        currentTab = NavTab.TRANSACTIONS
+    }
+
     fun navigateToTransactionsDate(monthOffset: Int, day: Int, dateLabel: String = "") {
-        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
-            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        }
+        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day, dateLabel))
+        lastTimeTab = NavTab.TRANSACTIONS
         currentTab = NavTab.TRANSACTIONS
     }
 
-    /**
-     * Navigates directly from Statistics to Transactions focused on a specific transaction in a month.
-     */
     fun navigateToTransaction(monthOffset: Int, transaction: TransactionEntity) {
-        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
-            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        }
+        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         val cal = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
-        val day = cal.get(Calendar.DAY_OF_MONTH)
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, day, transaction.amount))
+        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, cal.get(Calendar.DAY_OF_MONTH), transaction.amount))
+        lastTimeTab = NavTab.TRANSACTIONS
         currentTab = NavTab.TRANSACTIONS
     }
 
-    /**
-     * Navigates directly from Statistics to Transactions with Monthly Budget dialog opened.
-     */
     fun navigateToBudgetAdjustment(monthOffset: Int) {
-        if (statisticsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
-            statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        }
-        if (transactionsViewModel.viewState.value.selectedMonthOffset != monthOffset) {
-            transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(monthOffset))
-        }
+        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
+        transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(monthOffset))
+        transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget))
+        lastTimeTab = NavTab.TRANSACTIONS
+        currentTab = NavTab.TRANSACTIONS
+    }
+
+    fun navigateToTransactionsMonth(monthOffset: Int) {
+        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
+        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
+        transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
+        transactionsViewModel.handleIntent(TransactionsIntent.SelectMonth(monthOffset))
+        lastTimeTab = NavTab.TRANSACTIONS
         currentTab = NavTab.TRANSACTIONS
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import com.listen.expensetracker.features.budget.components.BudgetDialogMode
 import com.listen.expensetracker.features.budget.components.CategoryBudgetModalDialog
 import com.listen.expensetracker.features.common.components.MonthPickerDialog
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
@@ -98,9 +99,17 @@ fun TransactionsDialogHost(
         }
         is TransactionsDialog.MonthPicker -> {
             MonthPickerDialog(
-                currentOffset = state.selectedMonthOffset,
+                currentMonthOffset = state.selectedMonthOffset,
+                currentYearOffset = state.selectedYearOffset,
+                isYearMode = state.period == TransactionPeriod.YEAR,
                 onOffsetSelected = { offset ->
+                    onIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
                     onIntent(TransactionsIntent.SelectMonth(offset))
+                    onIntent(TransactionsIntent.DismissDialog)
+                },
+                onYearSelected = { offset ->
+                    onIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.YEAR))
+                    onIntent(TransactionsIntent.SelectYear(offset))
                     onIntent(TransactionsIntent.DismissDialog)
                 },
                 onDismiss = { onIntent(TransactionsIntent.DismissDialog) },

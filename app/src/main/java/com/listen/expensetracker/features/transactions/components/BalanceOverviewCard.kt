@@ -57,6 +57,7 @@ fun BalanceOverviewCard(
     modifier: Modifier = Modifier,
     monthlyBudget: Double = 0.0,
     remainingBudget: Double = 0.0,
+    isYearMode: Boolean = false,
     onBudgetClick: () -> Unit = {},
     onToggleHideBalance: (() -> Unit)? = null
 ) {
@@ -183,7 +184,7 @@ fun BalanceOverviewCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = AppStrings.MONTHLY_BUDGET.tr(lang),
+                            text = (if (isYearMode) AppStrings.ANNUAL_BUDGET else AppStrings.MONTHLY_BUDGET).tr(lang),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface

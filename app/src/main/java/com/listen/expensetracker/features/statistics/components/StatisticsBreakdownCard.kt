@@ -30,17 +30,19 @@ import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
 
 /**
- * 统计分类收支环形占比与分段比例条卡片 (StatisticsBreakdownCard)。
+ * 统计分类收支环形占比与分段比例条通用卡片 (StatisticsBreakdownCard)。
  */
 @Composable
 fun StatisticsBreakdownCard(
-    calc: CalculationResult,
+    shares: List<PieChartItem>,
+    segments: List<ProgressSegment>,
+    totalAmount: Double,
     isExpenseTab: Boolean,
-    monthOffset: Int,
     currencySymbol: String,
     lang: String,
     hideAmount: Boolean,
     modifier: Modifier = Modifier,
+    key: Any? = null,
     onCategoryClick: ((categoryName: String) -> Unit)? = null
 ) {
     SurfaceCard(
@@ -55,13 +57,9 @@ fun StatisticsBreakdownCard(
             },
             label = "DonutChartTabTransition"
         ) { expenseTab ->
-            val shares = if (expenseTab) calc.categoryShares else calc.incomeCategoryShares
-            val segments = if (expenseTab) calc.progressSegments else calc.incomeProgressSegments
-            val amount = if (expenseTab) calc.totalExpense else calc.totalIncome
+            var selectedDonutItem by remember(expenseTab, key) { mutableStateOf<PieChartItem?>(null) }
 
-            var selectedDonutItem by remember(expenseTab, monthOffset) { mutableStateOf<PieChartItem?>(null) }
-
-            if (shares.isEmpty() || amount <= 0.0) {
+            if (shares.isEmpty() || totalAmount <= 0.0) {
                 CommonEmpty(
                     message = if (expenseTab) AppStrings.EMPTY_MONTH_EXPENSE.tr(lang) else AppStrings.EMPTY_MONTH_INCOME.tr(lang),
                     modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
@@ -70,9 +68,9 @@ fun StatisticsBreakdownCard(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     DonutChart(
                         items = shares,
-                        totalValue = amount,
+                        totalValue = totalAmount,
                         centerTitle = if (expenseTab) AppStrings.TOTAL_EXPENSE.tr(lang) else AppStrings.TOTAL_INCOME.tr(lang),
-                        centerValueText = if (hideAmount) "••••" else "$currencySymbol${amount.formatAmount()}",
+                        centerValueText = if (hideAmount) "••••" else "$currencySymbol${totalAmount.formatAmount()}",
                         currencySymbol = currencySymbol,
                         hideAmount = hideAmount,
                         selectedItem = selectedDonutItem,
@@ -97,6 +95,37 @@ fun StatisticsBreakdownCard(
     }
 }
 
+/**
+ * 月度维度便利重载方法。
+ */
+@Composable
+fun StatisticsBreakdownCard(
+    calc: CalculationResult,
+    isExpenseTab: Boolean,
+    monthOffset: Int,
+    currencySymbol: String,
+    lang: String,
+    hideAmount: Boolean,
+    modifier: Modifier = Modifier,
+    onCategoryClick: ((categoryName: String) -> Unit)? = null
+) {
+    val shares = if (isExpenseTab) calc.categoryShares else calc.incomeCategoryShares
+    val segments = if (isExpenseTab) calc.progressSegments else calc.incomeProgressSegments
+    val amount = if (isExpenseTab) calc.totalExpense else calc.totalIncome
+    StatisticsBreakdownCard(
+        shares = shares,
+        segments = segments,
+        totalAmount = amount,
+        isExpenseTab = isExpenseTab,
+        currencySymbol = currencySymbol,
+        lang = lang,
+        hideAmount = hideAmount,
+        modifier = modifier,
+        key = monthOffset,
+        onCategoryClick = onCategoryClick
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun StatisticsBreakdownCardPreview() {
@@ -108,34 +137,13 @@ fun StatisticsBreakdownCardPreview() {
         PieChartItem("Others", "#6B7280", 300.0, 0.1f)
     )
     val sampleSegments = sampleShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
-    
-    val sampleCalc = CalculationResult(
-        filteredTransactions = emptyList(),
-        totalExpense = 3000.0,
-        totalIncome = 5000.0,
-        netBalance = 2000.0,
-        monthlyBudget = 4000.0,
-        remainingBudget = 1000.0,
-        budgetUsageRatio = 0.75f,
-        isOverBudget = false,
-        categoryShares = sampleShares,
-        progressSegments = sampleSegments,
-        incomeCategoryShares = emptyList(),
-        incomeProgressSegments = emptyList(),
-        dailyTrendBars = emptyList(),
-        dailyTrendPoints = emptyList(),
-        dailyAverageExpense = 100.0,
-        dailyAverageIncome = 166.0,
-        maxExpenseTransaction = null,
-        maxIncomeTransaction = null,
-        monthTitle = "Aug 2026"
-    )
 
     ListenTheme {
         StatisticsBreakdownCard(
-            calc = sampleCalc,
+            shares = sampleShares,
+            segments = sampleSegments,
+            totalAmount = 3000.0,
             isExpenseTab = true,
-            monthOffset = 0,
             currencySymbol = "$",
             lang = "en",
             hideAmount = false

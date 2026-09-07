@@ -6,6 +6,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
@@ -18,25 +19,23 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewMod
  *
  * Google 官方 UI State Holder 设计模式说明：
  * 1. 【职责解耦】：
- *    - [StatisticsUiState]：存放业务领域只读数据（分类占比图表数据、收支总计、预算进度、趋势图点位），由 ViewModel 状态机持有；
- *    - [StatisticsStateHolder]：承载界面控件与动画调度状态（PagerState, LazyListState, 滚动计算, 副作用触发），生命周期与 Compose 树绑定。
+ *    - [StatisticsUiState]：存放业务领域只读数据，由 ViewModel 状态机持有；
+ *    - [StatisticsStateHolder]：承载界面控件与动画调度状态（Month/Year PagerState, LazyListState, 滚动计算, 副作用触发），生命周期与 Compose 树绑定。
  * 2. 【杜绝内存泄漏】：严禁将 PagerState/LazyListState 放入 ViewModel；
  * 3. 【极致纯净的 Screen】：将状态初始化与效应调度全部收拢在此，使 Screen 函数专注于纯声明式视图渲染。
  */
 class StatisticsStateHolder(
-    val pagerState: PagerState,
+    val monthPagerState: PagerState,
+    val yearPagerState: PagerState,
     val listState: LazyListState,
     val currentMonthTitle: String,
-    val currentMonthOffset: Int
+    val currentMonthOffset: Int,
+    val currentYearTitle: String,
+    val currentYearOffset: Int
 )
 
 /**
  * 创建并记住 [StatisticsStateHolder] 的 Composable 辅助函数。
- *
- * 
- * - 使用 [rememberPagerState] 支撑统计页横向月份滑动切换；
- * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现列表位置记忆与恢复；
- * - 内部挂载 [StatisticsEffects]，避免向 Screen 暴露杂乱的效应监听逻辑。
  */
 @Composable
 fun rememberStatisticsStateHolder(
@@ -46,50 +45,74 @@ fun rememberStatisticsStateHolder(
 ): StatisticsStateHolder {
     val lang = state.language
 
-    // 1. 初始化 Pager 状态
-    val pagerState = rememberPagerState(
+    // 1. 初始化月度 Pager 状态
+    val monthPagerState = rememberPagerState(
         initialPage = PAGER_BASE_INDEX + state.selectedMonthOffset,
         pageCount = { PAGER_PAGE_COUNT }
     )
-    // [Bugfix] 解决跨 Tab 切换月份时的“有数据到无数据”画面闪动问题：
-    // 原因分析：当用户在其他 Tab 改变月份再切回统计页时，SaveableStateProvider 会恢复上次离开统计页时的旧月份 page，
-    // 导致 Compose 首帧先渲染旧月份（满数据卡片），随后协程副作用才异步触发 scrollToPage 跳到新月份（空数据），产生肉眼可见闪烁。
-    // 解决的问题：在测量布局首帧前调用 requestScrollToPage 同步请求对齐到目标月份，杜绝异步滚动延迟与旧数据卡片闪现。
-    val targetPage = PAGER_BASE_INDEX + state.selectedMonthOffset
-    if (pagerState.currentPage != targetPage && !pagerState.isScrollInProgress) {
-        pagerState.requestScrollToPage(targetPage)
+    val targetMonthPage = PAGER_BASE_INDEX + state.selectedMonthOffset
+    if (monthPagerState.currentPage != targetMonthPage && !monthPagerState.isScrollInProgress) {
+        monthPagerState.requestScrollToPage(targetMonthPage)
     }
 
-    // 2. 初始化列表滚动状态并绑定 Saver
-    val listState = rememberSaveable(pagerState.currentPage, saver = LazyListState.Saver) {
+    // 2. 初始化年度 Pager 状态
+    val yearPagerState = rememberPagerState(
+        initialPage = PAGER_BASE_INDEX + state.selectedYearOffset,
+        pageCount = { PAGER_PAGE_COUNT }
+    )
+    val targetYearPage = PAGER_BASE_INDEX + state.selectedYearOffset
+    if (yearPagerState.currentPage != targetYearPage && !yearPagerState.isScrollInProgress) {
+        yearPagerState.requestScrollToPage(targetYearPage)
+    }
+
+    // 3. 初始化列表滚动状态并绑定 Saver
+    val listState = rememberSaveable(monthPagerState.currentPage, yearPagerState.currentPage, saver = LazyListState.Saver) {
         LazyListState()
     }
 
-    // 3. 根据当前滑动手势或状态机实时计算顶部胶囊标题与月份偏移（避免跨 Tab 切换时的闪烁）
-    val activeOffset = if (pagerState.isScrollInProgress) {
-        pagerState.currentPage - PAGER_BASE_INDEX
+    // 4. 根据当前滑动手势或状态机实时计算顶部胶囊标题与月份/年份偏移
+    val activeMonthOffset = if (monthPagerState.isScrollInProgress) {
+        monthPagerState.currentPage - PAGER_BASE_INDEX
     } else {
         state.selectedMonthOffset
     }
-    val (_, _, currentMonthTitle) = remember(activeOffset, lang) {
-        TransactionCalculationEngine.getMonthRangeAndTitle(activeOffset, lang)
+    val (_, _, currentMonthTitle) = remember(activeMonthOffset, lang) {
+        TransactionCalculationEngine.getMonthRangeAndTitle(activeMonthOffset, lang)
     }
 
-    // 4. 挂载画面专用副作用与手势监听
+    val activeYearOffset = if (yearPagerState.isScrollInProgress) {
+        yearPagerState.currentPage - PAGER_BASE_INDEX
+    } else {
+        state.selectedYearOffset
+    }
+    val (_, _, currentYearTitle) = remember(activeYearOffset, lang) {
+        AnnualCalculationEngine.getYearRangeAndTitle(activeYearOffset, lang)
+    }
+
+    // 5. 挂载画面专用副作用与手势监听
     StatisticsEffects(
         viewModel = viewModel,
-        pagerState = pagerState,
+        monthPagerState = monthPagerState,
+        yearPagerState = yearPagerState,
         listState = listState,
         selectedMonthOffset = state.selectedMonthOffset,
+        selectedYearOffset = state.selectedYearOffset,
         onIntent = onIntent
     )
 
-    return remember(pagerState, listState, currentMonthTitle, activeOffset) {
+    return remember(
+        monthPagerState, yearPagerState, listState,
+        currentMonthTitle, activeMonthOffset,
+        currentYearTitle, activeYearOffset
+    ) {
         StatisticsStateHolder(
-            pagerState = pagerState,
+            monthPagerState = monthPagerState,
+            yearPagerState = yearPagerState,
             listState = listState,
             currentMonthTitle = currentMonthTitle,
-            currentMonthOffset = activeOffset
+            currentMonthOffset = activeMonthOffset,
+            currentYearTitle = currentYearTitle,
+            currentYearOffset = activeYearOffset
         )
     }
 }

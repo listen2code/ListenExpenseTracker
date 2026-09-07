@@ -23,6 +23,7 @@ object ExpenseStrings {
         AppStrings.TOTAL_EXPENSE to "总支出",
         AppStrings.TOTAL_INCOME to "总收入",
         AppStrings.MONTHLY_BUDGET to "月预算",
+        AppStrings.ANNUAL_BUDGET to "年预算",
         AppStrings.USED_BUDGET to "已用",
         AppStrings.OVER_BUDGET to "已超支",
         AppStrings.BUDGET_CENTER_TITLE to "分类预算管理",
@@ -140,6 +141,10 @@ object ExpenseStrings {
         AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE to "删除账户",
         AppStrings.DELETE_ACCOUNT_CONFIRM_DESC to "确认删除该账户吗？已关联此账户的历史记录不会受到影响。",
         AppStrings.SELECT_MONTH_DIALOG to "选择年月",
+        AppStrings.SELECT_YEAR_TITLE to "选择年份",
+        AppStrings.BACK_TO_MONTHS to "返回选月",
+        AppStrings.VIEW_FULL_YEAR to "整年",
+        AppStrings.JUMP_TO_THIS_YEAR to "回到今年",
         AppStrings.ABOUT_APP to "关于应用",
         AppStrings.CHECK_UPDATE to "检查更新",
         AppStrings.CHECK_UPDATE_DESC to "前往 Google Play 检查并升级到最新版本",
@@ -293,7 +298,14 @@ object ExpenseStrings {
         AppStrings.APM_BTN_CLEAR to "清空",
         AppStrings.APM_BTN_EXPORT to "导出",
         AppStrings.APM_EMPTY_LOGS to "暂无匹配日志",
-        AppStrings.APM_SHARE_TITLE to "分享 APM 日志"
+        AppStrings.APM_SHARE_TITLE to "分享 APM 日志",
+        AppStrings.PERIOD_MONTH to "按月",
+        AppStrings.PERIOD_YEAR to "按年",
+        AppStrings.TREND_YEAR_MONTHLY to "全年各月走势",
+        AppStrings.FILTER_ANNUAL_TAG to "%d年 · %s",
+        AppStrings.STATS_YEAR_FORMAT to "%d年",
+        AppStrings.STATS_MONTH_AVG_EXPENSE to "月均支出",
+        AppStrings.STATS_MONTH_AVG_INCOME to "月均收入"
     )
 
     private val enMap = mapOf(
@@ -304,6 +316,7 @@ object ExpenseStrings {
         AppStrings.TOTAL_EXPENSE to "Total Expense",
         AppStrings.TOTAL_INCOME to "Total Income",
         AppStrings.MONTHLY_BUDGET to "Monthly Budget",
+        AppStrings.ANNUAL_BUDGET to "Annual Budget",
         AppStrings.USED_BUDGET to "Used",
         AppStrings.OVER_BUDGET to "Over Budget",
         AppStrings.BUDGET_CENTER_TITLE to "Category Budgets",
@@ -421,6 +434,10 @@ object ExpenseStrings {
         AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE to "Delete Account",
         AppStrings.DELETE_ACCOUNT_CONFIRM_DESC to "Are you sure you want to delete this account? Historical transactions will remain intact.",
         AppStrings.SELECT_MONTH_DIALOG to "Select Month",
+        AppStrings.SELECT_YEAR_TITLE to "Select Year",
+        AppStrings.BACK_TO_MONTHS to "Back to Months",
+        AppStrings.VIEW_FULL_YEAR to "Full Year",
+        AppStrings.JUMP_TO_THIS_YEAR to "This Year",
         AppStrings.ABOUT_APP to "About App",
         AppStrings.CHECK_UPDATE to "Check for Updates",
         AppStrings.CHECK_UPDATE_DESC to "Open Google Play to check for the latest version",
@@ -574,7 +591,14 @@ object ExpenseStrings {
         AppStrings.APM_BTN_CLEAR to "Clear",
         AppStrings.APM_BTN_EXPORT to "Export",
         AppStrings.APM_EMPTY_LOGS to "No matching logs found",
-        AppStrings.APM_SHARE_TITLE to "Share APM Logs"
+        AppStrings.APM_SHARE_TITLE to "Share APM Logs",
+        AppStrings.PERIOD_MONTH to "Monthly",
+        AppStrings.PERIOD_YEAR to "Yearly",
+        AppStrings.TREND_YEAR_MONTHLY to "Monthly Trend",
+        AppStrings.FILTER_ANNUAL_TAG to "%d · %s",
+        AppStrings.STATS_YEAR_FORMAT to "%d",
+        AppStrings.STATS_MONTH_AVG_EXPENSE to "Monthly Avg Exp",
+        AppStrings.STATS_MONTH_AVG_INCOME to "Monthly Avg Inc"
     )
 
     private val jaMap = mapOf(
@@ -585,6 +609,7 @@ object ExpenseStrings {
         AppStrings.TOTAL_EXPENSE to "支出合計",
         AppStrings.TOTAL_INCOME to "収入合計",
         AppStrings.MONTHLY_BUDGET to "月間予算",
+        AppStrings.ANNUAL_BUDGET to "年次予算",
         AppStrings.USED_BUDGET to "使用済み",
         AppStrings.OVER_BUDGET to "予算超過",
         AppStrings.BUDGET_CENTER_TITLE to "カテゴリー別予算管理",
@@ -702,6 +727,10 @@ object ExpenseStrings {
         AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE to "口座を削除",
         AppStrings.DELETE_ACCOUNT_CONFIRM_DESC to "この口座を削除しますか？過去の取引履歴には影響しません。",
         AppStrings.SELECT_MONTH_DIALOG to "年月を選択",
+        AppStrings.SELECT_YEAR_TITLE to "年を選択",
+        AppStrings.BACK_TO_MONTHS to "月に戻る",
+        AppStrings.VIEW_FULL_YEAR to "年間",
+        AppStrings.JUMP_TO_THIS_YEAR to "今年に移動",
         AppStrings.ABOUT_APP to "アプリについて",
         AppStrings.CHECK_UPDATE to "アップデートを確認",
         AppStrings.CHECK_UPDATE_DESC to "Google Playで最新バージョンを確認・更新",
@@ -855,6 +884,13 @@ object ExpenseStrings {
         AppStrings.APM_BTN_CLEAR to "消去",
         AppStrings.APM_BTN_EXPORT to "出力",
         AppStrings.APM_EMPTY_LOGS to "一致するログはありません",
-        AppStrings.APM_SHARE_TITLE to "APM ログを共有"
+        AppStrings.APM_SHARE_TITLE to "APM ログを共有",
+        AppStrings.PERIOD_MONTH to "月別",
+        AppStrings.PERIOD_YEAR to "年別",
+        AppStrings.TREND_YEAR_MONTHLY to "年間月別推移",
+        AppStrings.FILTER_ANNUAL_TAG to "%d年 · %s",
+        AppStrings.STATS_YEAR_FORMAT to "%d年",
+        AppStrings.STATS_MONTH_AVG_EXPENSE to "月平均支出",
+        AppStrings.STATS_MONTH_AVG_INCOME to "月平均収入"
     )
 }

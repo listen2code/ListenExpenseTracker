@@ -35,36 +35,55 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionsEffects(
     viewModel: TransactionsViewModel?,
-    pagerState: PagerState,
+    monthPagerState: PagerState,
+    yearPagerState: PagerState,
     listState: LazyListState,
     groupedTransactions: Map<String, List<TransactionEntity>>,
     selectedMonthOffset: Int,
+    selectedYearOffset: Int,
     onIntent: (TransactionsIntent) -> Unit
 ) {
     // 使用 rememberUpdatedState 保持长协程引用最新状态，避免 LaunchedEffect 因参数变动频繁重启
     val currentGroupedTransactions by rememberUpdatedState(groupedTransactions)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
+    val currentYearOffset by rememberUpdatedState(selectedYearOffset)
 
-    LaunchedEffect(viewModel, pagerState) {
-        // 任务 1：监听外部月份变更并同步对齐 Pager（Tab 切换、分类联动、弹窗选月等）
+    LaunchedEffect(viewModel, monthPagerState, yearPagerState) {
+        // 任务 1：监听外部月份变更并同步对齐 Pager
         launch {
             snapshotFlow { currentMonthOffset }.collectLatest { offset ->
                 val targetPage = PAGER_BASE_INDEX + offset
-                if (pagerState.currentPage != targetPage) {
-                    pagerState.scrollToPage(targetPage)
+                if (monthPagerState.currentPage != targetPage) {
+                    monthPagerState.scrollToPage(targetPage)
+                }
+            }
+        }
+
+        // 任务 2：监听外部年份变更并同步对齐 Pager
+        launch {
+            snapshotFlow { currentYearOffset }.collectLatest { offset ->
+                val targetPage = PAGER_BASE_INDEX + offset
+                if (yearPagerState.currentPage != targetPage) {
+                    yearPagerState.scrollToPage(targetPage)
                 }
             }
         }
 
         if (viewModel != null) {
-            // 任务 2：监听 ViewModel 发射的单次 UI 副作用（滚动定位等）
+            // 任务 3：监听 ViewModel 发射的单次 UI 副作用（滚动定位等）
             launch {
                 viewModel.viewEffect.filterIsInstance<TransactionsEffect>().collectLatest { effect ->
                     when (effect) {
                         is TransactionsEffect.ScrollToMonth -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
-                            if (pagerState.currentPage != targetPage) {
-                                pagerState.scrollToPage(targetPage)
+                            if (monthPagerState.currentPage != targetPage) {
+                                monthPagerState.scrollToPage(targetPage)
+                            }
+                        }
+                        is TransactionsEffect.ScrollToYear -> {
+                            val targetPage = PAGER_BASE_INDEX + effect.offset
+                            if (yearPagerState.currentPage != targetPage) {
+                                yearPagerState.scrollToPage(targetPage)
                             }
                         }
                         is TransactionsEffect.ScrollToTop -> {
@@ -87,14 +106,26 @@ fun TransactionsEffects(
             }
         }
 
-        // 任务 3：将 Pager 滑动停止事件转化为 MVI Intent 同步至 ViewModel
+        // 任务 4：将月度 Pager 滑动停止事件转化为 MVI Intent 同步至 ViewModel
         launch {
-            snapshotFlow { pagerState.settledPage }
-                .drop(1) // 忽略初次创建时的第 1 次发射
+            snapshotFlow { monthPagerState.settledPage }
+                .drop(1)
                 .collect { page ->
                     val offset = page - PAGER_BASE_INDEX
                     if (offset != currentMonthOffset) {
                         onIntent(TransactionsIntent.SetMonthOffset(offset))
+                    }
+                }
+        }
+
+        // 任务 5：将年度 Pager 滑动停止事件转化为 MVI Intent 同步至 ViewModel
+        launch {
+            snapshotFlow { yearPagerState.settledPage }
+                .drop(1)
+                .collect { page ->
+                    val offset = page - PAGER_BASE_INDEX
+                    if (offset != currentYearOffset) {
+                        onIntent(TransactionsIntent.SetYearOffset(offset))
                     }
                 }
         }

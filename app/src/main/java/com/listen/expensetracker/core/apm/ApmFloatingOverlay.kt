@@ -175,38 +175,7 @@ fun ApmFloatingOverlay(
                     }
                 }
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shadowElevation = 8.dp,
-                    tonalElevation = 4.dp,
-                    modifier = Modifier.size(54.dp)
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                if (errorCount > 0) {
-                                    Badge(
-                                        containerColor = ExpenseRed,
-                                        contentColor = Color.White
-                                    ) {
-                                        Text(if (errorCount > 99) "99+" else "$errorCount", fontSize = 9.sp)
-                                    }
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.BugReport,
-                                contentDescription = "APM Bubble",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                    }
-                }
+                ApmBubbleContent(errorCount = errorCount)
             }
         }
 

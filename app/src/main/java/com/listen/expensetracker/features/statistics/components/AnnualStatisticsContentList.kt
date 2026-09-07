@@ -23,65 +23,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
-import com.listen.expensetracker.data.engine.FinancialInsightEngine
-import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.LineChart
 import com.listen.uicomponent.components.SurfaceCard
 import java.util.Calendar
 
 /**
- * LazyColumn Statistics Content List view for a specific month page (monthOffset).
- * Aggregates Financial Insights, Annual Overview, Donut Breakdown, Trend Line Chart, Key Metrics, and Rankings.
+ * 年度专属统计内容列表视图 (AnnualStatisticsContentList)。
+ * 聚合展示年度 12 个月收支总览看板、全年分类占比环形图、年度月别走势折线图、年度关键指标与全年分类排行。
  */
 @Composable
-fun StatisticsContentList(
+fun AnnualStatisticsContentList(
     state: StatisticsUiState,
-    monthOffset: Int,
+    yearOffset: Int,
     onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() },
-    onCategoryClick: ((categoryName: String) -> Unit)? = null,
-    onDateClick: ((day: Int, dateLabel: String) -> Unit)? = null,
+    listState: LazyListState = rememberSaveable(yearOffset, saver = LazyListState.Saver) { LazyListState() },
+    onAnnualCategoryClick: ((year: Int, categoryName: String) -> Unit)? = null,
     onTransactionClick: ((TransactionEntity) -> Unit)? = null,
-    onBudgetClick: (() -> Unit)? = null
+    onNavigateToTransactionsMonth: ((monthOffset: Int) -> Unit)? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
-    // Real-time calculation for this specific month page
-    val calc = remember(state.allTransactions, monthOffset, state.monthlyBudget, lang) {
-        TransactionCalculationEngine.filterAndCalculate(
+    // 实时计算该指定年份的所有度量指标
+    val calc = remember(state.allTransactions, yearOffset, lang) {
+        AnnualCalculationEngine.filterAndCalculateYear(
             allList = state.allTransactions,
-            currentOffset = monthOffset,
-            query = "",
-            accountFilter = "ALL",
-            budget = state.monthlyBudget,
-            sortOrder = TransactionSortOrder.DATE_DESC,
-            currencySymbol = sym,
-            lang = lang
-        )
-    }
-
-    // 智能财务诊断与环比分析洞察列表
-    val insights = remember(state.allTransactions, monthOffset, state.monthlyBudget, sym, lang) {
-        FinancialInsightEngine.generateInsights(
-            allTransactions = state.allTransactions,
-            currentOffset = monthOffset,
-            monthlyBudget = state.monthlyBudget,
-            currencySymbol = sym,
+            yearOffset = yearOffset,
             lang = lang
         )
     }
 
     val activeShares = if (isExpenseTab) calc.categoryShares else calc.incomeCategoryShares
+    val activeSegments = if (isExpenseTab) calc.progressSegments else calc.incomeProgressSegments
+    val totalAmount = if (isExpenseTab) calc.totalExpense else calc.totalIncome
 
     LazyColumn(
         state = listState,
@@ -91,66 +74,71 @@ fun StatisticsContentList(
         contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
         verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
     ) {
-        // 1. 顶部智能财务洞察卡片轮播
-        if (insights.isNotEmpty()) {
-            item(key = "financial_insights_card") {
-                InsightCarouselCard(
-                    insights = insights,
-                    lang = lang,
-                    modifier = Modifier.padding(top = AppDimens.SpaceExtraSmall),
-                    onInsightClick = { item ->
-                        if (item.isCategoryAction && item.categoryId != null) {
-                            val catName = state.allTransactions.firstOrNull { it.categoryId == item.categoryId }?.categoryName ?: item.categoryId
-                            onCategoryClick?.invoke(catName)
-                        } else if (item.isBudgetAction) {
-                            onBudgetClick?.invoke()
-                        } else if (item.targetDay != null) {
-                            // [Bugfix] 消费峰值日跳转对齐走势图逻辑，携带具体日期（如 "9月2日"）关键字精准匹配 (Rule 22)
-                            val dateLabel = item.targetDateLabel ?: run {
-                                val c = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }
-                                "${c.get(Calendar.MONTH) + 1}月${item.targetDay}日"
-                            }
-                            onDateClick?.invoke(item.targetDay, dateLabel)
-                        }
-                    }
-                )
-            }
-        }
-
-        // 2. 分类占比与比例条卡片 (Donut & Segmented Progress)
-        item(key = "donut_chart_card") {
-            StatisticsBreakdownCard(
-                calc = calc,
-                isExpenseTab = isExpenseTab,
-                monthOffset = monthOffset,
+        // 1. 全年 12 个月收支总览卡片 (作为年别视图的核心主看板)
+        item(key = "annual_overview_card") {
+            AnnualOverviewCard(
+                summaries = calc.annualSummaries,
                 currencySymbol = sym,
                 lang = lang,
                 hideAmount = state.hideAmount,
-                onCategoryClick = onCategoryClick
+                modifier = Modifier.fillMaxWidth(),
+                onNavigateToTransactionsMonth = onNavigateToTransactionsMonth?.let { cb ->
+                    { monthIndex ->
+                        val curY = Calendar.getInstance().get(Calendar.YEAR)
+                        val curM = Calendar.getInstance().get(Calendar.MONTH) + 1
+                        val targetOffset = (calc.year - curY) * 12 + (monthIndex - curM)
+                        cb(targetOffset)
+                    }
+                }
             )
         }
 
-        // 3. Month Daily Trend Line Chart (Expense Only)
-        if (isExpenseTab && calc.dailyTrendPoints.isNotEmpty()) {
-            item(key = "trend_chart_card") {
+        // 2. 全年各大分类收支占比与比例条卡片
+        item(key = "annual_donut_card") {
+            StatisticsBreakdownCard(
+                shares = activeShares,
+                segments = activeSegments,
+                totalAmount = totalAmount,
+                isExpenseTab = isExpenseTab,
+                currencySymbol = sym,
+                lang = lang,
+                hideAmount = state.hideAmount,
+                key = yearOffset,
+                onCategoryClick = onAnnualCategoryClick?.let { cb -> { cat -> cb(calc.year, cat) } }
+            )
+        }
+
+        // 3. 年度 12 个月月度支出/收入走势折线图
+        if (calc.monthlyTrendPoints.isNotEmpty()) {
+            item(key = "annual_trend_chart") {
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = AppStrings.TREND_MONTH_DAILY.tr(lang),
+                            text = AppStrings.TREND_YEAR_MONTHLY.tr(lang),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = AppDimens.SpaceSmall)
                         )
-                        val maxDailyVal = calc.dailyTrendPoints.maxOfOrNull { it.value } ?: 0.0
+                        val maxMonthlyVal = calc.monthlyTrendPoints.maxOfOrNull { it.value } ?: 0.0
                         LineChart(
-                            points = calc.dailyTrendPoints,
+                            points = calc.monthlyTrendPoints,
                             chartHeight = AppDimens.ChartHeightStandard,
                             currencySymbol = sym,
                             hideAmount = state.hideAmount,
-                            maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxDailyVal),
+                            maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxMonthlyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${calc.totalExpense.formatAmount()}",
-                            onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { day -> cb(day, pt.subLabel ?: "") } } },
+                            onTooltipClick = onNavigateToTransactionsMonth?.let { cb ->
+                                { pt ->
+                                    val monthIdx = calc.monthlyTrendPoints.indexOf(pt) + 1
+                                    if (monthIdx in 1..12) {
+                                        val curY = Calendar.getInstance().get(Calendar.YEAR)
+                                        val curM = Calendar.getInstance().get(Calendar.MONTH) + 1
+                                        val targetOffset = (calc.year - curY) * 12 + (monthIdx - curM)
+                                        cb(targetOffset)
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -158,31 +146,32 @@ fun StatisticsContentList(
             }
         }
 
-        // 4. Key Metrics Summary Card
-        item(key = "metrics_card") {
+        // 4. 年度关键指标卡片 (月均支出/收入、全年单笔极值)
+        item(key = "annual_metrics_card") {
             AnimatedContent(
                 targetState = isExpenseTab,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(200))
                 },
-                label = "MetricsTabTransition"
+                label = "AnnualMetricsTabTransition"
             ) { expenseTab ->
                 MetricsSummaryCard(
                     isExpenseTab = expenseTab,
-                    dailyAverage = if (expenseTab) calc.dailyAverageExpense else calc.dailyAverageIncome,
+                    dailyAverage = if (expenseTab) calc.monthlyAverageExpense else calc.monthlyAverageIncome,
                     maxTransaction = if (expenseTab) calc.maxExpenseTransaction else calc.maxIncomeTransaction,
                     currencySymbol = sym,
                     lang = lang,
                     modifier = Modifier.fillMaxWidth(),
+                    averageLabel = if (expenseTab) AppStrings.STATS_MONTH_AVG_EXPENSE.tr(lang) else AppStrings.STATS_MONTH_AVG_INCOME.tr(lang),
                     hideAmount = state.hideAmount,
                     onMaxTransactionClick = onTransactionClick
                 )
             }
         }
 
-        // 5. Category Breakdown Ranking List
+        // 5. 全年分类排行列表 (支持点击分类穿透至流水画面年度筛选)
         if (activeShares.isNotEmpty()) {
-            item(key = "ranking_header") {
+            item(key = "annual_ranking_header") {
                 Text(
                     text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr(lang) else AppStrings.INCOME_RANKING.tr(lang),
                     fontWeight = FontWeight.Bold,
@@ -192,7 +181,7 @@ fun StatisticsContentList(
                 )
             }
 
-            item(key = "ranking_card") {
+            item(key = "annual_ranking_card") {
                 SurfaceCard(
                     cornerRadius = AppDimens.CornerCard,
                     contentPadding = AppDimens.SpaceLarge,
@@ -207,7 +196,7 @@ fun StatisticsContentList(
                                 hideAmount = state.hideAmount,
                                 lang = lang,
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = onCategoryClick?.let { { it(item.label) } }
+                                onClick = onAnnualCategoryClick?.let { cb -> { cb(calc.year, item.label) } }
                             )
                             if (index < activeShares.lastIndex) {
                                 HorizontalDivider(

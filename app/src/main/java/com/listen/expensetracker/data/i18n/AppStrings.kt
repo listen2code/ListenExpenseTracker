@@ -15,6 +15,7 @@ object AppStrings {
     const val TOTAL_EXPENSE = "total_expense"
     const val TOTAL_INCOME = "total_income"
     const val MONTHLY_BUDGET = "monthly_budget"
+    const val ANNUAL_BUDGET = "annual_budget"
     const val USED_BUDGET = "used_budget"
     const val OVER_BUDGET = "over_budget"
     const val BUDGET_CENTER_TITLE = "budget_center_title"
@@ -178,6 +179,10 @@ object AppStrings {
     const val DELETE_ACCOUNT_CONFIRM_TITLE = "delete_account_confirm_title"
     const val DELETE_ACCOUNT_CONFIRM_DESC = "delete_account_confirm_desc"
     const val SELECT_MONTH_DIALOG = "select_month_dialog"
+    const val SELECT_YEAR_TITLE = "select_year_title"
+    const val BACK_TO_MONTHS = "back_to_months"
+    const val VIEW_FULL_YEAR = "view_full_year"
+    const val JUMP_TO_THIS_YEAR = "jump_to_this_year"
     const val CURRENCY_DIALOG_TITLE = "currency_dialog_title"
     const val CURRENCY_CURRENT = "currency_current"
     const val EDIT_TRANSACTION_TITLE = "edit_transaction_title"
@@ -312,4 +317,13 @@ object AppStrings {
     const val SECURITY_LOCKED_DESC = "security_locked_desc"
     const val SECURITY_SHAKE_TOGGLE_ON = "security_shake_toggle_on"
     const val SECURITY_SHAKE_TOGGLE_OFF = "security_shake_toggle_off"
+
+    // Period & Yearly Analytics
+    const val PERIOD_MONTH = "period_month"
+    const val PERIOD_YEAR = "period_year"
+    const val TREND_YEAR_MONTHLY = "trend_year_monthly"
+    const val FILTER_ANNUAL_TAG = "filter_annual_tag"
+    const val STATS_YEAR_FORMAT = "stats_year_format"
+    const val STATS_MONTH_AVG_EXPENSE = "stats_month_avg_expense"
+    const val STATS_MONTH_AVG_INCOME = "stats_month_avg_income"
 }

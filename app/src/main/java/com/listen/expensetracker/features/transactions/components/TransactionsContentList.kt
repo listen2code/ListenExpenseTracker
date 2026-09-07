@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.engine.AnnualTransactionEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -69,15 +70,19 @@ fun TransactionsContentList(
     monthOffset: Int,
     onIntent: (TransactionsIntent) -> Unit,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() }
+    isYearMode: Boolean = false,
+    yearOffset: Int = 0,
+    listState: LazyListState = rememberSaveable(monthOffset, yearOffset, isYearMode, saver = LazyListState.Saver) { LazyListState() }
 ) {
     val lang = state.language
     val sym = state.currencySymbol
 
-    // Calculate real-time month-specific ledger statistics for this specific page
+    // Calculate real-time ledger statistics for this specific page (month or year)
     val calc = remember(
         state.transactions,
         monthOffset,
+        yearOffset,
+        isYearMode,
         state.searchQuery,
         state.selectedAccountFilter,
         state.typeFilter,
@@ -89,21 +94,39 @@ fun TransactionsContentList(
         state.sortOrder,
         lang
     ) {
-        TransactionCalculationEngine.filterAndCalculate(
-            allList = state.transactions,
-            currentOffset = monthOffset,
-            query = state.searchQuery,
-            accountFilter = state.selectedAccountFilter,
-            budget = state.monthlyBudget,
-            sortOrder = state.sortOrder,
-            currencySymbol = sym,
-            lang = lang,
-            typeFilter = state.typeFilter,
-            selectedCategories = state.selectedCategories,
-            amountPreset = state.amountPreset,
-            customMinAmount = state.customMinAmount,
-            customMaxAmount = state.customMaxAmount
-        )
+        if (isYearMode) {
+            AnnualTransactionEngine.filterAndCalculateYearTransactions(
+                allList = state.transactions,
+                yearOffset = yearOffset,
+                query = state.searchQuery,
+                accountFilter = state.selectedAccountFilter,
+                budget = state.monthlyBudget,
+                sortOrder = state.sortOrder,
+                currencySymbol = sym,
+                lang = lang,
+                typeFilter = state.typeFilter,
+                selectedCategories = state.selectedCategories,
+                amountPreset = state.amountPreset,
+                customMinAmount = state.customMinAmount,
+                customMaxAmount = state.customMaxAmount
+            )
+        } else {
+            TransactionCalculationEngine.filterAndCalculate(
+                allList = state.transactions,
+                currentOffset = monthOffset,
+                query = state.searchQuery,
+                accountFilter = state.selectedAccountFilter,
+                budget = state.monthlyBudget,
+                sortOrder = state.sortOrder,
+                currencySymbol = sym,
+                lang = lang,
+                typeFilter = state.typeFilter,
+                selectedCategories = state.selectedCategories,
+                amountPreset = state.amountPreset,
+                customMinAmount = state.customMinAmount,
+                customMaxAmount = state.customMaxAmount
+            )
+        }
     }
 
     val groupedTransactions = remember(calc.filteredTransactions) {
@@ -134,6 +157,7 @@ fun TransactionsContentList(
                 lang = lang,
                 monthlyBudget = calc.monthlyBudget,
                 remainingBudget = calc.remainingBudget,
+                isYearMode = isYearMode,
                 onBudgetClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget)) },
                 // [Bugfix] 解决设置中关闭「手势防窥」后仍可通过双击结余卡片切换隐额模式的问题 (Rule 22)
                 // 原因分析：之前无条件传入回调，导致 BalanceOverviewCard 的 detectTapGestures(onDoubleTap) 始终挂载；
@@ -169,7 +193,7 @@ fun TransactionsContentList(
                                 CommonButton(
                                     text = AppStrings.SEED_MONTH_DEMO_DATA.tr(lang),
                                     style = CommonButtonStyle.Tonal,
-                                    onClick = { onIntent(TransactionsIntent.SeedDemoData(monthOffset)) }
+                                    onClick = { onIntent(TransactionsIntent.SeedDemoData(if (isYearMode) 0 else monthOffset)) }
                                 )
                             }
                         } else null

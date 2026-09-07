@@ -11,9 +11,17 @@ import com.listen.uicomponent.theme.ThemeMode
 
 sealed interface StatisticsEffect : CommonUiEffect {
     data class ScrollToMonth(val offset: Int) : StatisticsEffect
+    data class ScrollToYear(val offset: Int) : StatisticsEffect
     data object ScrollToTop : StatisticsEffect
 }
 
+/**
+ * 统计时间周期维度枚举 (按月 / 按年)。
+ */
+enum class StatisticsPeriod {
+    MONTH, // 按月视图
+    YEAR   // 按年视图
+}
 
 /**
  * Immutable UI State representing the multi-dimensional statistics and financial analytics presentation.
@@ -38,8 +46,11 @@ data class StatisticsUiState(
     val maxExpenseTransaction: TransactionEntity? = null,
     val maxIncomeTransaction: TransactionEntity? = null,
     val statisticsTab: StatisticsTab = StatisticsTab.EXPENSE,
+    val period: StatisticsPeriod = StatisticsPeriod.MONTH,
     val selectedMonthOffset: Int = 0,
     val monthTitle: String = "本月",
+    val selectedYearOffset: Int = 0,
+    val yearTitle: String = "今年",
     val currencySymbol: String = "￥",
     val language: String = "zh",
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -51,10 +62,6 @@ data class StatisticsUiState(
 
 /**
  * 统计分析专属类型安全 Tab 标签枚举 (StatisticsTab)。
- *
- * 类型安全枚举规范：
- * 1. 严格遵守 PROMPTS.md Rule 17，彻底杜绝 `"EXPENSE"` 与 `"INCOME"` 字符串直接在 UI 与 State 中流转。
- * 2. 赋予编译器完整的类型检查能力，结合 `when (tab)` 表达式可享受穷举安全性（Exhaustive Check），新增 Tab 时未处理的分支会触发编译报错，避免隐蔽 Bug。
  */
 enum class StatisticsTab {
     EXPENSE, // 支出分析维度
@@ -65,8 +72,12 @@ enum class StatisticsTab {
  * User Intents for Statistics feature.
  */
 sealed interface StatisticsIntent {
+    data class ChangePeriod(val period: StatisticsPeriod) : StatisticsIntent
     data class ChangeMonthOffset(val offsetDelta: Int) : StatisticsIntent
     data class SetMonthOffset(val offset: Int) : StatisticsIntent
+    data class ChangeYearOffset(val offsetDelta: Int) : StatisticsIntent
+    data class SetYearOffset(val offset: Int) : StatisticsIntent
+    data class SelectYear(val offset: Int) : StatisticsIntent
     data class ChangeStatisticsTab(val tab: StatisticsTab) : StatisticsIntent
     data class ToggleHideAmount(val hide: Boolean) : StatisticsIntent
     data object OpenMonthPicker : StatisticsIntent
@@ -74,4 +85,3 @@ sealed interface StatisticsIntent {
     data object ScrollToTop : StatisticsIntent
     data class SelectMonth(val offset: Int) : StatisticsIntent
 }
-

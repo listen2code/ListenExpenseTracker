@@ -39,6 +39,18 @@ class TransactionsIntentTest {
         val dialogIntent = TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction(initialCategoryId = "c_food"))
         assertEquals(TransactionsDialog.AddTransaction(initialCategoryId = "c_food"), dialogIntent.dialog)
 
+        val periodIntent = TransactionsIntent.ChangePeriod(TransactionPeriod.YEAR)
+        assertEquals(TransactionPeriod.YEAR, periodIntent.period)
+
+        val yearOffsetIntent = TransactionsIntent.ChangeYearOffset(-1)
+        assertEquals(-1, yearOffsetIntent.offsetDelta)
+
+        val setYearIntent = TransactionsIntent.SetYearOffset(1)
+        assertEquals(1, setYearIntent.offset)
+
+        val selectYearIntent = TransactionsIntent.SelectYear(2)
+        assertEquals(2, selectYearIntent.offset)
+
         val appearIntent = TransactionsIntent.ScreenAppear
         val disappearIntent = TransactionsIntent.ScreenDisappear
         assertTrue(appearIntent is TransactionsIntent)

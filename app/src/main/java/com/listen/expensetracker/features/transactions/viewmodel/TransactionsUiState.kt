@@ -10,6 +10,7 @@ import com.listen.uicomponent.theme.ThemeMode
 
 sealed interface TransactionsEffect : CommonUiEffect {
     data class ScrollToMonth(val offset: Int) : TransactionsEffect
+    data class ScrollToYear(val offset: Int) : TransactionsEffect
     data object ScrollToTop : TransactionsEffect
     data class ScrollToTransaction(val txId: String) : TransactionsEffect
     data class ScrollToDay(val day: Int) : TransactionsEffect
@@ -44,6 +45,11 @@ sealed interface TransactionsDialog {
 }
 
 /**
+ * 流水展示时间维度周期枚举 (月 / 年)。
+ */
+enum class TransactionPeriod { MONTH, YEAR }
+
+/**
  * Immutable UI State representing ledger transactions, month grouping, search & filters.
  */
 data class TransactionsUiState(
@@ -65,8 +71,11 @@ data class TransactionsUiState(
     val amountPreset: AmountFilterPreset = AmountFilterPreset.ALL,
     val customMinAmount: Double? = null,
     val customMaxAmount: Double? = null,
+    val period: TransactionPeriod = TransactionPeriod.MONTH,
     val selectedMonthOffset: Int = 0,
     val monthTitle: String = "本月",
+    val selectedYearOffset: Int = 0,
+    val yearTitle: String = "今年",
     val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
     val currencySymbol: String = "￥",
     val language: String = "zh",
@@ -75,6 +84,7 @@ data class TransactionsUiState(
     val activeDialog: TransactionsDialog? = null,
     val isLoading: Boolean = false,
     val isDeveloperMode: Boolean = false,
+    val activeAnnualFilter: AnnualFilter? = null,
     val shakeToHideBalanceEnabled: Boolean = true
 ) {
     val categoryFilter: String
@@ -87,12 +97,22 @@ data class TransactionsUiState(
             if (selectedCategories.isNotEmpty()) count++
             if (amountPreset != AmountFilterPreset.ALL) count++
             if (sortOrder != TransactionSortOrder.DATE_DESC) count++
+            if (activeAnnualFilter != null) count++
             return count
         }
 
     val hasActiveFilters: Boolean
-        get() = activeFilterCount > 0 || searchQuery.isNotBlank() || selectedAccountFilter != "ALL"
+        get() = activeFilterCount > 0 || searchQuery.isNotBlank() || selectedAccountFilter != "ALL" || activeAnnualFilter != null
 }
+
+/**
+ * 跨年度临时分类过滤模型。
+ */
+data class AnnualFilter(
+    val year: Int,
+    val categoryName: String,
+    val categoryId: String? = null
+)
 
 /**
  * User Intents for Transactions Feature.
@@ -116,13 +136,19 @@ sealed interface TransactionsIntent {
     data class ToggleHideBalance(val hide: Boolean) : TransactionsIntent
     data class SearchQueryChange(val query: String) : TransactionsIntent
     data class FilterAccountChange(val accountType: String) : TransactionsIntent
+    data class ChangePeriod(val period: TransactionPeriod) : TransactionsIntent
     data class ChangeMonthOffset(val offsetDelta: Int) : TransactionsIntent
     data class SetMonthOffset(val offset: Int) : TransactionsIntent
+    data class ChangeYearOffset(val offsetDelta: Int) : TransactionsIntent
+    data class SetYearOffset(val offset: Int) : TransactionsIntent
+    data class SelectYear(val offset: Int) : TransactionsIntent
     data class ChangeSortOrder(val order: TransactionSortOrder) : TransactionsIntent
     data class OpenDialog(val dialog: TransactionsDialog) : TransactionsIntent
     data object DismissDialog : TransactionsIntent
     data class SeedDemoData(val monthOffset: Int) : TransactionsIntent
     data class FilterByCategory(val categoryName: String, val monthOffset: Int) : TransactionsIntent
+    data class FilterByAnnualCategory(val year: Int, val categoryName: String) : TransactionsIntent
+    data object ClearAnnualFilter : TransactionsIntent
     data class FilterByDate(val monthOffset: Int, val day: Int, val dateLabel: String? = null) : TransactionsIntent
     data class FilterByTransaction(val monthOffset: Int, val transactionId: String, val day: Int, val amount: Double? = null) : TransactionsIntent
     data object ScrollToTop : TransactionsIntent

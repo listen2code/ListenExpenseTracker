@@ -36,6 +36,9 @@ class TransactionsUiStateTest {
         assertEquals(ThemeMode.SYSTEM, state.themeMode)
         assertEquals(AccentColor.EMERALD, state.accentColor)
         assertEquals(TransactionSortOrder.DATE_DESC, state.sortOrder)
+        assertEquals(com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod.MONTH, state.period)
+        assertEquals(0, state.selectedYearOffset)
+        assertEquals("今年", state.yearTitle)
     }
 
     @Test

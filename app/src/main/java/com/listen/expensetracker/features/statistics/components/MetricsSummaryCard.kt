@@ -46,6 +46,7 @@ fun MetricsSummaryCard(
     currencySymbol: String,
     lang: String,
     modifier: Modifier = Modifier,
+    averageLabel: String? = null,
     hideAmount: Boolean = false,
     onMaxTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
@@ -60,10 +61,10 @@ fun MetricsSummaryCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Daily Average
+            // Daily / Monthly Average
             Column {
                 Text(
-                    text = if (isExpenseTab) AppStrings.DAILY_AVERAGE_EXPENSE.tr(lang) else AppStrings.DAILY_AVERAGE_INCOME.tr(lang),
+                    text = averageLabel ?: if (isExpenseTab) AppStrings.DAILY_AVERAGE_EXPENSE.tr(lang) else AppStrings.DAILY_AVERAGE_INCOME.tr(lang),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -95,6 +95,9 @@ fun App(
                         onNavigateToTransactions = { monthOffset, categoryName ->
                             appState.navigateToTransactionsCategory(categoryName, monthOffset)
                         },
+                        onNavigateToTransactionsAnnualCategory = { year, categoryName ->
+                            appState.navigateToTransactionsAnnualCategory(year, categoryName)
+                        },
                         onNavigateToTransactionsDate = { monthOffset, day, dateLabel ->
                             appState.navigateToTransactionsDate(monthOffset, day, dateLabel)
                         },
@@ -103,6 +106,9 @@ fun App(
                         },
                         onNavigateToBudget = { monthOffset ->
                             appState.navigateToBudgetAdjustment(monthOffset)
+                        },
+                        onNavigateToTransactionsMonth = { monthOffset ->
+                            appState.navigateToTransactionsMonth(monthOffset)
                         },
                         modifier = screenModifier
                     )

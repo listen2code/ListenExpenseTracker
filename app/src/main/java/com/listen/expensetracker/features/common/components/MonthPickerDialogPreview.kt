@@ -14,7 +14,7 @@ fun MonthPickerDialogPreview() {
     ExpenseStrings.init()
     ListenTheme {
         MonthPickerDialog(
-            currentOffset = 0,
+            currentMonthOffset = 0,
             onOffsetSelected = {},
             onDismiss = {},
             lang = "zh"

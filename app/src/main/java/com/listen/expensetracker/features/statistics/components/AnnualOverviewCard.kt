@@ -1,8 +1,13 @@
 package com.listen.expensetracker.features.statistics.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +29,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +49,7 @@ import com.listen.uicomponent.components.SurfaceCard
 
 /**
  * 年度 12 个月收支总览卡片 (AnnualOverviewCard)。
- * 呈现 12 个月的月度双柱收支对比与净结余健康度，支持轻触具体月份快速联动下钻。
+ * 呈现 12 个月的月度双柱收支对比与净结余健康度，支持轻触具体月份高亮并展示详情。
  */
 @Composable
 fun AnnualOverviewCard(
@@ -50,7 +59,8 @@ fun AnnualOverviewCard(
     lang: String = "zh",
     hideAmount: Boolean = false,
     currentSelectedMonth: Int? = null,
-    onMonthClick: ((monthIndex: Int) -> Unit)? = null
+    onMonthClick: ((monthIndex: Int) -> Unit)? = null,
+    onNavigateToTransactionsMonth: ((monthIndex: Int) -> Unit)? = null
 ) {
     if (summaries.isEmpty()) return
 
@@ -61,11 +71,12 @@ fun AnnualOverviewCard(
     val animProgress = remember { Animatable(0f) }
     LaunchedEffect(summaries) {
         animProgress.snapTo(0f)
-        animProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
-        )
+        animProgress.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
     }
+
+    var internalSelectedMonth by rememberSaveable { mutableStateOf<Int?>(null) }
+    val activeSelectedMonth = currentSelectedMonth ?: internalSelectedMonth
+    val selectedSummary = summaries.firstOrNull { it.monthIndex == activeSelectedMonth }
 
     SurfaceCard(
         modifier = modifier.fillMaxWidth(),
@@ -73,7 +84,6 @@ fun AnnualOverviewCard(
         contentPadding = AppDimens.SpaceLarge
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // 1. 标题行与图例说明
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,102 +107,100 @@ fun AnnualOverviewCard(
                     )
                 }
 
-                // 图例: 支出(红) vs 收入(绿)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFEF4444))
-                        )
-                        Text(
-                            text = AppStrings.TYPE_EXPENSE.tr(lang),
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF10B981))
-                        )
-                        Text(
-                            text = AppStrings.TYPE_INCOME.tr(lang),
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    LegendItem(color = Color(0xFFEF4444), label = AppStrings.TYPE_EXPENSE.tr(lang))
+                    LegendItem(color = Color(0xFF10B981), label = AppStrings.TYPE_INCOME.tr(lang))
                 }
             }
 
             Spacer(modifier = Modifier.height(AppDimens.SpaceLarge))
 
-            // 2. 12 个月收支双柱图轨道
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
                 summaries.forEach { item ->
-                    val isCurrent = currentSelectedMonth == item.monthIndex
+                    val isSelected = activeSelectedMonth == item.monthIndex
                     AnnualBarColumn(
                         item = item,
                         maxVal = maxVal,
                         animRatio = animProgress.value,
-                        isCurrent = isCurrent,
-                        onClick = onMonthClick?.let { { it(item.monthIndex) } },
+                        isSelected = isSelected,
+                        onClick = {
+                            internalSelectedMonth = if (activeSelectedMonth == item.monthIndex) null else item.monthIndex
+                            onMonthClick?.invoke(item.monthIndex)
+                        },
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = selectedSummary != null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                if (selectedSummary != null) {
+                    Column {
+                        Spacer(modifier = Modifier.height(AppDimens.SpaceMedium))
+                        AnnualOverviewMonthDetail(
+                            summary = selectedSummary,
+                            currencySymbol = currencySymbol,
+                            hideAmount = hideAmount,
+                            lang = lang,
+                            onViewTransactions = onNavigateToTransactionsMonth?.let { cb ->
+                                { cb(selectedSummary.monthIndex) }
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * 单月双轨柱状图列
- */
+@Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
+        Text(text = label, fontSize = AppDimens.TextMicro, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
 @Composable
 private fun AnnualBarColumn(
     item: AnnualMonthSummary,
     maxVal: Double,
     animRatio: Float,
-    isCurrent: Boolean,
+    isSelected: Boolean,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
     val trackHeight = 72.dp
     val expRatio = if (item.totalExpense > 0) ((item.totalExpense / maxVal) * animRatio).coerceIn(0.08, 1.0) else 0.0
     val incRatio = if (item.totalIncome > 0) ((item.totalIncome / maxVal) * animRatio).coerceIn(0.08, 1.0) else 0.0
+    val colBg = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else Color.Transparent
 
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(AppDimens.CornerButton))
+            .background(colBg)
             .clickable(enabled = onClick != null) { onClick?.invoke() }
-            .padding(horizontal = 1.dp),
+            .padding(horizontal = 1.dp, vertical = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 柱状容器
         Row(
-            modifier = Modifier
-                .height(trackHeight)
-                .fillMaxWidth(),
+            modifier = Modifier.height(trackHeight).fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom
         ) {
-            // 支出柱 (红)
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -200,10 +208,7 @@ private fun AnnualBarColumn(
                     .clip(RoundedCornerShape(2.dp))
                     .background(if (item.totalExpense > 0) Color(0xFFEF4444) else Color.Transparent)
             )
-
             Spacer(modifier = Modifier.width(2.dp))
-
-            // 收入柱 (绿)
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -215,12 +220,11 @@ private fun AnnualBarColumn(
 
         Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
 
-        // 月份标签
         Text(
             text = item.monthLabel,
             fontSize = AppDimens.TextMicro,
-            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-            color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             maxLines = 1
         )

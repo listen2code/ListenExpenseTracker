@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.transactions.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,6 +25,7 @@ import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.transactions.components.TransactionsContentList
 import com.listen.expensetracker.features.transactions.components.TransactionsDialogHost
 import com.listen.expensetracker.features.transactions.components.TransactionsHeaderFilters
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
@@ -54,12 +56,20 @@ fun TransactionsScreen(
     BaseScreenScaffold(
         titleSlot = {
             MonthNavigationCapsule(
-                monthTitle = holder.currentMonthTitle,
+                monthTitle = if (state.period == TransactionPeriod.MONTH) holder.currentMonthTitle else holder.currentYearTitle,
                 onPreviousMonth = {
-                    onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                    if (state.period == TransactionPeriod.MONTH) {
+                        onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                    } else {
+                        onIntent(TransactionsIntent.SelectYear(holder.currentYearOffset - 1))
+                    }
                 },
                 onNextMonth = {
-                    onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                    if (state.period == TransactionPeriod.MONTH) {
+                        onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                    } else {
+                        onIntent(TransactionsIntent.SelectYear(holder.currentYearOffset + 1))
+                    }
                 },
                 onTitleClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthPicker)) }
             )
@@ -98,18 +108,37 @@ fun TransactionsScreen(
                     .padding(bottom = AppDimens.SpaceSmall)
             )
 
-            // 2. 水平双向无限滑动分页器 (HorizontalPager)
-            HorizontalPager(
-                state = holder.pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                val pageOffset = page - PAGER_BASE_INDEX
-                TransactionsContentList(
-                    state = state,
-                    monthOffset = pageOffset,
-                    onIntent = onIntent,
-                    listState = if (page == holder.pagerState.currentPage) holder.listState else rememberLazyListState()
-                )
+            // 3. 水平双向无限滑动分页器 (HorizontalPager)
+            if (state.period == TransactionPeriod.MONTH) {
+                HorizontalPager(
+                    state = holder.monthPagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val pageOffset = page - PAGER_BASE_INDEX
+                    TransactionsContentList(
+                        state = state,
+                        monthOffset = pageOffset,
+                        isYearMode = false,
+                        yearOffset = 0,
+                        onIntent = onIntent,
+                        listState = if (page == holder.monthPagerState.currentPage) holder.listState else rememberLazyListState()
+                    )
+                }
+            } else {
+                HorizontalPager(
+                    state = holder.yearPagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val pageOffset = page - PAGER_BASE_INDEX
+                    TransactionsContentList(
+                        state = state,
+                        monthOffset = 0,
+                        isYearMode = true,
+                        yearOffset = pageOffset,
+                        onIntent = onIntent,
+                        listState = if (page == holder.yearPagerState.currentPage) holder.listState else rememberLazyListState()
+                    )
+                }
             }
         }
     }

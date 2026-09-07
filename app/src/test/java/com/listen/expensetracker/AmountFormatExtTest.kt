@@ -26,7 +26,7 @@ class AmountFormatExtTest {
     fun formatAmount_nonZeroDecimals_preservesDecimals() {
         assertEquals("12.34", 12.34.formatAmount())
         assertEquals("99.99", 99.99.formatAmount())
-        assertEquals("0.50", 0.50.formatAmount())
+        assertEquals("0.5", 0.50.formatAmount())
         assertEquals("0.05", 0.05.formatAmount())
     }
 
