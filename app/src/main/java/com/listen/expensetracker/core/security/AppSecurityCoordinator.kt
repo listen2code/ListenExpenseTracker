@@ -22,8 +22,21 @@ class AppSecurityCoordinator(
     var isAppLocked by mutableStateOf(false)
         private set
 
-    private var backgroundTimestamp = SystemClock.elapsedRealtime()
+    private var backgroundTimestamp = 0L
+    private var isAuthenticating = false
     private val shakeDetector = ShakeDetector(onShake = onShakeTriggered)
+
+    /**
+     * 在 Activity onCreate 阶段快速同步检测是否需要初始锁定
+     */
+    fun checkInitialLock(activity: FragmentActivity) {
+        val enabled = SecurityPreferences.isBiometricEnabled(activity)
+        val supported = BiometricSecurityManager.isBiometricOrCredentialAvailable(activity)
+        if (enabled && supported) {
+            isAppLocked = true
+            applyRecentAppsShield(activity, true)
+        }
+    }
 
     /**
      * 响应式调度窗口安全标志 (FLAG_SECURE)：
@@ -76,7 +89,11 @@ class AppSecurityCoordinator(
     ) {
         applyRecentAppsShield(activity, recentAppsShield)
         if (biometricEnabled && isBioSupported) {
-            val elapsedSeconds = (SystemClock.elapsedRealtime() - backgroundTimestamp) / 1000
+            val elapsedSeconds = if (backgroundTimestamp == 0L) {
+                Long.MAX_VALUE / 1000
+            } else {
+                (SystemClock.elapsedRealtime() - backgroundTimestamp) / 1000
+            }
             if (elapsedSeconds >= timeoutSeconds) {
                 isAppLocked = true
                 applyRecentAppsShield(activity, recentAppsShield)
@@ -89,13 +106,20 @@ class AppSecurityCoordinator(
      * 调起系统生物识别/设备密码验证
      */
     fun promptUnlock(activity: FragmentActivity, lang: String, recentAppsShield: Boolean = true) {
+        if (isAuthenticating) return
+        isAuthenticating = true
         BiometricSecurityManager.promptUnlock(
             activity = activity,
             title = AppStrings.SECURITY_UNLOCK_PROMPT_TITLE.tr(lang),
             subtitle = AppStrings.SECURITY_UNLOCK_PROMPT_SUBTITLE.tr(lang),
             onSuccess = {
+                isAuthenticating = false
                 isAppLocked = false
+                backgroundTimestamp = SystemClock.elapsedRealtime()
                 applyRecentAppsShield(activity, recentAppsShield)
+            },
+            onError = { _, _ ->
+                isAuthenticating = false
             }
         )
     }

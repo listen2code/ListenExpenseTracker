@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.data.pref.archDataStore
+import com.listen.expensetracker.core.security.SecurityPreferences
 import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.uicomponent.theme.AccentColor
@@ -60,8 +61,12 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             autoBackupWifiOnly = prefs[KEY_AUTO_BACKUP_WIFI_ONLY] ?: false,
             isDeveloperMode = prefs[KEY_DEVELOPER_MODE] ?: false,
             hideBalance = prefs[KEY_HIDE_BALANCE] ?: false,
-            biometricLockEnabled = prefs[KEY_BIOMETRIC_LOCK_ENABLED] ?: false,
-            lockTimeoutSeconds = prefs[KEY_LOCK_TIMEOUT_SECONDS] ?: 0,
+            biometricLockEnabled = (prefs[KEY_BIOMETRIC_LOCK_ENABLED] ?: false).also {
+                SecurityPreferences.setBiometricEnabled(context, it)
+            },
+            lockTimeoutSeconds = (prefs[KEY_LOCK_TIMEOUT_SECONDS] ?: 0).also {
+                SecurityPreferences.setLockTimeoutSeconds(context, it)
+            },
             recentAppsShieldEnabled = prefs[KEY_RECENT_APPS_SHIELD_ENABLED] ?: true,
             shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true,
             apmFloatingWindowEnabled = prefs[KEY_APM_FLOATING_WINDOW_ENABLED] ?: false
@@ -133,10 +138,12 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
     }
 
     suspend fun setBiometricLockEnabled(enabled: Boolean) {
+        SecurityPreferences.setBiometricEnabled(context, enabled)
         context.archDataStore.edit { prefs -> prefs[KEY_BIOMETRIC_LOCK_ENABLED] = enabled }
     }
 
     suspend fun setLockTimeoutSeconds(seconds: Int) {
+        SecurityPreferences.setLockTimeoutSeconds(context, seconds)
         context.archDataStore.edit { prefs -> prefs[KEY_LOCK_TIMEOUT_SECONDS] = seconds }
     }
 

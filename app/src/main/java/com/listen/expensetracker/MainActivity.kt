@@ -17,6 +17,8 @@ import com.listen.expensetracker.core.effect.CollectCommonUiEffects
 import com.listen.expensetracker.core.overlay.AppOverlayHost
 import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.BiometricLockOverlay
+import com.listen.expensetracker.core.security.BiometricSecurityManager
+import com.listen.expensetracker.core.security.SecurityPreferences
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
@@ -46,6 +48,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         ExpenseStrings.init()
         CrashHandler.init(this)
+        securityCoordinator.checkInitialLock(this)
         pendingQuickAddIntent.value = intent
 
         setContent {
@@ -61,9 +64,10 @@ class MainActivity : FragmentActivity() {
             }
 
             val currentIntent = pendingQuickAddIntent.value
-            LaunchedEffect(currentIntent) {
-                currentIntent?.let { targetIntent ->
-                    handleQuickAddIntent(targetIntent, appState)
+            val isLocked = securityCoordinator.isAppLocked
+            LaunchedEffect(currentIntent, isLocked) {
+                if (currentIntent != null && !isLocked) {
+                    handleQuickAddIntent(currentIntent, appState)
                     pendingQuickAddIntent.value = null
                 }
             }
@@ -83,17 +87,23 @@ class MainActivity : FragmentActivity() {
                 accentColor = settingsState.accentColor
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    App(appState = appState)
-
-                    // Top-level Declarative Overlay Host (0 boolean flags, 0 raw ifs)
-                    AppOverlayHost(appState = appState)
-
-                    // 生物识别全屏锁屏遮罩层
+                    // 生物识别全屏锁屏遮罩层（锁定状态下完全隔离主界面与所有子窗口弹窗）
                     if (securityCoordinator.isAppLocked) {
                         BiometricLockOverlay(
-                            onUnlockRequest = { securityCoordinator.promptUnlock(this@MainActivity, settingsState.language, settingsState.recentAppsShieldEnabled) },
+                            onUnlockRequest = {
+                                securityCoordinator.promptUnlock(
+                                    this@MainActivity,
+                                    settingsState.language,
+                                    settingsState.recentAppsShieldEnabled
+                                )
+                            },
                             lang = settingsState.language
                         )
+                    } else {
+                        App(appState = appState)
+
+                        // Top-level Declarative Overlay Host (0 boolean flags, 0 raw ifs)
+                        AppOverlayHost(appState = appState)
                     }
                 }
             }
@@ -103,9 +113,13 @@ class MainActivity : FragmentActivity() {
     override fun onStart() {
         super.onStart()
         val s = activeAppState?.settingsViewModel?.viewState?.value
-        if (s != null) {
-            securityCoordinator.onStart(this, s.biometricLockEnabled, s.isBiometricSupported, s.lockTimeoutSeconds, s.language, s.recentAppsShieldEnabled)
-        }
+        val enabled = s?.biometricLockEnabled ?: SecurityPreferences.isBiometricEnabled(this)
+        val supported = s?.isBiometricSupported ?: BiometricSecurityManager.isBiometricOrCredentialAvailable(this)
+        val timeout = s?.lockTimeoutSeconds ?: SecurityPreferences.getLockTimeoutSeconds(this)
+        val lang = s?.language ?: "zh"
+        val shield = s?.recentAppsShieldEnabled ?: true
+
+        securityCoordinator.onStart(this, enabled, supported, timeout, lang, shield)
     }
 
     override fun onResume() {
@@ -131,6 +145,9 @@ class MainActivity : FragmentActivity() {
     override fun onStop() {
         super.onStop()
         securityCoordinator.onStop()
+        if (securityCoordinator.isAppLocked) {
+            pendingQuickAddIntent.value = null
+        }
         GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
     }
 
