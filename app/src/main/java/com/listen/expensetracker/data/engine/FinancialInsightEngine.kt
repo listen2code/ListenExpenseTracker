@@ -7,42 +7,6 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import java.util.Calendar
 import kotlin.math.abs
 
-/**
- * 洞察严重等级枚举，对应卡片的情感化着色与优先级。
- */
-enum class InsightSeverity {
-    INFO,       // 信息提示
-    POSITIVE,   // 积极向好 (翡翠绿)
-    WARNING,    // 预警注意 (琥珀黄)
-    DANGER      // 危险超支 (珊瑚红)
-}
-
-/**
- * 智能财务洞察项领域实体。
- */
-data class FinancialInsightItem(
-    val id: String,
-    val title: String,
-    val description: String,
-    val severity: InsightSeverity,
-    val categoryId: String? = null,
-    val targetDay: Int? = null,
-    val targetDateLabel: String? = null,
-    val diffPercentage: Float? = null,
-    val isCategoryAction: Boolean = false,
-    val isBudgetAction: Boolean = false
-)
-
-/**
- * 年度单月度汇总模型。
- */
-data class AnnualMonthSummary(
-    val monthIndex: Int,
-    val monthLabel: String,
-    val totalExpense: Double,
-    val totalIncome: Double,
-    val netBalance: Double
-)
 
 /**
  * 智能财务洞察与深度环比诊断核心引擎 (FinancialInsightEngine)。
@@ -62,13 +26,21 @@ object FinancialInsightEngine {
         val (currentStart, currentEnd, _) = TransactionCalculationEngine.getMonthRangeAndTitle(currentOffset, lang)
         val (prevStart, prevEnd, _) = TransactionCalculationEngine.getMonthRangeAndTitle(currentOffset - 1, lang)
 
-        val currentExpenses = allTransactions.filter { it.timestamp in currentStart..currentEnd && it.type == TransactionType.EXPENSE }
+        val currentMonthTxs = allTransactions.filter { it.timestamp in currentStart..currentEnd }
+        val currentExpenses = currentMonthTxs.filter { it.type == TransactionType.EXPENSE }
+        val currentIncomes = currentMonthTxs.filter { it.type == TransactionType.INCOME }
         val prevExpenses = allTransactions.filter { it.timestamp in prevStart..prevEnd && it.type == TransactionType.EXPENSE }
 
         val currentTotal = currentExpenses.sumOf { it.amount }
         val prevTotal = prevExpenses.sumOf { it.amount }
+        val currentIncomeTotal = currentIncomes.sumOf { it.amount }
 
-        // 1. 月环比总支出对比 (MoM Total Expense Analysis)
+        // 1. 收支结余率与赤字分析 (Savings Rate & Surplus/Deficit)
+        FinancialInsightDetectors.detectSavingsRate(currentIncomeTotal, currentTotal, currencySymbol, lang)?.let {
+            insights.add(it)
+        }
+
+        // 2. 月环比总支出对比 (MoM Total Expense Analysis)
         if (prevTotal > 0 && currentTotal > 0) {
             val diff = (currentTotal - prevTotal) / prevTotal
             val pctStr = "%.1f".format(abs(diff * 100))
@@ -95,7 +67,7 @@ object FinancialInsightEngine {
             }
         }
 
-        // 2. 预算消耗速率预测 (Burn Rate Predictor)
+        // 3. 预算消耗速率预测与节流表现 (Burn Rate & Frugal Progress)
         val nowCal = Calendar.getInstance()
         val currentDay = nowCal.get(Calendar.DAY_OF_MONTH)
         val maxDays = nowCal.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -108,34 +80,57 @@ object FinancialInsightEngine {
                     FinancialInsightItem(
                         id = "insight_burn_rate",
                         title = AppStrings.INSIGHT_BURN_RATE_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_BURN_RATE_DESC.tr(lang).format(
-                            "$currencySymbol${dailyAvg.formatAmount()}",
-                            exhaustedDay
-                        ),
+                        description = AppStrings.INSIGHT_BURN_RATE_DESC.tr(lang).format("$currencySymbol${dailyAvg.formatAmount()}", exhaustedDay),
                         severity = InsightSeverity.WARNING,
-                        isBudgetAction = true // 未来预测值不触发日期过滤，点击唤起月预算管理 (Rule 22)
+                        isBudgetAction = true
+                    )
+                )
+            } else if (currentDay >= 8 && estimatedTotal <= monthlyBudget * 0.70 && currentTotal < monthlyBudget) {
+                insights.add(
+                    FinancialInsightItem(
+                        id = "insight_budget_frugal",
+                        title = AppStrings.INSIGHT_BUDGET_FRUGAL_TITLE.tr(lang),
+                        description = AppStrings.INSIGHT_BUDGET_FRUGAL_DESC.tr(lang).format(
+                            (currentDay * 100) / maxDays,
+                            "%.1f".format((currentTotal / monthlyBudget) * 100)
+                        ),
+                        severity = InsightSeverity.POSITIVE,
+                        isBudgetAction = true
                     )
                 )
             }
         }
 
-        // 3. 突发分类异动排查 (Category Spike Drilldown)
+        // 4. 单项分类过度倾斜检测 (Category Dominance, >= 45%)
         val currentCatMap = currentExpenses.groupBy { it.categoryId }.mapValues { it.value.sumOf { tx -> tx.amount } }
         val prevCatMap = prevExpenses.groupBy { it.categoryId }.mapValues { it.value.sumOf { tx -> tx.amount } }
+        if (currentTotal > 100.0 && currentExpenses.size >= 3) {
+            val dominant = currentCatMap.maxByOrNull { it.value }
+            if (dominant != null && dominant.value >= currentTotal * 0.45) {
+                val catName = currentExpenses.firstOrNull { it.categoryId == dominant.key }?.categoryName ?: dominant.key
+                insights.add(
+                    FinancialInsightItem(
+                        id = "insight_cat_dominant_${dominant.key}",
+                        title = AppStrings.INSIGHT_CAT_DOMINANT_TITLE.tr(lang),
+                        description = AppStrings.INSIGHT_CAT_DOMINANT_DESC.tr(lang).format(catName, "%.1f".format((dominant.value / currentTotal) * 100)),
+                        severity = InsightSeverity.WARNING,
+                        categoryId = dominant.key,
+                        isCategoryAction = true
+                    )
+                )
+            }
+        }
+
+        // 5. 突发分类异动排查 (Category Spike Drilldown)
         for ((catId, amt) in currentCatMap) {
             val prevAmt = prevCatMap[catId] ?: 0.0
             if (prevAmt > 50.0 && amt > prevAmt * 1.8) {
                 val catName = currentExpenses.firstOrNull { it.categoryId == catId }?.categoryName ?: catId
-                val times = "%.1f".format(amt / prevAmt)
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_cat_jump_$catId",
                         title = AppStrings.INSIGHT_CAT_JUMP_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_CAT_JUMP_DESC.tr(lang).format(
-                            catName,
-                            times,
-                            "$currencySymbol${amt.formatAmount()}"
-                        ),
+                        description = AppStrings.INSIGHT_CAT_JUMP_DESC.tr(lang).format(catName, "%.1f".format(amt / prevAmt), "$currencySymbol${amt.formatAmount()}"),
                         severity = InsightSeverity.INFO,
                         categoryId = catId,
                         isCategoryAction = true
@@ -145,7 +140,17 @@ object FinancialInsightEngine {
             }
         }
 
-        // 4. 单日开销最大峰值检测 (Peak Spending Day)
+        // 6. 周末 vs 工作日消费偏好 (Weekend vs Weekday Shift)
+        FinancialInsightDetectors.detectWeekendSpendingShift(currentExpenses, currencySymbol, lang)?.let {
+            insights.add(it)
+        }
+
+        // 7. 高频小额支出累积 (Latte Factor)
+        FinancialInsightDetectors.detectLatteFactor(currentExpenses, currencySymbol, lang)?.let {
+            insights.add(it)
+        }
+
+        // 8. 单日开销最大峰值检测 (Peak Spending Day)
         val dayGroups = currentExpenses.groupBy {
             val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
             c.get(Calendar.DAY_OF_MONTH)
@@ -157,24 +162,25 @@ object FinancialInsightEngine {
                 val cal = Calendar.getInstance().apply { add(Calendar.MONTH, currentOffset) }
                 val month = cal.get(Calendar.MONTH) + 1
                 val peakDay = maxDayEntry.key
-                val dateLabel = "${month}月${peakDay}日"
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_peak_day",
                         title = AppStrings.INSIGHT_PEAK_DAY_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr(lang).format(
-                            peakDay,
-                            "$currencySymbol${peakDayAmount.formatAmount()}"
-                        ),
+                        description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr(lang).format(peakDay, "$currencySymbol${peakDayAmount.formatAmount()}"),
                         severity = InsightSeverity.INFO,
                         targetDay = peakDay,
-                        targetDateLabel = dateLabel
+                        targetDateLabel = "${month}月${peakDay}日"
                     )
                 )
             }
         }
 
-        // 兜底提示卡片（当月数据平稳或记录较少时）
+        // 9. 零支出自律天数达成 (No-Spend Discipline Days)
+        FinancialInsightDetectors.detectNoSpendDays(currentExpenses, currentOffset, lang)?.let {
+            insights.add(it)
+        }
+
+        // 10. 兜底提示卡片（当月数据平稳或记录较少时）
         if (insights.isEmpty()) {
             val isOver = currentTotal > monthlyBudget && monthlyBudget > 0
             val statusTitle = if (isOver) AppStrings.INSIGHT_OVER_TITLE.tr(lang) else AppStrings.INSIGHT_STEADY_TITLE.tr(lang)
@@ -201,10 +207,7 @@ object FinancialInsightEngine {
         currentOffset: Int,
         lang: String = "zh"
     ): List<AnnualMonthSummary> {
-        val cal = Calendar.getInstance().apply {
-            add(Calendar.MONTH, currentOffset)
-        }
-        val targetYear = cal.get(Calendar.YEAR)
+        val targetYear = Calendar.getInstance().apply { add(Calendar.MONTH, currentOffset) }.get(Calendar.YEAR)
         return AnnualCalculationEngine.calculateAnnualSummaries(allTransactions, targetYear, lang)
     }
 }

@@ -51,100 +51,64 @@ object DemoDataEngine {
         val cal = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }
         val maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
         val currentDay = if (monthOffset == 0) {
-            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(1, maxDay)
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH).coerceIn(8, maxDay)
         } else maxDay
 
         val generated = mutableListOf<TransactionEntity>()
 
-        // 1. 生成 1~2 笔真实收入
-        val incAmt = Random.nextInt(12000, 22000).toDouble()
-        val incCal = (cal.clone() as Calendar).apply {
-            set(Calendar.DAY_OF_MONTH, Random.nextInt(1, currentDay.coerceAtLeast(2)))
-            set(Calendar.HOUR_OF_DAY, 10); set(Calendar.MINUTE, 0)
+        // 识别当月周末与工作日分布，确保跨周期行为特征稳定
+        val checkCal = cal.clone() as Calendar
+        val weekendDays = mutableListOf<Int>()
+        val weekdayDays = mutableListOf<Int>()
+        for (d in 1..currentDay) {
+            checkCal.set(Calendar.DAY_OF_MONTH, d)
+            val dow = checkCal.get(Calendar.DAY_OF_WEEK)
+            if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) weekendDays.add(d) else weekdayDays.add(d)
         }
-        generated.add(
-            TransactionEntity(
-                id = UUID.randomUUID().toString(), type = TransactionType.INCOME,
-                categoryId = "c_salary", categoryName = AppStrings.CAT_SALARY.tr(lang),
-                categoryIcon = "c_salary", categoryColorHex = "#10B981",
-                amount = incAmt, timestamp = incCal.timeInMillis,
-                note = if (lang == "zh") "月度薪资发放" else "Monthly Salary", accountType = "BANK"
-            )
-        )
+        val wDay = weekendDays.firstOrNull() ?: 1
+        val wkDay1 = weekdayDays.firstOrNull() ?: 2
+        val wkDay2 = if (weekdayDays.size > 1) weekdayDays[1] else 3
 
-        // 2. 注入针对 4 种告警状态的关键特征支出数据
-        // 特征A：单日开销最大峰值 (Peak Day: >= 35% 总支出, 如 1280 元数码配件)
-        val peakDay = if (currentDay >= 3) 2 else 1
-        val peakCal = (cal.clone() as Calendar).apply {
-            set(Calendar.DAY_OF_MONTH, peakDay); set(Calendar.HOUR_OF_DAY, 14); set(Calendar.MINUTE, 30)
-        }
-        generated.add(
-            TransactionEntity(
-                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
-                categoryId = "c_shopping", categoryName = AppStrings.CAT_SHOPPING.tr(lang),
-                categoryIcon = "c_shopping", categoryColorHex = "#EC4899",
-                amount = 1280.0, timestamp = peakCal.timeInMillis,
-                note = if (lang == "zh") "降噪无线耳机" else "Noise Canceling Earbuds", accountType = "CREDIT"
-            )
-        )
-
-        // 特征B：突发分类异动 (Category Spike: 娱乐消费达 480 元，结合上月仅 60 元触发 >1.8x)
-        val spikeDay = if (currentDay >= 4) 3 else 1
-        val spikeCal = (cal.clone() as Calendar).apply {
-            set(Calendar.DAY_OF_MONTH, spikeDay); set(Calendar.HOUR_OF_DAY, 19); set(Calendar.MINUTE, 45)
-        }
-        generated.add(
-            TransactionEntity(
-                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
-                categoryId = "c_entertainment", categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
-                categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6",
-                amount = 480.0, timestamp = spikeCal.timeInMillis,
-                note = if (lang == "zh") "演唱会门票" else "Concert Tickets", accountType = "BANK"
-            )
-        )
-
-        // 3. 生成多笔日常随机分散支出 (共 14~18 笔，保证总额约 3000~3600 元，日均偏高触发预算预警)
-        val dailyCount = Random.nextInt(12, 16)
-        for (i in 0 until dailyCount) {
-            val exp = expenseTemplates.random()
-            val amt = Random.nextInt(exp.minAmount, (exp.maxAmount / 2).coerceAtLeast(exp.minAmount + 5)).toDouble()
-            val expDay = Random.nextInt(1, (currentDay + 1).coerceAtMost(maxDay + 1))
-            val expCal = (cal.clone() as Calendar).apply {
-                set(Calendar.DAY_OF_MONTH, expDay.coerceIn(1, maxDay))
-                set(Calendar.HOUR_OF_DAY, Random.nextInt(7, 23))
-                set(Calendar.MINUTE, Random.nextInt(0, 59))
+        fun makeTx(
+            catId: String, nameKey: String, colorHex: String, amt: Double,
+            day: Int, h: Int, m: Int, note: String, isIncome: Boolean = false, acc: String = "BANK"
+        ): TransactionEntity {
+            val tCal = (cal.clone() as Calendar).apply {
+                set(Calendar.DAY_OF_MONTH, day.coerceIn(1, maxDay))
+                set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, m)
             }
-            generated.add(
-                TransactionEntity(
-                    id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
-                    categoryId = exp.categoryId, categoryName = exp.categoryNameKey.tr(lang),
-                    categoryIcon = exp.categoryId, categoryColorHex = exp.colorHex,
-                    amount = amt, timestamp = expCal.timeInMillis,
-                    note = exp.notes.random(), accountType = accounts.random()
-                )
+            return TransactionEntity(
+                id = UUID.randomUUID().toString(),
+                type = if (isIncome) TransactionType.INCOME else TransactionType.EXPENSE,
+                categoryId = catId, categoryName = nameKey.tr(lang),
+                categoryIcon = catId, categoryColorHex = colorHex,
+                amount = amt, timestamp = tCal.timeInMillis, note = note, accountType = acc
             )
         }
 
-        // 4. 生成周期订阅支出项
-        val subDay = if (currentDay >= 5) 5 else 1
-        val subCal = (cal.clone() as Calendar).apply {
-            set(Calendar.DAY_OF_MONTH, subDay); set(Calendar.HOUR_OF_DAY, 9); set(Calendar.MINUTE, 0)
-        }
-        val subNote = if (lang == "zh") "[周期] 流媒体月度订阅" else if (lang == "ja") "[周期] サブスクリプション" else "[周期] Streaming Subscription"
-        generated.add(
-            TransactionEntity(
-                id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
-                categoryId = "c_entertainment", categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang),
-                categoryIcon = "c_entertainment", categoryColorHex = "#8B5CF6",
-                amount = 45.0, timestamp = subCal.timeInMillis, note = subNote, accountType = "BANK"
-            )
-        )
+        // 1. 真实月度薪资发放 (16000元，结余率达 85% > 20%，触发 insight_savings_rate)
+        generated.add(makeTx("c_salary", AppStrings.CAT_SALARY, "#10B981", 16000.0, wkDay1, 10, 0, if (lang == "zh") "月度薪资发放" else "Monthly Salary", isIncome = true))
 
-        // 5. 跨月对比基准垫底生成：若为当月或特定月份，顺带注入上个月对比基准数据（支出总计约 1300 元）
-        // 从而直接触发 MoM 环比上涨 (+150% > 12%) 与娱乐分类突增 (> 1.8x)
-        val prevCal = Calendar.getInstance().apply {
-            add(Calendar.MONTH, monthOffset - 1)
-        }
+        // 2. 周末峰值与大额异动 (触发 insight_peak_day, insight_weekend_shift, insight_category_dominant, insight_cat_jump)
+        // 周末集中消费：数码购物 1350元 (占总支出 59% >= 45%) + 演唱会门票 480元 (较上月60元增长 8.7x > 1.8x)
+        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 1350.0, wDay, 14, 30, if (lang == "zh") "降噪无线耳机" else "Noise Canceling Earbuds", acc = "CREDIT"))
+        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 480.0, wDay, 19, 45, if (lang == "zh") "演唱会门票" else "Concert Tickets"))
+
+        // 3. 工作日日常支出与周期订阅
+        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 120.0, wkDay1, 15, 20, if (lang == "zh") "日常服饰配件" else "Apparel Accessories"))
+        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 45.0, wkDay1, 9, 0, if (lang == "zh") "[周期] 流媒体月度订阅" else "[周期] Streaming Subscription"))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 160.0, wkDay2, 19, 0, if (lang == "zh") "日式寿喜烧" else "Japanese Sukiyaki"))
+
+        // 4. 注入 6 笔 <= 35 元的高频小额支出 (触发拿铁因子 insight_latte_factor)
+        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 22.0, wkDay1, 8, 30, if (lang == "zh") "星巴克拿铁" else "Starbucks Latte", acc = "CASH"))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 28.0, wkDay1, 12, 15, if (lang == "zh") "便当午餐" else "Lunch Bento", acc = "CASH"))
+        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 6.0, wkDay1, 18, 0, if (lang == "zh") "地铁通勤" else "Subway Commute", acc = "CASH"))
+        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 18.0, wkDay2, 14, 0, if (lang == "zh") "下午茶果茶" else "Fruit Tea", acc = "CASH"))
+        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 12.0, wkDay2, 8, 45, if (lang == "zh") "公交出行" else "City Bus", acc = "CASH"))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 15.0, wkDay2, 21, 30, if (lang == "zh") "便利店零食" else "Snack", acc = "CASH"))
+
+        // 5. 跨月对比基准垫底生成：上月支出总计 1240 元，触发环比上涨 (+81.9% > 12%)
+        val prevCal = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset - 1) }
         val prevMaxDay = prevCal.getActualMaximum(Calendar.DAY_OF_MONTH)
         val prevBaselineList = listOf(
             Triple("c_food", 450.0, if (lang == "zh") "上月日常餐饮" else "Past Dining"),

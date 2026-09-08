@@ -192,14 +192,15 @@ class FinancialInsightEngineTest {
             lang = "zh"
         )
 
-        // 验证 4 种主要告警洞察是否在生成的数据中得到覆盖
-        val hasMom = insights.any { it.id.startsWith("insight_mom_") }
-        val hasSpike = insights.any { it.id.startsWith("insight_cat_jump_") }
-        val hasPeak = insights.any { it.id == "insight_peak_day" }
-
-        assertTrue("Demo data should trigger MoM insight", hasMom)
-        assertTrue("Demo data should trigger category spike insight", hasSpike)
-        assertTrue("Demo data should trigger peak day insight", hasPeak)
+        // 验证全量财务洞察在生成的数据中得到 100% 覆盖
+        assertTrue("Should trigger savings rate", insights.any { it.id == "insight_savings_rate" })
+        assertTrue("Should trigger MoM increase", insights.any { it.id == "insight_mom_increase" })
+        assertTrue("Should trigger category dominant", insights.any { it.id.startsWith("insight_cat_dominant_") })
+        assertTrue("Should trigger category spike", insights.any { it.id.startsWith("insight_cat_jump_") })
+        assertTrue("Should trigger peak day", insights.any { it.id == "insight_peak_day" })
+        assertTrue("Should trigger weekend shift", insights.any { it.id == "insight_weekend_shift" })
+        assertTrue("Should trigger latte factor", insights.any { it.id == "insight_latte_factor" })
+        assertTrue("Should trigger no spend days", insights.any { it.id == "insight_no_spend_days" })
     }
 
     @Test

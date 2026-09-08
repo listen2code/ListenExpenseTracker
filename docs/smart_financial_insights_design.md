@@ -3,170 +3,82 @@
 ## 1. 概述 (Overview)
 
 ### 1.1 背景与痛点
-现有统计图表（饼图、折线图、排行榜）能够较好呈现单月的静态收支构成，但用户无法直观了解：
+现有统计图表（饼图、折线图、排行榜）能够较好呈现单月的静态收支构成，但用户在资产管理时需要更立体的智能诊断：
 1. **跨月度开销趋势**：本月相比上月花多了还是花少了？哪个分类开销涨幅最明显？
-2. **预算消耗健康度预警**：按照目前的日常花销速度，本月什么时候会提前花光预算？
-3. **异常消费波峰**：哪一天的单日消费出现异常峰值，是什么原因引起的？
+2. **收支结余健康度**：本月储蓄率是否达标，还是已经出现超支赤字？
+3. **日常行为习惯与生活方式洞察**：周末是否发生报复性高额消费？日常高频小额「拿铁因子」日积月累消耗了多少资金？本月有多少天实现了零支出自律？
+4. **分类失衡与异常峰值**：是否有某单一分类吞噬了近半预算？哪一天发生了决定性的开销波峰？
 
 ### 1.2 核心目标
-1. **月度环比分析引擎 (MoM Comparison)**：计算总支出与各分类相比上月同期的绝对差值与百分比变动。
-2. **智能预算消耗速率预测 (Burn Rate Predictor)**：基于当前日历天数与每日平均斜率，测算预算消耗倒计时。
-3. **统计页高阶视图**：顶部轮播呈现「财务洞察卡片 (Insight Cards)」与「年度 12 个月收支走势 (Annual Overview)」柱状走势图。
+1. **收支结余与赤字预警 (Savings Rate & Deficit)**：衡量储蓄率健康度（结余 $\ge 20\%$ 为健康，支出大于收入为赤字警报）。
+2. **月度环比分析引擎 (MoM Comparison)**：计算总支出相比上月同期的差值与变动率（$> +12\%$ 为预警，$< -12\%$ 为节流优异）。
+3. **智能预算消耗预测与节流表现 (Burn Rate & Frugal Progress)**：推算总预算耗尽日期，或表彰节流进度。
+4. **单项分类过度倾斜检测 (Category Dominance)**：单分类支出 $\ge 45\%$ 时提示分类配置失衡。
+5. **突发分类异动排查 (Category Spike)**：单分类环比增长 $> 1.8\times$ 且基数 $> 50$ 元。
+6. **周末消费偏好分析 (Weekend Shift)**：周末日均支出 $\ge 1.6\times$ 工作日且周末总额 $> 100$ 元。
+7. **拿铁因子累积分析 (Latte Factor)**：微额支出（$\le 35$ 元）频次 $\ge 6$ 次时计算微额总负担。
+8. **零支出自律天数统计 (No-Spend Discipline Days)**：统计当月未发生支出的健康自律天数。
+9. **模拟数据全量覆盖验证 (Demo Data Coverage)**：一键生成的演示数据能够 100% 触发并完整展现上述各类洞察卡片。
 
 ---
 
-## 2. 算法与数据模型 (Algorithms & Data Models)
+## 2. 模块化架构设计 (Modular Architecture)
+
+为确保代码严格遵循单文件 $\le 250$ 行规范并保持高内聚低耦合，财务洞察体系拆分为三层：
 
 ```mermaid
-classDiagram
-    class InsightSeverity {
-        <<enumeration>>
-        INFO
-        WARNING
-        DANGER
-        POSITIVE
-    }
-    class FinancialInsightItem {
-        +String id
-        +String title
-        +String description
-        +InsightSeverity severity
-        +String iconName
-        +Double metricValue
-        +String actionTarget (e.g. category drill-down)
-    }
-    FinancialInsightItem --> InsightSeverity
+graph TD
+    UI[InsightCarouselCard & Breakdown] --> FinancialInsightEngine
+    FinancialInsightEngine --> FinancialInsightItem[FinancialInsightItem.kt<br/>领域实体与严重等级枚举]
+    FinancialInsightEngine --> FinancialInsightDetectors[FinancialInsightDetectors.kt<br/>生活方式与行为检测器]
+    FinancialInsightEngine --> AnnualCalculationEngine[AnnualCalculationEngine.kt<br/>年度收支计算引擎]
+    DemoDataEngine[DemoDataEngine.kt<br/>全量洞察演示数据生成器] -.-> FinancialInsightEngine
 ```
 
-### 2.1 洞察卡片领域模型 (FinancialInsightItem)
-```kotlin
-package com.listen.expensetracker.data.engine
-
-enum class InsightSeverity {
-    INFO,       // 提示信息（如：本月收入已结清）
-    POSITIVE,   // 积极向好（如：本月支出比上月同期减少 23.4%）
-    WARNING,    // 警示注意（如：按照当前消费速度，预计 9月22日 耗尽预算）
-    DANGER      // 危险超支（如：餐饮分类已超出本月预算 120%）
-}
-
-data class FinancialInsightItem(
-    val id: String,
-    val title: String,
-    val description: String,
-    val severity: InsightSeverity,
-    val categoryId: String? = null,
-    val targetDay: Int? = null,
-    val diffPercentage: Float? = null
-)
-```
-
-### 2.2 核心诊断算法 (FinancialInsightEngine)
-```kotlin
-package com.listen.expensetracker.data.engine
-
-import com.listen.expensetracker.data.db.TransactionEntity
-import com.listen.expensetracker.data.db.TransactionType
-import java.util.Calendar
-
-object FinancialInsightEngine {
-
-    /**
-     * 生成当前月份的智能洞察列表
-     */
-    fun generateInsights(
-        allTransactions: List<TransactionEntity>,
-        currentOffset: Int,
-        monthlyBudget: Double,
-        categoryRatios: Map<String, Float>,
-        lang: String
-    ): List<FinancialInsightItem> {
-        val insights = mutableListOf<FinancialInsightItem>()
-
-        val (currentStart, currentEnd, _) = TransactionCalculationEngine.getMonthRangeAndTitle(currentOffset, lang)
-        val (prevStart, prevEnd, _) = TransactionCalculationEngine.getMonthRangeAndTitle(currentOffset - 1, lang)
-
-        val currentExpenses = allTransactions.filter { it.timestamp in currentStart..currentEnd && it.type == TransactionType.EXPENSE }
-        val prevExpenses = allTransactions.filter { it.timestamp in prevStart..prevEnd && it.type == TransactionType.EXPENSE }
-
-        val currentTotal = currentExpenses.sumOf { it.amount }
-        val prevTotal = prevExpenses.sumOf { it.amount }
-
-        // 1. 月环比总支出对比 (MoM Total Analysis)
-        if (prevTotal > 0 && currentTotal > 0) {
-            val diff = (currentTotal - prevTotal) / prevTotal
-            val pct = "%.1f".format(kotlin.math.abs(diff * 100))
-            if (diff > 0.15) {
-                insights.add(FinancialInsightItem(
-                    id = "insight_mom_increase",
-                    title = "支出环比增长较快",
-                    description = "当前总开销已比上月同期多支出 $pct%，请注意控制花销节奏。",
-                    severity = InsightSeverity.WARNING,
-                    diffPercentage = (diff * 100).toFloat()
-                ))
-            } else if (diff < -0.15) {
-                insights.add(FinancialInsightItem(
-                    id = "insight_mom_decrease",
-                    title = "节流表现优异",
-                    description = "当前总开销比上月同期节省了 $pct%，请继续保持！",
-                    severity = InsightSeverity.POSITIVE,
-                    diffPercentage = (diff * 100).toFloat()
-                ))
-            }
-        }
-
-        // 2. 预算消耗速率预测 (Burn Rate Predictor)
-        val nowCal = Calendar.getInstance()
-        val currentDay = nowCal.get(Calendar.DAY_OF_MONTH)
-        val maxDays = nowCal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        if (currentOffset == 0 && monthlyBudget > 0 && currentDay in 3..(maxDays - 2)) {
-            val dailyAvg = currentTotal / currentDay
-            val estimatedTotal = dailyAvg * maxDays
-            if (estimatedTotal > monthlyBudget && currentTotal < monthlyBudget) {
-                val exhaustedDay = (monthlyBudget / dailyAvg).toInt().coerceIn(currentDay, maxDays)
-                insights.add(FinancialInsightItem(
-                    id = "insight_burn_rate",
-                    title = "预算预警预测",
-                    description = "按照当前每日平均开销（¥${"%.0f".format(dailyAvg)}/天），预计将在本月 ${exhaustedDay} 日耗尽总预算。",
-                    severity = InsightSeverity.WARNING,
-                    targetDay = exhaustedDay
-                ))
-            }
-        }
-
-        // 3. 分类开销异常跃升排查
-        val currentCatMap = currentExpenses.groupBy { it.categoryId }.mapValues { it.value.sumOf { tx -> tx.amount } }
-        val prevCatMap = prevExpenses.groupBy { it.categoryId }.mapValues { it.value.sumOf { tx -> tx.amount } }
-        currentCatMap.forEach { (catId, amt) ->
-            val prevAmt = prevCatMap[catId] ?: 0.0
-            if (prevAmt > 50.0 && amt > prevAmt * 1.8) {
-                val catName = currentExpenses.firstOrNull { it.categoryId == catId }?.categoryName ?: catId
-                insights.add(FinancialInsightItem(
-                    id = "insight_cat_jump_$catId",
-                    title = "分类开销异动",
-                    description = "「$catName」本月支出已达上月的 ${(amt / prevAmt).toInt()} 倍（当前 ¥${"%.0f".format(amt)}），为近期增长最快项。",
-                    severity = InsightSeverity.INFO,
-                    categoryId = catId
-                ))
-            }
-        }
-
-        return insights
-    }
-}
-```
+### 2.1 文件职责划分
+1. `FinancialInsightItem.kt`: 包含 `InsightSeverity`（INFO, POSITIVE, WARNING, DANGER）、`FinancialInsightItem` 领域模型及 `AnnualMonthSummary`。
+2. `FinancialInsightDetectors.kt`: 封装 `detectSavingsRate`、`detectWeekendSpendingShift`、`detectLatteFactor`、`detectNoSpendDays` 等高内聚行为检测规则。
+3. `FinancialInsightEngine.kt`: 主门面引擎，负责统筹生成月度全部洞察项及年度总览。
+4. `DemoDataEngine.kt`: 构造具备周末消费偏好、拿铁因子、分类倾斜、单日峰值及结余健康的拟真演示数据。
 
 ---
 
-## 3. UI 呈现与用户交互 (UI Presentation)
+## 3. 洞察规则与判定阈值 (Insight Detection Rules)
 
-### 3.1 统计页顶部「财务洞察卡片轮播 (Insight Carousel)」
-* 横向单卡轮播展示，右下角带有 `1/3` 分页胶囊；
-* 根据 `InsightSeverity` 着色：
-  * `POSITIVE`: 翡翠绿轻透明背景 + 📈 趋势图标；
-  * `WARNING`: 琥珀金背景 + ⚡ 预警图标；
-  * `DANGER`: 珊瑚红背景 + 🚨 警报图标；
-* 点击卡片支持穿透下钻（例如轻触异动分类卡片，直接跳转至流水页并定位该分类）。
+| 洞察类型 | 标识 ID | 触发条件 | 严重等级 | 交互动作 |
+| :--- | :--- | :--- | :--- | :--- |
+| **健康储蓄率** | `insight_savings_rate` | 收入 > 0 且储蓄率 $\ge 20\%$ | POSITIVE | - |
+| **收支赤字警告** | `insight_deficit` | 总支出 > 总收入 | DANGER | - |
+| **月支出环比上涨** | `insight_mom_increase` | 当月支出较上月同期上涨 $> 12\%$ | WARNING | - |
+| **月支出环比节流** | `insight_mom_decrease` | 当月支出较上月同期节省 $> 12\%$ | POSITIVE | - |
+| **预算耗尽预警** | `insight_burn_rate` | 当月日均支出推算整月将超预算 | WARNING | 点击跳转修改预算 |
+| **预算节流良好** | `insight_budget_frugal` | 当前天数 $\ge 8$ 天且推算支出 $\le$ 预算 70% | POSITIVE | 点击查看预算进度 |
+| **单分类过度倾斜** | `insight_cat_dominant_*` | 单项分类支出 $\ge 45\%$ 总支出 | WARNING | 点击跳转筛选该分类 |
+| **突发分类跃升** | `insight_cat_jump_*` | 单分类环比增长 $> 1.8\times$ 且基数 $> 50$ 元 | INFO | 点击跳转筛选该分类 |
+| **周末消费倾斜** | `insight_weekend_shift` | 周末日均支出 $\ge 1.6\times$ 工作日日均 | INFO | - |
+| **拿铁因子累积** | `insight_latte_factor` | $\le 35$ 元小额支出笔数 $\ge 6$ 笔 | INFO | - |
+| **单日最大峰值** | `insight_peak_day` | 单日开销 $\ge 35\%$ 当月总支出 | INFO | 点击跳转定位该日 |
+| **零支出自律天数** | `insight_no_spend_days` | 当月未发生任何支出的天数 $\ge 3$ 天 | POSITIVE | - |
+| **平稳运行兜底** | `insight_steady_state` | 未触发任何警示/异动时的健康状态卡片 | POSITIVE / DANGER | - |
 
-### 3.2 年度 12 个月收支总览视图 (Annual Overview Chart)
-* 在统计页顶部提供 `[ 按月查看 ] | [ 年度总览 ]` 切换器；
-* 呈现 12 根并列收支双柱状图（绿色代表收入，红色代表支出），点击具体月份快速跳入该月详细面板。
+---
+
+## 4. UI 呈现与用户交互 (UI Presentation)
+
+### 4.1 统计页顶部「财务洞察卡片轮播 (Insight Carousel)」
+* 横向卡片轮播滑动展示，右下角带有高可读性分页胶囊（如 `1/8`）；
+* 情绪化色彩体系：
+  * `POSITIVE`: 翡翠绿轻透明背景 + 向上趋势/勋章图标；
+  * `WARNING`: 琥珀暖黄背景 + 闪电/预警图标；
+  * `DANGER`: 珊瑚玫红背景 + 警报图标；
+  * `INFO`: 科技深蓝背景 + 放大镜/日历图标；
+* 支持穿透下钻（分类异动直接筛选流水、峰值日期直接跳转定位该天、预算卡片直接呼出预算设置）。
+
+### 4.2 模拟数据演示生成策略 (Demo Data Strategy)
+在开发/演示模式下点击「生成模拟数据」时，系统会自洽构造具备以下特征的数据集：
+1. **真实月薪 (16,000 元)**：保证储蓄率达 85%（触发 `insight_savings_rate`）；
+2. **周末集中大额数码消费 (1,350 元) + 演唱会门票 (480 元)**：触发 `insight_peak_day`、`insight_weekend_shift`、`insight_cat_dominant`、`insight_cat_jump`；
+3. **工作日注入 6 笔 $\le 35$ 元的小额咖啡与通勤**：触发 `insight_latte_factor`；
+4. **控制消费集中在 3 个特定日期**：当月其余日期均为无支出自律日（触发 `insight_no_spend_days`）；
+5. **注入上月低基准对比数据 (1,240 元)**：确保环比增长达 81.9%（触发 `insight_mom_increase`）。
+从而使用户可在轮播卡片中完整体验到全部 8 种核心智能洞察。
