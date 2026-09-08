@@ -11,6 +11,7 @@ import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.transactions.components.calculateDayScrollIndex
 import com.listen.expensetracker.features.transactions.components.calculateTransactionScrollIndex
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsEffect
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
@@ -38,12 +39,14 @@ fun TransactionsEffects(
     monthPagerState: PagerState,
     yearPagerState: PagerState,
     listState: LazyListState,
+    period: TransactionPeriod,
     groupedTransactions: Map<String, List<TransactionEntity>>,
     selectedMonthOffset: Int,
     selectedYearOffset: Int,
     onIntent: (TransactionsIntent) -> Unit
 ) {
     // 使用 rememberUpdatedState 保持长协程引用最新状态，避免 LaunchedEffect 因参数变动频繁重启
+    val currentPeriod by rememberUpdatedState(period)
     val currentGroupedTransactions by rememberUpdatedState(groupedTransactions)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
     val currentYearOffset by rememberUpdatedState(selectedYearOffset)
@@ -54,7 +57,11 @@ fun TransactionsEffects(
             snapshotFlow { currentMonthOffset }.collectLatest { offset ->
                 val targetPage = PAGER_BASE_INDEX + offset
                 if (monthPagerState.currentPage != targetPage) {
-                    monthPagerState.scrollToPage(targetPage)
+                    if (kotlin.math.abs(monthPagerState.currentPage - targetPage) <= 3) {
+                        monthPagerState.animateScrollToPage(targetPage)
+                    } else {
+                        monthPagerState.scrollToPage(targetPage)
+                    }
                 }
             }
         }
@@ -64,7 +71,11 @@ fun TransactionsEffects(
             snapshotFlow { currentYearOffset }.collectLatest { offset ->
                 val targetPage = PAGER_BASE_INDEX + offset
                 if (yearPagerState.currentPage != targetPage) {
-                    yearPagerState.scrollToPage(targetPage)
+                    if (kotlin.math.abs(yearPagerState.currentPage - targetPage) <= 3) {
+                        yearPagerState.animateScrollToPage(targetPage)
+                    } else {
+                        yearPagerState.scrollToPage(targetPage)
+                    }
                 }
             }
         }
@@ -77,17 +88,40 @@ fun TransactionsEffects(
                         is TransactionsEffect.ScrollToMonth -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
                             if (monthPagerState.currentPage != targetPage) {
-                                monthPagerState.scrollToPage(targetPage)
+                                if (kotlin.math.abs(monthPagerState.currentPage - targetPage) <= 3) {
+                                    monthPagerState.animateScrollToPage(targetPage)
+                                } else {
+                                    monthPagerState.scrollToPage(targetPage)
+                                }
                             }
                         }
                         is TransactionsEffect.ScrollToYear -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
                             if (yearPagerState.currentPage != targetPage) {
-                                yearPagerState.scrollToPage(targetPage)
+                                if (kotlin.math.abs(yearPagerState.currentPage - targetPage) <= 3) {
+                                    yearPagerState.animateScrollToPage(targetPage)
+                                } else {
+                                    yearPagerState.scrollToPage(targetPage)
+                                }
                             }
                         }
                         is TransactionsEffect.ScrollToTop -> {
-                            listState.animateScrollToItem(0)
+                            val isAtTop = !listState.isScrollInProgress &&
+                                listState.firstVisibleItemIndex == 0 &&
+                                listState.firstVisibleItemScrollOffset == 0
+                            if (isAtTop) {
+                                if (currentPeriod == TransactionPeriod.MONTH) {
+                                    if (currentMonthOffset != 0 || monthPagerState.currentPage != PAGER_BASE_INDEX) {
+                                        onIntent(TransactionsIntent.SelectMonth(0))
+                                    }
+                                } else {
+                                    if (currentYearOffset != 0 || yearPagerState.currentPage != PAGER_BASE_INDEX) {
+                                        onIntent(TransactionsIntent.SelectYear(0))
+                                    }
+                                }
+                            } else {
+                                listState.animateScrollToItem(0)
+                            }
                         }
                         is TransactionsEffect.ScrollToTransaction -> {
                             val targetIndex = calculateTransactionScrollIndex(currentGroupedTransactions, effect.txId)

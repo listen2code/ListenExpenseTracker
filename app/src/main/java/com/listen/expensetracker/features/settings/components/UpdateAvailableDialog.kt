@@ -4,8 +4,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.uicomponent.theme.ListenTheme
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,8 +16,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -71,6 +66,23 @@ fun UpdateAvailableDialog(
                     modifier = Modifier.size(24.dp)
                 )
             }
+        },
+        confirmButton = {
+            CommonButton(
+                text = AppStrings.BTN_UPDATE.tr(lang),
+                onClick = {
+                    openGooglePlay(context)
+                    onDismiss()
+                },
+                style = CommonButtonStyle.Primary
+            )
+        },
+        dismissButton = {
+            CommonButton(
+                text = AppStrings.BTN_CANCEL.tr(lang),
+                onClick = onDismiss,
+                style = CommonButtonStyle.Outlined
+            )
         }
     ) {
         Column(
@@ -106,7 +118,7 @@ fun UpdateAvailableDialog(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 180.dp)
+                            .heightIn(max = 200.dp)
                             .verticalScroll(scrollState)
                     ) {
                         Text(
@@ -117,71 +129,7 @@ fun UpdateAvailableDialog(
                     }
                 }
             }
-
-            // Action Buttons
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // 1. Download Update / Open Release
-                val targetDownloadUrl = releaseInfo.apkDownloadUrl ?: releaseInfo.htmlUrl
-                CommonButton(
-                    text = AppStrings.UPDATE_NOW_BTN.tr(lang),
-                    onClick = {
-                        openUrlInBrowser(context, targetDownloadUrl)
-                        onDismiss()
-                    },
-                    style = CommonButtonStyle.Primary,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "Download",
-                            modifier = Modifier.size(AppDimens.IconSizeMedium)
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // 2. View on GitHub button (if direct apk download exists)
-                if (releaseInfo.apkDownloadUrl != null) {
-                    CommonButton(
-                        text = AppStrings.VIEW_ON_GITHUB_BTN.tr(lang),
-                        onClick = {
-                            openUrlInBrowser(context, releaseInfo.htmlUrl)
-                            onDismiss()
-                        },
-                        style = CommonButtonStyle.Secondary,
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Default.OpenInBrowser,
-                                contentDescription = "GitHub",
-                                modifier = Modifier.size(AppDimens.IconSizeMedium)
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                // 3. Cancel button
-                CommonButton(
-                    text = AppStrings.BTN_CANCEL.tr(lang),
-                    onClick = onDismiss,
-                    style = CommonButtonStyle.Secondary,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
         }
-    }
-}
-
-private fun openUrlInBrowser(context: Context, url: String) {
-    try {
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    } catch (_: Exception) {
-        // Fallback or ignore
     }
 }
 @Preview(showBackground = true)

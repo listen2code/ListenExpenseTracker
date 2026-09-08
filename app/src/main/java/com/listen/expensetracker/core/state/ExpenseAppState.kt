@@ -68,34 +68,43 @@ class ExpenseAppState(
      * Currently active month offset synchronized across Transactions and Statistics screens.
      */
     val activeMonthOffset: Int
-        get() = if (currentTab == NavTab.STATISTICS) {
-            statisticsViewModel.viewState.value.selectedMonthOffset
-        } else {
-            transactionsViewModel.viewState.value.selectedMonthOffset
-        }
+        get() = if (currentTab == NavTab.STATISTICS) statisticsViewModel.viewState.value.selectedMonthOffset
+        else transactionsViewModel.viewState.value.selectedMonthOffset
 
     val activeYearOffset: Int
-        get() = if (currentTab == NavTab.STATISTICS) {
-            statisticsViewModel.viewState.value.selectedYearOffset
-        } else {
-            transactionsViewModel.viewState.value.selectedYearOffset
-        }
+        get() = if (currentTab == NavTab.STATISTICS) statisticsViewModel.viewState.value.selectedYearOffset
+        else transactionsViewModel.viewState.value.selectedYearOffset
 
     private var lastTimeTab: NavTab = NavTab.TRANSACTIONS
+    private var preserveStatisticsYearOnReturn = false
 
     private fun syncTimeState(fromTab: NavTab, toTab: NavTab) {
         if (fromTab == NavTab.TRANSACTIONS && toTab == NavTab.STATISTICS) {
-            val tx = transactionsViewModel.viewState.value
-            val targetPeriod = if (tx.period == TransactionPeriod.YEAR) StatisticsPeriod.YEAR else StatisticsPeriod.MONTH
-            if (statisticsViewModel.viewState.value.period != targetPeriod) statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(targetPeriod))
-            if (statisticsViewModel.viewState.value.selectedMonthOffset != tx.selectedMonthOffset) statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(tx.selectedMonthOffset))
-            if (statisticsViewModel.viewState.value.selectedYearOffset != tx.selectedYearOffset) statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(tx.selectedYearOffset))
-        } else if (fromTab == NavTab.STATISTICS && toTab == NavTab.TRANSACTIONS) {
             val stats = statisticsViewModel.viewState.value
+            val tx = transactionsViewModel.viewState.value
+            if (preserveStatisticsYearOnReturn && stats.period == StatisticsPeriod.YEAR && tx.period == TransactionPeriod.MONTH) {
+                preserveStatisticsYearOnReturn = false
+                return
+            }
+            preserveStatisticsYearOnReturn = false
+            val targetPeriod = if (tx.period == TransactionPeriod.YEAR) StatisticsPeriod.YEAR else StatisticsPeriod.MONTH
+            if (stats.period != targetPeriod) statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(targetPeriod))
+            if (targetPeriod == StatisticsPeriod.MONTH && stats.selectedMonthOffset != tx.selectedMonthOffset) {
+                statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(tx.selectedMonthOffset))
+            } else if (targetPeriod == StatisticsPeriod.YEAR && stats.selectedYearOffset != tx.selectedYearOffset) {
+                statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(tx.selectedYearOffset))
+            }
+        } else if (fromTab == NavTab.STATISTICS && toTab == NavTab.TRANSACTIONS) {
+            preserveStatisticsYearOnReturn = false
+            val stats = statisticsViewModel.viewState.value
+            val tx = transactionsViewModel.viewState.value
             val targetPeriod = if (stats.period == StatisticsPeriod.YEAR) TransactionPeriod.YEAR else TransactionPeriod.MONTH
-            if (transactionsViewModel.viewState.value.period != targetPeriod) transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(targetPeriod))
-            if (transactionsViewModel.viewState.value.selectedMonthOffset != stats.selectedMonthOffset) transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(stats.selectedMonthOffset))
-            if (transactionsViewModel.viewState.value.selectedYearOffset != stats.selectedYearOffset) transactionsViewModel.handleIntent(TransactionsIntent.SetYearOffset(stats.selectedYearOffset))
+            if (tx.period != targetPeriod) transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(targetPeriod))
+            if (targetPeriod == TransactionPeriod.MONTH && tx.selectedMonthOffset != stats.selectedMonthOffset) {
+                transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(stats.selectedMonthOffset))
+            } else if (targetPeriod == TransactionPeriod.YEAR && tx.selectedYearOffset != stats.selectedYearOffset) {
+                transactionsViewModel.handleIntent(TransactionsIntent.SetYearOffset(stats.selectedYearOffset))
+            }
         }
     }
 
@@ -109,6 +118,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransactionsCategory(categoryName: String, monthOffset: Int) {
+        preserveStatisticsYearOnReturn = false
         statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByCategory(categoryName, monthOffset))
@@ -117,6 +127,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransactionsAnnualCategory(year: Int, categoryName: String) {
+        preserveStatisticsYearOnReturn = false
         val curYear = Calendar.getInstance().get(Calendar.YEAR)
         statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(year - curYear))
         statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
@@ -126,6 +137,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransactionsDate(monthOffset: Int, day: Int, dateLabel: String = "") {
+        preserveStatisticsYearOnReturn = false
         statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day, dateLabel))
@@ -134,6 +146,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransaction(monthOffset: Int, transaction: TransactionEntity) {
+        preserveStatisticsYearOnReturn = false
         statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         val cal = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
@@ -143,6 +156,7 @@ class ExpenseAppState(
     }
 
     fun navigateToBudgetAdjustment(monthOffset: Int) {
+        preserveStatisticsYearOnReturn = false
         statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
         statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(monthOffset))
@@ -153,8 +167,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransactionsMonth(monthOffset: Int) {
-        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
+        preserveStatisticsYearOnReturn = true
         transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.SelectMonth(monthOffset))
         lastTimeTab = NavTab.TRANSACTIONS
@@ -167,13 +180,8 @@ class ExpenseAppState(
     var activeOverlay by mutableStateOf<AppOverlay?>(null)
         private set
 
-    fun openOverlay(overlay: AppOverlay) {
-        activeOverlay = overlay
-    }
-
-    fun dismissOverlay() {
-        activeOverlay = null
-    }
+    fun openOverlay(overlay: AppOverlay) { activeOverlay = overlay }
+    fun dismissOverlay() { activeOverlay = null }
 
     /**
      * One-time event flow for scrolling a specific tab's list to top on double-tap.
@@ -201,10 +209,7 @@ class ExpenseAppState(
         switchTab(NavTab.TRANSACTIONS)
         transactionsViewModel.handleIntent(
             TransactionsIntent.OpenDialog(
-                TransactionsDialog.AddTransaction(
-                    initialCategoryId = categoryId,
-                    initialType = type
-                )
+                TransactionsDialog.AddTransaction(initialCategoryId = categoryId, initialType = type)
             )
         )
     }
@@ -217,22 +222,12 @@ class ExpenseAppState(
 fun rememberExpenseAppState(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ): ExpenseAppState {
-    val transactionsViewModel: TransactionsViewModel = viewModel(
-        factory = TransactionsViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
-    val statisticsViewModel: StatisticsViewModel = viewModel(
-        factory = StatisticsViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
-    val settingsViewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
+    val app = LocalContext.current.applicationContext as Application
+    val transactionsViewModel: TransactionsViewModel = viewModel(factory = TransactionsViewModel.Factory(app))
+    val statisticsViewModel: StatisticsViewModel = viewModel(factory = StatisticsViewModel.Factory(app))
+    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory(app))
 
     return remember(transactionsViewModel, statisticsViewModel, settingsViewModel, snackbarHostState) {
-        ExpenseAppState(
-            transactionsViewModel = transactionsViewModel,
-            statisticsViewModel = statisticsViewModel,
-            settingsViewModel = settingsViewModel,
-            snackbarHostState = snackbarHostState
-        )
+        ExpenseAppState(transactionsViewModel, statisticsViewModel, settingsViewModel, snackbarHostState)
     }
 }

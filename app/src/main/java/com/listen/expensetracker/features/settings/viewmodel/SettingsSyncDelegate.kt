@@ -113,6 +113,12 @@ class SettingsSyncDelegate(
     }
 
     suspend fun seedDemoData(monthOffset: Int, lang: String, onToast: (String) -> Unit) {
+        val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
+        val count = dao.getTransactionCountInRange(startTs, endTs)
+        if (count > 0) {
+            onToast(AppStrings.SEED_MONTH_HAS_DATA_ERROR.tr(lang))
+            return
+        }
         val accountList = AccountRepository.getAllAccounts().map { it.key }
         val accounts = if (accountList.isEmpty()) listOf("CASH", "BANK", "CREDIT") else accountList
         val generated = DemoDataEngine.generate(monthOffset, lang, accounts)
@@ -124,7 +130,6 @@ class SettingsSyncDelegate(
                 recurringDao.insertRule(demoRule)
             }
         }
-        val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
         onToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(lang).format(title, generated.size))
     }
 

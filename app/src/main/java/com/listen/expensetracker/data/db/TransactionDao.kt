@@ -39,4 +39,7 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE timestamp BETWEEN :startTs AND :endTs")
+    suspend fun getTransactionCountInRange(startTs: Long, endTs: Long): Int
 }

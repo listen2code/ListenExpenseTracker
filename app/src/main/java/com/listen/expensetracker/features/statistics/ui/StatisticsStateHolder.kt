@@ -95,6 +95,7 @@ fun rememberStatisticsStateHolder(
         monthPagerState = monthPagerState,
         yearPagerState = yearPagerState,
         listState = listState,
+        period = state.period,
         selectedMonthOffset = state.selectedMonthOffset,
         selectedYearOffset = state.selectedYearOffset,
         onIntent = onIntent

@@ -109,6 +109,7 @@ fun rememberTransactionsStateHolder(
         monthPagerState = monthPagerState,
         yearPagerState = yearPagerState,
         listState = listState,
+        period = state.period,
         groupedTransactions = groupedTransactions,
         selectedMonthOffset = state.selectedMonthOffset,
         selectedYearOffset = state.selectedYearOffset,

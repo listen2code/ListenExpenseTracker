@@ -75,37 +75,41 @@ fun SettingsFinanceSection(
                 )
             }
 
-            // Monthly Budget Button (Full Width)
-            CommonButton(
-                text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${monthlyBudget.formatAmount()}",
-                onClick = onOpenBudgetDialog,
-                style = CommonButtonStyle.Outlined,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Savings,
-                        contentDescription = "Budget",
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Monthly Budget & Recurring Transactions Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
+            ) {
+                CommonButton(
+                    text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${monthlyBudget.formatAmount()}",
+                    onClick = onOpenBudgetDialog,
+                    style = CommonButtonStyle.Outlined,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Savings,
+                            contentDescription = "Budget",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    modifier = Modifier.weight(1f)
+                )
 
-            // Recurring Transactions & Subscriptions Button
-            CommonButton(
-                text = AppStrings.RECURRING_TITLE.tr(lang),
-                onClick = onOpenRecurringDialog,
-                style = CommonButtonStyle.Outlined,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.AccountBalanceWallet,
-                        contentDescription = "Recurring",
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
+                CommonButton(
+                    text = AppStrings.RECURRING_TITLE.tr(lang),
+                    onClick = onOpenRecurringDialog,
+                    style = CommonButtonStyle.Outlined,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.AccountBalanceWallet,
+                            contentDescription = "Recurring",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             // Category & Account Management Buttons Row
             Row(

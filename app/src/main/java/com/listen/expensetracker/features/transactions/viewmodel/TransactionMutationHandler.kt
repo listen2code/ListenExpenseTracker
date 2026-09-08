@@ -62,10 +62,15 @@ class TransactionMutationHandler(
     }
 
     fun seedDemoData(monthOffset: Int, lang: String) = scope.launch {
+        val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
+        val count = dao.getTransactionCountInRange(startTs, endTs)
+        if (count > 0) {
+            emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_HAS_DATA_ERROR.tr(lang)))
+            return@launch
+        }
         val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
         val generated = DemoDataEngine.generate(monthOffset, lang, accounts)
         dao.insertTransactions(generated)
-        val (_, _, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
         emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(lang).format(title, generated.size)))
     }
 }

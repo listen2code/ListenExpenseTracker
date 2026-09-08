@@ -149,6 +149,8 @@ fun SettingsScreen(
             item(key = "version_footer") {
                 SettingsVersionFooter(
                     isDeveloperMode = state.isDeveloperMode,
+                    isCheckingUpdate = state.isCheckingUpdate,
+                    onCheckForUpdates = { onIntent(SettingsIntent.CheckForUpdates(it)) },
                     onToggleDeveloperMode = { onIntent(SettingsIntent.ToggleDeveloperMode(it)) },
                     onOpenAboutDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) },
                     lang = lang

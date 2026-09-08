@@ -92,11 +92,12 @@ class SettingsViewModel(
             }
             is SettingsIntent.ScrollToTop -> { emitEffect(SettingsEffect.ScrollToTop) }
             is SettingsIntent.ToggleDeveloperMode -> viewModelScope.launch {
-                prefManager.setDeveloperMode(intent.enabled)
-                updateState { copy(isDeveloperMode = intent.enabled) }
-                val lang = currentState.language
-                val msg = if (intent.enabled) AppStrings.DEVELOPER_MODE_ENABLED.tr(lang) else AppStrings.DEVELOPER_MODE_DISABLED.tr(lang)
-                emitEffect(CommonUiEffect.ShowToast(msg))
+                if (intent.enabled && !currentState.isDeveloperMode) {
+                    prefManager.setDeveloperMode(true)
+                    updateState { copy(isDeveloperMode = true) }
+                    val lang = currentState.language
+                    emitEffect(CommonUiEffect.ShowToast(AppStrings.DEVELOPER_MODE_ENABLED.tr(lang)))
+                }
             }
             is SettingsIntent.LinkGoogleAccount -> viewModelScope.launch {
                 prefManager.setLoggedIn(true, intent.email, intent.displayName ?: "", intent.avatarUrl ?: "")

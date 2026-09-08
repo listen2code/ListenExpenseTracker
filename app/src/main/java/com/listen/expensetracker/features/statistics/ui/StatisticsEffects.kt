@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsEffect
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
@@ -26,10 +27,12 @@ fun StatisticsEffects(
     monthPagerState: PagerState,
     yearPagerState: PagerState,
     listState: LazyListState,
+    period: StatisticsPeriod,
     selectedMonthOffset: Int,
     selectedYearOffset: Int,
     onIntent: (StatisticsIntent) -> Unit
 ) {
+    val currentPeriod by rememberUpdatedState(period)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
     val currentYearOffset by rememberUpdatedState(selectedYearOffset)
 
@@ -39,7 +42,11 @@ fun StatisticsEffects(
             snapshotFlow { currentMonthOffset }.collectLatest { offset ->
                 val targetPage = PAGER_BASE_INDEX + offset
                 if (monthPagerState.currentPage != targetPage) {
-                    monthPagerState.scrollToPage(targetPage)
+                    if (kotlin.math.abs(monthPagerState.currentPage - targetPage) <= 3) {
+                        monthPagerState.animateScrollToPage(targetPage)
+                    } else {
+                        monthPagerState.scrollToPage(targetPage)
+                    }
                 }
             }
         }
@@ -49,7 +56,11 @@ fun StatisticsEffects(
             snapshotFlow { currentYearOffset }.collectLatest { offset ->
                 val targetPage = PAGER_BASE_INDEX + offset
                 if (yearPagerState.currentPage != targetPage) {
-                    yearPagerState.scrollToPage(targetPage)
+                    if (kotlin.math.abs(yearPagerState.currentPage - targetPage) <= 3) {
+                        yearPagerState.animateScrollToPage(targetPage)
+                    } else {
+                        yearPagerState.scrollToPage(targetPage)
+                    }
                 }
             }
         }
@@ -62,17 +73,40 @@ fun StatisticsEffects(
                         is StatisticsEffect.ScrollToMonth -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
                             if (monthPagerState.currentPage != targetPage) {
-                                monthPagerState.scrollToPage(targetPage)
+                                if (kotlin.math.abs(monthPagerState.currentPage - targetPage) <= 3) {
+                                    monthPagerState.animateScrollToPage(targetPage)
+                                } else {
+                                    monthPagerState.scrollToPage(targetPage)
+                                }
                             }
                         }
                         is StatisticsEffect.ScrollToYear -> {
                             val targetPage = PAGER_BASE_INDEX + effect.offset
                             if (yearPagerState.currentPage != targetPage) {
-                                yearPagerState.scrollToPage(targetPage)
+                                if (kotlin.math.abs(yearPagerState.currentPage - targetPage) <= 3) {
+                                    yearPagerState.animateScrollToPage(targetPage)
+                                } else {
+                                    yearPagerState.scrollToPage(targetPage)
+                                }
                             }
                         }
                         is StatisticsEffect.ScrollToTop -> {
-                            listState.animateScrollToItem(0)
+                            val isAtTop = !listState.isScrollInProgress &&
+                                listState.firstVisibleItemIndex == 0 &&
+                                listState.firstVisibleItemScrollOffset == 0
+                            if (isAtTop) {
+                                if (currentPeriod == StatisticsPeriod.MONTH) {
+                                    if (currentMonthOffset != 0 || monthPagerState.currentPage != PAGER_BASE_INDEX) {
+                                        onIntent(StatisticsIntent.SelectMonth(0))
+                                    }
+                                } else {
+                                    if (currentYearOffset != 0 || yearPagerState.currentPage != PAGER_BASE_INDEX) {
+                                        onIntent(StatisticsIntent.SelectYear(0))
+                                    }
+                                }
+                            } else {
+                                listState.animateScrollToItem(0)
+                            }
                         }
                     }
                 }
