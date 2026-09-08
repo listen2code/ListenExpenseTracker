@@ -82,8 +82,14 @@ fun StatisticsBreakdownCard(
                         segments = segments,
                         highlightColorHex = selectedDonutItem?.colorHex,
                         onSegmentClick = { seg ->
+                            // 单击切换：若已选中则取消选择，否则切换选中
                             val matchedItem = shares.find { it.colorHex.equals(seg.colorHex, ignoreCase = true) }
                             selectedDonutItem = if (selectedDonutItem == matchedItem) null else matchedItem
+                        },
+                        onSegmentSelect = { seg ->
+                            // 长按拖动选择：随手势直接对齐选中区块并同步驱动环形图展示对应扇区 Tooltip
+                            val matchedItem = shares.find { it.colorHex.equals(seg.colorHex, ignoreCase = true) }
+                            selectedDonutItem = matchedItem
                         },
                         modifier = Modifier
                             .fillMaxWidth()

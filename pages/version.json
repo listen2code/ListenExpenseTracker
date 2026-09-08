@@ -1,10 +1,10 @@
 {
-  "version": "0.0.34",
-  "buildNumber": 34,
+  "version": "0.0.35",
+  "buildNumber": 35,
   "url": "https://play.google.com/store/apps/details?id=com.listen.expensetracker",
   "changelog": {
-    "zh": "v0.0.4：Feature-First 模块化架构重构、单文件职责拆分（<=250行）、全面去除废弃 API 并接入现代 Google 认证体系、全量国际化字典扩充、消除金额跳闪与图表遮挡、追加 Android 12+ 原生 Splash 启动画面。",
-    "en": "v0.0.4: Feature-First modular refactoring, single-responsibility file splitting (<=250 lines), deprecated API replacement with modern Google Identity, full i18n expansion, UI jitter & chart clipping fixes, and Android 12+ Splash Screen integration.",
-    "ja": "v0.0.4：Feature-First モジュール化リファクタリング、単一責任ファイル分割（<=250行）、非推奨API刷新と最新Google認証対応、全画面多言語化、金额チラつきとチャート表示崩れの解消、Android 12+ Splash Screen追加。"
+    "zh": "v0.0.35：统计页面分段进度条支持长按拖拽连续切换选中分类，环形图同步联动高亮并展示详情气泡；优化触觉震动反馈与触控换算精度。",
+    "en": "v0.0.35: Support long-press drag gesture on the statistics progress bar to dynamically switch selected categories with synchronous donut chart highlighting and tooltip updates; enhanced haptic feedback and touch calculation accuracy.",
+    "ja": "v0.0.35：統計画面のプログレスバーを長押しドラッグして選択カテゴリを動的に切り替え、上部のドーナツチャートとツールチップがリアルタイムで連动するように対応。触覚フィードバックとタッチ精度の向上。"
   }
 }
