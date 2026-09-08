@@ -232,6 +232,20 @@
   - [ ] 创建 `channel_budget_alerts` 高优先级通知渠道，适配 Android 13+ 通知运行时权限。
   - [ ] 点击通知直达分类预算管理模态弹窗 (`CategoryBudgetModalDialog`)，即时调整预算或排查明细。
 
+### 6. 年月视图全维度联动、版本更新闭环与安全交互增强 (Year/Month Linkage, Update Flow & Security Enhancements) - [Completed]
+- [x] **跨 Tab 年月视图全维度联动与下钻保护**
+  - [x] 在 `ExpenseAppState` 实现常规全局双向联动：跨 Tab 切换自动同步 `period` (MONTH / YEAR) 及对应的 `monthOffset` / `yearOffset`。
+  - [x] 实现下钻返回保护 (`preserveStatisticsYearOnReturn`)：年视图图表点击月份下钻至月流水，返回切回统计时稳固保持年视图。
+  - [x] 底部导航栏双击已置顶 Tab 时智能快速复位：根据当前视图模式自动归位当月或当年 (`offset = 0`)。
+- [x] **开发者模式隐秘手势唤醒与数据操作防误触**
+  - [x] 隐藏清空所有数据按钮，通过版本号/设置区域连续点击 5 次激活开发者模式，激活后永久保留。
+  - [x] 统一“生成模拟数据”与“清空所有账单”按钮高度与文案规范。
+  - [x] 模拟数据生成前校验当月是否已有真实账单，若存在则拦截生成并提示错误，杜绝脏数据污染。
+- [x] **设置页版本校验与 Google Play 更新闭环**
+  - [x] 设置页提供“检查更新”按钮，带 Loading 状态异步请求 GitHub `version.json` 进行版本比对。
+  - [x] 有新版本呼出 `UpdateAvailableDialog` 展示更新说明，支持取消或一键拉起 Google Play 商店更新。
+  - [x] 月预算与周期账单按钮优化为并排紧凑排布。
+
 ---
 
 ## 需求池 (Backlog - 探索性功能备选)

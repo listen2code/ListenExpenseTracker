@@ -344,3 +344,87 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 ### 影响 (Consequences)
 - 优点：列表与编辑态金额表现 100% 统一；彻底消除非法小数输入风险；
 - 成本：无额外运行时性能损耗，逻辑内聚在键盘事件回调中。
+
+---
+
+## ADR-025: 跨 Tab 年月视图双向联动与统计下钻保持机制 (Cross-Tab Year/Month View Linkage & Drill-Down State Preservation)
+
+### 背景 (Context)
+流水与统计画面均具备月视图与年视图。在常规场景下，用户希望两大画面的时间周期与偏移保持全局自然联动（例如流水切换为 2025 年视图，切至统计也应呈现 2025 年视图）。
+然而存在一个特殊的关键下钻场景：当用户在统计画面的年视图中点击 12 个月概览卡片或年度走势折线图上的某个特定月份时，系统会跳转到流水画面并切换为月视图以便用户查看当月详细流水。在此场景下，用户查看完流水后很可能会立即（或翻看邻近月份后）点击底部导航栏切回统计画面。若无差别的双向联动强制将流水的月视图覆盖统计画面，会导致统计画面的年视图被意外破坏，违背用户直觉。
+
+### 决策 (Decision)
+1. **常规全局双向联动 (`syncTimeState`)**：
+   - 当用户在底部导航栏正常切换 Tab 时，`ExpenseAppState` 自动同步源页面与目标页面的周期（`period: MONTH / YEAR`）与对应的时间偏移（`selectedMonthOffset` / `selectedYearOffset`）。
+2. **下钻返回保护机制 (`preserveStatisticsYearOnReturn`)**：
+   - 统计年视图点击图表 item 调用 `navigateToTransactionsMonth(monthOffset)` 时，置位 `preserveStatisticsYearOnReturn = true`；
+   - 此时仅将流水画面切换为 `TransactionPeriod.MONTH` 并定位至目标月份，**统计画面自身保持 `StatisticsPeriod.YEAR` 不变**；
+   - 当用户从流水画面点击底栏切回统计画面时，`syncTimeState` 识别到下钻保护状态有效且流水仍为月视图，主动拦截流水月视图对统计年视图的覆盖，直接保持统计画面的年视图状态，并重置保护标志；
+   - 若用户在流水画面主动将周期切换为年视图，则解除保护，恢复常规双向联动。
+
+### 影响 (Consequences)
+- 优点：完美兼顾了日常使用的自然年月双向联动，以及年视图下钻至月流水后返回的无缝状态保持；
+- 成本：在 `ExpenseAppState` 中增加一个轻量布尔标志与分支判断，由自动化单元测试（`ExpenseAppStateTest`）严密保证稳定性。
+
+---
+
+## ADR-026: 开发者模式 5 击隐秘唤醒与高危操作防误触 (Developer Mode 5-Tap Reveal & Safe Demo Data Seeding)
+
+### 背景 (Context)
+1. “清除所有数据”属于完全不可逆的极高危破坏性操作，长期置于设置页中即使带有二次确认弹窗也存在误触和引发用户心理焦虑的风险；
+2. “生成模拟数据”在用户当月已有真实手工记账记录时若被触发，会导致测试数据与真实数据深度混杂且难以剥离清理。
+
+### 决策 (Decision)
+1. **隐秘开发者模式 (5-Tap Reveal Gesture)**：
+   - 默认状态下收起并彻底隐藏“清除所有数据”按钮；
+   - 用户在版本号/设置特定区域连续点击 5 次触发彩蛋式开发者模式唤醒（支持剩余点击次数 Toast 引导）；
+   - 一旦激活开发者模式，状态持久化保留，不再提供反向关闭机制，确保技术调试人员无需反复激活。
+2. **按钮规范统一**：
+   - 统一“生成模拟数据”与“清空所有账单”按钮高度与文案命名规范，保证视觉对齐与语义对称。
+3. **真实数据防脏守卫 (Real Data Guard)**：
+   - 在 `TransactionMutationHandler.seedDemoData` 中，执行前先调用 `dao.getTransactionCountInRange` 查询目标月份是否存在既有账单；
+   - 若记录数大于 0，立即终止生成流程并弹出错误提示“当月已有数据，无法生成模拟数据”，杜绝脏数据污染真实账目。
+
+### 影响 (Consequences)
+- 优点：彻底消除生产环境下误清空所有账单的潜在风险；保护了真实账目数据的纯洁性；
+- 成本：技术人员测试时需通过 5 击手势激活开发者模式。
+
+---
+
+## ADR-027: 版本在线校验与 Google Play 更新闭环 (In-App Version Check & Google Play Update Flow)
+
+### 背景 (Context)
+用户在应用内需要方便快捷地获知是否有新版本发布，并查看新版本更新说明后决定是否更新。
+
+### 决策 (Decision)
+1. **异步远程版本校验**：
+   - 在设置页底部版本区域提供“检查更新”按钮，点击后呈现旋转 Loading 状态；
+   - 异步拉取 GitHub 官方发布的 `version.json`，比对当前本地 `BuildConfig.VERSION_CODE` 与远程最新版本号；
+2. **无缝结果反馈与更新闭环**：
+   - 若当前已为最新版本，显示“已经是最新版本”友好 Toast 并结束 Loading；
+   - 若检测到新版本，呼出 `UpdateAvailableDialog` 弹窗，展示新版本版本号与更新说明（Changelog）；
+   - 底部提供“取消”与“立即更新”两个按钮，点击“立即更新”通过 `Intent.ACTION_VIEW` 零延迟拉起系统 Google Play 商店对应应用详情页，若未安装 Play 商店则平滑降级至网页版商店。
+
+### 影响 (Consequences)
+- 优点：轻量无侵入，无需依赖第三方庞大的热更新或升级 SDK，形成闭环升级链路；
+- 成本：依赖远程网络访问及 GitHub 静态文件托管。
+
+---
+
+## ADR-028: 底部导航双击置顶与智能归位当前周期 (Double-Tap Active Tab to Reset to Current Period)
+
+### 背景 (Context)
+用户在流水或统计画面翻看数月甚至数年前的历史数据后，想要回到当月/当年时，往往需要连续多次点击箭头或重新打开月份选择器，操作链路较长。
+
+### 决策 (Decision)
+1. **双击手势捕获**：
+   - 在底部导航栏 `NavigationBarItem` 中，当用户点击当前已选中的 Tab 时，通过判断连续两次点击间隔（$< 350\text{ms}$）识别双击手势。
+2. **两段式智能归位**：
+   - **第一击/未置顶**：如果列表尚未滚动至顶部，双击优先平滑滚动列表至第一项（`ScrollToTop`）；
+   - **已置顶状态下双击**：如果列表已经在顶部（`firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0`），则根据当前处于的视图模式智能归位：
+     - 若为月视图，自动重置选中月份为当月（`selectedMonthOffset = 0`）；
+     - 若为年视图，自动重置选中年份为当年（`selectedYearOffset = 0`）。
+
+### 影响 (Consequences)
+- 优点：符合现代移动应用主流交互习惯（如微博、Twitter 双击 Tab 置顶并刷新），大幅提升重度用户的交互效率；
+- 成本：需在 `TransactionsEffects` 与 `StatisticsEffects` 中捕获 `ScrollToTop` 事件并结合 `LazyListState` 状态做两段式分支判断。

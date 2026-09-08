@@ -121,7 +121,11 @@ sequenceDiagram
 
 将整个应用的顶层生命周期与导航状态收口至 `ExpenseAppState`：
 - **`NavTab` 枚举**：定义 `TRANSACTIONS`, `STATISTICS`, `SETTINGS`，彻底消灭 `0, 1, 2` 等魔数索引；
-- **状态持有**：集中管理各个 ViewModel 实例与 `SnackbarHostState`，使 `MainActivity` 保持在 100 行左右的极致精简状态。
+- **状态持有与编排**：集中管理各个 Feature ViewModel 实例与 `SnackbarHostState`，使 `MainActivity` 保持在 100 行左右的极致精简状态；
+- **全周期年月双向联动 (`syncTimeState`)**：在跨 Tab 切换时统一调度流水与统计画面的周期模式（`MONTH / YEAR`）与时间偏移（`selectedMonthOffset` / `selectedYearOffset`），实现全局时间视角的平滑同步；
+- **下钻返回保护机制 (`preserveStatisticsYearOnReturn`)**：当用户在统计年视图点击图表 item 下钻到月流水查看时，置位保护标志，统计画面自身保持年视图，当用户立即或在月流水翻看后切回统计画面时，主动拦截流水的月视图覆盖，确保统计画面稳固保持在年视图；
+- **双击 Tab 智能归位 (`triggerScrollToTop`)**：通过 `SharedFlow<NavTab>` 向各画面分发顶层双击事件，各画面在已置顶状态下双击自动根据当前年/月视图模式快速复位至当年/当月（`offset = 0`）；
+- **全局浮层调度与快速记账**：收敛管理 `AppOverlay.ApmInspector` 浮层开关与 `openQuickAdd` 小部件闪电记账路由跳转。
 
 ---
 
