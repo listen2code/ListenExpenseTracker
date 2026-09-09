@@ -1,6 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.uicomponent.theme.ListenTheme
 
@@ -149,5 +152,23 @@ fun UpdateAvailableDialogPreview() {
             onDismiss = {},
             lang = "zh"
         )
+    }
+}
+
+/**
+ * Launches the Google Play Store page for this application or falls back to web browser.
+ */
+fun openGooglePlay(context: Context) {
+    val packageName = context.packageName
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(webIntent)
     }
 }

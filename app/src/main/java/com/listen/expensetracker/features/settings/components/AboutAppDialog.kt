@@ -1,23 +1,26 @@
 package com.listen.expensetracker.features.settings.components
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,27 +36,23 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.net.toUri
 import com.listen.arch.i18n.tr
+import com.listen.expensetracker.R
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
-import com.listen.uicomponent.components.CommonText
-import com.listen.expensetracker.R
 import com.listen.uicomponent.theme.ListenTheme
 
 /**
- * About Application Dialog displaying dynamic package version info and update triggers.
+ * About Application Dialog displaying package version, design architecture, and app core highlights.
  */
 @Composable
 fun AboutAppDialog(
     onDismiss: () -> Unit,
-    lang: String = "zh",
-    isCheckingUpdate: Boolean = false,
-    onCheckUpdates: ((String) -> Unit)? = null
+    lang: String = "zh"
 ) {
     val context = LocalContext.current
     val (versionName, versionCode) = try {
@@ -76,88 +76,161 @@ fun AboutAppDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = "lExpense",
+        title = AppStrings.ABOUT_APP.tr(lang),
         icon = {
-            if (appIconBitmap != null) {
-                Image(
-                    bitmap = appIconBitmap,
-                    contentDescription = "lExpense",
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(AppDimens.CornerButton))
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(AppDimens.CornerButton))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "About",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(AppDimens.CornerButton))
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountBalanceWallet,
-                        contentDescription = "lExpense",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
             }
+        },
+        confirmButton = {
+            CommonButton(
+                text = AppStrings.BTN_DONE.tr(lang),
+                onClick = onDismiss,
+                style = CommonButtonStyle.Primary
+            )
         }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
-            CommonText(
-                text = "${AppStrings.APP_VERSION_LABEL.tr(lang)}: v$versionName (Build $versionCode)",
-                fontSize = AppDimens.TextBody,
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+        ) {
+            // App Branding & Version Header Card
+            AboutAppHeader(
+                appIconBitmap = appIconBitmap,
+                versionName = versionName,
+                versionCode = versionCode
+            )
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(vertical = AppDimens.SpaceExtraSmall)
+            )
+
+            // Technical Specs & Key Highlights
+            AboutInfoItem(
+                icon = Icons.Default.Layers,
+                label = AppStrings.APP_ARCHITECTURE_LABEL.tr(lang),
+                value = "MVI + Clean Architecture + Room"
+            )
+            AboutInfoItem(
+                icon = Icons.Default.Code,
+                label = AppStrings.APP_CORE_SDK_LABEL.tr(lang),
+                value = "ListenArch, ListenUiComponent"
+            )
+            AboutInfoItem(
+                icon = Icons.Default.Security,
+                label = AppStrings.APP_FEATURES_LABEL.tr(lang),
+                value = AppStrings.APP_FEATURES_DESC.tr(lang)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutAppHeader(
+    appIconBitmap: androidx.compose.ui.graphics.ImageBitmap?,
+    versionName: String,
+    versionCode: Long
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(AppDimens.CornerCard))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .padding(AppDimens.SpaceMedium),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+    ) {
+        if (appIconBitmap != null) {
+            Image(
+                bitmap = appIconBitmap,
+                contentDescription = "lExpense",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(AppDimens.CornerButton))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(AppDimens.CornerButton))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountBalanceWallet,
+                    contentDescription = "lExpense",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = "lExpense",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = "v$versionName ($versionCode)",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutInfoItem(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .size(16.dp)
+                .padding(top = 2.dp)
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface
             )
-            CommonText(
-                text = "${AppStrings.APP_ARCHITECTURE_LABEL.tr(lang)}: MVI + Clean Architecture + Room + Google Drive Sync",
-                fontSize = AppDimens.TextSmall,
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            CommonText(
-                text = "${AppStrings.APP_CORE_SDK_LABEL.tr(lang)}: ListenArch, ListenUiComponent",
-                fontSize = AppDimens.TextSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            CommonText(
-                text = AppStrings.APP_FEATURES_DESC.tr(lang),
-                fontSize = AppDimens.TextSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
-
-            // Check for Updates on GitHub Button
-            CommonButton(
-                text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr(lang) else AppStrings.CHECK_UPDATE.tr(lang),
-                onClick = {
-                    if (onCheckUpdates != null) {
-                        onCheckUpdates(versionName)
-                    } else {
-                        openGooglePlay(context)
-                        onDismiss()
-                    }
-                },
-                enabled = !isCheckingUpdate,
-                style = CommonButtonStyle.Primary,
-                icon = {
-                    if (isCheckingUpdate) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(AppDimens.IconSizeSmall),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.SystemUpdate,
-                            contentDescription = "Update",
-                            modifier = Modifier.size(AppDimens.IconSizeMedium)
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -170,25 +243,7 @@ fun AboutAppDialogPreview() {
     ListenTheme {
         AboutAppDialog(
             onDismiss = {},
-            lang = "en"
+            lang = "zh"
         )
-    }
-}
-
-/**
- * Launches the Google Play Store page for this application or falls back to web browser.
- */
-fun openGooglePlay(context: Context) {
-    val packageName = context.packageName
-    try {
-        val intent = Intent(Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    } catch (_: Exception) {
-        val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(webIntent)
     }
 }

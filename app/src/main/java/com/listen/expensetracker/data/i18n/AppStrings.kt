@@ -133,6 +133,17 @@ object AppStrings {
     const val EXPORT_JSON = "export_json"
     const val EXPORT_CSV = "export_csv"
     const val IMPORT_JSON = "import_json"
+    const val EXPORT_EXCEL_TITLE = "export_excel_title"
+    const val EXPORT_EXCEL_BTN = "export_excel_btn"
+    const val EXPORT_RANGE_LABEL = "export_range_label"
+    const val EXPORT_RANGE_ALL = "export_range_all"
+    const val EXPORT_RANGE_MONTH = "export_range_month"
+    const val EXPORT_RANGE_YEAR = "export_range_year"
+    const val EXPORT_TYPE_LABEL = "export_type_label"
+    const val EXPORT_ACTION_SAVE = "export_action_save"
+    const val EXPORT_ACTION_SHARE = "export_action_share"
+    const val EXPORT_PREVIEW_SUMMARY = "export_preview_summary"
+    const val EXPORT_SUCCESS_TOAST = "export_success_toast"
 
     // Cloud & Google Auth
     const val AUTO_BACKUP_DRIVE_TITLE = "auto_backup_drive_title"

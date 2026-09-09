@@ -37,7 +37,8 @@ import com.listen.uicomponent.components.SurfaceCard
 @Composable
 fun SettingsDialogHost(
     state: SettingsUiState,
-    onIntent: (SettingsIntent) -> Unit
+    onIntent: (SettingsIntent) -> Unit,
+    onSaveExcelToFile: (startTs: Long?, endTs: Long?, typeFilter: String, fileName: String) -> Unit = { _, _, _, _ -> }
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -143,10 +144,6 @@ fun SettingsDialogHost(
         }
         is SettingsDialog.AboutApp -> {
             AboutAppDialog(
-                isCheckingUpdate = state.isCheckingUpdate,
-                onCheckUpdates = { currentVersion ->
-                    onIntent(SettingsIntent.CheckForUpdates(currentVersion))
-                },
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )
@@ -154,6 +151,19 @@ fun SettingsDialogHost(
         is SettingsDialog.UpdateAvailable -> {
             UpdateAvailableDialog(
                 releaseInfo = state.activeDialog.releaseInfo,
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                lang = lang
+            )
+        }
+        is SettingsDialog.ExportExcelOptions -> {
+            ExportOptionsSheet(
+                transactions = state.transactions,
+                currencySymbol = sym,
+                onSaveToFile = onSaveExcelToFile,
+                onShare = { startTs, endTs, type ->
+                    onIntent(SettingsIntent.ShareExcel(startTs, endTs, type))
+                    onIntent(SettingsIntent.DismissDialog)
+                },
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )

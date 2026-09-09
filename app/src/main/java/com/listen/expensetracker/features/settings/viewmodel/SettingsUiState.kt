@@ -4,6 +4,7 @@ import android.net.Uri
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.arch.sync.SyncState
 import com.listen.expensetracker.data.db.RecurringRuleEntity
+import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.theme.AccentColor
@@ -26,6 +27,7 @@ sealed interface SettingsDialog {
     data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
     data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
+    data object ExportExcelOptions : SettingsDialog
 }
 
 /**
@@ -56,7 +58,8 @@ data class SettingsUiState(
     val recentAppsShieldEnabled: Boolean = true,
     val shakeToHideBalanceEnabled: Boolean = true,
     val isBiometricSupported: Boolean = false,
-    val apmFloatingWindowEnabled: Boolean = false
+    val apmFloatingWindowEnabled: Boolean = false,
+    val transactions: List<TransactionEntity> = emptyList()
 )
 
 /**
@@ -89,6 +92,8 @@ sealed interface SettingsIntent {
     data object ClearAllData : SettingsIntent
     data class ExportJsonToFile(val uri: Uri) : SettingsIntent
     data class ImportJsonFromFile(val uri: Uri) : SettingsIntent
+    data class ExportExcelToFile(val uri: Uri, val startTs: Long?, val endTs: Long?, val typeFilter: String) : SettingsIntent
+    data class ShareExcel(val startTs: Long?, val endTs: Long?, val typeFilter: String) : SettingsIntent
     data class OpenDialog(val dialog: SettingsDialog) : SettingsIntent
     data object DismissDialog : SettingsIntent
     data class CheckForUpdates(val currentVersion: String) : SettingsIntent

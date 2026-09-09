@@ -1,9 +1,15 @@
 package com.listen.expensetracker.features.settings.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import android.net.Uri
+import androidx.core.content.FileProvider
 import com.listen.arch.i18n.tr
 import com.listen.arch.sync.CloudSyncManager
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.cloud.GoogleDriveService
 import com.listen.expensetracker.data.db.RecurringRuleDao
@@ -166,6 +172,60 @@ class SettingsSyncDelegate(
             }
         } catch (e: Throwable) {
             onToast(if (lang == "en") "Import failed: ${e.message}" else "导入 JSON 文件失败: ${e.message}")
+        }
+    }
+
+    suspend fun exportExcelToFile(
+        uri: Uri,
+        startTs: Long?,
+        endTs: Long?,
+        typeFilter: String,
+        lang: String,
+        onToast: (String) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        try {
+            val allList = dao.getAllTransactions()
+            val filtered = TransactionBackupManager.filterTransactions(allList, startTs, endTs, typeFilter)
+            val bytes = TransactionBackupManager.exportToExcelCsv(filtered, lang)
+            application.contentResolver.openOutputStream(uri)?.use { os ->
+                os.write(bytes)
+            }
+            onToast(if (lang == "en") "Successfully exported ${filtered.size} records to Excel file" else "已成功导出 ${filtered.size} 条账单至 Excel 表格")
+        } catch (e: Throwable) {
+            onToast(if (lang == "en") "Export failed: ${e.message}" else "导出 Excel 失败: ${e.message}")
+        }
+    }
+
+    suspend fun shareExcel(
+        startTs: Long?,
+        endTs: Long?,
+        typeFilter: String,
+        lang: String,
+        onToast: (String) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        try {
+            val allList = dao.getAllTransactions()
+            val filtered = TransactionBackupManager.filterTransactions(allList, startTs, endTs, typeFilter)
+            val bytes = TransactionBackupManager.exportToExcelCsv(filtered, lang)
+            val exportDir = File(application.cacheDir, "exports").apply { mkdirs() }
+            val timeStr = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val file = File(exportDir, "lexpense_${timeStr}.csv")
+            file.writeBytes(bytes)
+
+            val shareUri = FileProvider.getUriForFile(application, "${application.packageName}.fileprovider", file)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/csv"
+                putExtra(Intent.EXTRA_STREAM, shareUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val title = if (lang == "en") "Share Excel Statement" else "分享账单表格"
+            val chooser = Intent.createChooser(shareIntent, title).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            application.startActivity(chooser)
+        } catch (e: Throwable) {
+            onToast(if (lang == "en") "Share failed: ${e.message}" else "分享账单失败: ${e.message}")
         }
     }
 }

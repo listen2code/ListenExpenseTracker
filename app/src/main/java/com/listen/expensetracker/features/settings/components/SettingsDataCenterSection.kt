@@ -56,6 +56,7 @@ fun SettingsDataCenterSection(
     onToggleAutoBackupWifiOnly: (Boolean) -> Unit = {},
     onTriggerBackup: () -> Unit,
     onTriggerRestore: () -> Unit,
+    onExportExcel: () -> Unit = {},
     onExportJson: () -> Unit,
     onImportJson: () -> Unit,
     isOperating: Boolean = false,
@@ -181,7 +182,16 @@ fun SettingsDataCenterSection(
                 modifier = Modifier.padding(vertical = 2.dp)
             )
 
-            // Part B: Local File-based JSON Export & Import
+            // Part B: Local File-based Data Export & Import
+            CommonButton(
+                text = AppStrings.EXPORT_EXCEL_BTN.tr(lang),
+                onClick = onExportExcel,
+                style = CommonButtonStyle.Primary,
+                icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export Excel", modifier = Modifier.size(16.dp)) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)

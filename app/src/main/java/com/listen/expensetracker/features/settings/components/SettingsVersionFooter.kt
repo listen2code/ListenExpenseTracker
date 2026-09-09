@@ -40,6 +40,7 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.SurfaceCard
 
 /**
  * Settings Bottom Version Footer Item.
@@ -71,83 +72,87 @@ fun SettingsVersionFooter(
     var clickCount by remember { mutableIntStateOf(0) }
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = AppDimens.SpaceSection),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+    SurfaceCard(
+        cornerRadius = AppDimens.CornerCard,
+        contentPadding = AppDimens.SpaceLarge,
+        modifier = modifier.fillMaxWidth()
     ) {
-        // Check for updates action button
-        CommonButton(
-            text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr(lang) else AppStrings.CHECK_UPDATE.tr(lang),
-            onClick = { onCheckForUpdates(versionName) },
-            enabled = !isCheckingUpdate,
-            style = CommonButtonStyle.Outlined,
-            icon = {
-                if (isCheckingUpdate) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(AppDimens.IconSizeSmall),
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 2.dp
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
+        ) {
+            // Check for updates action button
+            CommonButton(
+                text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr(lang) else AppStrings.CHECK_UPDATE.tr(lang),
+                onClick = { onCheckForUpdates(versionName) },
+                enabled = !isCheckingUpdate,
+                style = CommonButtonStyle.Outlined,
+                icon = {
+                    if (isCheckingUpdate) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(AppDimens.IconSizeSmall),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.SystemUpdate,
+                            contentDescription = "Update",
+                            modifier = Modifier.size(AppDimens.IconSizeMedium)
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Version Card with 5-tap developer mode trigger
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(AppDimens.CornerCard))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
+                    .combinedClickable(
+                        onClick = {
+                            if (isDeveloperMode) {
+                                Toast.makeText(context, AppStrings.DEVELOPER_MODE_ALREADY.tr(lang), Toast.LENGTH_SHORT).show()
+                                return@combinedClickable
+                            }
+                            val now = System.currentTimeMillis()
+                            if (now - lastClickTime > 1500L) {
+                                clickCount = 1
+                            } else {
+                                clickCount++
+                            }
+                            lastClickTime = now
+
+                            if (clickCount >= 5) {
+                                clickCount = 0
+                                onToggleDeveloperMode(true)
+                            } else if (clickCount in 3..4) {
+                                val remaining = 5 - clickCount
+                                val stepMsg = String.format(AppStrings.DEVELOPER_MODE_STEPS.tr(lang), remaining)
+                                Toast.makeText(context, stepMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onLongClick = {
+                            onOpenAboutDialog()
+                        }
                     )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.SystemUpdate,
-                        contentDescription = "Update",
-                        modifier = Modifier.size(AppDimens.IconSizeMedium)
+                    .padding(vertical = AppDimens.SpaceMedium, horizontal = AppDimens.SpaceLarge)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
+                ) {
+                    Text(
+                        text = "v$versionName ($versionCode)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium
                     )
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        // Version Card with 5-tap developer mode trigger
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(AppDimens.CornerCard))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
-                .combinedClickable(
-                    onClick = {
-                        if (isDeveloperMode) {
-                            Toast.makeText(context, AppStrings.DEVELOPER_MODE_ALREADY.tr(lang), Toast.LENGTH_SHORT).show()
-                            return@combinedClickable
-                        }
-                        val now = System.currentTimeMillis()
-                        if (now - lastClickTime > 1500L) {
-                            clickCount = 1
-                        } else {
-                            clickCount++
-                        }
-                        lastClickTime = now
-
-                        if (clickCount >= 5) {
-                            clickCount = 0
-                            onToggleDeveloperMode(true)
-                        } else if (clickCount in 3..4) {
-                            val remaining = 5 - clickCount
-                            val stepMsg = String.format(AppStrings.DEVELOPER_MODE_STEPS.tr(lang), remaining)
-                            Toast.makeText(context, stepMsg, Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    onLongClick = {
-                        onOpenAboutDialog()
-                    }
-                )
-                .padding(vertical = AppDimens.SpaceMedium, horizontal = AppDimens.SpaceLarge)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
-            ) {
-                Text(
-                    text = "v$versionName ($versionCode)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.Medium
-                )
             }
         }
     }

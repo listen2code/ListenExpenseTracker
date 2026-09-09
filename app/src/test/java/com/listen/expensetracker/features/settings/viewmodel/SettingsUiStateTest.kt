@@ -44,8 +44,22 @@ class SettingsUiStateTest {
         val mockUri = mock(Uri::class.java)
         val exportIntent = SettingsIntent.ExportJsonToFile(mockUri)
         assertEquals(mockUri, exportIntent.uri)
+
+        val exportExcelIntent = SettingsIntent.ExportExcelToFile(mockUri, 1000L, 2000L, "EXPENSE")
+        assertEquals(mockUri, exportExcelIntent.uri)
+        assertEquals(1000L, exportExcelIntent.startTs)
+        assertEquals(2000L, exportExcelIntent.endTs)
+        assertEquals("EXPENSE", exportExcelIntent.typeFilter)
+
+        val shareExcelIntent = SettingsIntent.ShareExcel(null, null, "ALL")
+        assertNull(shareExcelIntent.startTs)
+        assertNull(shareExcelIntent.endTs)
+        assertEquals("ALL", shareExcelIntent.typeFilter)
         
         val dialogIntent = SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)
         assertEquals(SettingsDialog.MonthlyBudget, dialogIntent.dialog)
+
+        val excelDialogIntent = SettingsIntent.OpenDialog(SettingsDialog.ExportExcelOptions)
+        assertEquals(SettingsDialog.ExportExcelOptions, excelDialogIntent.dialog)
     }
 }

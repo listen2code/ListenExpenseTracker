@@ -6,8 +6,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
@@ -27,7 +30,9 @@ class SettingsStateHolder(
     val listState: LazyListState,
     val currentMonthTitle: String,
     val exportJsonLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    val importJsonLauncher: ManagedActivityResultLauncher<Array<String>, Uri?>
+    val importJsonLauncher: ManagedActivityResultLauncher<Array<String>, Uri?>,
+    val exportExcelLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    val onPrepareExportExcel: (startTs: Long?, endTs: Long?, typeFilter: String, fileName: String) -> Unit
 )
 
 /**
@@ -79,12 +84,32 @@ fun rememberSettingsStateHolder(
         uri?.let { onIntent(SettingsIntent.ImportJsonFromFile(it)) }
     }
 
-    return remember(listState, currentMonthTitle, exportJsonLauncher, importJsonLauncher) {
+    // 6. Excel (CSV) 导出系统文档创建器
+    var pendingExportExcelConfig by remember { mutableStateOf<Triple<Long?, Long?, String>?>(null) }
+    val exportExcelLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            val (startTs, endTs, type) = pendingExportExcelConfig ?: Triple(null, null, "ALL")
+            onIntent(SettingsIntent.ExportExcelToFile(it, startTs, endTs, type))
+        }
+    }
+
+    val onPrepareExportExcel: (startTs: Long?, endTs: Long?, typeFilter: String, fileName: String) -> Unit = remember {
+        { startTs, endTs, typeFilter, fileName ->
+            pendingExportExcelConfig = Triple(startTs, endTs, typeFilter)
+            exportExcelLauncher.launch(fileName)
+        }
+    }
+
+    return remember(listState, currentMonthTitle, exportJsonLauncher, importJsonLauncher, exportExcelLauncher, onPrepareExportExcel) {
         SettingsStateHolder(
             listState = listState,
             currentMonthTitle = currentMonthTitle,
             exportJsonLauncher = exportJsonLauncher,
-            importJsonLauncher = importJsonLauncher
+            importJsonLauncher = importJsonLauncher,
+            exportExcelLauncher = exportExcelLauncher,
+            onPrepareExportExcel = onPrepareExportExcel
         )
     }
 }

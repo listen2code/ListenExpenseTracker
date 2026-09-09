@@ -46,6 +46,7 @@ class SettingsViewModel(
         observeGoogleAccount()
         observeSyncState()
         observeRecurringRules()
+        observeTransactions()
     }
 
     override fun handleIntent(intent: SettingsIntent) {
@@ -110,23 +111,29 @@ class SettingsViewModel(
                 emitEffect(CommonUiEffect.ShowToast("已安全退出 Google 账号"))
             }
             is SettingsIntent.TriggerCloudBackup -> viewModelScope.launch {
-                syncDelegate.triggerCloudBackup(currentState.googleAccountEmail, currentState.language, traceId,
-                    onOperating = { op -> updateState { copy(isOperating = op) } },
-                    onToast = { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) })
+                syncDelegate.triggerCloudBackup(currentState.googleAccountEmail, currentState.language, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
             }
             is SettingsIntent.TriggerCloudRestore -> viewModelScope.launch {
-                syncDelegate.triggerCloudRestore(currentState.googleAccountEmail, currentState.language, traceId,
-                    onOperating = { op -> updateState { copy(isOperating = op) } },
-                    onToast = { msg -> emitEffect(CommonUiEffect.ShowToast(msg)) })
+                syncDelegate.triggerCloudRestore(currentState.googleAccountEmail, currentState.language, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
             }
             is SettingsIntent.SeedDemoData -> viewModelScope.launch { syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.ClearAllData -> viewModelScope.launch { syncDelegate.clearAllData(currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.ExportJsonToFile -> viewModelScope.launch { syncDelegate.exportJsonToFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch { syncDelegate.importJsonFromFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ExportExcelToFile -> viewModelScope.launch { syncDelegate.exportExcelToFile(intent.uri, intent.startTs, intent.endTs, intent.typeFilter, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ShareExcel -> viewModelScope.launch { syncDelegate.shareExcel(intent.startTs, intent.endTs, intent.typeFilter, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.TriggerGoogleSignIn -> { emitEffect(SettingsEffect.LaunchGoogleSignIn) }
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is SettingsIntent.CheckForUpdates -> checkForUpdates(intent.currentVersion)
+        }
+    }
+
+    private fun observeTransactions() {
+        viewModelScope.launch {
+            dao.getAllTransactionsFlow().collectLatest { txs ->
+                updateState { copy(transactions = txs) }
+            }
         }
     }
 

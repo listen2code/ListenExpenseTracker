@@ -472,3 +472,27 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 - 优点：单手大拇指黄金操作区全覆盖，筛选与清空极度丝滑；
 - 成本：需使用 `Surface` + `combinedClickable` 替代基础 FAB 以支撑复合手势。
 
+---
+
+## ADR-031: 账单 Excel/CSV 导出与双轨分享机制 (Excel/CSV Export & Dual Sharing Mechanism)
+
+### 背景 (Context)
+用户在月度/年度财务对账、报销核算及离线分析场景下，对导出账单至电脑端电子表格（Excel、WPS、Numbers）有刚性诉求。由于 Apache POI 等传统 Excel 库在 Android 端体积过大（20MB+），极易造成 APK 臃肿和冷启动延迟；同时直接输出纯文本 CSV 容易在 Windows Excel 中出现中文乱码、错列或科学计数法格式丢失。
+
+### 决策 (Decision)
+1. **轻量级零依赖技术路线（UTF-8 BOM CSV）**：
+   - 不引入任何外部庞大库，采用纯原生 Kotlin 流式生成带 **UTF-8 BOM（`0xEF, 0xBB, 0xBF`）** 头的标准 CSV 文件。
+   - 彻底保证在 Windows/Mac 下的 Microsoft Excel、WPS Office、Apple Numbers 等各类表格软件中双击直开 **0 乱码**，且体积开销为 0。
+2. **RFC 4180 严格转义与公式友好**：
+   - 对包含逗号、换行、双引号的备注字段实施规范的双引号嵌套转义（`""`）；金额字段以浮点原样输出，开箱即用支持 Excel 自动求和公式。
+3. **多维灵活筛选与即时预估（`ExportOptionsSheet`）**：
+   - 支持按时间范围（全部、当月、当年）与交易类型（全部、支出、收入）多维组合过滤；
+   - 弹窗内根据当前选项毫秒级计算并展示 `预计导出 X 笔账单，合计 ￥Y.YY`，提升用户掌控感。
+4. **双轨导出动线（本地保存 + 一键分享）**：
+   - **保存为文件**：基于 Android 原生 Storage Access Framework（SAF `CreateDocument`），用户可自主存入本地任意目录；
+   - **一键分享**：基于安全隔离的 `FileProvider` 生成临时缓存，通过系统标准分享面板直发至微信、邮件、企业微信等常用工具。
+
+### 影响 (Consequences)
+- 优点：0 APK 膨胀、0 乱码、全平台表格软件即开即算，体验丝滑；
+- 规范：单文件行数限制严格 $\le 250$ 行。
+

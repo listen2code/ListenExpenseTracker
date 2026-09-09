@@ -90,6 +90,7 @@ fun SettingsScreen(
                     onToggleAutoBackupWifiOnly = { onIntent(SettingsIntent.ToggleAutoBackupWifiOnly(it)) },
                     onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
                     onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
+                    onExportExcel = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ExportExcelOptions)) },
                     onExportJson = {
                         val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
                         holder.exportJsonLauncher.launch(fileName)
@@ -160,5 +161,12 @@ fun SettingsScreen(
     }
 
     // Feature-Level Dialog Host
-    SettingsDialogHost(state = state, onIntent = onIntent)
+    SettingsDialogHost(
+        state = state,
+        onIntent = onIntent,
+        onSaveExcelToFile = { startTs, endTs, type, fileName ->
+            onIntent(SettingsIntent.DismissDialog)
+            holder.onPrepareExportExcel(startTs, endTs, type, fileName)
+        }
+    )
 }
