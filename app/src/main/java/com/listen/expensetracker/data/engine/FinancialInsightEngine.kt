@@ -43,7 +43,7 @@ object FinancialInsightEngine {
         // 2. 月环比总支出对比 (MoM Total Expense Analysis)
         if (prevTotal > 0 && currentTotal > 0) {
             val diff = (currentTotal - prevTotal) / prevTotal
-            val pctStr = "%.1f".format(abs(diff * 100))
+            val pctStr = abs(diff * 100).formatPercentage()
             if (diff > 0.12) {
                 insights.add(
                     FinancialInsightItem(
@@ -92,7 +92,7 @@ object FinancialInsightEngine {
                         title = AppStrings.INSIGHT_BUDGET_FRUGAL_TITLE.tr(lang),
                         description = AppStrings.INSIGHT_BUDGET_FRUGAL_DESC.tr(lang).format(
                             (currentDay * 100) / maxDays,
-                            "%.1f".format((currentTotal / monthlyBudget) * 100)
+                            ((currentTotal / monthlyBudget) * 100).formatPercentage()
                         ),
                         severity = InsightSeverity.POSITIVE,
                         isBudgetAction = true
@@ -112,7 +112,7 @@ object FinancialInsightEngine {
                     FinancialInsightItem(
                         id = "insight_cat_dominant_${dominant.key}",
                         title = AppStrings.INSIGHT_CAT_DOMINANT_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_CAT_DOMINANT_DESC.tr(lang).format(catName, "%.1f".format((dominant.value / currentTotal) * 100)),
+                        description = AppStrings.INSIGHT_CAT_DOMINANT_DESC.tr(lang).format(catName, ((dominant.value / currentTotal) * 100).formatPercentage()),
                         severity = InsightSeverity.WARNING,
                         categoryId = dominant.key,
                         isCategoryAction = true

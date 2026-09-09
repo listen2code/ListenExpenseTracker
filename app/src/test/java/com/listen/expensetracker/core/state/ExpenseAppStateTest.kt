@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.core.state
+package com.listen.expensetracker.core.state
 
 import androidx.compose.material3.SnackbarHostState
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
@@ -50,6 +50,7 @@ class ExpenseAppStateTest {
         appState.navigateToTransactionsMonth(monthOffset = -3)
         txState.value = txState.value.copy(period = TransactionPeriod.MONTH, selectedMonthOffset = -3)
 
+        verify(transactionsViewModel).handleIntent(TransactionsIntent.ResetAllFilters)
         verify(transactionsViewModel).handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
         verify(transactionsViewModel).handleIntent(TransactionsIntent.SelectMonth(-3))
         verify(statisticsViewModel, never()).handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
@@ -115,6 +116,17 @@ class ExpenseAppStateTest {
 
         verify(transactionsViewModel).handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.YEAR))
         verify(transactionsViewModel).handleIntent(TransactionsIntent.SetYearOffset(-2))
+        assertEquals(NavTab.TRANSACTIONS, appState.currentTab)
+    }
+
+    @Test
+    fun navigateToTransactionsMonth_clearsExistingFilters_andSwitchesToTransactionsTab() {
+        appState.navigateToTransactionsMonth(monthOffset = -6)
+
+        // 验证按顺序触发了 ResetAllFilters 清除既有筛选条件、切换为月周期、以及选择目标月份
+        verify(transactionsViewModel).handleIntent(TransactionsIntent.ResetAllFilters)
+        verify(transactionsViewModel).handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
+        verify(transactionsViewModel).handleIntent(TransactionsIntent.SelectMonth(-6))
         assertEquals(NavTab.TRANSACTIONS, appState.currentTab)
     }
 }

@@ -35,6 +35,7 @@ fun StatisticsEffects(
     val currentPeriod by rememberUpdatedState(period)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
     val currentYearOffset by rememberUpdatedState(selectedYearOffset)
+    val currentListState by rememberUpdatedState(listState)
 
     LaunchedEffect(viewModel, monthPagerState, yearPagerState) {
         // 任务 1：监听外部月份变更并同步对齐月度 Pager
@@ -91,9 +92,9 @@ fun StatisticsEffects(
                             }
                         }
                         is StatisticsEffect.ScrollToTop -> {
-                            val isAtTop = !listState.isScrollInProgress &&
-                                listState.firstVisibleItemIndex == 0 &&
-                                listState.firstVisibleItemScrollOffset == 0
+                            val isAtTop = !currentListState.isScrollInProgress &&
+                                currentListState.firstVisibleItemIndex == 0 &&
+                                currentListState.firstVisibleItemScrollOffset == 0
                             if (isAtTop) {
                                 if (currentPeriod == StatisticsPeriod.MONTH) {
                                     if (currentMonthOffset != 0 || monthPagerState.currentPage != PAGER_BASE_INDEX) {
@@ -105,7 +106,7 @@ fun StatisticsEffects(
                                     }
                                 }
                             } else {
-                                listState.animateScrollToItem(0)
+                                currentListState.animateScrollToItem(0)
                             }
                         }
                     }

@@ -32,6 +32,32 @@ fun Int.formatAmount(): String = this.toString()
 fun Number.formatAmount(): String = this.toDouble().formatAmount()
 
 /**
+ * 全局统一百分比数值格式化扩展函数 (Percentage Formatting Standard Ext)。
+ *
+ * 遵循规范:
+ * 百分比数字（如 100.0%、50.0%、12.50%）同样不需要 .0、.00 等无意义后缀。
+ *
+ * 示例:
+ * 100.0 -> "100"
+ * 50.0  -> "50"
+ * 12.50 -> "12.5"
+ * 12.34 -> "12.34"
+ */
+fun Double.formatPercentage(): String {
+    if (this == 0.0 || this == -0.0) return "0"
+    val str = String.format(Locale.US, "%.1f", this)
+    return when {
+        str.endsWith(".00") -> str.removeSuffix(".00")
+        str.endsWith(".0") -> str.removeSuffix(".0")
+        str.contains(".") -> str.trimEnd('0').trimEnd('.')
+        else -> str
+    }
+}
+
+fun Float.formatPercentage(): String = this.toDouble().formatPercentage()
+fun Number.formatPercentage(): String = this.toDouble().formatPercentage()
+
+/**
  * 带有币种符号的快捷格式化扩展。
  * 示例: 100.0.formatWithCurrency("￥") -> "￥100"
  */

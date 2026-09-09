@@ -20,37 +20,41 @@
         android:background="@drawable/widget_card_bg"
         android:padding="8dp">
 
-        <!-- 标题行：应用图标、月份与三态健康度徽章 -->
+        <!-- 第 1 行：应用图标、小眼睛与健康度状态徽章 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
             <ImageView
                 android:id="@+id/widget_app_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="6dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:padding="2dp"
+                android:scaleType="fitCenter"
                 android:src="@drawable/widget_app_icon"
                 android:contentDescription="@string/app_name" />
 
             <TextView
-                android:id="@+id/widget_month_title"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="12sp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                tools:text="9月支出" />
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/widget_btn_toggle_eye"
+                android:layout_width="40dp"
+                android:layout_height="32dp"
+                android:padding="5dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/widget_ic_eye"
+                android:contentDescription="Toggle Visibility" />
 
             <TextView
                 android:id="@+id/widget_health_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
                 android:background="@drawable/widget_badge_normal"
                 android:paddingHorizontal="5dp"
                 android:paddingVertical="1.5dp"
@@ -60,26 +64,90 @@
                 tools:text="正常" />
         </LinearLayout>
 
-        <!-- 当月总支出金额 (自适应缩小，禁止省略号截断) -->
-        <TextView
-            android:id="@+id/widget_spent_amount"
+        <!-- 第 2 行：左右切换与中间的月份 (宽裕点击区域，无盲区覆盖) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/widget_btn_prev_month"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/widget_ic_chevron_left"
+                android:contentDescription="Previous Month" />
+
+            <TextView
+                android:id="@+id/widget_month_title"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="11.5sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeMaxTextSize="12sp"
+                android:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="9sp"
+                app:autoSizeMaxTextSize="12sp"
+                app:autoSizeStepGranularity="1sp"
+                tools:text="2026年09月" />
+
+            <ImageView
+                android:id="@+id/widget_btn_next_month"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/widget_ic_chevron_right"
+                android:contentDescription="Next Month" />
+        </LinearLayout>
+
+        <!-- 当月总支出金额 (支出标签 + 金额自适应缩小，禁止省略号截断) -->
+        <LinearLayout
+            android:id="@+id/widget_spent_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="--"
-            android:textColor="@color/widget_text_primary"
-            android:textSize="19sp"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="9sp"
-            android:autoSizeMaxTextSize="19sp"
-            android:autoSizeStepGranularity="1sp"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="9sp"
-            app:autoSizeMaxTextSize="19sp"
-            app:autoSizeStepGranularity="1sp"
-            tools:text="￥0.00" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/widget_spent_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp"
+                tools:text="支出" />
+
+            <TextView
+                android:id="@+id/widget_spent_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="--"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeMaxTextSize="18sp"
+                android:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="9sp"
+                app:autoSizeMaxTextSize="18sp"
+                app:autoSizeStepGranularity="1sp"
+                tools:text="￥0.00" />
+        </LinearLayout>
 
         <!-- 剩余预算提示 (自适应缩小，禁止省略号截断) -->
         <TextView
@@ -105,8 +173,8 @@
             android:id="@+id/widget_budget_progress_normal"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
             android:max="100"
             android:progress="0"
             android:progressDrawable="@drawable/widget_progress_normal" />
@@ -115,8 +183,8 @@
             android:id="@+id/widget_budget_progress_warning"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
             android:max="100"
             android:progress="0"
             android:visibility="gone"
@@ -126,8 +194,8 @@
             android:id="@+id/widget_budget_progress_over"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
             android:max="100"
             android:progress="0"
             android:visibility="gone"

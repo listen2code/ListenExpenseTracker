@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.engine.formatPercentage
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryRepository
@@ -182,7 +183,7 @@ fun RankingCategoryItem(
                             .padding(horizontal = 5.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "${"%.1f".format(share.percentage * 100)}%",
+                            text = "${(share.percentage * 100).formatPercentage()}%",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = color

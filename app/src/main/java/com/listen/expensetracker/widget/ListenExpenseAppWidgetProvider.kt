@@ -25,6 +25,31 @@ import kotlinx.coroutines.launch
  */
 class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        val action = intent.action ?: return
+        val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
+
+        when (action) {
+            ACTION_PREV_MONTH -> {
+                val currentOffset = getWidgetMonthOffset(context, widgetId)
+                setWidgetMonthOffset(context, widgetId, currentOffset - 1)
+                triggerWidgetUpdate(context, widgetId)
+            }
+            ACTION_NEXT_MONTH -> {
+                val currentOffset = getWidgetMonthOffset(context, widgetId)
+                setWidgetMonthOffset(context, widgetId, currentOffset + 1)
+                triggerWidgetUpdate(context, widgetId)
+            }
+            ACTION_TOGGLE_HIDE_AMOUNT -> {
+                val currentHide = getWidgetHideAmount(context, widgetId)
+                setWidgetHideAmount(context, widgetId, !currentHide)
+                triggerWidgetUpdate(context, widgetId)
+            }
+        }
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -37,7 +62,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                 val allList = db.transactionDao().getAllTransactions()
                 val prefManager = ExpenseDataStoreManager(context)
                 val prefs = prefManager.preferencesFlow.first()
-                updateFromTransactions(context, allList, prefs.currencySymbol, prefs.monthlyBudget, prefs.language)
+                for (id in appWidgetIds) {
+                    updateSingleWidget(context, appWidgetManager, id, allList, prefs.currencySymbol, prefs.monthlyBudget, prefs.language)
+                }
             } catch (_: Exception) {
                 val (_, _, defaultTitle) = TransactionCalculationEngine.getMonthRangeAndTitle(0, "zh")
                 for (id in appWidgetIds) {
@@ -54,6 +81,16 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val CAT_SHOPPING = "c_shopping"
         const val CAT_DAILY = "c_other_exp"
 
+        // 小部件自定义广播 Action
+        const val ACTION_PREV_MONTH = "com.listen.expensetracker.widget.ACTION_PREV_MONTH"
+        const val ACTION_NEXT_MONTH = "com.listen.expensetracker.widget.ACTION_NEXT_MONTH"
+        const val ACTION_TOGGLE_HIDE_AMOUNT = "com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT"
+
+        // 偏好持久化 Key
+        private const val PREFS_NAME = "listen_expense_widget_prefs"
+        private const val KEY_OFFSET_PREFIX = "widget_month_offset_"
+        private const val KEY_HIDE_PREFIX = "widget_hide_amount_"
+
         // 统一小部件与深层链接 (Deep Link) 路由常量，避免在 Activity 中硬编码 (Rule 22)
         const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
         const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
@@ -61,6 +98,68 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val URI_HOST_QUICK_ADD = "quick_add"
         const val PARAM_CATEGORY = "category"
         const val PARAM_TYPE = "type"
+
+        fun getWidgetMonthOffset(context: Context, widgetId: Int): Int {
+            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return sp.getInt("$KEY_OFFSET_PREFIX$widgetId", 0)
+        }
+
+        fun setWidgetMonthOffset(context: Context, widgetId: Int, offset: Int) {
+            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            sp.edit().putInt("$KEY_OFFSET_PREFIX$widgetId", offset).apply()
+        }
+
+        fun getWidgetHideAmount(context: Context, widgetId: Int): Boolean {
+            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return sp.getBoolean("$KEY_HIDE_PREFIX$widgetId", false)
+        }
+
+        fun setWidgetHideAmount(context: Context, widgetId: Int, hide: Boolean) {
+            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            sp.edit().putBoolean("$KEY_HIDE_PREFIX$widgetId", hide).apply()
+        }
+
+        private fun triggerWidgetUpdate(context: Context, widgetId: Int) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val db = AppDatabase.getInstance(context)
+                    val allList = db.transactionDao().getAllTransactions()
+                    val prefManager = ExpenseDataStoreManager(context)
+                    val prefs = prefManager.preferencesFlow.first()
+                    val appWidgetManager = AppWidgetManager.getInstance(context)
+                    updateSingleWidget(context, appWidgetManager, widgetId, allList, prefs.currencySymbol, prefs.monthlyBudget, prefs.language)
+                } catch (_: Exception) {}
+            }
+        }
+
+        fun updateSingleWidget(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            allList: List<TransactionEntity>,
+            currencySymbol: String = "￥",
+            monthlyBudget: Double = 5000.0,
+            lang: String = "zh"
+        ) {
+            val offset = getWidgetMonthOffset(context, appWidgetId)
+            val hideAmount = getWidgetHideAmount(context, appWidgetId)
+            val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(offset, lang)
+            val totalExpense = calculateMonthlyExpense(allList, startTs, endTs)
+            val health = calculateHealthStatus(totalExpense, monthlyBudget)
+            WidgetLayoutBinder.renderWidget(
+                context = context,
+                manager = appWidgetManager,
+                widgetId = appWidgetId,
+                spent = totalExpense,
+                budget = monthlyBudget,
+                currency = currencySymbol,
+                title = title,
+                health = health,
+                lang = lang,
+                hideAmount = hideAmount,
+                monthOffset = offset
+            )
+        }
 
         /**
          * 统一标准化分类别名映射，兼容外部调用与旧版分类 ID
@@ -100,21 +199,17 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             monthlyBudget: Double = 5000.0,
             lang: String = "zh"
         ) {
-            val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(0, lang)
-            val totalExpense = calculateMonthlyExpense(allList, startTs, endTs)
-            val health = calculateHealthStatus(totalExpense, monthlyBudget)
-
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, ListenExpenseAppWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
 
             for (appWidgetId in appWidgetIds) {
-                WidgetLayoutBinder.renderWidget(context, appWidgetManager, appWidgetId, totalExpense, monthlyBudget, currencySymbol, title, health, lang)
+                updateSingleWidget(context, appWidgetManager, appWidgetId, allList, currencySymbol, monthlyBudget, lang)
             }
         }
 
         /**
-         * 纯计算逻辑：过滤当月已发生支出
+         * 纯计算逻辑：过滤指定月份已发生支出
          */
         fun calculateMonthlyExpense(allList: List<TransactionEntity>, startTs: Long, endTs: Long): Double {
             return allList.filter { it.type == TransactionType.EXPENSE && it.timestamp in startTs..endTs }.sumOf { it.amount }
@@ -139,6 +234,45 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             return PendingIntent.getActivity(context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        fun createPrevMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
+            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
+                action = ACTION_PREV_MONTH
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                widgetId * 10 + 1,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        fun createNextMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
+            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
+                action = ACTION_NEXT_MONTH
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                widgetId * 10 + 2,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        fun createToggleEyePendingIntent(context: Context, widgetId: Int): PendingIntent {
+            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
+                action = ACTION_TOGGLE_HIDE_AMOUNT
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                widgetId * 10 + 3,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
         fun createQuickAddPendingIntent(

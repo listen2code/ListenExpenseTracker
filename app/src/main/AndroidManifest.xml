@@ -37,6 +37,9 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.listen.expensetracker.widget.ACTION_PREV_MONTH" />
+                <action android:name="com.listen.expensetracker.widget.ACTION_NEXT_MONTH" />
+                <action android:name="com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

@@ -18,8 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
+import com.listen.uicomponent.components.CommonSwitchRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -98,54 +97,22 @@ fun SettingsDataCenterSection(
                 )
 
                 // Auto-Backup to Google Drive Switch Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f).padding(end = AppDimens.SpaceMedium)) {
-                        Text(
-                            text = AppStrings.AUTO_BACKUP_DRIVE_TITLE.tr(lang),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = AppStrings.AUTO_BACKUP_DRIVE_DESC.tr(lang),
-                            fontSize = AppDimens.TextMicro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = autoBackupDrive,
-                        onCheckedChange = onToggleAutoBackupDrive,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
+                CommonSwitchRow(
+                    title = AppStrings.AUTO_BACKUP_DRIVE_TITLE.tr(lang),
+                    checked = autoBackupDrive,
+                    onCheckedChange = onToggleAutoBackupDrive,
+                    subtitle = AppStrings.AUTO_BACKUP_DRIVE_DESC.tr(lang),
+                    contentPadding = 0.dp
+                )
 
                 // Wi-Fi Only Switch Row (Conditional on Auto Backup enabled)
                 if (autoBackupDrive) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = AppStrings.AUTO_BACKUP_WIFI_ONLY_TITLE.tr(lang),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Switch(
-                            checked = autoBackupWifiOnly,
-                            onCheckedChange = onToggleAutoBackupWifiOnly,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                checkedTrackColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    }
+                    CommonSwitchRow(
+                        title = AppStrings.AUTO_BACKUP_WIFI_ONLY_TITLE.tr(lang),
+                        checked = autoBackupWifiOnly,
+                        onCheckedChange = onToggleAutoBackupWifiOnly,
+                        contentPadding = 0.dp
+                    )
                 }
 
                 // Sync Status Indicators

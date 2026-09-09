@@ -1,4 +1,4 @@
-﻿package com.listen.expensetracker.data.engine
+package com.listen.expensetracker.data.engine
 
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -28,7 +28,7 @@ internal object FinancialInsightDetectors {
                 description = AppStrings.INSIGHT_SAVINGS_HEALTHY_DESC.tr(lang).format(
                     "$currencySymbol${currentIncomeTotal.formatAmount()}",
                     "$currencySymbol${currentTotal.formatAmount()}",
-                    "%.1f".format(savingsRate * 100)
+                    (savingsRate * 100).formatPercentage()
                 ),
                 severity = InsightSeverity.POSITIVE,
                 diffPercentage = (savingsRate * 100).toFloat()

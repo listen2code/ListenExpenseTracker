@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,51 +63,13 @@ fun TransactionsHeaderFilters(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
     ) {
-        // Search Input Bar & Filter Trigger Button
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
-        ) {
-            SearchBarInput(
-                query = state.searchQuery,
-                onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
-                placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
-                modifier = Modifier.weight(1f)
-            )
-
-            // Compound Filter Sheet Trigger with badge count
-            val hasDialogFilters = state.activeFilterCount > 0
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = if (hasDialogFilters) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                modifier = Modifier
-                    .height(38.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.FilterSheet)) }
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = AppStrings.FILTER_TITLE.tr(lang),
-                        tint = if (hasDialogFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    if (state.activeFilterCount > 0) {
-                        Text(
-                            text = "${state.activeFilterCount}",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-        }
+        // Search Input Bar (Full Width)
+        SearchBarInput(
+            query = state.searchQuery,
+            onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
+            placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
+            modifier = Modifier.fillMaxWidth()
+        )
 
         // Active Filter Tags Row (Scrollable chips with 'X' button)
         ActiveFilterTagsRow(

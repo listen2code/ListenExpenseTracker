@@ -2,6 +2,7 @@ package com.listen.expensetracker
 
 import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.engine.formatAmount
+import com.listen.expensetracker.data.engine.formatPercentage
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -44,6 +45,16 @@ class AmountFormatExtTest {
         assertEquals("$", defaultCurrencySymbolForLanguage("en"))
         assertEquals("$", defaultCurrencySymbolForLanguage("fr"))
         assertEquals("$", defaultCurrencySymbolForLanguage(""))
+    }
+
+    @Test
+    fun formatPercentage_trailingZeros_convertsToInteger() {
+        assertEquals("100", 100.0.formatPercentage())
+        assertEquals("100", 100.0f.formatPercentage())
+        assertEquals("50", 50.0.formatPercentage())
+        assertEquals("0", 0.0.formatPercentage())
+        assertEquals("12.5", 12.50.formatPercentage())
+        assertEquals("12.3", 12.34.formatPercentage())
     }
 }
 

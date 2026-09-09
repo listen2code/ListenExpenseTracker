@@ -27,36 +27,41 @@ object WidgetLayoutBinder {
         currency: String,
         title: String,
         health: BudgetHealthStatus,
-        lang: String
+        lang: String,
+        hideAmount: Boolean = false,
+        monthOffset: Int = 0
     ) {
         val views = RemoteViews(context.packageName, R.layout.widget_expense_overview)
-        val formattedSpent = "$currency${spent.formatAmount()}"
+        val formattedSpent = if (hideAmount) "••••" else "$currency${spent.formatAmount()}"
         val remaining = budget - spent
         val usageRatio = if (budget > 0) (spent / budget).toFloat() else 0f
         val progressPercent = (usageRatio * 100).toInt().coerceIn(0, 100)
 
-        // 1. 设置当月看板标题与金额（精炼月份标签，多语言收口）
+        // 1. 设置当月看板标题与金额（月份精简呈现，支出移动至金额旁）
         val displayMonthTitle = if (title.contains("(")) {
-            val monthPure = title.substringAfter("(").substringBefore(")")
-            AppStrings.WIDGET_MONTH_EXPENSE.tr(lang).format(monthPure)
+            title.substringAfter("(").substringBefore(")")
         } else {
-            "$title · ${AppStrings.TYPE_EXPENSE.tr(lang)}"
+            title
         }
         views.setTextViewText(R.id.widget_month_title, displayMonthTitle)
+        views.setTextViewText(R.id.widget_spent_label, AppStrings.TYPE_EXPENSE.tr(lang))
         views.setTextViewText(R.id.widget_spent_amount, formattedSpent)
 
         // 代码端阶梯式动态降阶字号 (兜底部分启动器不支持 XML autoSizeTextType，彻底杜绝 ...)
+        val isEn = lang.equals("en", ignoreCase = true)
         val targetSpentSp = when {
-            formattedSpent.length <= 6 -> 19f   // ￥0 ~ ￥999
-            formattedSpent.length <= 8 -> 16f   // ￥1,234
-            formattedSpent.length <= 10 -> 13.5f // ￥12,345
-            formattedSpent.length <= 12 -> 11.5f // ￥123,456
-            else -> 9.5f                        // 百万级大金额
+            formattedSpent.length <= 6 -> if (isEn) 16.5f else 18f   // ￥0 ~ ￥999 或 ••••
+            formattedSpent.length <= 8 -> if (isEn) 14.5f else 15.5f // ￥1,234
+            formattedSpent.length <= 10 -> if (isEn) 12f else 13f    // ￥12,345
+            formattedSpent.length <= 12 -> 10.5f                     // ￥123,456
+            else -> 9.5f                                             // 百万级大金额
         }
         views.setTextViewTextSize(R.id.widget_spent_amount, TypedValue.COMPLEX_UNIT_SP, targetSpentSp)
 
         val remainingText = if (budget > 0) {
-            if (remaining >= 0) {
+            if (hideAmount) {
+                if (remaining >= 0) "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} ••••" else "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} ••••"
+            } else if (remaining >= 0) {
                 "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} $currency${remaining.formatAmount()}"
             } else {
                 "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} $currency${(-remaining).formatAmount()}"
@@ -68,7 +73,11 @@ object WidgetLayoutBinder {
         val targetRemainingSp = if (remainingText.length > 11) 9.5f else 11f
         views.setTextViewTextSize(R.id.widget_budget_remaining, TypedValue.COMPLEX_UNIT_SP, targetRemainingSp)
 
-        // 2. 健康状态徽章与三态彩色进度条显隐联动
+        // 2. 小眼睛图标状态绑定
+        val eyeIcon = if (hideAmount) R.drawable.widget_ic_eye_off else R.drawable.widget_ic_eye
+        views.setImageViewResource(R.id.widget_btn_toggle_eye, eyeIcon)
+
+        // 3. 健康状态徽章与三态彩色进度条显隐联动
         val (badgeText, badgeBg, badgeColor) = when (health) {
             BudgetHealthStatus.NORMAL -> Triple(AppStrings.BUDGET_STATUS_NORMAL.tr(lang), R.drawable.widget_badge_normal, R.color.widget_health_normal)
             BudgetHealthStatus.WARNING -> Triple(AppStrings.BUDGET_STATUS_WARNING.tr(lang), R.drawable.widget_badge_warning, R.color.widget_health_warning)
@@ -90,16 +99,25 @@ object WidgetLayoutBinder {
         }
         views.setProgressBar(activeProgressBarId, 100, progressPercent, false)
 
-        // 3. 动态配置 4 大高频快捷分类按钮文案（上下布局，仅需更新文本子控件）
+        // 4. 动态配置 4 大高频快捷分类按钮文案（上下布局，仅需更新文本子控件）
         views.setTextViewText(R.id.widget_btn_food_text, AppStrings.CAT_FOOD.tr(lang))
         views.setTextViewText(R.id.widget_btn_transport_text, AppStrings.CAT_TRANSPORT.tr(lang))
         views.setTextViewText(R.id.widget_btn_shopping_text, AppStrings.CAT_SHOPPING.tr(lang))
         views.setTextViewText(R.id.widget_btn_daily_text, AppStrings.CAT_OTHER_EXP.tr(lang))
 
-        // 4. 意图路由绑定
+        // 5. 意图路由绑定 (月份左右切换、眼睛显隐切换、打开 App、4个快捷记账)
+        views.setOnClickPendingIntent(R.id.widget_btn_prev_month, ListenExpenseAppWidgetProvider.createPrevMonthPendingIntent(context, widgetId))
+        views.setOnClickPendingIntent(R.id.widget_btn_next_month, ListenExpenseAppWidgetProvider.createNextMonthPendingIntent(context, widgetId))
+        views.setOnClickPendingIntent(R.id.widget_btn_toggle_eye, ListenExpenseAppWidgetProvider.createToggleEyePendingIntent(context, widgetId))
+
         val openAppPendingIntent = ListenExpenseAppWidgetProvider.createOpenAppPendingIntent(context)
-        views.setOnClickPendingIntent(R.id.widget_root, openAppPendingIntent)
-        views.setOnClickPendingIntent(R.id.widget_budget_card, openAppPendingIntent)
+        // 防误触优化：移除外层 card 与 root 的全局兜底绑定，将应用拉起精准约束于金额、预算及标题等核心内容区域
+        views.setOnClickPendingIntent(R.id.widget_spent_container, openAppPendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_spent_amount, openAppPendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_budget_remaining, openAppPendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_month_title, openAppPendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_app_icon, openAppPendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_health_badge, openAppPendingIntent)
 
         views.setOnClickPendingIntent(R.id.widget_btn_food, ListenExpenseAppWidgetProvider.createQuickAddPendingIntent(context, ListenExpenseAppWidgetProvider.CAT_FOOD, 201))
         views.setOnClickPendingIntent(R.id.widget_btn_transport, ListenExpenseAppWidgetProvider.createQuickAddPendingIntent(context, ListenExpenseAppWidgetProvider.CAT_TRANSPORT, 202))

@@ -428,3 +428,47 @@ Swipe-to-Delete 滑动删除极易因误触导致账单丢失，若每次删除�
 ### 影响 (Consequences)
 - 优点：符合现代移动应用主流交互习惯（如微博、Twitter 双击 Tab 置顶并刷新），大幅提升重度用户的交互效率；
 - 成本：需在 `TransactionsEffects` 与 `StatisticsEffects` 中捕获 `ScrollToTop` 事件并结合 `LazyListState` 状态做两段式分支判断。
+
+---
+
+## ADR-029: 设置画面 Switch 触控热区全行标准化 (Settings Switch Full-Row Touch Target Standardization)
+
+### 背景 (Context)
+在设置页中，部分开关（如安全与隐私、APM 调试）采用了 `CommonSwitchRow`，用户点击整行任意文字或区域即可触发状态切换；而数据中心部分的 Google Drive 自动备份相关开关最初采用原生的 `Row + Switch` 实现，仅有右侧的小开关控件可被点击，导致各分区触控交互行为不一致。
+
+### 决策 (Decision)
+1. **统一组件体系**：
+   - 将 `SettingsDataCenterSection` 内所有开关控件统一迁移至 `CommonSwitchRow(contentPadding = 0.dp)`；
+   - 与 `SettingsSecuritySection`（生物识别锁、防窥保护、手势隐额）以及 `SettingsApmSection`（调试悬浮窗）保持 100% 一致的设计规范。
+2. **全行可点击触控体验**：
+   - 用户轻触标题、副标题说明文字或开关自身，均可流畅切换开关状态，彻底消除点击盲区。
+
+### 影响 (Consequences)
+- 优点：交互手感高度统一，符合无障碍 (Accessibility) 与大拇指热区设计准则；同时精简了代码行数（210 行），严格遵守单文件 $\le 250$ 行规范。
+- 成本：无。
+
+---
+
+## ADR-030: 流水画面筛选按钮大拇指黄金热区化与长按快速重置 (Transactions Filter FAB Thumb Ergonomics & Long-Press Quick Clear)
+
+### 背景 (Context)
+1. 原先流水界面的多维筛选入口位于屏幕右上角（搜索框右侧），单手握持大屏手机时大拇指极难触达，必须双手协同或改变握姿。
+2. 搜索框右侧放置筛选按钮挤占了搜索输入的视觉宽度。
+3. 用户在频繁筛选查看后，缺乏极简、快速一键清除所有生效筛选条件的快捷通道。
+
+### 决策 (Decision)
+1. **顶部搜索框全宽化**：
+   - 移除右上角筛选小按钮，让 `SearchBarInput` 独占整行（`fillMaxWidth()`），输入更从容开阔。
+2. **账户横滑栏保持纯粹**：
+   - 搜索框下方的横向滑动栏专职承接账户维度的切换（全部、现金、银行卡、信用卡等），不杂糅通用的多维筛选入口，心智职责清晰。
+3. **右下角双 FAB 协同与大拇指盲操直达**：
+   - 在右下角主记账 `+` 按钮左侧新增**次级悬浮筛选按钮**（`SmallFloatingActionButton` 尺寸 40dp）；
+   - 筛选按钮自带激活数字徽标（`BadgedBox`），当存在生效条件时高亮显示；
+4. **双重手势交互与防误触重置**：
+   - **单击（Click）**：正常呼出 `FilterSheet` 多维筛选抽屉；
+   - **长按（Long Click）**：伴随扎实的触觉震动反馈（`HapticFeedbackType.LongPress`），瞬间派发 `ResetAllFilters` 重置所有生效条件，并弹出 Toast 提示 `清除筛选`；长按手势（约 400ms）天然防止误触。
+
+### 影响 (Consequences)
+- 优点：单手大拇指黄金操作区全覆盖，筛选与清空极度丝滑；
+- 成本：需使用 `Surface` + `combinedClickable` 替代基础 FAB 以支撑复合手势。
+

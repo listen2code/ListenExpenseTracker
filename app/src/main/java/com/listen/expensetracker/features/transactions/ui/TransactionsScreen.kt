@@ -6,16 +6,38 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Modifier
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -52,6 +74,8 @@ fun TransactionsScreen(
     // 🌟 一行收拢所有 Pager、ListState 与副作用协同逻辑
     val holder = rememberTransactionsStateHolder(state, onIntent, viewModel)
     val lang = state.language
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     BaseScreenScaffold(
         titleSlot = {
@@ -84,12 +108,69 @@ fun TransactionsScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction())) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceLarge)
             ) {
-                Icon(Icons.Default.Add, contentDescription = AppStrings.BTN_ADD_TRANSACTION.tr(lang))
+                // Secondary Filter FAB: Thumb zone one-tap access with badge & long-press quick clear
+                val hasFilters = state.activeFilterCount > 0
+                val filterContainerColor = if (hasFilters) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                val filterContentColor = if (hasFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                BadgedBox(
+                    badge = {
+                        if (hasFilters) {
+                            Badge(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ) {
+                                Text(
+                                    text = "${state.activeFilterCount}",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = filterContainerColor,
+                        shadowElevation = 4.dp,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .combinedClickable(
+                                onClick = {
+                                    onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.FilterSheet))
+                                },
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (state.hasActiveFilters) {
+                                        onIntent(TransactionsIntent.ResetAllFilters)
+                                        Toast.makeText(context, AppStrings.FILTER_CLEAR_ACTIVE.tr(lang), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            )
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = AppStrings.FILTER_TITLE.tr(lang),
+                                tint = filterContentColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Primary Add Transaction FAB
+                FloatingActionButton(
+                    onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction())) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = AppStrings.BTN_ADD_TRANSACTION.tr(lang))
+                }
             }
         },
         modifier = modifier

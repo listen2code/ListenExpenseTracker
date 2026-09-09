@@ -168,6 +168,8 @@ class ExpenseAppState(
 
     fun navigateToTransactionsMonth(monthOffset: Int) {
         preserveStatisticsYearOnReturn = true
+        // [Feature] 从年度收支总览/各月走势穿透到流水画面时，清除即存的筛选条件（搜索词、分类、账户、类型、金额等），确保完整展示该月份全量流水
+        transactionsViewModel.handleIntent(TransactionsIntent.ResetAllFilters)
         transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
         transactionsViewModel.handleIntent(TransactionsIntent.SelectMonth(monthOffset))
         lastTimeTab = NavTab.TRANSACTIONS

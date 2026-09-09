@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import com.listen.expensetracker.features.settings.viewmodel.SettingsEffect
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -21,11 +23,12 @@ fun SettingsEffects(
     context: Context,
     listState: LazyListState
 ) {
+    val currentListState by rememberUpdatedState(listState)
     LaunchedEffect(viewModel) {
         viewModel?.viewEffect?.filterIsInstance<SettingsEffect>()?.collectLatest { effect ->
             when (effect) {
                 is SettingsEffect.LaunchGoogleSignIn -> viewModel.launchGoogleAccountPicker(context)
-                is SettingsEffect.ScrollToTop -> listState.animateScrollToItem(0)
+                is SettingsEffect.ScrollToTop -> currentListState.animateScrollToItem(0)
             }
         }
     }
