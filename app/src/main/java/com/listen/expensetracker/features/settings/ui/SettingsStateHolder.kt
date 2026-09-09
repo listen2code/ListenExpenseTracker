@@ -59,6 +59,7 @@ fun rememberSettingsStateHolder(
     }
 
     // 2. 列表滚动状态
+    // 使用 rememberSaveable 持久化滚动位置，防止发生 Configuration Change（如折叠屏折叠或旋转屏幕）时产生位置丢失。
     val listState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
     }
@@ -71,6 +72,7 @@ fun rememberSettingsStateHolder(
     )
 
     // 4. JSON 导出系统文档创建器
+    // 所有的 ActivityResultLauncher 必须被注册并在 Compose 树生命周期内存活，否则系统回调将无法正确路由。
     val exportJsonLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -85,6 +87,9 @@ fun rememberSettingsStateHolder(
     }
 
     // 6. Excel (CSV) 导出系统文档创建器
+    // 设计了“两阶段”挂起导出模式 (Pending Export Pattern)：
+    // 先将过滤配置参数 (startTs, endTs, type) 缓存到状态中，然后再调用系统的文件保存框，
+    // 最后在系统的回调中结合该挂起配置真正发送导出 Intent。
     var pendingExportExcelConfig by remember { mutableStateOf<Triple<Long?, Long?, String>?>(null) }
     val exportExcelLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv")

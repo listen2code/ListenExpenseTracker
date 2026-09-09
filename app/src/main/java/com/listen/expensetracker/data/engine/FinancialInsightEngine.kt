@@ -11,6 +11,9 @@ import kotlin.math.abs
 /**
  * 智能财务洞察与深度环比诊断核心引擎 (FinancialInsightEngine)。
  * 负责当月 vs 上月环比分析、预算消耗速率预测、分类异动突增排查与全年收支总览计算。
+ * 
+ * 设计模式：使用了“检测策略模式”(Detection Strategy Pattern)。
+ * 每一种洞察指标（如赤字、总额突增、分类主导等）都是一项独立无干扰的检测规则，保障了策略易于拔插及后续扩展。
  */
 object FinancialInsightEngine {
 
@@ -41,6 +44,7 @@ object FinancialInsightEngine {
         }
 
         // 2. 月环比总支出对比 (MoM Total Expense Analysis)
+        // 通过对比 (当月支出 - 上月支出) / 上月支出 计算开销变化幅度，超 ±12% 时进行阈值洞察告警。
         if (prevTotal > 0 && currentTotal > 0) {
             val diff = (currentTotal - prevTotal) / prevTotal
             val pctStr = abs(diff * 100).formatPercentage()
@@ -68,6 +72,7 @@ object FinancialInsightEngine {
         }
 
         // 3. 预算消耗速率预测与节流表现 (Burn Rate & Frugal Progress)
+        // 烧钱率预测算法：(当月已用总额 / 当前已过去的自然天数) * 当月总天数，由此动态预估月底花费是否会超预算。
         val nowCal = Calendar.getInstance()
         val currentDay = nowCal.get(Calendar.DAY_OF_MONTH)
         val maxDays = nowCal.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -122,6 +127,7 @@ object FinancialInsightEngine {
         }
 
         // 5. 突发分类异动排查 (Category Spike Drilldown)
+        // 检测某个单项分类在本月的总开支是否出现了异动突增（如超过上月同类别的 1.8倍）。
         for ((catId, amt) in currentCatMap) {
             val prevAmt = prevCatMap[catId] ?: 0.0
             if (prevAmt > 50.0 && amt > prevAmt * 1.8) {
@@ -151,6 +157,7 @@ object FinancialInsightEngine {
         }
 
         // 8. 单日开销最大峰值检测 (Peak Spending Day)
+        // 挑出本月消费占比极高（>=35%）的单日峰值作为关键开支溯源依据。
         val dayGroups = currentExpenses.groupBy {
             val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
             c.get(Calendar.DAY_OF_MONTH)

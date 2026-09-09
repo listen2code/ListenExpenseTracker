@@ -42,6 +42,8 @@ enum class AmountFilterPreset(val labelKey: String) {
 
 object TransactionCalculationEngine {
 
+    // 采用 Object 单例模式设计此计算引擎，确保它是纯粹的无状态计算工具。
+    // 计算过程仅依赖传入参数，内部无状态副作用缓存，有利于单元测试和多线程并发安全。
     fun filterAndCalculate(
         allList: List<TransactionEntity>,
         currentOffset: Int,
@@ -63,10 +65,14 @@ object TransactionCalculationEngine {
         val monthFilteredList = allList.filter { it.timestamp in startTs..endTs }
         val activeCategories = if (selectedCategories.isNotEmpty()) selectedCategories else if (categoryFilter != "ALL") setOf(categoryFilter) else emptySet()
 
+        // 采用多维度的过滤管道模式 (Filter Pipeline)：
+        // 管道层层过滤涵盖：文本查询、账户类型、账单分类、金额范围。
         val matchedFiltered = monthFilteredList.filter { item ->
             val itemCal = Calendar.getInstance().apply { timeInMillis = item.timestamp }
             val itemMonth = itemCal.get(Calendar.MONTH) + 1
             val itemDay = itemCal.get(Calendar.DAY_OF_MONTH)
+            // 刻意囊括了中文日期（X月X日）和 ISO数字（MM-dd）等不同维度的数据标签，
+            // 使得用户可以通过自然语言习惯直接从查询栏搜索特定日期的账单流水。
             val dateLabelZh = "${itemMonth}月${itemDay}日"
             val matchesQuery = cleanQuery.isEmpty() ||
                     item.categoryName.lowercase().contains(cleanQuery) ||
@@ -151,6 +157,8 @@ object TransactionCalculationEngine {
         )
     }
 
+    // 使用 groupBy 先对数据进行分类聚合，随后结合 sumOf 汇总各个类别的份额，
+    // 这种流式计算非常契合 Kotlin 集合式的操作，用来生成图表分类占比。
     fun calculateCategoryShares(items: List<TransactionEntity>, total: Double): List<PieChartItem> {
         if (total <= 0) return emptyList()
         return items
@@ -211,6 +219,7 @@ object TransactionCalculationEngine {
 
     fun getMonthRangeAndTitle(offset: Int, lang: String = "zh"): Triple<Long, Long, String> {
         val cal = Calendar.getInstance().apply {
+            // 利用 Calendar 计算月份边缘 Case（当前月份 1号 0时0分0秒）
             add(Calendar.MONTH, offset)
             set(Calendar.DAY_OF_MONTH, 1)
             set(Calendar.HOUR_OF_DAY, 0)
