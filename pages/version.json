@@ -1,6 +1,6 @@
 {
-  "version": "0.0.35",
-  "buildNumber": 35,
+  "version": "0.0.36",
+  "buildNumber": 36,
   "url": "https://play.google.com/store/apps/details?id=com.listen.expensetracker",
   "changelog": {
     "zh": "v0.0.35：统计页面分段进度条支持长按拖拽连续切换选中分类，环形图同步联动高亮并展示详情气泡；优化触觉震动反馈与触控换算精度。",
