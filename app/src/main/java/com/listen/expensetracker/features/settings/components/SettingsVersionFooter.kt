@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -111,8 +112,9 @@ fun SettingsVersionFooter(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 48.dp)
                     .clip(RoundedCornerShape(AppDimens.CornerCard))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
                     .combinedClickable(
                         onClick = {
                             if (isDeveloperMode) {
@@ -140,7 +142,7 @@ fun SettingsVersionFooter(
                             onOpenAboutDialog()
                         }
                     )
-                    .padding(vertical = AppDimens.SpaceMedium, horizontal = AppDimens.SpaceLarge)
+                    .padding(vertical = AppDimens.SpaceLarge, horizontal = AppDimens.SpaceLarge)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -148,9 +150,9 @@ fun SettingsVersionFooter(
                 ) {
                     Text(
                         text = "v$versionName ($versionCode)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

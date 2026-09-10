@@ -99,7 +99,7 @@ fun CategoryBudgetCenterContent(
                         },
                         modifier = Modifier.size(26.dp)
                     ) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev", modifier = Modifier.size(15.dp))
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                     }
                     Text(text = monthTitle, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 6.dp))
                     IconButton(
@@ -112,7 +112,7 @@ fun CategoryBudgetCenterContent(
                         },
                         modifier = Modifier.size(26.dp)
                     ) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", modifier = Modifier.size(15.dp))
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                     }
                 }
             }

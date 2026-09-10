@@ -88,6 +88,7 @@ fun SettingsFinanceSection(
                         Icon(
                             imageVector = Icons.Default.Savings,
                             contentDescription = "Budget",
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                     },
@@ -103,6 +104,7 @@ fun SettingsFinanceSection(
                         Icon(
                             imageVector = Icons.Default.AccountBalanceWallet,
                             contentDescription = "Recurring",
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                     },
@@ -124,6 +126,7 @@ fun SettingsFinanceSection(
                         Icon(
                             imageVector = Icons.Default.Category,
                             contentDescription = "Categories",
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                     },
@@ -139,6 +142,7 @@ fun SettingsFinanceSection(
                         Icon(
                             imageVector = Icons.Default.AccountBalanceWallet,
                             contentDescription = "Accounts",
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                     },

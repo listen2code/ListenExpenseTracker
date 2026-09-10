@@ -9,12 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.HorizontalDivider
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -55,13 +57,15 @@ fun AboutAppDialog(
     lang: String = "zh"
 ) {
     val context = LocalContext.current
-    val (versionName, versionCode) = try {
-        val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        val vName = pInfo.versionName ?: "0.0.1"
-        val vCode = PackageInfoCompat.getLongVersionCode(pInfo)
-        Pair(vName, vCode)
-    } catch (_: Exception) {
-        Pair("0.0.1", 1L)
+    val (versionName, versionCode) = remember(context) {
+        try {
+            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            val vName = pInfo.versionName ?: "0.0.1"
+            val vCode = PackageInfoCompat.getLongVersionCode(pInfo)
+            Pair(vName, vCode)
+        } catch (_: Exception) {
+            Pair("0.0.1", 1L)
+        }
     }
 
     val appIconBitmap = remember(context) {
@@ -77,22 +81,6 @@ fun AboutAppDialog(
     CommonDialog(
         onDismissRequest = onDismiss,
         title = AppStrings.ABOUT_APP.tr(lang),
-        icon = {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(AppDimens.CornerButton))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "About",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        },
         confirmButton = {
             CommonButton(
                 text = AppStrings.BTN_DONE.tr(lang),
@@ -102,44 +90,25 @@ fun AboutAppDialog(
         }
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
-            // App Branding & Version Header Card
             AboutAppHeader(
                 appIconBitmap = appIconBitmap,
                 versionName = versionName,
                 versionCode = versionCode
             )
 
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                modifier = Modifier.padding(vertical = AppDimens.SpaceExtraSmall)
-            )
-
-            // Technical Specs & Key Highlights
-            AboutInfoItem(
-                icon = Icons.Default.Layers,
-                label = AppStrings.APP_ARCHITECTURE_LABEL.tr(lang),
-                value = "MVI + Clean Architecture + Room"
-            )
-            AboutInfoItem(
-                icon = Icons.Default.Code,
-                label = AppStrings.APP_CORE_SDK_LABEL.tr(lang),
-                value = "ListenArch, ListenUiComponent"
-            )
-            AboutInfoItem(
-                icon = Icons.Default.Security,
-                label = AppStrings.APP_FEATURES_LABEL.tr(lang),
-                value = AppStrings.APP_FEATURES_DESC.tr(lang)
-            )
+            AboutSpecsCard(lang = lang)
         }
     }
 }
 
 @Composable
 private fun AboutAppHeader(
-    appIconBitmap: androidx.compose.ui.graphics.ImageBitmap?,
+    appIconBitmap: ImageBitmap?,
     versionName: String,
     versionCode: Long
 ) {
@@ -147,7 +116,7 @@ private fun AboutAppHeader(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(AppDimens.CornerCard))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f))
             .padding(AppDimens.SpaceMedium),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
@@ -156,31 +125,21 @@ private fun AboutAppHeader(
             Image(
                 bitmap = appIconBitmap,
                 contentDescription = "lExpense",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(AppDimens.CornerButton))
+                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp))
             )
         } else {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(AppDimens.CornerButton))
-                    .background(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBalanceWallet,
-                    contentDescription = "lExpense",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
+                Icon(Icons.Default.AccountBalanceWallet, "lExpense", tint = Color.White, modifier = Modifier.size(28.dp))
             }
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = "lExpense",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -202,7 +161,36 @@ private fun AboutAppHeader(
 }
 
 @Composable
-private fun AboutInfoItem(
+private fun AboutSpecsCard(lang: String) {
+    val items = remember(lang) {
+        listOf(
+            Triple(Icons.Default.Layers, AppStrings.APP_ARCHITECTURE_LABEL.tr(lang), "MVI + Clean Architecture + Room"),
+            Triple(Icons.Default.Code, AppStrings.APP_CORE_SDK_LABEL.tr(lang), "ListenArch · ListenUiComponent"),
+            Triple(Icons.Default.Security, AppStrings.APP_FEATURES_LABEL.tr(lang), AppStrings.APP_FEATURES_DESC.tr(lang))
+        )
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(AppDimens.CornerCard))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .padding(AppDimens.SpaceMedium),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
+    ) {
+        items.forEachIndexed { index, (icon, label, value) ->
+            if (index > 0) {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.padding(vertical = 2.dp)
+                )
+            }
+            AboutInfoRow(icon = icon, label = label, value = value)
+        }
+    }
+}
+
+@Composable
+private fun AboutInfoRow(
     icon: ImageVector,
     label: String,
     value: String
@@ -212,15 +200,16 @@ private fun AboutInfoItem(
         horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
         verticalAlignment = Alignment.Top
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .size(16.dp)
-                .padding(top = 2.dp)
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Box(
+            modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, label, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
