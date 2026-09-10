@@ -22,11 +22,17 @@ import kotlinx.coroutines.launch
 /**
  * 桌面小部件 2.0 (App Widget 2.0 - 快速记账与预算看板)。
  * 负责桌面 5x2 智能双模看板数据流管理、闪电记账 Intent 路由与常量统一维护。
+ * 
+ * 设计模式与生命周期说明:
+ * - AppWidgetProvider 实际上是一个 BroadcastReceiver。
+ * - 它的生命周期主要通过 `onReceive` (分发自定义的点击动作) 和 `onUpdate` (系统发起的冷启动或定期更新) 来驱动。
  */
 class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+        // 这里实现了一个局部状态机（widget-local state machine），
+        // 用于处理用户点击操作，如月份前后切换和隐藏/显示金额切换，更新状态后立即触发 UI 渲染。
         val action = intent.action ?: return
         val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
@@ -55,7 +61,10 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // 冷启动或添加小组件时，从 Room 和 DataStore 异步提取数据并渲染
+        // 冷启动或添加小组件时，从 Room 和 DataStore 异步提取数据并渲染。
+        // 技术决策: 为什么使用 CoroutineScope(Dispatchers.IO) 而不是 viewModelScope?
+        // 因为 Widget 的运行环境是一个独立的 BroadcastReceiver 上下文，没有 ViewModel 生命周期，
+        // 因此必须使用独立的协程作用域来执行异步的数据库和偏好设置读取。
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = AppDatabase.getInstance(context)
@@ -66,6 +75,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                     updateSingleWidget(context, appWidgetManager, id, allList, prefs.currencySymbol, prefs.monthlyBudget, prefs.language)
                 }
             } catch (_: Exception) {
+                // 异常回退机制 (try-catch fallback):
+                // 如果数据库或数据存储读取失败，回退渲染默认占位数据，
+                // 确保小部件在异常情况下也不会变成白板（Blank）。
                 val (_, _, defaultTitle) = TransactionCalculationEngine.getMonthRangeAndTitle(0, "zh")
                 for (id in appWidgetIds) {
                     WidgetLayoutBinder.renderWidget(context, appWidgetManager, id, 0.0, 5000.0, "￥", defaultTitle, BudgetHealthStatus.NORMAL, "zh")
@@ -91,7 +103,8 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         private const val KEY_OFFSET_PREFIX = "widget_month_offset_"
         private const val KEY_HIDE_PREFIX = "widget_hide_amount_"
 
-        // 统一小部件与深层链接 (Deep Link) 路由常量，避免在 Activity 中硬编码 (Rule 22)
+        // 统一小部件与深层链接 (Deep Link) 路由常量，避免在 Activity 中硬编码 (Rule 22)。
+        // 采用 URI_SCHEME/URI_HOST 的规范模式，使跨文件的路由配置保持一致且易于维护。
         const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
         const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
         const val URI_SCHEME = "lexpense"
@@ -99,6 +112,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val PARAM_CATEGORY = "category"
         const val PARAM_TYPE = "type"
 
+        // 状态隔离机制: 使用 widgetId 作为 SharedPreferences Key 的后缀。
+        // 这实现了每个小部件实例的独立状态存储，这意味着同一主屏幕上的不同小部件实例
+        // 可以独立展示不同的月份数据，而互不干扰。
         fun getWidgetMonthOffset(context: Context, widgetId: Int): Int {
             val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return sp.getInt("$KEY_OFFSET_PREFIX$widgetId", 0)
@@ -162,7 +178,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         }
 
         /**
-         * 统一标准化分类别名映射，兼容外部调用与旧版分类 ID
+         * 统一标准化分类别名映射，兼容外部调用与旧版分类 ID。
+         * 历史原因可能导致相同的分类存在不同的标识（例如 cat_food 与 c_food），
+         * 统一映射可确保向下兼容（Backward Compatibility）。
          */
         fun normalizeCategoryId(raw: String?): String? = when (raw) {
             "cat_food", "c_food" -> "c_food"
@@ -175,6 +193,11 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         /**
          * 解析小部件或外部 DeepLink 触发的快速记账意图。
          * 若匹配则返回 Pair(categoryId, transactionType)，否则返回 null。
+         * 
+         * 鲁棒性设计 (Dual-source parsing):
+         * 同时支持解析 URI query params 和 Intent extras。
+         * 因为不同的 Android 启动器（Launcher）在转发 PendingIntent 时的行为存在差异，
+         * 这种双重解析可以有效抵御环境碎片化。
          */
         fun parseQuickAddIntent(intent: Intent?): Pair<String?, String>? {
             if (intent == null) return null
@@ -190,7 +213,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         }
 
         /**
-         * 响应式流触发小部件数据刷新
+         * 响应式流触发小部件数据刷新。
+         * 通常在 ViewModel 收集（Collector）数据库 Flow 更新时被调用，
+         * 它会遍历当前屏幕上的所有小部件实例并强制更新。
          */
         fun updateFromTransactions(
             context: Context,
@@ -236,6 +261,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             return PendingIntent.getActivity(context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
+        // PendingIntent RequestCode 策略 (widgetId * 10 + N):
+        // 由于 Android 系统会重用相同 Intent 的 PendingIntent，
+        // 必须为每个小部件实例生成唯一的 requestCode，避免不同小部件间的事件被错误合并覆盖。
         fun createPrevMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
             val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
                 action = ACTION_PREV_MONTH
@@ -245,6 +273,7 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                 context,
                 widgetId * 10 + 1,
                 intent,
+                // FLAG_IMMUTABLE: Android 12+ (API 31+) 强制安全要求，防止外部应用篡改 Intent 意图
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
@@ -283,6 +312,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         ): PendingIntent {
             val intent = Intent(context, MainActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
+                // 双重写入设计 (Belt-and-suspenders):
+                // 同时将分类信息写入 URI Data 和 Intent Extras。
+                // 这极大提高了与不同 Android 启动器的兼容性，防止某些启动器在解析时丢弃 Extras 或截断 URI。
                 data = if (categoryId != null) {
                     "$URI_SCHEME://$URI_HOST_QUICK_ADD?$PARAM_CATEGORY=$categoryId&$PARAM_TYPE=$type".toUri()
                 } else {
