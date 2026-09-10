@@ -19,7 +19,7 @@ import androidx.core.net.toUri
  * Universal Centralized Composable Hook to collect and handle CommonUiEffect across ViewModels.
  * Eliminates duplicate LaunchedEffect boilerplate for Toast, Snackbar, ShareText, Browser URL, and Navigation.
  *
- * @param viewModels List of ViewModels producing CommonUiEffect
+ * @param viewModels List of ViewModels producing CommonUiEffect (使用 vararg 允许一次性传入所有 ViewModels，单点注册)
  * @param snackbarHostState Active SnackbarHostState to show transient feedback
  * @param onNavigateBack Optional callback for back navigation
  * @param onNavigateTo Optional callback for screen routing
@@ -35,7 +35,10 @@ fun CollectCommonUiEffects(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     viewModels.forEach { vm ->
+        // 以 vm 作为 key，为每一个 ViewModel 启动一个独立互不干扰的协程收集器
         LaunchedEffect(vm) {
+            // 使用 collectLatest：如果新 Effect 在旧 Effect 完成前到达，会取消旧的收集协程。
+            // 这对于 Snackbar 这类会挂起(suspend)直到消失的 UI 元素尤为重要，防止队列阻塞。
             vm.viewEffect.collectLatest { effect ->
                 when (effect) {
                     is CommonUiEffect.ShowToast -> {
@@ -67,7 +70,8 @@ fun CollectCommonUiEffects(
                         keyboardController?.hide()
                     }
                     else -> {
-                        // 业务画面专属副作用（如 ScrollToMonth、ScrollToTop）已由各 Screen 独立消费，全局收集器直接忽略
+                        // 为什么留空：业务画面专属的具体副作用（如 ScrollToMonth、ScrollToTop 等）
+                        // 不属于基础通用 Effect，它们交由各 Screen 在内部独立消费，全局收集器在此直接忽略。
                     }
                 }
             }
@@ -77,6 +81,7 @@ fun CollectCommonUiEffects(
 
 /**
  * Helper function to launch Android native Chooser intent for text sharing.
+ * 使用 Intent.createChooser 拉起 Android 系统原生的分享面板(Share Sheet)。
  */
 fun shareSystemText(context: Context, content: String, title: String) {
     val sendIntent = Intent().apply {
@@ -92,6 +97,7 @@ fun shareSystemText(context: Context, content: String, title: String) {
 
 /**
  * Helper function to open an external web URL via system browser.
+ * 采用静默的 try-catch：即使用户设备上没有安装浏览器，也不会发生崩溃(Crash)。
  */
 fun openBrowserUrl(context: Context, url: String) {
     try {

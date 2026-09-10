@@ -31,6 +31,7 @@ import java.util.Calendar
 
 /**
  * Type-safe Navigation Tab definitions for ListenExpenseTracker.
+ * 使用类型安全的枚举替代魔术数字(0, 1, 2)进行 Tab 导航，提升可读性并防止越界错误。
  */
 enum class NavTab(
     val route: String,
@@ -44,6 +45,8 @@ enum class NavTab(
 
 /**
  * Sealed definition of all Global App-Level Overlays (Modals, Floating Bubbles, HUDs).
+ * 使用 sealed interface 确保在全局覆盖物(如悬浮窗、HUD)匹配时能够使用 exhaustive(详尽的) when 表达式，
+ * 方便未来安全地扩展新的覆盖物类型。
  */
 sealed interface AppOverlay {
     data object ApmInspector : AppOverlay
@@ -51,6 +54,8 @@ sealed interface AppOverlay {
 
 /**
  * Clean Application State Holder coordinating ViewModels, Navigation Tabs, SnackbarHostState, and Global Overlays.
+ * 经典的“指挥家 (Conductor)”模式：它本身不是 ViewModel，但作为顶层状态持有者，
+ * 负责统筹并协调 3 个主要的 ViewModel 和 SnackbarHostState 的交互。
  */
 class ExpenseAppState(
     val transactionsViewModel: TransactionsViewModel,
@@ -75,9 +80,17 @@ class ExpenseAppState(
         get() = if (currentTab == NavTab.STATISTICS) statisticsViewModel.viewState.value.selectedYearOffset
         else transactionsViewModel.viewState.value.selectedYearOffset
 
+    // 追踪上一个“非设置”的 Tab。因为“设置(Settings)”是一个中立的 Tab，
+    // 不具备时间流属性，因此不应该参与时间状态的同步。
     private var lastTimeTab: NavTab = NavTab.TRANSACTIONS
     private var preserveStatisticsYearOnReturn = false
 
+    /**
+     * 核心复杂逻辑：在“流水(Transactions)”和“统计(Statistics)”之间切换时，执行双向的月份/年份偏移量同步。
+     * [preserveStatisticsYearOnReturn] 标志位的作用：
+     * 当用户在“统计”页面的年度视图中，下钻点击某个月份进入“流水”页面查看细节时，
+     * 我们必须保护“统计”页面的年度视图状态，确保当他们返回时，不会被错误地同步为月度视图。
+     */
     private fun syncTimeState(fromTab: NavTab, toTab: NavTab) {
         if (fromTab == NavTab.TRANSACTIONS && toTab == NavTab.STATISTICS) {
             val stats = statisticsViewModel.viewState.value
@@ -110,6 +123,7 @@ class ExpenseAppState(
 
     fun switchTab(tab: NavTab) {
         if (tab != currentTab) {
+            // 当当前 Tab 是中立的“设置”时，使用 lastTimeTab 作为同步起点，保证时间同步链条不断裂
             val sourceTab = if (currentTab == NavTab.SETTINGS) lastTimeTab else currentTab
             syncTimeState(fromTab = sourceTab, toTab = tab)
             if (tab != NavTab.SETTINGS) lastTimeTab = tab
@@ -167,6 +181,7 @@ class ExpenseAppState(
     }
 
     fun navigateToTransactionsMonth(monthOffset: Int) {
+        // 这是整个应用中唯一将该标志位置为 true 的地方，用于标识发生了“从年度下钻到月度”的行为
         preserveStatisticsYearOnReturn = true
         // [Feature] 从年度收支总览/各月走势穿透到流水画面时，清除即存的筛选条件（搜索词、分类、账户、类型、金额等），确保完整展示该月份全量流水
         transactionsViewModel.handleIntent(TransactionsIntent.ResetAllFilters)
@@ -188,6 +203,8 @@ class ExpenseAppState(
     /**
      * One-time event flow for scrolling a specific tab's list to top on double-tap.
      * replay = 0 ensures no replay occurs when re-entering tabs.
+     * 使用 replay=0 防止在重新订阅(如重新进入 Tab)时收到过期的旧事件；
+     * 设置 extraBufferCapacity=1 允许 tryEmit 在非挂起上下文中成功发射事件。
      */
     private val _scrollToTopEvents = MutableSharedFlow<NavTab>(replay = 0, extraBufferCapacity = 1)
     val scrollToTopEvents = _scrollToTopEvents.asSharedFlow()
@@ -219,6 +236,8 @@ class ExpenseAppState(
 
 /**
  * Remembers and provisions all feature ViewModels, UI state holders, and Overlay manager.
+ * 通过带有 Factory 的 viewModel() 函数集中创建所有 3 个 ViewModel，
+ * 并确保它们在应用的生命周期内保持单一实例(Single-instance lifecycle)。
  */
 @Composable
 fun rememberExpenseAppState(

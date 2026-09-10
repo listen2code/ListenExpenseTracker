@@ -257,6 +257,8 @@
   - [x] 优化左侧信息层次为双行结构：第一行排列 Icon、小眼睛与健康度状态；第二行排列左右切月箭头与月份标题，消除紧凑感。
 - [x] **底部导航置顶防失效**
   - [x] 使用 `rememberUpdatedState(listState)` 修复月份切换导致 Effects 闭包引用过期失效的边界缺陷。
+- [x] **为所有功能组件生成 @Preview 预览代码**
+  - [x] 覆盖 features 目录下的核心 UI 页面与组件（`TransactionsScreen`、`StatisticsScreen`、`SettingsScreen`、`ExportOptionsSheet`、`AnnualOverviewMonthDetail`、`ApmInspectorComponents` 等），提升可视化开发与调试效率。
 
 ---
 
@@ -265,4 +267,3 @@
 - [ ] **分类预算跨月结转机制 (Budget Rollover)**：支持将上月分类未用完的结余自动滚入下月可用额度。
 - [ ] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
 - [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。
-- [x] **为所有功能组件生成 @Preview 预览代码**：覆盖 features 目录下的核心 UI 组件，提升开发与调试效率。
