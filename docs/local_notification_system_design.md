@@ -177,33 +177,43 @@
 ## 5. 设置中心管理与权限联动 (Notification Settings)
 
 ### 5.1 设置层级与配置项
-在设置页「系统偏好」或独立「通知与提醒」卡片中提供直观的开关体系：
+在设置页采用高度紧凑且层级分明的「通知与提醒」卡片，Master Switch 直接融于 Header：
 ```
-[通知与提醒]
-├─ 启用应用本地通知 (总开关) ------------------- [Switch]
-│   ├─ 预算超支与警戒线预警 --------------------- [Switch]
-│   │   └─ 80% 警戒线提醒 ---------------------- [Switch]
-│   ├─ 周期账单自动记账提醒 --------------------- [Switch]
-│   └─ 新版本发布更新提醒 ----------------------- [Switch]
-└─ 系统通知权限状态 (未授权时显示“去授权”快速入口)
+┌─────────────────────────────────────────────────────────────┐
+│ 🔔 通知与提醒                                     [Switch]  │  <-- Master Switch 融于顶栏
+│    预算预警、周期入账与新版提醒                             │
+├─────────────────────────────────────────────────────────────┤ (展开后仅 3 行，极简紧凑)
+│  预算预警与超支提醒                               [Switch]  │  <-- 2合1合并项 (覆盖 80% 与 100%)
+│  达 80% 警戒线或 100% 超支时提醒                            │
+│                                                             │
+│  周期账单自动入账提醒                             [Switch]  │
+│  自动履约记账后通知核对                                     │
+│                                                             │
+│  新版本发布更新提醒                               [Switch]  │
+│  检测到应用新版本时通知                                     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 5.2 Android 13+ 运行时权限联动流程
 1. 用户在设置页打开任何通知开关时，检测 `ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)`；
 2. 若未授权，通过系统标准 `ActivityResultContracts.RequestPermission` 拉起授权弹窗；
-3. 若用户点击“不再提示”并拒绝，设置项显示提示标签“系统通知权限已被禁用”，点击可一键直达当前 App 的系统应用通知设置页 (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`)。
+3. 若用户拒绝，设置卡片顶部显示警告横幅「系统通知权限已关闭，无法接收提醒」，点击「去开启」按钮一键直达当前 App 的系统通知设置页 (`NotificationPermissionHelper.openNotificationSettings`)。
 
 ---
 
-## 6. 模块划分与代码实现规划 (Implementation Roadmap)
+## 6. 模块划分与落地代码实现清单 (Delivered Implementation)
 
-| 序号 | 模块 / 文件 | 职责说明 | 预估行数 |
+| 序号 | 模块 / 文件 | 职责说明 | 落地行数 (<= 250) |
 |:---:|------------|---------|:-------:|
-| 1 | `core/notification/LocalNotificationManager.kt` | 单例通知分发中心，负责 Channel 创建、通知构建与安全发送 | ~120 行 |
-| 2 | `core/notification/NotificationPermissionHelper.kt` | Android 13+ 运行时权限检查、请求与系统设置跳转辅助 | ~60 行 |
-| 3 | `core/notification/NotificationPreferences.kt` | 通知开关、去重键（`notifiedKeys`）、冷却时间戳持久化 | ~90 行 |
-| 4 | `features/budget/engine/BudgetAlertGuard.kt` | 预算预警检测与防骚扰决策引擎 | ~110 行 |
-| 5 | `features/recurring/engine/RecurringNotificationHelper.kt` | 周期账单履约后通知文本构造与批量合并 | ~80 行 |
-| 6 | `data/update/UpdateNotificationHelper.kt` | 版本更新通知决策、冷却频控与通知投递 | ~70 行 |
-| 7 | `features/settings/ui/SettingsNotificationSection.kt` | 设置页通知开关列表与系统权限联动 UI | ~130 行 |
-| 8 | `MainActivity.kt` | 扩展 DeepLink 路由解析（预算中心、周期流水、版本弹窗） | ~20 行 |
+| 1 | `core/notification/LocalNotificationManager.kt` | 单例通知分发中心，负责 Channel 矩阵初始化、通知构建、PendingIntent 路由与安全发送 | 207 行 |
+| 2 | `core/notification/NotificationPermissionHelper.kt` | Android 13+ 运行时权限检查与系统设置跳转辅助 | 68 行 |
+| 3 | `core/notification/NotificationPreferences.kt` | 通知开关偏好持久化、去重键（`notifiedKeys`）与过期清理 | 143 行 |
+| 4 | `data/i18n/NotificationStrings.kt` | 中/英/日三语集中式通知渠道名、通知标题/内容及设置文案映射 | 219 行 |
+| 5 | `features/budget/engine/BudgetAlertGuard.kt` | 预算超支 (100%) 与预警 (80%) 决策引擎与防骚扰状态机 | 207 行 |
+| 6 | `features/recurring/engine/RecurringNotificationHelper.kt` | 周期账单自动履约后单笔/多笔聚合通知构造与派发 | 76 行 |
+| 7 | `data/update/UpdateNotificationHelper.kt` | 版本更新比对结果通知派发与 3 天防打扰频控 | 53 行 |
+| 8 | `features/settings/components/SettingsNotificationSection.kt` | 设置页通知面板 UI，Header 融合总开关，三项紧凑布局 | 181 行 |
+| 9 | `features/settings/viewmodel/SettingsNotificationDelegate.kt` | 设置中心通知状态管理与版本检测委托代理 | 113 行 |
+| 10 | `features/settings/components/SettingsNotificationSimulateDialog.kt` | 开发者模式 APM 系统通知全链路模拟演练弹窗 | 179 行 |
+| 11 | `MainActivity.kt` | 扩展 DeepLink 路由解析（预算中心、周期流水、版本弹窗） | 167 行 |
+
