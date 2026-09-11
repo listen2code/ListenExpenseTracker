@@ -373,5 +373,5 @@
 - [ ] **AMOLED 纯黑夜间节能模式 (Pure Black Dark Mode)**：为 OLED 屏幕提供真正的 `#000000` 纯黑背景，结合深色主题达到极致省电。
 - [ ] **自定义分类图标扩展包与拖拽排序**：支持用户自定义扩展矢量图标，并在分类管理对话框中支持长按拖拽自定义排列顺序。
 - [ ] **多币种实时汇率换算与资产总览 (Multi-Currency Real-time FX)**：支持单笔账单标记原币种与入账汇率，自动折算为基准货币汇总。
-- [x] **架构设计全景可视化面板 (Architecture Visualizer)**：在开发者面板以图形化拓扑展示系统的 MVI 响应式流、Clean Architecture 与模块依赖解耦关系。
+- [x] **系统顶层架构全景规范化文档沉淀**：在 [`docs/architecture.md`](architecture.md) 系统性深度阐述系统的 MVI 响应式流、Clean Architecture 四层解耦与 Composite 模块依赖关系（应用内试验性面板已精简退役）。
 - [ ] **Google Drive 增量同步与冲突合并策略**：由目前的全量快照上传演进为版本向量驱动的增量差分合并。

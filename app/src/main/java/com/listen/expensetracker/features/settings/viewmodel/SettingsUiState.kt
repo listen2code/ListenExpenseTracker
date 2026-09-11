@@ -29,7 +29,6 @@ sealed interface SettingsDialog {
     data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
     data object ExportExcelOptions : SettingsDialog
     data object SimulateNotifications : SettingsDialog
-    data object ArchitectureVisualizer : SettingsDialog
 }
 
 /**
@@ -66,8 +65,7 @@ data class SettingsUiState(
     val budgetAlertsEnabled: Boolean = true,
     val budgetWarningThresholdEnabled: Boolean = true,
     val recurringBillsAlertsEnabled: Boolean = true,
-    val appUpdatesAlertsEnabled: Boolean = true,
-    val isArchitectureVisualizerOpen: Boolean = false
+    val appUpdatesAlertsEnabled: Boolean = true
 )
 
 /**
@@ -110,6 +108,5 @@ sealed interface SettingsIntent {
     data class ToggleBudgetWarningThreshold(val enabled: Boolean) : SettingsIntent
     data class ToggleRecurringBillsAlerts(val enabled: Boolean) : SettingsIntent
     data class ToggleAppUpdatesAlerts(val enabled: Boolean) : SettingsIntent
-    data class ToggleArchitectureVisualizer(val isOpen: Boolean) : SettingsIntent
 }
 

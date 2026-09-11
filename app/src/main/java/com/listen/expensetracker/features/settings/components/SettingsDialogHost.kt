@@ -174,12 +174,6 @@ fun SettingsDialogHost(
                 lang = lang
             )
         }
-        is SettingsDialog.ArchitectureVisualizer -> {
-            com.listen.expensetracker.features.settings.architecture.ArchitectureVisualizerDialog(
-                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
-                lang = lang
-            )
-        }
         null -> Unit
     }
 

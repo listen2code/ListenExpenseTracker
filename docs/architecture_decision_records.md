@@ -721,36 +721,26 @@ fun TransactionsScreenPreview() {
 
 ---
 
-## ADR-035: 应用内架构设计全景可视化面板 (Architecture Visualizer)
+## ADR-035: 系统架构全景规范文档化沉淀与应用内可视化功能精简退役
 
 ### 背景 (Context)
-大型移动端应用经过多轮演进后，往往存在“文档脱离代码实际”或“团队成员及代码审查者无法快速理解顶层架构”的困境。传统静态 UML 或 Markdown 架构图只能在电脑端查阅，在手机真机演示或日常排障时无法直观映射运行时的架构流转。
+在项目演进过程中，曾于开发者模式中尝试引入应用内“架构设计全景可视化面板 (Architecture Visualizer)”，试图在移动端运行时以图形化卡片形式展示 MVI 响应式流、Clean Architecture 与模块解耦关系。
+但在实际迭代中发现：
+1. **界面层级膨胀与排版拥挤**：在真机有限的屏幕宽度与纵向视口内，展示复杂的架构连线、接口列表与守则要求较多屏幕空间，且在多种系统字号下易导致折行不美观；
+2. **职责边界倒挂**：系统的顶层架构设计、依赖拓扑与设计模式属于工程开发与代码审查规范，理应沉淀于代码仓库的专业技术文档中作为单一真实源 (Single Source of Truth)，而非打包进客户端生产代码（避免增加无谓的 DEX 方法数与 APK 体积）。
 
 ### 决策与设计思路 (Decision & Rationale)
-在开发者运维模式（APM Section）内置**架构设计全景可视化面板 (Architecture Visualizer)**：
-1. **三大核心维度全覆盖**：
-   - **MVI 响应式流**：展示 View $\to$ Intent $\to$ ViewModel/Delegates $\to$ Immutable State $\to$ Render 闭环，以及独立的 `CommonUiEffect` 单次事件总线；
-   - **Clean Architecture 四层拓扑**：展示 Presentation $\to$ Domain (纯函数引擎) $\to$ Data $\to$ Platform Core 的单向依赖与职责边界；
-   - **Gradle Composite Build 模块拓扑**：展示 `:app` 宿主与通用基础库 `:ListenArch`、`:ListenUiComponent` 的解耦规则与生态接口。
-2. **交互式固定分屏与节点下钻 (Fixed Upper-Lower Split Architecture)**：
-   - 上半区固定拓扑画板，无论如何切换 Tab 或选中节点，拓扑视图始终稳定在视口顶部；
-   - 下半区配备独立的自适应滚动卡片抽屉，查看选中节点的职责理念、代表性工程类与架构红线守则；
-   - 彻底避免传统长列表滚动时“点击节点后详情将拓扑图顶出屏幕”的糟糕体验，实现“同屏对照”。
-3. **视觉连线与状态反馈增强 (Visual Connectivity & Pulsing Glow)**：
-   - 抽离统一的拓扑图形组件库 `ArchitectureTopologyComponents.kt`；
-   - 节点卡片内嵌左侧色彩指示条 (Accent Bar)，选中节点配备 `InfiniteTransition` 呼吸脉冲光晕与高对比度边框；
-   - 连线与环形指示条（如 MVI 单向闭环反馈、Clean 层级依赖、Composite 模块契约）强化视觉箭头引导与颜色区分；
-4. **纯原生 Compose 渲染与架构纪律**：
-   - 零依赖任何第三方重量级图表库，纯原生绘制自适应深浅主题；
-   - 严格遵循单文件 $\le 250$ 行规范，将模型、公共拓扑组件、详情抽屉、Tabs、独立 Screen 拆分为高内聚的小文件；
-   - 严格遵守 Zero Mermaid 约束，工程单测 100% PASS。
-5. **独立全屏画面演进与排版深度优化 (Independent Screen & Typography Overhaul)**：
-   - **从弹窗升级为独立沉浸全屏 (`ArchitectureVisualizerScreen.kt`)**：彻底脱离 Dialog 弹窗尺寸约束与物理限制，采用 `BaseScreenScaffold` 提供标准沉浸式 TopBar 与返回导航。在 `SettingsScreen` 内部通过单向状态 `isArchitectureVisualizerOpen` 调度，无缝嵌入当前 Compose 渲染树，保留主题与返回栈自然交互。
-   - **文字过长折行与拥挤根治优化**：
-     - 节点标题与副标题启用 `maxLines = 1, overflow = TextOverflow.Ellipsis`，Badge 采用自适应权重，杜绝卡片内部无谓折行挤压；
-     - 代表性类/接口列表采用官方 `FlowRow` 流式网格标签排版，彻底解决水平溢出或死板堆叠；
-     - 架构守则列表采用 `Row(BulletDot + Text)` 挂标结构，文字多行换行时不再回绕至圆点下方，视觉对齐极为规整；
-     - 核心职责描述辅以柔和底衬卡片，建立明晰的视觉阅读层级。
+1. **全景架构规范回归技术文档 (`docs/architecture.md`)**：
+   - 将系统三大核心维度——**MVI 单向数据流闭环**、**Clean Architecture 四层职责边界**与 **Gradle Composite Build 模块拓扑**——完整、深度、结构化地沉淀在 [`docs/architecture.md`](architecture.md) 中；
+   - 采用标准 ASCII 字符图、清晰的层级对照表与核心源码解析，严格遵循 Zero Mermaid 规范，确保团队任何成员在任何 IDE 或终端均能秒级阅览与检索。
+2. **彻底移除应用内可视化运行时代码 (Clean Code Removal)**：
+   - 彻底删除 `features/settings/architecture/` 目录下的全部可视化组件与屏幕 (`ArchitectureVisualizerScreen`, `ArchitectureVisualizerDialog`, `ArchitectureTopologyComponents`, `ArchitectureNodeDetailDrawer`, `ArchitectureModel`, 各 Tab 实现)；
+   - 彻底删除 `data/i18n/ArchitectureStrings.kt` 及 `ExpenseStrings.init()` 关联字典；
+   - 清理 `SettingsUiState`, `SettingsViewModel`, `SettingsScreen`, `SettingsApmSection`, `SettingsDialogHost` 中的所有 visualizer 状态、Intent 与 UI 入口；
+   - 移除对应的测试套件 `ArchitectureModelTest.kt`。
+3. **运维工具面板布局重塑 (Ergonomic System Ops Layout)**：
+   - 移除“架构全景”按钮后，APM 运维卡片底部的“模拟系统通知”升级为全宽按钮，与上方“生成数据 / 清空数据”形成对称均衡的视觉网格，界面恢复通透、清爽与高凝聚力。
+
 
 
 

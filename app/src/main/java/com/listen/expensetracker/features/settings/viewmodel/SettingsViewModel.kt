@@ -138,7 +138,6 @@ class SettingsViewModel(
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is SettingsIntent.CheckForUpdates -> notificationDelegate.checkForUpdates(intent.currentVersion, currentState, ::updateState, ::emitEffect)
-            is SettingsIntent.ToggleArchitectureVisualizer -> updateState { copy(isArchitectureVisualizerOpen = intent.isOpen) }
             else -> Unit
         }
     }

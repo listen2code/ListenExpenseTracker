@@ -50,9 +50,8 @@ Jacoco 最新实测覆盖率数据如下：
 
 ## 🧪 3. 最新运行验证结果
 
-所有测试均在 `./gradlew testDebugUnitTest` 验证通过（26/26 PASS）：
+所有测试均在 `./gradlew testDebugUnitTest` 验证通过（25/25 PASS）：
 
-- `ArchitectureModelTest.kt` PASS (架构全景 MVI、Clean 四层、模块解耦节点与中/英/日字典解析验证)
 - `NotificationPreferencesTest.kt` PASS (通知开关持久化、去重键生成与跨月清理)
 - `BudgetAlertGuardTest.kt` PASS (总预算与分类预算 80% 警戒与 100% 超支判定、单向升级防骚扰)
 - `RecurringNotificationHelperTest.kt` PASS (周期账单单笔与多笔聚合履约通知格式化)

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.*
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
-import com.listen.expensetracker.data.i18n.ArchitectureStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -33,8 +31,8 @@ import com.listen.uicomponent.components.*
 import com.listen.uicomponent.theme.ListenTheme
 
 /**
- * APM 运维可观测性、数据测试与架构全景可视化卡片 (SettingsApmSection)。
- * 涵盖全局浮窗开关、生成演示数据、清空数据暗门、模拟系统通知与架构全景入口。
+ * APM 运维可观测性与数据测试卡片 (SettingsApmSection)。
+ * 涵盖全局浮窗开关、生成演示数据、清空数据暗门与模拟系统通知入口。
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -46,8 +44,7 @@ fun SettingsApmSection(
     lang: String,
     modifier: Modifier = Modifier,
     targetMonthTitle: String = "",
-    onOpenSimulateNotifications: () -> Unit = {},
-    onOpenArchitectureVisualizer: () -> Unit = {}
+    onOpenSimulateNotifications: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -181,45 +178,23 @@ fun SettingsApmSection(
                 }
             }
 
-            // 开发者双通道按钮行：模拟通知与架构全景并列
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
-            ) {
-                CommonButton(
-                    text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
-                    onClick = onOpenSimulateNotifications,
-                    style = CommonButtonStyle.Outlined,
-                    icon = {
-                        Icon(
-                            Icons.Default.NotificationsActive,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    contentPadding = PaddingValues(horizontal = 6.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                )
-
-                CommonButton(
-                    text = ArchitectureStrings.TITLE.tr(lang),
-                    onClick = onOpenArchitectureVisualizer,
-                    style = CommonButtonStyle.Outlined,
-                    icon = {
-                        Icon(
-                            Icons.Default.Hub,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    contentPadding = PaddingValues(horizontal = 6.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                )
-            }
+            // 模拟系统通知全宽按钮
+            CommonButton(
+                text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
+                onClick = onOpenSimulateNotifications,
+                style = CommonButtonStyle.Outlined,
+                icon = {
+                    Icon(
+                        Icons.Default.NotificationsActive,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                contentPadding = PaddingValues(horizontal = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            )
         }
     }
 }

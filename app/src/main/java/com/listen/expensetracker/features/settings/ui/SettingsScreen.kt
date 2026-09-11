@@ -50,16 +50,6 @@ fun SettingsScreen(
     val lang = state.language
     val sym = state.currencySymbol
 
-    // 🌟 独立画面：架构设计全景可视化全屏渲染
-    if (state.isArchitectureVisualizerOpen) {
-        com.listen.expensetracker.features.settings.architecture.ArchitectureVisualizerScreen(
-            onBack = { onIntent(SettingsIntent.ToggleArchitectureVisualizer(false)) },
-            lang = lang,
-            modifier = modifier
-        )
-        return
-    }
-
     BaseScreenScaffold(
         title = AppStrings.SETTINGS_TITLE.tr(lang),
         modifier = modifier
@@ -168,8 +158,7 @@ fun SettingsScreen(
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,
                         lang = lang,
-                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) },
-                        onOpenArchitectureVisualizer = { onIntent(SettingsIntent.ToggleArchitectureVisualizer(true)) }
+                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) }
                     )
                 }
             }
