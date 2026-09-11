@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.AutoResizeText
 import com.listen.uicomponent.components.CommonButton
@@ -68,7 +70,8 @@ fun SettingsApmSection(
     onConfirmClearAll: () -> Unit,
     lang: String,
     modifier: Modifier = Modifier,
-    targetMonthTitle: String = ""
+    targetMonthTitle: String = "",
+    onOpenSimulateNotifications: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -87,7 +90,7 @@ fun SettingsApmSection(
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceLarge,
+        contentPadding = AppDimens.SpaceStandard,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
@@ -201,6 +204,23 @@ fun SettingsApmSection(
                     )
                 }
             }
+
+            // Notification Simulation Trigger
+            CommonButton(
+                text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
+                onClick = onOpenSimulateNotifications,
+                style = CommonButtonStyle.Outlined,
+                icon = {
+                    Icon(
+                        Icons.Default.NotificationsActive,
+                        contentDescription = null,
+                        modifier = Modifier.size(AppDimens.IconSizeMedium)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            )
         }
     }
 }

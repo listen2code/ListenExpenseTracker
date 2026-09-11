@@ -242,24 +242,24 @@
     - [x] 在多任务切换器（Recent Apps）中隐藏敏感金额截图（`FLAG_SECURE` 动态注入）。
     - [x] 手势防窥：支持加速度传感器“摇一摇手机” (`ShakeDetector`) 或“双击结余区域”快速切换全局隐额模式。
 
-### 5. 本地智能通知预警与提醒中枢 (Local Notification & Alert Hub) - [P1, 核心体验闭环]
+### 5. 本地智能通知预警与提醒中枢 (Local Notification & Alert Hub) - [Completed]
 * **详细设计文档**：[local_notification_system_design.md](local_notification_system_design.md)
-- [ ] **统一通知底座与 Android 13+ 渠道矩阵**
-    - [ ] 封装单例 `LocalNotificationManager`，统筹系统通知渠道分发与 PendingIntent 路由。
-    - [ ] 注册渠道矩阵：`channel_budget_alerts` (高优先级)、`channel_recurring_bills` (默认优先级)、`channel_app_updates` (轻提醒)。
-    - [ ] 接入 Android 13+ (`POST_NOTIFICATIONS`) 运行时动态权限鉴权、申请与未授权引导设置页。
-- [ ] **预算超支与 80% 警戒线预警状态机**
-    - [ ] 实现 `BudgetAlertGuard`：记账后检测当月总预算或分类预算是否跨越 80% 警戒或 100% 超支线。
-    - [ ] 严格去重防骚扰 (Dedup)：维护 `yyyy_MM:targetId:LEVEL` 状态记录，同月同级仅通知 1 次。
-    - [ ] DeepLink 穿透交互：点击通知直达分类预算管理模态弹窗 (`CategoryBudgetModalDialog`)。
-- [ ] **周期账单自动履约入账通知**
-    - [ ] 在 `RecurringTransactionEngine.processDueRules` 自动记账成功后捕获入账清单并发送提醒（单笔明细 / 多笔聚合）。
-    - [ ] 点击通知直达流水页并聚焦定位当次自动记录的账单。
-- [ ] **新版本发布静默检测与升级通知**
-    - [ ] 联动 `UpdateCheckerService` 静默比对远端版本，带 3 天冷却防打扰。
-    - [ ] 通知展示新版本亮点，点击直达应用内 `UpdateAvailableDialog`。
-- [ ] **设置中心「通知与提醒」集中配置面板**
-    - [ ] 设置页新增通知管理卡片，提供全局主开关与三大场景独立子开关。
+- [x] **统一通知底座与 Android 13+ 渠道矩阵**
+    - [x] 封装单例 `LocalNotificationManager`，统筹系统通知渠道分发与 PendingIntent 路由。
+    - [x] 注册渠道矩阵：`channel_budget_alerts` (高优先级)、`channel_recurring_bills` (默认优先级)、`channel_app_updates` (轻提醒)。
+    - [x] 接入 Android 13+ (`POST_NOTIFICATIONS`) 运行时动态权限鉴权、申请与未授权引导设置页。
+- [x] **预算超支与 80% 警戒线预警状态机**
+    - [x] 实现 `BudgetAlertGuard`：记账后检测当月总预算或分类预算是否跨越 80% 警戒或 100% 超支线。
+    - [x] 严格去重防骚扰 (Dedup)：维护 `yyyy_MM:targetId:LEVEL` 状态记录，同月同级仅通知 1 次。
+    - [x] DeepLink 穿透交互：点击通知直达分类预算管理模态弹窗 (`CategoryBudgetModalDialog`)。
+- [x] **周期账单自动履约入账通知**
+    - [x] 在 `RecurringTransactionEngine.processDueRules` 自动记账成功后捕获入账清单并发送提醒（单笔明细 / 多笔聚合）。
+    - [x] 点击通知直达流水页并聚焦定位当次自动记录的账单。
+- [x] **新版本发布静默检测与升级通知**
+    - [x] 联动 `UpdateCheckerService` 静默比对远端版本，带 3 天冷却防打扰。
+    - [x] 通知展示新版本亮点，点击直达应用内 `UpdateAvailableDialog`。
+- [x] **设置中心「通知与提醒」集中配置面板**
+    - [x] 设置页新增通知管理卡片，提供全局主开关与三大场景独立子开关。
 
 ### 6. 年月视图全维度联动、版本更新闭环与安全交互增强 - [Completed]
 - [x] **跨 Tab 年月视图全维度联动与下钻保护**
@@ -353,6 +353,14 @@
 - [ ] **Canvas 原生精美海报渲染**
     - [ ] 采用 Jetpack Compose Canvas 原生无外部渲染依赖绘制高分辨率长图海报（纯色极简风格）。
     - [ ] 调用系统原生分享面板 (`Intent.ACTION_SEND`)，支持一键将年度战报保存到相册或分享至社交圈。
+
+### 9. WorkManager 后台定时调度与离线通知唤醒 (WorkManager Periodic Alert Worker) - [P1, 离线准时触达]
+- [ ] **系统级定时任务调度器**
+    - [ ] 接入 AndroidX `WorkManager`（`androidx.work:work-runtime-ktx`），注册系统托管的 `PeriodicWorkRequest`（如每日固定时段或每 24 小时自检执行）。
+    - [ ] 遵循 Android Doze 低电耗与电池优化规范，即使 App 处于冷态或进程被杀死，系统底层仍能在时间窗口唤醒轻量后台 Worker。
+- [ ] **离线自检与后台自动推送**
+    - [ ] 在 Worker 内部后台查询 SQLite，自动履约并记入当天到达执行日期的周期账单，即时派发 `channel_recurring_bills` 状态栏通知。
+    - [ ] 结合网络连接约束条件（`NetworkType.CONNECTED`），在后台静默请求 GitHub 版本比对，带 3 天防打扰冷却机制，有新版本时静默派发 `channel_app_updates` 更新通知。
 
 ---
 

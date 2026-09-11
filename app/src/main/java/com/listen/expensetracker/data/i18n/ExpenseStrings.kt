@@ -11,6 +11,7 @@ object ExpenseStrings {
         StringsRes.registerAppStrings("zh", zhMap)
         StringsRes.registerAppStrings("en", enMap)
         StringsRes.registerAppStrings("ja", jaMap)
+        NotificationStrings.init()
     }
 
     fun get(key: String, lang: String): String = StringsRes.get(key, lang)

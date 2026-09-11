@@ -16,6 +16,7 @@ import com.listen.expensetracker.features.settings.components.SettingsAppearance
 import com.listen.expensetracker.features.settings.components.SettingsDataCenterSection
 import com.listen.expensetracker.features.settings.components.SettingsDialogHost
 import com.listen.expensetracker.features.settings.components.SettingsFinanceSection
+import com.listen.expensetracker.features.settings.components.SettingsNotificationSection
 import com.listen.expensetracker.features.settings.components.SettingsSecuritySection
 import com.listen.expensetracker.features.settings.components.SettingsVersionFooter
 import com.listen.expensetracker.features.settings.viewmodel.SettingsDialog
@@ -59,8 +60,8 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(horizontal = AppDimens.SpaceLarge),
-            contentPadding = PaddingValues(bottom = AppDimens.SpaceLarge),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
+            contentPadding = PaddingValues(top = AppDimens.SpaceSmall, bottom = AppDimens.SpaceBottomFab),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
             // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts, Recurring)
             item(key = "finance_section") {
@@ -116,7 +117,22 @@ fun SettingsScreen(
                 )
             }
 
-            // 4. Security & Privacy Shield Section
+            // 4. Notifications & Alert Hub Section
+            item(key = "notification_section") {
+                SettingsNotificationSection(
+                    notificationsEnabled = state.notificationsEnabled,
+                    budgetAlertsEnabled = state.budgetAlertsEnabled,
+                    recurringBillsAlertsEnabled = state.recurringBillsAlertsEnabled,
+                    appUpdatesAlertsEnabled = state.appUpdatesAlertsEnabled,
+                    onToggleNotifications = { onIntent(SettingsIntent.ToggleNotifications(it)) },
+                    onToggleBudgetAlerts = { onIntent(SettingsIntent.ToggleBudgetAlerts(it)) },
+                    onToggleRecurringBillsAlerts = { onIntent(SettingsIntent.ToggleRecurringBillsAlerts(it)) },
+                    onToggleAppUpdatesAlerts = { onIntent(SettingsIntent.ToggleAppUpdatesAlerts(it)) },
+                    lang = lang
+                )
+            }
+
+            // 5. Security & Privacy Shield Section
             item(key = "security_section") {
                 SettingsSecuritySection(
                     biometricLockEnabled = state.biometricLockEnabled,
@@ -141,7 +157,8 @@ fun SettingsScreen(
                         onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,
-                        lang = lang
+                        lang = lang,
+                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) }
                     )
                 }
             }

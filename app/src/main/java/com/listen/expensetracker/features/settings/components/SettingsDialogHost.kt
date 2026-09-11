@@ -168,6 +168,12 @@ fun SettingsDialogHost(
                 lang = lang
             )
         }
+        is SettingsDialog.SimulateNotifications -> {
+            SettingsNotificationSimulateDialog(
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                lang = lang
+            )
+        }
         null -> Unit
     }
 

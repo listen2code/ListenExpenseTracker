@@ -54,7 +54,7 @@ fun SettingsFinanceSection(
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceLarge,
+        contentPadding = AppDimens.SpaceStandard,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {

@@ -39,9 +39,20 @@ class SettingsViewModel(
     private val recurringDao = db.recurringRuleDao()
     private val prefManager = ExpenseDataStoreManager(application)
     private val syncDelegate = SettingsSyncDelegate(application, dao, recurringDao, prefManager)
+    private val notificationDelegate = SettingsNotificationDelegate(application, viewModelScope)
 
     init {
         ApmLogger.i(tag = "VM", message = "SettingsViewModel initialized")
+        val notif = notificationDelegate.populateInitialState()
+        updateState {
+            copy(
+                notificationsEnabled = notif.notificationsEnabled,
+                budgetAlertsEnabled = notif.budgetAlertsEnabled,
+                budgetWarningThresholdEnabled = notif.budgetWarningThresholdEnabled,
+                recurringBillsAlertsEnabled = notif.recurringBillsAlertsEnabled,
+                appUpdatesAlertsEnabled = notif.appUpdatesAlertsEnabled
+            )
+        }
         observeSettings()
         observeGoogleAccount()
         observeSyncState()
@@ -50,6 +61,7 @@ class SettingsViewModel(
     }
 
     override fun handleIntent(intent: SettingsIntent) {
+        if (notificationDelegate.handleIntent(intent, ::updateState)) return
         val traceId = TraceManager.newTraceId()
         when (intent) {
             is SettingsIntent.ChangeLanguage -> viewModelScope.launch {
@@ -125,7 +137,8 @@ class SettingsViewModel(
             is SettingsIntent.TriggerGoogleSignIn -> { emitEffect(SettingsEffect.LaunchGoogleSignIn) }
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
-            is SettingsIntent.CheckForUpdates -> checkForUpdates(intent.currentVersion)
+            is SettingsIntent.CheckForUpdates -> notificationDelegate.checkForUpdates(intent.currentVersion, currentState, ::updateState, ::emitEffect)
+            else -> Unit
         }
     }
 
@@ -190,31 +203,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             CloudSyncManager.syncStateFlow.collectLatest { syncState ->
                 updateState { copy(syncState = syncState, lastSyncTimestamp = syncState.lastSyncTimestamp) }
-            }
-        }
-    }
-
-    private fun checkForUpdates(currentVersion: String) {
-        if (currentState.isCheckingUpdate) return
-        viewModelScope.launch {
-            updateState { copy(isCheckingUpdate = true) }
-            val lang = currentState.language
-            val currentBuildNumber = try {
-                val pInfo = application.packageManager.getPackageInfo(application.packageName, 0)
-                PackageInfoCompat.getLongVersionCode(pInfo)
-            } catch (_: Exception) { 0L }
-            when (val result = UpdateCheckerService.checkLatestRelease(currentVersion, currentBuildNumber, lang)) {
-                is UpdateResult.NewVersionAvailable -> updateState {
-                    copy(isCheckingUpdate = false, activeDialog = SettingsDialog.UpdateAvailable(result.releaseInfo))
-                }
-                is UpdateResult.AlreadyLatest -> {
-                    updateState { copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(String.format(AppStrings.ALREADY_LATEST_VERSION.tr(lang), currentVersion)))
-                }
-                is UpdateResult.Error -> {
-                    updateState { copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(AppStrings.CHECK_UPDATE_FAILED.tr(lang)))
-                }
             }
         }
     }

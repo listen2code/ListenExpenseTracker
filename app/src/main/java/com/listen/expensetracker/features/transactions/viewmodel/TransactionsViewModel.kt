@@ -20,6 +20,8 @@ import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
+import com.listen.expensetracker.features.budget.engine.BudgetAlertGuard
+import com.listen.expensetracker.features.recurring.engine.RecurringNotificationHelper
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import java.util.Calendar
 import kotlinx.coroutines.flow.collectLatest
@@ -37,8 +39,7 @@ class TransactionsViewModel(
     private val prefManager = ExpenseDataStoreManager(application)
     private val mutationHandler = TransactionMutationHandler(
         application = application, dao = dao, scope = viewModelScope,
-        emitEffect = { emitEffect(it) },
-        onRestore = { handleIntent(TransactionsIntent.RestoreDeletedTransaction(it)) }
+        emitEffect = { emitEffect(it) }, onRestore = { handleIntent(TransactionsIntent.RestoreDeletedTransaction(it)) }
     )
 
     init {
@@ -67,16 +68,10 @@ class TransactionsViewModel(
             is TransactionsIntent.ChangePeriod -> { updateState { copy(period = intent.period) }; recalculate() }
             is TransactionsIntent.ChangeMonthOffset -> { updateState { copy(selectedMonthOffset = currentState.selectedMonthOffset + intent.offsetDelta, activeAnnualFilter = null) }; recalculate() }
             is TransactionsIntent.SetMonthOffset -> { updateState { copy(selectedMonthOffset = intent.offset, activeAnnualFilter = null) }; recalculate() }
-            is TransactionsIntent.SelectMonth -> {
-                updateState { copy(selectedMonthOffset = intent.offset, activeAnnualFilter = null) }; recalculate()
-                emitEffect(TransactionsEffect.ScrollToMonth(intent.offset))
-            }
+            is TransactionsIntent.SelectMonth -> { updateState { copy(selectedMonthOffset = intent.offset, activeAnnualFilter = null) }; recalculate(); emitEffect(TransactionsEffect.ScrollToMonth(intent.offset)) }
             is TransactionsIntent.ChangeYearOffset -> { updateState { copy(selectedYearOffset = currentState.selectedYearOffset + intent.offsetDelta) }; recalculate() }
             is TransactionsIntent.SetYearOffset -> { updateState { copy(selectedYearOffset = intent.offset) }; recalculate() }
-            is TransactionsIntent.SelectYear -> {
-                updateState { copy(selectedYearOffset = intent.offset) }; recalculate()
-                emitEffect(TransactionsEffect.ScrollToYear(intent.offset))
-            }
+            is TransactionsIntent.SelectYear -> { updateState { copy(selectedYearOffset = intent.offset) }; recalculate(); emitEffect(TransactionsEffect.ScrollToYear(intent.offset)) }
             is TransactionsIntent.ScrollToTop -> emitEffect(TransactionsEffect.ScrollToTop)
             is TransactionsIntent.ChangeSortOrder -> { updateState { copy(sortOrder = intent.order) }; recalculate() }
             is TransactionsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
@@ -86,11 +81,10 @@ class TransactionsViewModel(
                 val cat = findCategory(intent.categoryName)
                 updateState {
                     copy(
-                        period = TransactionPeriod.MONTH, selectedMonthOffset = intent.monthOffset,
-                        searchQuery = "", selectedAccountFilter = "ALL", typeFilter = cat?.type ?: "ALL",
+                        period = TransactionPeriod.MONTH, selectedMonthOffset = intent.monthOffset, searchQuery = "",
+                        selectedAccountFilter = "ALL", typeFilter = cat?.type ?: "ALL",
                         selectedCategories = setOf(cat?.id ?: intent.categoryName), amountPreset = AmountFilterPreset.ALL,
-                        customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC,
-                        activeAnnualFilter = null
+                        customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null
                     )
                 }
                 recalculate(); emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset))
@@ -100,11 +94,10 @@ class TransactionsViewModel(
                 val cat = findCategory(intent.categoryName)
                 updateState {
                     copy(
-                        period = TransactionPeriod.YEAR, selectedYearOffset = intent.year - curYear,
-                        searchQuery = "", selectedAccountFilter = "ALL", typeFilter = cat?.type ?: "ALL",
+                        period = TransactionPeriod.YEAR, selectedYearOffset = intent.year - curYear, searchQuery = "",
+                        selectedAccountFilter = "ALL", typeFilter = cat?.type ?: "ALL",
                         selectedCategories = setOf(cat?.id ?: intent.categoryName), amountPreset = AmountFilterPreset.ALL,
-                        customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC,
-                        activeAnnualFilter = null
+                        customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null
                     )
                 }
                 recalculate(); emitEffect(TransactionsEffect.ScrollToYear(intent.year - curYear))
@@ -113,26 +106,12 @@ class TransactionsViewModel(
                 updateState { copy(activeAnnualFilter = null, selectedCategories = emptySet(), typeFilter = "ALL") }; recalculate()
             }
             is TransactionsIntent.FilterByDate -> {
-                updateState {
-                    copy(
-                        selectedMonthOffset = intent.monthOffset, searchQuery = intent.dateLabel ?: "",
-                        selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
-                        amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
-                        sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null
-                    )
-                }
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = intent.dateLabel ?: "", selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null) }
                 recalculate(); emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset)); emitEffect(TransactionsEffect.ScrollToDay(intent.day))
             }
             is TransactionsIntent.FilterByTransaction -> {
                 val amtStr = intent.amount?.formatAmount() ?: ""
-                updateState {
-                    copy(
-                        selectedMonthOffset = intent.monthOffset, searchQuery = amtStr,
-                        selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(),
-                        amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null,
-                        sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null
-                    )
-                }
+                updateState { copy(selectedMonthOffset = intent.monthOffset, searchQuery = amtStr, selectedAccountFilter = "ALL", typeFilter = "ALL", selectedCategories = emptySet(), amountPreset = AmountFilterPreset.ALL, customMinAmount = null, customMaxAmount = null, sortOrder = TransactionSortOrder.DATE_DESC, activeAnnualFilter = null) }
                 recalculate(); emitEffect(TransactionsEffect.ScrollToMonth(intent.monthOffset)); emitEffect(TransactionsEffect.ScrollToTransaction(intent.transactionId))
             }
             is TransactionsIntent.ChangeTypeFilter -> { updateState { copy(typeFilter = intent.type) }; recalculate() }
@@ -163,7 +142,10 @@ class TransactionsViewModel(
     }
 
     private fun checkDueRecurringRules() = viewModelScope.launch {
-        RecurringTransactionEngine.processDueRules(db.recurringRuleDao(), dao)
+        val res = RecurringTransactionEngine.processDueRulesWithResult(db.recurringRuleDao(), dao)
+        if (res.executedRules.isNotEmpty()) {
+            RecurringNotificationHelper.notifyRecurringBillsExecuted(application, res.executedRules, currentState.currencySymbol, currentState.language)
+        }
     }
 
     override fun toLifecycleIntent(event: LifecycleEvent): TransactionsIntent? = when (event) {
@@ -237,6 +219,12 @@ class TransactionsViewModel(
                 monthlyBudget = calc.monthlyBudget, remainingBudget = calc.remainingBudget,
                 budgetUsageRatio = calc.budgetUsageRatio, isOverBudget = calc.isOverBudget,
                 monthTitle = calc.monthTitle, isLoading = false
+            )
+        }
+        if (currentState.selectedMonthOffset == 0) {
+            BudgetAlertGuard.evaluate(
+                application, allList, 0, currentState.monthlyBudget,
+                currentState.categoryBudgetRatios, currentState.currencySymbol, currentState.language
             )
         }
     }

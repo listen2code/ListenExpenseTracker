@@ -19,10 +19,14 @@ import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.BiometricLockOverlay
 import com.listen.expensetracker.core.security.BiometricSecurityManager
 import com.listen.expensetracker.core.security.SecurityPreferences
+import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.state.ExpenseAppState
+import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.uicomponent.theme.ListenTheme
 
@@ -48,6 +52,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         ExpenseStrings.init()
         CrashHandler.init(this)
+        LocalNotificationManager.createNotificationChannels(this)
         securityCoordinator.checkInitialLock(this)
         pendingQuickAddIntent.value = intent
 
@@ -67,7 +72,7 @@ class MainActivity : FragmentActivity() {
             val isLocked = securityCoordinator.isAppLocked
             LaunchedEffect(currentIntent, isLocked) {
                 if (currentIntent != null && !isLocked) {
-                    handleQuickAddIntent(currentIntent, appState)
+                    handleDeepLinkIntent(currentIntent, appState)
                     pendingQuickAddIntent.value = null
                 }
             }
@@ -151,7 +156,32 @@ class MainActivity : FragmentActivity() {
         GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
     }
 
-    private fun handleQuickAddIntent(intent: Intent, appState: ExpenseAppState) {
+    private fun handleDeepLinkIntent(intent: Intent, appState: ExpenseAppState) {
+        val data = intent.data
+        if (data != null && data.scheme == "lexpense") {
+            when (data.host) {
+                "quick_add" -> {
+                    val (categoryId, type) = ListenExpenseAppWidgetProvider.parseQuickAddIntent(intent) ?: return
+                    appState.openQuickAdd(categoryId, type)
+                }
+                "budget_center" -> {
+                    appState.switchTab(NavTab.TRANSACTIONS)
+                    appState.transactionsViewModel.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget))
+                }
+                "transactions" -> {
+                    appState.switchTab(NavTab.TRANSACTIONS)
+                    if (data.getQueryParameter("filter") == "recurring") {
+                        appState.transactionsViewModel.handleIntent(TransactionsIntent.SearchQueryChange("[周期]"))
+                    }
+                }
+                "update" -> {
+                    appState.switchTab(NavTab.SETTINGS)
+                    val version = data.getQueryParameter("version") ?: ""
+                    appState.settingsViewModel.handleIntent(SettingsIntent.CheckForUpdates(version))
+                }
+            }
+            return
+        }
         val (categoryId, type) = ListenExpenseAppWidgetProvider.parseQuickAddIntent(intent) ?: return
         appState.openQuickAdd(categoryId, type)
     }

@@ -46,10 +46,10 @@ fun SettingsSecuritySection(
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceLarge,
+        contentPadding = AppDimens.SpaceStandard,
         modifier = modifier.fillMaxWidth()
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             // Header
             Row(
                 verticalAlignment = Alignment.CenterVertically,

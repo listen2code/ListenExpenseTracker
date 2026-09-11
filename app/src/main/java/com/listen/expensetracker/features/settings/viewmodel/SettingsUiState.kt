@@ -28,6 +28,7 @@ sealed interface SettingsDialog {
     data object AboutApp : SettingsDialog
     data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
     data object ExportExcelOptions : SettingsDialog
+    data object SimulateNotifications : SettingsDialog
 }
 
 /**
@@ -59,7 +60,12 @@ data class SettingsUiState(
     val shakeToHideBalanceEnabled: Boolean = true,
     val isBiometricSupported: Boolean = false,
     val apmFloatingWindowEnabled: Boolean = false,
-    val transactions: List<TransactionEntity> = emptyList()
+    val transactions: List<TransactionEntity> = emptyList(),
+    val notificationsEnabled: Boolean = true,
+    val budgetAlertsEnabled: Boolean = true,
+    val budgetWarningThresholdEnabled: Boolean = true,
+    val recurringBillsAlertsEnabled: Boolean = true,
+    val appUpdatesAlertsEnabled: Boolean = true
 )
 
 /**
@@ -97,5 +103,10 @@ sealed interface SettingsIntent {
     data class OpenDialog(val dialog: SettingsDialog) : SettingsIntent
     data object DismissDialog : SettingsIntent
     data class CheckForUpdates(val currentVersion: String) : SettingsIntent
+    data class ToggleNotifications(val enabled: Boolean) : SettingsIntent
+    data class ToggleBudgetAlerts(val enabled: Boolean) : SettingsIntent
+    data class ToggleBudgetWarningThreshold(val enabled: Boolean) : SettingsIntent
+    data class ToggleRecurringBillsAlerts(val enabled: Boolean) : SettingsIntent
+    data class ToggleAppUpdatesAlerts(val enabled: Boolean) : SettingsIntent
 }
 

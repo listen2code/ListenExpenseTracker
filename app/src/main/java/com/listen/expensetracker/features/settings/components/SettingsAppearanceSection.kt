@@ -57,10 +57,10 @@ fun SettingsAppearanceSection(
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceLarge,
+        contentPadding = AppDimens.SpaceStandard,
         modifier = modifier.fillMaxWidth()
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceLarge)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             // Header Row
             Row(
                 verticalAlignment = Alignment.CenterVertically,

@@ -17,6 +17,11 @@ data class RecurringMonthlyBaseline(
     val incomeCount: Int
 )
 
+data class RecurringExecutionResult(
+    val processedCount: Int,
+    val executedRules: List<RecurringRuleEntity>
+)
+
 object RecurringTransactionEngine {
 
     /**
@@ -99,15 +104,16 @@ object RecurringTransactionEngine {
 
     /**
      * 履约待执行的周期规则。
-     * 自动插入账单记录并递增下一次执行时间戳。
+     * 自动插入账单记录、递增下一次执行时间戳，并返回执行结果与规则列表。
      */
-    suspend fun processDueRules(
+    suspend fun processDueRulesWithResult(
         recurringDao: RecurringRuleDao,
         txDao: TransactionDao,
         currentTime: Long = System.currentTimeMillis()
-    ): Int {
+    ): RecurringExecutionResult {
         val dueRules = recurringDao.getDueRules(currentTime)
         var processedCount = 0
+        val executedRules = mutableListOf<RecurringRuleEntity>()
 
         for (rule in dueRules) {
             if (rule.executionType == ExecutionType.AUTO_INSERT) {
@@ -135,9 +141,21 @@ object RecurringTransactionEngine {
                 )
                 recurringDao.updateRule(updatedRule)
                 processedCount++
+                executedRules.add(rule)
             }
         }
 
-        return processedCount
+        return RecurringExecutionResult(processedCount, executedRules)
+    }
+
+    /**
+     * 向后兼容的履约调用，返回自动记录的笔数。
+     */
+    suspend fun processDueRules(
+        recurringDao: RecurringRuleDao,
+        txDao: TransactionDao,
+        currentTime: Long = System.currentTimeMillis()
+    ): Int {
+        return processDueRulesWithResult(recurringDao, txDao, currentTime).processedCount
     }
 }
