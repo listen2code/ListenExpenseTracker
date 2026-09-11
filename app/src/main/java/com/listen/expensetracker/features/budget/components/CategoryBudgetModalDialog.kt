@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.engine.CategoryBudgetEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.components.CommonButton
@@ -58,6 +59,15 @@ fun CategoryBudgetModalDialog(
 ) {
     var mode by remember(initialMode) { mutableStateOf(initialMode) }
     var activeMonthOffset by remember(initialMonthOffset) { androidx.compose.runtime.mutableIntStateOf(initialMonthOffset) }
+
+    val sortedCategories = remember(allTransactions, activeMonthOffset, monthlyBudget, categoryRatios) {
+        CategoryBudgetEngine.calculate(
+            allTransactions = allTransactions,
+            currentOffset = activeMonthOffset,
+            totalBudget = monthlyBudget,
+            categoryRatios = categoryRatios
+        ).statusList.map { it.category }
+    }
 
     var editBudgetInput by remember(monthlyBudget) {
         mutableStateOf(if (monthlyBudget > 0) monthlyBudget.formatAmount() else "5000")
@@ -173,7 +183,8 @@ fun CategoryBudgetModalDialog(
                         onRatiosChange = { editRatios = it },
                         currencySymbol = currencySymbol,
                         lang = lang,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        categories = sortedCategories
                     )
                 }
             }

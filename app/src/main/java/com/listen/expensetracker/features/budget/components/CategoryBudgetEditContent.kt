@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.components.CommonEditText
@@ -49,9 +50,9 @@ fun CategoryBudgetEditContent(
     onRatiosChange: (Map<String, Float>) -> Unit,
     currencySymbol: String,
     lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    categories: List<Category> = CategoryRepository.expenseCategories
 ) {
-    val categories = remember { CategoryRepository.expenseCategories }
     val presets = remember { listOf(3000.0, 5000.0, 8000.0, 10000.0, 15000.0, 20000.0) }
     val totalBudget = budgetInput.toDoubleOrNull() ?: 0.0
     val totalAllocatedPercent = ratios.values.sumOf { (it * 100).roundToInt() }
