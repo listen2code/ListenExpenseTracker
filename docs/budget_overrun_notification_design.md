@@ -1,5 +1,8 @@
 # 预算超支与健康度本地通知预警设计与实现规范 (Budget Overrun Notification Specification)
 
+> [!NOTE]
+> 本文档已统一升级并扩充为完整的本地通知与提醒中枢规范，涵盖**预算超支与警戒预警**、**周期账单自动履约入账通知**以及**新版本升级通知**三大核心场景。详情请参阅：[local_notification_system_design.md](local_notification_system_design.md)。
+
 ## 1. 概述 (Overview)
 
 ### 1.1 背景与痛点
@@ -14,26 +17,34 @@
 
 ## 2. 预警决策架构与流转时序 (Alert Decision Flow)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant User as 用户记账
-    participant VM as TransactionsViewModel
-    participant Engine as CategoryBudgetEngine
-    participant Guard as BudgetAlertGuard
-    participant NotifMgr as LocalNotificationManager
-
-    User->>VM: 保存账单 (Add / Update Transaction)
-    VM->>Engine: calculate(allTransactions, monthOffset=0)
-    Engine-->>VM: 返回 CategoryBudgetSummary (包含各分类与总预算健康状态)
-    VM->>Guard: checkAndFilterAlerts(summary)
-    alt 存在新跨越的预警/超支项 且 未曾通知过
-        Guard->>NotifMgr: postBudgetAlertNotification(title, message, categoryId)
-        Guard->>Guard: 记录该分类本月已通知标记 (KEY_BUDGET_NOTIFIED_FLAGS)
-    else 状态未升级或已通知过
-        Guard-->>VM: 静默忽略 (No-op)
-    end
+```text
+[用户保存账单]
+      │
+      ▼
+[TransactionsViewModel] ─── calculate(allTransactions) ───> [CategoryBudgetEngine]
+                                                                     │
+[BudgetAlertGuard] <─── 返回 CategoryBudgetSummary ──────────────────┘
+      │
+      ├─ 判定一: 是否达到 80% 警戒 或 100% 超支？
+      ├─ 判定二: 该分类/总预算在当月是否已通知过该级别？
+      │
+      ├── [未通知过] ───> [LocalNotificationManager] ───> 发送系统预警通知
+      │                         │
+      │                         └──> 记录已通知标记 KEY_NOTIFIED_FLAGS
+      │
+      └── [已通知或未达标] ──> 静默忽略 (No-op)
 ```
+
+### 2.1 决策时序步骤表 (Sequence Step Table)
+
+| 步骤 | 参与方 | 动作 / 调用 | 判定逻辑与输出 |
+| :---: | :--- | :--- | :--- |
+| **1** | 用户 $\to$ `TransactionsViewModel` | 保存账单 (`Add/Update Transaction`) | 提交记账数据 |
+| **2** | `TransactionsViewModel` $\to$ `CategoryBudgetEngine` | `calculate(allTransactions, monthOffset=0)` | 实时计算各分类与总预算健康状态汇总 |
+| **3** | `TransactionsViewModel` $\to$ `BudgetAlertGuard` | `evaluateAndNotify(summary)` | 评估当月支出是否越过 80% 警戒或 100% 超支 |
+| **4a**| `BudgetAlertGuard` $\to$ `LocalNotificationManager` | **[通过]** 未曾通知过且跨越阈值 | 发送高优先级系统预警通知，持久化已通知 Key |
+| **4b**| `BudgetAlertGuard` | **[拦截]** 当月已通知过同级别或未超标 | 静默忽略 (No-op)，严格杜绝反复打扰 |
+
 
 ---
 
@@ -98,7 +109,7 @@ object BudgetAlertGuard {
         // 1. 检查总预算
         val totalRatio = totalExpense / monthlyBudget
         if (totalRatio >= 1.0) {
-            val key = "$monthKey:TOTAL:OVERRUN"
+            val key = "$monthKey:TOTAL:OVERBUDGET"
             if (!notifiedRecords.contains(key)) {
                 onNewAlert(key, "🚨 月度总预算已超支", "本月总支出已达 ¥${"%.0f".format(totalExpense)}，超出总预算 ¥${"%.0f".format(totalExpense - monthlyBudget)}，请注意节约开支！")
             }
@@ -112,15 +123,15 @@ object BudgetAlertGuard {
         // 2. 检查各分类预算
         categoryStatuses.forEach { cat ->
             if (cat.budgetAmount > 0) {
-                if (cat.healthStatus == BudgetHealthStatus.OVERRUN) {
-                    val key = "$monthKey:${cat.category.id}:OVERRUN"
+                if (cat.status == BudgetHealthStatus.OVERBUDGET) {
+                    val key = "$monthKey:${cat.category.id}:OVERBUDGET"
                     if (!notifiedRecords.contains(key)) {
-                        onNewAlert(key, "🚨 「${cat.category.displayName}」已超支", "本月该分类支出 ¥${"%.0f".format(cat.spentAmount)}，超出预算 ¥${"%.0f".format(cat.spentAmount - cat.budgetAmount)}。")
+                        onNewAlert(key, "🚨 「${cat.category.getDisplayName()}」已超支", "本月该分类支出 ¥${"%.0f".format(cat.spentAmount)}，超出预算 ¥${"%.0f".format(cat.spentAmount - cat.budgetAmount)}。")
                     }
-                } else if (cat.healthStatus == BudgetHealthStatus.WARNING) {
+                } else if (cat.status == BudgetHealthStatus.WARNING) {
                     val key = "$monthKey:${cat.category.id}:WARNING"
                     if (!notifiedRecords.contains(key)) {
-                        onNewAlert(key, "⚠️ 「${cat.category.displayName}」预算预警", "该分类支出已达到预算的 ${(cat.usageRatio * 100).toInt()}%。")
+                        onNewAlert(key, "⚠️ 「${cat.category.getDisplayName()}」预算预警", "该分类支出已达到预算的 ${(cat.usageRatio * 100).toInt()}%。")
                     }
                 }
             }

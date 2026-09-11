@@ -1,17 +1,12 @@
 package com.listen.expensetracker.core.state
 
 import android.app.Application
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -28,20 +23,6 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsVie
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.Calendar
-
-/**
- * Type-safe Navigation Tab definitions for ListenExpenseTracker.
- * 使用类型安全的枚举替代魔术数字(0, 1, 2)进行 Tab 导航，提升可读性并防止越界错误。
- */
-enum class NavTab(
-    val route: String,
-    val labelKey: String,
-    val icon: ImageVector
-) {
-    TRANSACTIONS("transactions", "nav_transactions", Icons.AutoMirrored.Filled.List),
-    STATISTICS("statistics", "nav_statistics", Icons.Default.PieChart),
-    SETTINGS("settings", "nav_settings", Icons.Default.Settings)
-}
 
 /**
  * Sealed definition of all Global App-Level Overlays (Modals, Floating Bubbles, HUDs).
