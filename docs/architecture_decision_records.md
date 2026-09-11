@@ -742,8 +742,16 @@ fun TransactionsScreenPreview() {
    - 连线与环形指示条（如 MVI 单向闭环反馈、Clean 层级依赖、Composite 模块契约）强化视觉箭头引导与颜色区分；
 4. **纯原生 Compose 渲染与架构纪律**：
    - 零依赖任何第三方重量级图表库，纯原生绘制自适应深浅主题；
-   - 严格遵循单文件 $\le 250$ 行规范，将模型、公共拓扑组件、详情抽屉、Tabs、Dialog 拆分为 7 个高内聚的小文件；
+   - 严格遵循单文件 $\le 250$ 行规范，将模型、公共拓扑组件、详情抽屉、Tabs、独立 Screen 拆分为高内聚的小文件；
    - 严格遵守 Zero Mermaid 约束，工程单测 100% PASS。
+5. **独立全屏画面演进与排版深度优化 (Independent Screen & Typography Overhaul)**：
+   - **从弹窗升级为独立沉浸全屏 (`ArchitectureVisualizerScreen.kt`)**：彻底脱离 Dialog 弹窗尺寸约束与物理限制，采用 `BaseScreenScaffold` 提供标准沉浸式 TopBar 与返回导航。在 `SettingsScreen` 内部通过单向状态 `isArchitectureVisualizerOpen` 调度，无缝嵌入当前 Compose 渲染树，保留主题与返回栈自然交互。
+   - **文字过长折行与拥挤根治优化**：
+     - 节点标题与副标题启用 `maxLines = 1, overflow = TextOverflow.Ellipsis`，Badge 采用自适应权重，杜绝卡片内部无谓折行挤压；
+     - 代表性类/接口列表采用官方 `FlowRow` 流式网格标签排版，彻底解决水平溢出或死板堆叠；
+     - 架构守则列表采用 `Row(BulletDot + Text)` 挂标结构，文字多行换行时不再回绕至圆点下方，视觉对齐极为规整；
+     - 核心职责描述辅以柔和底衬卡片，建立明晰的视觉阅读层级。
+
 
 
 

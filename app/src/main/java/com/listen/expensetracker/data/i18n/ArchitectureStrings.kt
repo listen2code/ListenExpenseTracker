@@ -59,18 +59,18 @@ object ArchitectureStrings {
 
     private val zhMap = mapOf(
         TITLE to "架构设计全景可视化",
-        SUBTITLE to "系统 MVI 响应式流、Clean 分层与模块解耦拓扑",
+        SUBTITLE to "MVI 响应式流、Clean 分层与模块解耦拓扑",
         TAB_MVI to "MVI 响应式流",
         TAB_CLEAN to "Clean Architecture",
         TAB_MODULES to "模块解耦拓扑",
-        SECTION_RESPONSIBILITY to "核心职责与设计理念",
-        SECTION_EXAMPLES to "工程代表类 / 关键接口",
-        SECTION_RULES to "架构红线与约束守则",
-        TIP_SELECT_NODE to "轻按上方拓扑节点，查看架构规范与代码下钻",
+        SECTION_RESPONSIBILITY to "核心职责与理念",
+        SECTION_EXAMPLES to "代表类与关键接口",
+        SECTION_RULES to "架构红线守则",
+        TIP_SELECT_NODE to "轻按上方拓扑节点，查看规范与代码下钻",
 
         MVI_VIEW_TITLE to "View / 纯函数 UI 渲染",
         MVI_VIEW_DESC to "纯 Compose 组件树，只依赖不可变 State 快照，用户交互仅向下游派发 Intent，不直接执行业务逻辑与状态变更。",
-        MVI_INTENT_TITLE to "Intent / 唯一用户意图",
+        MVI_INTENT_TITLE to "Intent / 统一用户意图",
         MVI_INTENT_DESC to "Sealed Interface 密封类型系统，所有 UI 事件必须包装为强类型意图，便于日志追踪、自动化测试与状态回放。",
         MVI_VM_TITLE to "ViewModel & 业务委托",
         MVI_VM_DESC to "唯一的业务决策中心，通过 Delegate 分解复杂职责，单向消费 Intent，以原子化 copy 产出新的 UiState。",
@@ -82,20 +82,20 @@ object ArchitectureStrings {
         CLEAN_PRESENTATION_TITLE to "展示层 (Presentation Layer)",
         CLEAN_PRESENTATION_DESC to "包含各 Feature Screen、无状态 UI 组件与 StateHolder，遵从 MVI 模式，严格隔离领域与数据层细节。",
         CLEAN_DOMAIN_TITLE to "领域引擎层 (Domain & Engines)",
-        CLEAN_DOMAIN_DESC to "纯函数业务计算核心（预算超支预警、智能财务诊断、周期履约计算），100% 零 Android SDK 强依赖，秒级全量单测。",
-        CLEAN_DATA_TITLE to "数据与持久化层 (Data Layer)",
-        CLEAN_DATA_DESC to "Room SQLite 本地优先数据库、DataStore 响应式偏好流、SAF 文件导出以及 Google Drive 云端快照存储。",
+        CLEAN_DOMAIN_DESC to "纯函数业务计算核心（预算预警、财务诊断、周期履约），100% 隔离 Android SDK，毫秒级快速单测。",
+        CLEAN_DATA_TITLE to "数据持久化层 (Data Layer)",
+        CLEAN_DATA_DESC to "Room SQLite 本地数据库、DataStore 响应式偏好流、SAF 文件导出以及 Google Drive 云端快照存储。",
         CLEAN_CORE_TITLE to "系统与能力层 (Core & Platform)",
-        CLEAN_CORE_DESC to "系统通知矩阵 (Channel)、桌面微件 (AppWidget 2.0)、生物识别隐私防窥 (Biometric) 以及 APM 性能监控底座。",
+        CLEAN_CORE_DESC to "通知矩阵 (Channel)、桌面微件 (AppWidget 2.0)、生物识别防窥 (Biometric) 以及 APM 性能监控底座。",
 
         MOD_APP_TITLE to ":app (业务宿主模块)",
-        MOD_APP_DESC to "顶级业务容器，包含记账、统计、设置三屏全量页面，编排全局状态机，集成 AndroidX 依赖与应用配置。",
+        MOD_APP_DESC to "顶级业务容器，包含流水、统计、设置三屏全量页面，编排全局状态机，集成系统依赖与应用配置。",
         MOD_ARCH_TITLE to ":ListenArch (通用架构底座)",
-        MOD_ARCH_DESC to "独立 Composite Build 模块，提供 MVI 核心基类、多语言 i18n 动态注册中心与轻量同步状态定义，零业务耦合。",
+        MOD_ARCH_DESC to "独立 Composite Build 模块，提供 MVI 核心基类、多语言 i18n 动态注册中心与轻量同步状态，零业务耦合。",
         MOD_UI_TITLE to ":ListenUiComponent (设计系统库)",
-        MOD_UI_DESC to "通用 Compose 纯 UI 库，定义 SurfaceCard、CommonButton、颜色令牌与主题规范，严禁反向依赖宿主业务模型。",
+        MOD_UI_DESC to "通用 Compose 纯 UI 库，定义 SurfaceCard、CommonButton、设计令牌与主题规范，严禁反向依赖业务模型。",
         MOD_SYS_TITLE to "系统与外部云服务 (External Ecosystem)",
-        MOD_SYS_DESC to "Android System OS (通知、微件、安全)、Google Drive REST API 以及本地文件系统 SAF，通过接口完全解耦隔离。"
+        MOD_SYS_DESC to "Android System OS (通知、微件、安全)、Google Drive API 及本地文件系统 SAF，通过接口完全解耦隔离。"
     )
 
     private val enMap = mapOf(
@@ -141,13 +141,13 @@ object ArchitectureStrings {
 
     private val jaMap = mapOf(
         TITLE to "アーキテクチャ全景ビジュアライザー",
-        SUBTITLE to "MVIリアクティブフロー、クリーンアーキテクチャ、モジュール結合トポロジー",
+        SUBTITLE to "MVIリアクティブフロー、クリーン構成、モジュール結合トポロジー",
         TAB_MVI to "MVI リアクティブ",
         TAB_CLEAN to "クリーン構成",
         TAB_MODULES to "モジュール結合",
         SECTION_RESPONSIBILITY to "主要責務と設計理念",
         SECTION_EXAMPLES to "代表クラス / 主要インターフェース",
-        SECTION_RULES to "アーキテクチャ規約と制約",
+        SECTION_RULES to "アーキテクチャ規約と制约",
         TIP_SELECT_NODE to "ノードをタップして設計詳細と規範を確認",
 
         MVI_VIEW_TITLE to "View / 描画UI",

@@ -102,4 +102,13 @@ class ArchitectureModelTest {
         val dialog: SettingsDialog = SettingsDialog.ArchitectureVisualizer
         assertEquals(SettingsDialog.ArchitectureVisualizer, dialog)
     }
+
+    @Test
+    fun testToggleArchitectureVisualizerIntent() {
+        val intent = com.listen.expensetracker.features.settings.viewmodel.SettingsIntent.ToggleArchitectureVisualizer(true)
+        assertTrue(intent.isOpen)
+        val state = com.listen.expensetracker.features.settings.viewmodel.SettingsUiState(isArchitectureVisualizerOpen = true)
+        assertTrue(state.isArchitectureVisualizerOpen)
+    }
 }
+

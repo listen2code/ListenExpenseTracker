@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
@@ -95,17 +96,25 @@ fun TopologyNodeCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 6.dp)
+                ) {
                     Text(
                         text = node.titleKey.tr(lang),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = node.subtitle,
                         fontSize = 9.sp,
                         lineHeight = 11.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -119,7 +128,8 @@ fun TopologyNodeCard(
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = nodeColor,
-                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                        maxLines = 1,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
             }
@@ -148,6 +158,8 @@ fun FlowConnectorArrow(
             text = label,
             fontSize = 8.5.sp,
             fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
         )
     }
@@ -182,6 +194,8 @@ fun FlowLoopIndicator(
                 text = label,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = contentColor
             )
         }

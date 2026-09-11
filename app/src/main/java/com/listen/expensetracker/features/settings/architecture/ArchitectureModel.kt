@@ -32,7 +32,7 @@ object ArchitectureModelProvider {
             subtitle = "Composable Tree & StateHolder",
             descKey = ArchitectureStrings.MVI_VIEW_DESC,
             examples = listOf("TransactionsScreen.kt", "SettingsScreen.kt", "CategoryBudgetModalDialog.kt"),
-            rules = listOf("禁止直接调用 ViewModel 修改状态", "遵循 Rule 17 StateHolder 模式隔离框架状态", "纯函数式只读渲染"),
+            rules = listOf("禁止直接调用 ViewModel 修改状态", "遵循 Rule 17 StateHolder 隔离框架状态", "纯函数式只读渲染"),
             badge = "Render",
             colorHex = 0xFF10B981L // Emerald
         ),
@@ -42,7 +42,7 @@ object ArchitectureModelProvider {
             subtitle = "Sealed Interface Action",
             descKey = ArchitectureStrings.MVI_INTENT_DESC,
             examples = listOf("TransactionsIntent", "SettingsIntent", "StatisticsIntent"),
-            rules = listOf("所有用户操作必须建模为密封接口", "意图天然支持事件溯源与测试回放", "不可变携带参数"),
+            rules = listOf("所有操作强制定义为密封接口", "意图天然支持事件溯源与测试回放", "不可变携带参数"),
             badge = "Action",
             colorHex = 0xFF3B82F6L // Blue
         ),
@@ -52,7 +52,7 @@ object ArchitectureModelProvider {
             subtitle = "Decision Center & Delegates",
             descKey = ArchitectureStrings.MVI_VM_DESC,
             examples = listOf("SettingsViewModel", "TransactionsViewModel", "SettingsNotificationDelegate"),
-            rules = listOf("单文件红线 <= 250 行，复杂业务必须拆解为 Delegate", "只通过原子 copy 产出新 UiState", "禁止对外暴露可变流"),
+            rules = listOf("单文件 <= 250 行，通过 Delegate 拆解业务", "只通过原子 copy 产出新 UiState", "禁止对外暴露可变流"),
             badge = "Reducer",
             colorHex = 0xFF8B5CF6L // Violet
         ),
@@ -62,7 +62,7 @@ object ArchitectureModelProvider {
             subtitle = "Immutable StateFlow (SSOT)",
             descKey = ArchitectureStrings.MVI_STATE_DESC,
             examples = listOf("SettingsUiState", "TransactionsViewState", "StatisticsUiState"),
-            rules = listOf("全部字段强制为 val 不可变定义", "单一数据源真实快照，杜绝状态撕裂", "利用 data class copy 机制"),
+            rules = listOf("全部字段强制为 val 不可变定义", "单一数据源真实快照，杜绝状态撕裂", "纯函数数据类传递"),
             badge = "SSOT",
             colorHex = 0xFFF59E0BL // Amber
         ),
@@ -95,7 +95,7 @@ object ArchitectureModelProvider {
             subtitle = "Pure Calculation Engines",
             descKey = ArchitectureStrings.CLEAN_DOMAIN_DESC,
             examples = listOf("BudgetAlertGuard.kt", "FinancialInsightEngine.kt", "CategoryBudgetEngine.kt"),
-            rules = listOf("纯函数式无副作用算法", "100% 隔离 Android SDK，毫秒级快速单测", "业务核心决策中心"),
+            rules = listOf("纯函数式无副作用算法", "100% 隔离 Android SDK，毫秒级单测", "业务核心计算中心"),
             badge = "Layer 2",
             colorHex = 0xFF10B981L // Emerald
         ),
@@ -115,7 +115,7 @@ object ArchitectureModelProvider {
             subtitle = "System Services, APM & Platform",
             descKey = ArchitectureStrings.CLEAN_CORE_DESC,
             examples = listOf("LocalNotificationManager.kt", "BiometricSecurityManager.kt", "ApmLogger.kt"),
-            rules = listOf("严格适配 Android 13+ 规范", "500条环形内存日志零GC负担", "硬件时钟防回拨防窥保护"),
+            rules = listOf("严格适配 Android 13+ 规范", "500条环形内存日志零GC负担", "时钟防回拨防窥保护"),
             badge = "Layer 4",
             colorHex = 0xFF6366F1L // Indigo
         )
@@ -128,7 +128,7 @@ object ArchitectureModelProvider {
             subtitle = "Top-level Feature Application",
             descKey = ArchitectureStrings.MOD_APP_DESC,
             examples = listOf("app/build.gradle.kts", "MainActivity.kt", "MainApp.kt"),
-            rules = listOf("全工程顶层宿主，装配所有功能特性", "遵循 Gradle Composite Build 机制协同编译", "单文件红线严格限制 <= 250 行"),
+            rules = listOf("全工程顶层宿主，装配所有功能特性", "遵循 Gradle Composite Build 协同编译", "单文件严格限制 <= 250 行"),
             badge = "App Host",
             colorHex = 0xFF10B981L // Emerald
         ),
@@ -158,7 +158,7 @@ object ArchitectureModelProvider {
             subtitle = "External Platform & Cloud APIs",
             descKey = ArchitectureStrings.MOD_SYS_DESC,
             examples = listOf("NotificationManagerCompat", "Google Drive REST v3", "StorageAccessFramework"),
-            rules = listOf("通过隔离接口交互，保障无云服务下的完全可用", "遵循系统电池白名单与低电耗规范", "不引入重型第三方全家桶"),
+            rules = listOf("通过隔离接口交互，保障离线完全可用", "遵循系统电池白名单与低电耗规范", "不引入重型第三方框架"),
             badge = "Ecosystem",
             colorHex = 0xFF64748BL // Slate
         )
