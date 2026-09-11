@@ -60,7 +60,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(horizontal = AppDimens.SpaceLarge),
-            contentPadding = PaddingValues(top = AppDimens.SpaceSmall, bottom = AppDimens.SpaceBottomFab),
+            contentPadding = PaddingValues(top = AppDimens.SpaceSmall, bottom = AppDimens.SpaceSmall),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
             // 1. Finance Preferences & Rules Section (Monthly Budget, Categories, Accounts, Recurring)
@@ -113,7 +113,9 @@ fun SettingsScreen(
                     onChangeThemeMode = { onIntent(SettingsIntent.ChangeThemeMode(it)) },
                     onChangeAccentColor = { onIntent(SettingsIntent.ChangeAccentColor(it)) },
                     onLanguageChange = { onIntent(SettingsIntent.ChangeLanguage(it)) },
-                    lang = lang
+                    lang = lang,
+                    isPureBlackDark = state.isPureBlackDark,
+                    onTogglePureBlackDark = { onIntent(SettingsIntent.TogglePureBlackDark(it)) }
                 )
             }
 

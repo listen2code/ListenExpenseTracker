@@ -38,6 +38,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_RECENT_APPS_SHIELD_ENABLED = booleanPreferencesKey("expense_recent_apps_shield_enabled")
         val KEY_SHAKE_TO_HIDE_BALANCE_ENABLED = booleanPreferencesKey("expense_shake_to_hide_balance_enabled")
         val KEY_APM_FLOATING_WINDOW_ENABLED = booleanPreferencesKey("expense_apm_floating_enabled")
+        val KEY_PURE_BLACK_DARK = booleanPreferencesKey("expense_pure_black_dark")
     }
 
     val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
@@ -69,7 +70,8 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             },
             recentAppsShieldEnabled = prefs[KEY_RECENT_APPS_SHIELD_ENABLED] ?: true,
             shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true,
-            apmFloatingWindowEnabled = prefs[KEY_APM_FLOATING_WINDOW_ENABLED] ?: false
+            apmFloatingWindowEnabled = prefs[KEY_APM_FLOATING_WINDOW_ENABLED] ?: false,
+            isPureBlackDark = prefs[KEY_PURE_BLACK_DARK] ?: false
         )
     }
 
@@ -157,6 +159,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
 
     suspend fun setApmFloatingWindowEnabled(enabled: Boolean) {
         context.archDataStore.edit { prefs -> prefs[KEY_APM_FLOATING_WINDOW_ENABLED] = enabled }
+    }
+
+    suspend fun setPureBlackDark(enabled: Boolean) {
+        context.archDataStore.edit { prefs -> prefs[KEY_PURE_BLACK_DARK] = enabled }
     }
 
     suspend fun setCategoryBudgetRatios(ratios: Map<String, Float>) {

@@ -32,7 +32,8 @@ data class ExpensePreferences(
     val lockTimeoutSeconds: Int = 0,
     val recentAppsShieldEnabled: Boolean = true,
     val shakeToHideBalanceEnabled: Boolean = true,
-    val apmFloatingWindowEnabled: Boolean = false
+    val apmFloatingWindowEnabled: Boolean = false,
+    val isPureBlackDark: Boolean = false
 )
 
 /**

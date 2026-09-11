@@ -50,38 +50,22 @@ class SettingsUiStateTest {
         assertFalse(state.isBiometricSupported)
         assertFalse(state.apmFloatingWindowEnabled)
         assertTrue(state.transactions.isEmpty())
+        assertFalse(state.isPureBlackDark)
     }
 
     @Test
     fun testCustomStateValuesAndCopy() {
         val rule = RecurringRuleEntity(
-            id = "rule_1",
-            title = "Test Rent",
-            type = TransactionType.EXPENSE,
-            categoryId = "c_shopping",
-            categoryName = "Shopping",
-            categoryIcon = "icon",
-            categoryColorHex = "#EC4899",
-            amount = 2500.0,
-            accountType = "BANK",
-            note = "Rent note",
-            frequency = RecurringFrequency.MONTHLY,
-            dayOfPeriod = 1,
-            startDate = 1000L,
-            nextExecutionDate = 2000L,
-            executionType = ExecutionType.AUTO_INSERT
+            id = "rule_1", title = "Test Rent", type = TransactionType.EXPENSE,
+            categoryId = "c_shopping", categoryName = "Shopping", categoryIcon = "icon",
+            categoryColorHex = "#EC4899", amount = 2500.0, accountType = "BANK",
+            note = "Rent note", frequency = RecurringFrequency.MONTHLY, dayOfPeriod = 1,
+            startDate = 1000L, nextExecutionDate = 2000L, executionType = ExecutionType.AUTO_INSERT
         )
         val tx = TransactionEntity(
-            id = "tx_1",
-            type = TransactionType.EXPENSE,
-            categoryId = "c_food",
-            categoryName = "Food",
-            categoryIcon = "icon",
-            categoryColorHex = "#EF4444",
-            amount = 50.0,
-            timestamp = 1000L,
-            note = "Lunch",
-            accountType = "CASH"
+            id = "tx_1", type = TransactionType.EXPENSE, categoryId = "c_food",
+            categoryName = "Food", categoryIcon = "icon", categoryColorHex = "#EF4444",
+            amount = 50.0, timestamp = 1000L, note = "Lunch", accountType = "CASH"
         )
 
         val state = SettingsUiState(
@@ -97,7 +81,8 @@ class SettingsUiStateTest {
             googleAvatarUrl = "https://avatar.png",
             isDeveloperMode = true,
             biometricLockEnabled = true,
-            transactions = listOf(tx)
+            transactions = listOf(tx),
+            isPureBlackDark = true
         )
 
         assertEquals("en", state.language)
@@ -113,45 +98,31 @@ class SettingsUiStateTest {
         assertTrue(state.isDeveloperMode)
         assertTrue(state.biometricLockEnabled)
         assertEquals(1, state.transactions.size)
+        assertTrue(state.isPureBlackDark)
 
-        val copiedState = state.copy(language = "ja", isCheckingUpdate = true)
+        val copiedState = state.copy(language = "ja", isCheckingUpdate = true, isPureBlackDark = false)
         assertEquals("ja", copiedState.language)
         assertTrue(copiedState.isCheckingUpdate)
+        assertFalse(copiedState.isPureBlackDark)
         assertEquals(8000.0, copiedState.monthlyBudget, 0.0)
     }
 
     @Test
     fun testSettingsDialogVariants() {
-        val monthlyDialog = SettingsDialog.MonthlyBudget
-        val categoryDialog = SettingsDialog.CategoryManage
-        val accountDialog = SettingsDialog.AccountManage
-        val recurringDialog = SettingsDialog.RecurringManage
-        val clearDialog = SettingsDialog.ClearConfirm
-        val logoutDialog = SettingsDialog.LogoutConfirm
-        val aboutDialog = SettingsDialog.AboutApp
-        val exportExcelDialog = SettingsDialog.ExportExcelOptions
-
-        val release = ReleaseInfo(
-            tagName = "v1.1.0",
-            title = "Version 1.1.0",
-            changelog = "Bug fixes and improvements",
-            htmlUrl = "https://github.com/release",
-            apkDownloadUrl = "https://download.apk"
-        )
+        val release = ReleaseInfo("v1.1.0", "Version 1.1.0", "Bug fixes and improvements", "https://github.com/release", "https://download.apk")
         val updateDialog = SettingsDialog.UpdateAvailable(release)
-
         assertEquals("v1.1.0", updateDialog.releaseInfo.tagName)
         assertEquals("Version 1.1.0", updateDialog.releaseInfo.title)
         assertEquals("Bug fixes and improvements", updateDialog.releaseInfo.changelog)
         assertEquals("https://download.apk", updateDialog.releaseInfo.apkDownloadUrl)
-        assertEquals(monthlyDialog, SettingsDialog.MonthlyBudget)
-        assertEquals(categoryDialog, SettingsDialog.CategoryManage)
-        assertEquals(accountDialog, SettingsDialog.AccountManage)
-        assertEquals(recurringDialog, SettingsDialog.RecurringManage)
-        assertEquals(clearDialog, SettingsDialog.ClearConfirm)
-        assertEquals(logoutDialog, SettingsDialog.LogoutConfirm)
-        assertEquals(aboutDialog, SettingsDialog.AboutApp)
-        assertEquals(exportExcelDialog, SettingsDialog.ExportExcelOptions)
+        assertEquals(SettingsDialog.MonthlyBudget, SettingsDialog.MonthlyBudget)
+        assertEquals(SettingsDialog.CategoryManage, SettingsDialog.CategoryManage)
+        assertEquals(SettingsDialog.AccountManage, SettingsDialog.AccountManage)
+        assertEquals(SettingsDialog.RecurringManage, SettingsDialog.RecurringManage)
+        assertEquals(SettingsDialog.ClearConfirm, SettingsDialog.ClearConfirm)
+        assertEquals(SettingsDialog.LogoutConfirm, SettingsDialog.LogoutConfirm)
+        assertEquals(SettingsDialog.AboutApp, SettingsDialog.AboutApp)
+        assertEquals(SettingsDialog.ExportExcelOptions, SettingsDialog.ExportExcelOptions)
     }
 
     @Test
@@ -182,21 +153,11 @@ class SettingsUiStateTest {
 
         // Recurring Rule Intents
         val mockRule = RecurringRuleEntity(
-            id = "rule_2",
-            title = "Gym",
-            type = TransactionType.EXPENSE,
-            categoryId = "c_fitness",
-            categoryName = "Fitness",
-            categoryIcon = "icon",
-            categoryColorHex = "#F59E0B",
-            amount = 300.0,
-            accountType = "CREDIT",
-            note = "Gym Note",
-            frequency = RecurringFrequency.MONTHLY,
-            dayOfPeriod = 15,
-            startDate = 1000L,
-            nextExecutionDate = 2000L,
-            executionType = ExecutionType.AUTO_INSERT
+            id = "rule_2", title = "Gym", type = TransactionType.EXPENSE,
+            categoryId = "c_fitness", categoryName = "Fitness", categoryIcon = "icon",
+            categoryColorHex = "#F59E0B", amount = 300.0, accountType = "CREDIT",
+            note = "Gym Note", frequency = RecurringFrequency.MONTHLY, dayOfPeriod = 15,
+            startDate = 1000L, nextExecutionDate = 2000L, executionType = ExecutionType.AUTO_INSERT
         )
         val saveRuleIntent = SettingsIntent.SaveRecurringRule(mockRule)
         assertEquals("rule_2", saveRuleIntent.rule.id)
@@ -232,6 +193,9 @@ class SettingsUiStateTest {
 
         val apmFloatingIntent = SettingsIntent.ToggleApmFloatingWindow(true)
         assertTrue(apmFloatingIntent.enabled)
+
+        val pureBlackIntent = SettingsIntent.TogglePureBlackDark(true)
+        assertTrue(pureBlackIntent.enabled)
 
         // Auth & Sync Intents
         assertEquals(SettingsIntent.TriggerGoogleSignIn, SettingsIntent.TriggerGoogleSignIn)

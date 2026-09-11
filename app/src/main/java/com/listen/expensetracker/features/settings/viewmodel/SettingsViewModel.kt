@@ -71,6 +71,7 @@ class SettingsViewModel(
                 updateState { copy(language = intent.langCode, currencySymbol = symbol) }
             }
             is SettingsIntent.ChangeThemeMode -> viewModelScope.launch { prefManager.setThemeMode(intent.mode.name); updateState { copy(themeMode = intent.mode) } }
+            is SettingsIntent.TogglePureBlackDark -> viewModelScope.launch { prefManager.setPureBlackDark(intent.enabled); updateState { copy(isPureBlackDark = intent.enabled) } }
             is SettingsIntent.ChangeAccentColor -> viewModelScope.launch { prefManager.setAccentColor(intent.accent.name); updateState { copy(accentColor = intent.accent) } }
             is SettingsIntent.UpdateMonthlyBudget -> viewModelScope.launch { prefManager.setMonthlyBudget(intent.budget); updateState { copy(monthlyBudget = intent.budget) } }
             is SettingsIntent.UpdateCategoryBudgets -> viewModelScope.launch {
@@ -170,7 +171,8 @@ class SettingsViewModel(
                     isDeveloperMode = prefs.isDeveloperMode,
                     biometricLockEnabled = prefs.biometricLockEnabled, lockTimeoutSeconds = prefs.lockTimeoutSeconds,
                     recentAppsShieldEnabled = prefs.recentAppsShieldEnabled, shakeToHideBalanceEnabled = prefs.shakeToHideBalanceEnabled,
-                    isBiometricSupported = isBioSupported, apmFloatingWindowEnabled = prefs.apmFloatingWindowEnabled
+                    isBiometricSupported = isBioSupported, apmFloatingWindowEnabled = prefs.apmFloatingWindowEnabled,
+                    isPureBlackDark = prefs.isPureBlackDark
                 )
             }
         }

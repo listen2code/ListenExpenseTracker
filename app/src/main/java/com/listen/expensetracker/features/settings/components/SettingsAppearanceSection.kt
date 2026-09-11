@@ -36,6 +36,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonSegmentedControl
+import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -53,7 +54,9 @@ fun SettingsAppearanceSection(
     onChangeAccentColor: (AccentColor) -> Unit,
     onLanguageChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    lang: String = language
+    lang: String = language,
+    isPureBlackDark: Boolean = false,
+    onTogglePureBlackDark: (Boolean) -> Unit = {}
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -98,6 +101,15 @@ fun SettingsAppearanceSection(
                     items = modes.map { it.second },
                     selectedIndex = modes.indexOfFirst { it.first == themeMode }.coerceAtLeast(0),
                     onIndexChange = { index -> onChangeThemeMode(modes[index].first) }
+                )
+
+                // AMOLED 纯黑夜间节能模式开关
+                CommonSwitchRow(
+                    title = AppStrings.AMOLED_PURE_BLACK_TITLE.tr(lang),
+                    subtitle = AppStrings.AMOLED_PURE_BLACK_DESC.tr(lang),
+                    checked = isPureBlackDark,
+                    onCheckedChange = onTogglePureBlackDark,
+                    contentPadding = 0.dp
                 )
             }
 

@@ -42,7 +42,8 @@
 | [ADR-032](#adr-032-本地智能通知预警与多渠道分流提醒中枢) | 本地智能通知预警与多渠道分流提醒中枢 | 系统通知 / 权限闭环 | **Accepted** |
 | [ADR-033](#adr-033-全功能组件与屏幕-preview-可视化覆盖架构规范) | 全功能组件与屏幕 @Preview 可视化覆盖架构规范 | 开发体验 / 隔离调试 | **Accepted** |
 | [ADR-034](#adr-034-设置中心高紧凑布局重塑与智能通知单开关整合) | 设置中心高紧凑布局重塑与智能通知单开关整合 | 视觉交互 / 信息紧凑化 | **Accepted** |
-| [ADR-035](#adr-035-应用内架构设计全景可视化面板-architecture-visualizer) | 应用内架构设计全景可视化面板 (Architecture Visualizer) | 开发者工具 / 架构可解释性 | **Accepted** |
+| [ADR-035](#adr-035-系统架构全景规范文档化沉淀与应用内可视化功能精简退役) | 系统架构全景规范文档化沉淀与应用内可视化功能精简退役 | 开发者工具 / 架构可解释性 | **Accepted** |
+| [ADR-036](#adr-036-amoled-纯黑夜间节能模式与-oled-像素自适应边框设计规范) | AMOLED 纯黑夜间节能模式与 OLED 像素自适应边框设计规范 | 视觉主题 / 硬件能效 | **Accepted** |
 
 ---
 
@@ -740,6 +741,40 @@ fun TransactionsScreenPreview() {
    - 移除对应的测试套件 `ArchitectureModelTest.kt`。
 3. **运维工具面板布局重塑 (Ergonomic System Ops Layout)**：
    - 移除“架构全景”按钮后，APM 运维卡片底部的“模拟系统通知”升级为全宽按钮，与上方“生成数据 / 清空数据”形成对称均衡的视觉网格，界面恢复通透、清爽与高凝聚力。
+
+---
+
+## ADR-036: AMOLED 纯黑夜间节能模式与 OLED 像素自适应边框设计规范
+
+### 背景 (Context)
+在 Material Design 3 默认的深色主题规范中，为了保证海拔层级阴影（Elevation Surface Tint）的渲染表现，深色背景通常采用深灰或深蓝灰色调（如 `#121212`、`#1C1B1F` 等）。
+然而在配备 OLED / AMOLED 屏幕的移动终端上，每个有机发光二极管像素点是自发光的。当显示颜色为绝对纯黑（`#000000`）时，对应位置的硬件像素点会彻底进入关断休眠状态（True Black Turn-off），功耗几乎降为 0，能够实现显著的节能省电效益与无尽对比度。
+但在将主题颜色完全替换为 `#000000` 时，存在一个关键的用户体验痛点：
+- **卡片边缘融入背景 (Border-Card Blending Issue)**：若 `background` 与 `surface`（卡片表面）均采用 `#000000`，原本依靠深浅灰阶区分层级的卡片容器（如账户资产卡、流水卡片、设置分区卡）其立体边界将完全丢失，导致界面扁平化、信息拥挤、视觉层级混乱。
+
+### 决策与设计思路 (Decision & Rationale)
+
+1. **底层设计系统纯黑 Token 扩展 (`ListenUiComponent`)**：
+   - 在 `Color.kt` 中引入专属纯黑调色板：
+     - `PureBlackBackground = Color(0xFF000000)`（屏幕底层画布）
+     - `PureBlackSurface = Color(0xFF000000)`（卡片容器表面）
+     - `PureBlackSurfaceVariant = Color(0xFF141414)`（细微辅助高亮）
+     - `PureBlackOutline = Color(0xFF262626)`（1dp 硬件轮廓线）
+     - `PureBlackOutlineVariant = Color(0xFF1A1A1A)`（弱轮廓分割线）
+   - 在 `Theme.kt` 中为 `ListenTheme` 增加 `pureBlackDark: Boolean = false` 参数。当系统处于深色模式且激活该标志时，动态切换至 `PureBlackDarkColorScheme`。
+
+2. **`SurfaceCard` 几何自适应轮廓增强 (Adaptive Border Injection)**：
+   - 为避免全量手动修改业务层上百处卡片调用，在通用基础组件 `SurfaceCard.kt` 中设计了环境敏感自适应机制：
+     - 当传入或解析到的 `backgroundColor == PureBlackBackground` 且调用方未显式指定自定义 `border` 时，组件自动注入 `BorderStroke(1.dp, MaterialTheme.colorScheme.outline)`；
+     - 既实现了在 OLED 屏幕上最大化黑像素休眠面积，又依靠 1dp 高精度的微光轮廓线（`#262626`）保持了原本优雅的悬浮卡片立体形态。
+
+3. **设置层与 DataStore 持久化 MVI 闭环 (`ListenExpenseTracker`)**：
+   - **持久化层**：`ExpensePreferences` 与 `ExpenseDataStoreManager` 增设 `KEY_PURE_BLACK_DARK`，提供只读响应式 `Flow<Boolean>` 与 `setPureBlackDark(Boolean)` 挂起函数；
+   - **展示层 MVI**：`SettingsUiState` 携带 `isPureBlackDark`；`SettingsIntent.TogglePureBlackDark(val enabled: Boolean)` 驱动状态迁移与持久化更新；
+   - **用户感知**：在设置页「外观与个性化」卡片内增加多语言自适应的专属开关行（中/英/日），并带清晰功能描述。
+
+4. **顶层即时重组响应 (`MainActivity`)**：
+   - 顶层 `MainActivity` 在观察到 `settingsState.isPureBlackDark` 变化时，将该状态向下透传给最外层 `ListenTheme(..., pureBlackDark = settingsState.isPureBlackDark)`，全应用所有界面即时无缝重组切换，无需冷重启。
 
 
 

@@ -89,7 +89,8 @@ class MainActivity : FragmentActivity() {
 
             ListenTheme(
                 themeMode = settingsState.themeMode,
-                accentColor = settingsState.accentColor
+                accentColor = settingsState.accentColor,
+                pureBlackDark = settingsState.isPureBlackDark
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     // 生物识别全屏锁屏遮罩层（锁定状态下完全隔离主界面与所有子窗口弹窗）

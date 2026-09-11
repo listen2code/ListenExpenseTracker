@@ -117,6 +117,8 @@ object AppStrings {
     const val THEME_LIGHT = "theme_light"
     const val THEME_DARK = "theme_dark"
     const val THEME_SYSTEM = "theme_system"
+    const val AMOLED_PURE_BLACK_TITLE = "amoled_pure_black_title"
+    const val AMOLED_PURE_BLACK_DESC = "amoled_pure_black_desc"
     const val APM_INSPECTOR = "apm_inspector"
     const val APM_FLOATING_WINDOW_TITLE = "apm_floating_window_title"
     const val APM_FLOATING_WINDOW_DESC = "apm_floating_window_desc"
