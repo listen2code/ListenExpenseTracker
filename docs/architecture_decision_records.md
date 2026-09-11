@@ -732,10 +732,18 @@ fun TransactionsScreenPreview() {
    - **MVI 响应式流**：展示 View $\to$ Intent $\to$ ViewModel/Delegates $\to$ Immutable State $\to$ Render 闭环，以及独立的 `CommonUiEffect` 单次事件总线；
    - **Clean Architecture 四层拓扑**：展示 Presentation $\to$ Domain (纯函数引擎) $\to$ Data $\to$ Platform Core 的单向依赖与职责边界；
    - **Gradle Composite Build 模块拓扑**：展示 `:app` 宿主与通用基础库 `:ListenArch`、`:ListenUiComponent` 的解耦规则与生态接口。
-2. **交互式节点下钻**：
-   - 允许用户轻按拓扑图上的任意节点（如 `Reducer` 或 `Domain Engine`），下方动态抽屉展开其架构职责、约束红线与工程代表类。
-3. **纯原生 Canvas / Compose 绘制**：
-   - 零依赖任何第三方图表库，纯原生绘制自适应深浅主题；
-   - 严格遵循单文件 $\le 250$ 行规范，将模型、Tabs、Dialog 拆分为高内聚的独立小文件。
+2. **交互式固定分屏与节点下钻 (Fixed Upper-Lower Split Architecture)**：
+   - 上半区固定拓扑画板，无论如何切换 Tab 或选中节点，拓扑视图始终稳定在视口顶部；
+   - 下半区配备独立的自适应滚动卡片抽屉，查看选中节点的职责理念、代表性工程类与架构红线守则；
+   - 彻底避免传统长列表滚动时“点击节点后详情将拓扑图顶出屏幕”的糟糕体验，实现“同屏对照”。
+3. **视觉连线与状态反馈增强 (Visual Connectivity & Pulsing Glow)**：
+   - 抽离统一的拓扑图形组件库 `ArchitectureTopologyComponents.kt`；
+   - 节点卡片内嵌左侧色彩指示条 (Accent Bar)，选中节点配备 `InfiniteTransition` 呼吸脉冲光晕与高对比度边框；
+   - 连线与环形指示条（如 MVI 单向闭环反馈、Clean 层级依赖、Composite 模块契约）强化视觉箭头引导与颜色区分；
+4. **纯原生 Compose 渲染与架构纪律**：
+   - 零依赖任何第三方重量级图表库，纯原生绘制自适应深浅主题；
+   - 严格遵循单文件 $\le 250$ 行规范，将模型、公共拓扑组件、详情抽屉、Tabs、Dialog 拆分为 7 个高内聚的小文件；
+   - 严格遵守 Zero Mermaid 约束，工程单测 100% PASS。
+
 
 

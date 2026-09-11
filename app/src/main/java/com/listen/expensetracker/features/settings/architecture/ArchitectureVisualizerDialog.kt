@@ -1,6 +1,6 @@
 package com.listen.expensetracker.features.settings.architecture
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,9 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.listen.arch.i18n.tr
@@ -25,7 +25,7 @@ import com.listen.uicomponent.components.*
 
 /**
  * 架构全景交互式可视化对话框 (ArchitectureVisualizerDialog)。
- * 承载 MVI 单向流、Clean Architecture 四层拓扑与 Gradle Composite Build 模块全景。
+ * 采用固定上下分区分割布局：上半区固定拓扑画板，下半区独立滚动下钻详情。
  */
 @Composable
 fun ArchitectureVisualizerDialog(
@@ -48,12 +48,10 @@ fun ArchitectureVisualizerDialog(
                 .fillMaxHeight(0.92f)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
             ) {
-                // 1. Header
+                // 1. Header (标题 + 简述 + 关闭图标)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -61,35 +59,36 @@ fun ArchitectureVisualizerDialog(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Hub,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Column {
                             Text(
                                 text = ArchitectureStrings.TITLE.tr(lang),
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = ArchitectureStrings.SUBTITLE.tr(lang),
-                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 9.5.sp,
+                                lineHeight = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(16.dp))
                     }
                 }
 
-                // 2. Tab 选择器
+                // 2. Tab 选择器 (MVI / Clean / Modules)
                 val tabs = listOf(
                     ArchitectureStrings.TAB_MVI.tr(lang),
                     ArchitectureStrings.TAB_CLEAN.tr(lang),
@@ -109,132 +108,64 @@ fun ArchitectureVisualizerDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                // 3. 上半区：固定拓扑画板 (不随详情卡片滚动，同屏对照)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(6.dp)
+                ) {
+                    when (currentTab) {
+                        ArchitectureTab.MVI -> MviFlowVisualizerTab(
+                            selectedNodeId = selectedNode?.id.orEmpty(),
+                            onSelectNode = { selectedNode = it },
+                            lang = lang
+                        )
+                        ArchitectureTab.CLEAN -> CleanLayersVisualizerTab(
+                            selectedNodeId = selectedNode?.id.orEmpty(),
+                            onSelectNode = { selectedNode = it },
+                            lang = lang
+                        )
+                        ArchitectureTab.MODULES -> ModuleTopologyVisualizerTab(
+                            selectedNodeId = selectedNode?.id.orEmpty(),
+                            onSelectNode = { selectedNode = it },
+                            lang = lang
+                        )
+                    }
+                }
+
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
 
-                // 3. 拓扑图画板展示
-                when (currentTab) {
-                    ArchitectureTab.MVI -> MviFlowVisualizerTab(
-                        selectedNodeId = selectedNode?.id.orEmpty(),
-                        onSelectNode = { selectedNode = it },
-                        lang = lang
-                    )
-                    ArchitectureTab.CLEAN -> CleanLayersVisualizerTab(
-                        selectedNodeId = selectedNode?.id.orEmpty(),
-                        onSelectNode = { selectedNode = it },
-                        lang = lang
-                    )
-                    ArchitectureTab.MODULES -> ModuleTopologyVisualizerTab(
-                        selectedNodeId = selectedNode?.id.orEmpty(),
-                        onSelectNode = { selectedNode = it },
-                        lang = lang
-                    )
+                // 4. 下半区：独立可滚动卡片抽屉，查看所选节点的职责理念、代表类、架构红线守则
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    selectedNode?.let { node ->
+                        ArchitectureNodeDetailDrawer(
+                            node = node,
+                            lang = lang,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                        )
+                    }
                 }
 
-                // 4. 选中节点下钻详情抽屉
-                selectedNode?.let { node ->
-                    NodeDetailInspectorCard(node = node, lang = lang)
-                }
-
-                // 5. 底部关闭按钮
+                // 5. 底部操作按钮
                 CommonButton(
                     text = AppStrings.BTN_DONE.tr(lang),
                     onClick = onDismiss,
                     style = CommonButtonStyle.Outlined,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(AppDimens.ButtonHeightCompact)
                 )
             }
         }
     }
-}
-
-@Composable
-private fun NodeDetailInspectorCard(
-    node: ArchitectureNode,
-    lang: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = node.titleKey.tr(lang),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = Color(node.colorHex).copy(alpha = 0.2f)
-                ) {
-                    Text(
-                        text = node.badge,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(node.colorHex),
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-            Text(
-                text = node.descKey.tr(lang),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // 代表类列表
-            Text(
-                text = "${ArchitectureStrings.SECTION_EXAMPLES.tr(lang)}:",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                node.examples.forEach { example ->
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Text(
-                            text = example,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            }
-
-            // 架构守则列表
-            Text(
-                text = "${ArchitectureStrings.SECTION_RULES.tr(lang)}:",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-            node.rules.forEach { rule ->
-                Text(
-                    text = "• $rule",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
+}\n
