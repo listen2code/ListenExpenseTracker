@@ -97,4 +97,4 @@ fun MviFlowVisualizerTab(
             contentColor = MaterialTheme.colorScheme.primary
         )
     }
-}\n
+}

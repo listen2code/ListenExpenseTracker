@@ -168,4 +168,4 @@ fun ArchitectureVisualizerDialog(
             }
         }
     }
-}\n
+}

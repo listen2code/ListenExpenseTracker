@@ -86,4 +86,4 @@ fun ModuleTopologyVisualizerTab(
             contentColor = MaterialTheme.colorScheme.secondary
         )
     }
-}\n
+}

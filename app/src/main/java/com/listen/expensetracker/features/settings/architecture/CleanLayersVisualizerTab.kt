@@ -81,4 +81,4 @@ fun CleanLayersVisualizerTab(
             contentColor = MaterialTheme.colorScheme.tertiary
         )
     }
-}\n
+}
