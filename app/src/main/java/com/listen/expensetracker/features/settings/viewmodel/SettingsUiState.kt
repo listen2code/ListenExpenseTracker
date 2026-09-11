@@ -29,6 +29,7 @@ sealed interface SettingsDialog {
     data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
     data object ExportExcelOptions : SettingsDialog
     data object SimulateNotifications : SettingsDialog
+    data object ArchitectureVisualizer : SettingsDialog
 }
 
 /**

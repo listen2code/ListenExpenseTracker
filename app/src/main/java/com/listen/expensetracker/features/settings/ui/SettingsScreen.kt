@@ -158,7 +158,8 @@ fun SettingsScreen(
                         onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,
                         lang = lang,
-                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) }
+                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) },
+                        onOpenArchitectureVisualizer = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ArchitectureVisualizer)) }
                     )
                 }
             }

@@ -1,39 +1,17 @@
 package com.listen.expensetracker.features.settings.components
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,19 +25,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ArchitectureStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
-import com.listen.uicomponent.components.AutoResizeText
-import com.listen.uicomponent.components.CommonButton
-import com.listen.uicomponent.components.CommonButtonStyle
-import com.listen.uicomponent.components.CommonSwitchRow
-import com.listen.uicomponent.components.SurfaceCard
+import com.listen.uicomponent.components.*
 import com.listen.uicomponent.theme.ListenTheme
 
 /**
- * APM Observability, Testing Seeds, and About App Section Card.
- * 方案 A：默认隐藏高危的“清空所有账单”按钮，支持长按“生成数据”或卡片标题隐秘唤出。
+ * APM 运维可观测性、数据测试与架构全景可视化卡片 (SettingsApmSection)。
+ * 涵盖全局浮窗开关、生成演示数据、清空数据暗门、模拟系统通知与架构全景入口。
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -71,7 +46,8 @@ fun SettingsApmSection(
     lang: String,
     modifier: Modifier = Modifier,
     targetMonthTitle: String = "",
-    onOpenSimulateNotifications: () -> Unit = {}
+    onOpenSimulateNotifications: () -> Unit = {},
+    onOpenArchitectureVisualizer: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -94,7 +70,7 @@ fun SettingsApmSection(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
-            // Header（支持长按标题作为备用暗门）
+            // Header（长按标题作为备用暗门）
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
@@ -118,7 +94,7 @@ fun SettingsApmSection(
                 )
             }
 
-            // APM Floating Window Switch (Rule 22: 控制全局可拖拽调试悬浮球)
+            // APM Floating Window Switch
             CommonSwitchRow(
                 title = AppStrings.APM_FLOATING_WINDOW_TITLE.tr(lang),
                 checked = apmFloatingWindowEnabled,
@@ -205,22 +181,45 @@ fun SettingsApmSection(
                 }
             }
 
-            // Notification Simulation Trigger
-            CommonButton(
-                text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
-                onClick = onOpenSimulateNotifications,
-                style = CommonButtonStyle.Outlined,
-                icon = {
-                    Icon(
-                        Icons.Default.NotificationsActive,
-                        contentDescription = null,
-                        modifier = Modifier.size(AppDimens.IconSizeMedium)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-            )
+            // 开发者双通道按钮行：模拟通知与架构全景并列
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
+            ) {
+                CommonButton(
+                    text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
+                    onClick = onOpenSimulateNotifications,
+                    style = CommonButtonStyle.Outlined,
+                    icon = {
+                        Icon(
+                            Icons.Default.NotificationsActive,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                )
+
+                CommonButton(
+                    text = ArchitectureStrings.TITLE.tr(lang),
+                    onClick = onOpenArchitectureVisualizer,
+                    style = CommonButtonStyle.Outlined,
+                    icon = {
+                        Icon(
+                            Icons.Default.Hub,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                )
+            }
         }
     }
 }

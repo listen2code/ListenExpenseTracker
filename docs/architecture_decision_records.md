@@ -42,6 +42,7 @@
 | [ADR-032](#adr-032-本地智能通知预警与多渠道分流提醒中枢) | 本地智能通知预警与多渠道分流提醒中枢 | 系统通知 / 权限闭环 | **Accepted** |
 | [ADR-033](#adr-033-全功能组件与屏幕-preview-可视化覆盖架构规范) | 全功能组件与屏幕 @Preview 可视化覆盖架构规范 | 开发体验 / 隔离调试 | **Accepted** |
 | [ADR-034](#adr-034-设置中心高紧凑布局重塑与智能通知单开关整合) | 设置中心高紧凑布局重塑与智能通知单开关整合 | 视觉交互 / 信息紧凑化 | **Accepted** |
+| [ADR-035](#adr-035-应用内架构设计全景可视化面板-architecture-visualizer) | 应用内架构设计全景可视化面板 (Architecture Visualizer) | 开发者工具 / 架构可解释性 | **Accepted** |
 
 ---
 
@@ -717,4 +718,24 @@ fun TransactionsScreenPreview() {
    通知卡片展开后仅展示 3 个业务开关（预算预警、周期账单自动入账、新版本发布更新），高度缩减 60% 以上。
 4. **全卡片间距统一收紧**：
    设置页 LazyColumn 卡片间距统一收紧至 `6.dp` (`AppDimens.SpaceMedium`)，所有卡片内部内衬统一收拢为 `8.dp` (`AppDimens.SpaceStandard`)，文案采用单行精简描述。
+
+---
+
+## ADR-035: 应用内架构设计全景可视化面板 (Architecture Visualizer)
+
+### 背景 (Context)
+大型移动端应用经过多轮演进后，往往存在“文档脱离代码实际”或“团队成员及代码审查者无法快速理解顶层架构”的困境。传统静态 UML 或 Markdown 架构图只能在电脑端查阅，在手机真机演示或日常排障时无法直观映射运行时的架构流转。
+
+### 决策与设计思路 (Decision & Rationale)
+在开发者运维模式（APM Section）内置**架构设计全景可视化面板 (Architecture Visualizer)**：
+1. **三大核心维度全覆盖**：
+   - **MVI 响应式流**：展示 View $\to$ Intent $\to$ ViewModel/Delegates $\to$ Immutable State $\to$ Render 闭环，以及独立的 `CommonUiEffect` 单次事件总线；
+   - **Clean Architecture 四层拓扑**：展示 Presentation $\to$ Domain (纯函数引擎) $\to$ Data $\to$ Platform Core 的单向依赖与职责边界；
+   - **Gradle Composite Build 模块拓扑**：展示 `:app` 宿主与通用基础库 `:ListenArch`、`:ListenUiComponent` 的解耦规则与生态接口。
+2. **交互式节点下钻**：
+   - 允许用户轻按拓扑图上的任意节点（如 `Reducer` 或 `Domain Engine`），下方动态抽屉展开其架构职责、约束红线与工程代表类。
+3. **纯原生 Canvas / Compose 绘制**：
+   - 零依赖任何第三方图表库，纯原生绘制自适应深浅主题；
+   - 严格遵循单文件 $\le 250$ 行规范，将模型、Tabs、Dialog 拆分为高内聚的独立小文件。
+
 

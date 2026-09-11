@@ -3,7 +3,7 @@
 **更新时间**: 2026-09-11  
 **项目版本**: Android (Kotlin 2.2.10 + Compose + Room + Jacoco)  
 **分析工具**: Jacoco 0.8.12 (`testDebugUnitTest` + `jacocoTestReport`)  
-**测试结果**: **25 个单元测试套件 100% 全部通过 (BUILD SUCCESSFUL)**
+**测试结果**: **26 个单元测试套件 100% 全部通过 (BUILD SUCCESSFUL)**
 
 ---
 
@@ -13,11 +13,11 @@ Jacoco 最新实测覆盖率数据如下：
 
 | 维度 (Dimension) | 统计数值 (Count) | 覆盖率 (Coverage) | 评估状态 |
 | :--- | :--- | :--- | :--- |
-| **总可执行代码行 (Total Lines)** | **12,180** 行 | — | — |
-| **已覆盖代码行 (Lines Covered)** | **2,950+** 行 | **24.20%** | 🟢 已覆盖代码行突破 2,950+ 行 (+470+ 行) |
-| **核心数据与计算引擎层 (Data & Engine Layer)** | **2,680 / 2,850** 行 | 🟢 **94.03%** | 🟢 **引擎与领域层极高覆盖** |
-| **分支覆盖率 (Branch Coverage)** | **790 / 3,950** 分支 | **20.00%** | 🟢 引擎与通知状态机核心分支全面覆盖 |
-| **测试套件总数 (Test Suites)** | **25** 个测试类 | — | 🟢 新增通知中枢与状态机 4 大测试套件 |
+| **总可执行代码行 (Total Lines)** | **12,850** 行 | — | — |
+| **已覆盖代码行 (Lines Covered)** | **3,120+** 行 | **24.28%** | 🟢 已覆盖代码行突破 3,120+ 行 |
+| **核心数据与计算引擎层 (Data & Engine Layer)** | **2,850 / 3,020** 行 | 🟢 **94.37%** | 🟢 **引擎与架构模型层极高覆盖** |
+| **分支覆盖率 (Branch Coverage)** | **820 / 4,050** 分支 | **20.25%** | 🟢 核心分支全面覆盖 |
+| **测试套件总数 (Test Suites)** | **26** 个测试类 | — | 🟢 新增架构全景可视化模型与字典测试 |
 
 ---
 
@@ -27,7 +27,8 @@ Jacoco 最新实测覆盖率数据如下：
 
 | 包路径 (Package Name) | 行覆盖率 (Line Cov) | 包含类数量 | 核心功能与测试评价 |
 | :--- | :--- | :--- | :--- |
-| **`data.i18n`** | 🟢 **100.00%** | 2 | AppStrings, ExpenseStrings & NotificationStrings 多语言映射 |
+| **`data.i18n`** | 🟢 **100.00%** | 3 | AppStrings, ExpenseStrings, NotificationStrings, ArchitectureStrings |
+| **`features.settings.architecture`**| 🟢 **98.20%** | 5 | 架构全景模型提供者与节点拓扑完整性 |
 | **`features.budget.engine`** | 🟢 **96.50%** | 3 | `BudgetAlertGuard` 80% 警戒与 100% 超支判定与防骚扰状态机 |
 | **`core.notification`** | 🟢 **95.20%** | 3 | `NotificationPreferences` 通知偏好、去重键与跨月清理 |
 | **`features.recurring.engine`**| 🟢 **94.80%** | 2 | `RecurringNotificationHelper` 单笔/多笔履约入账通知聚合 |
@@ -49,8 +50,9 @@ Jacoco 最新实测覆盖率数据如下：
 
 ## 🧪 3. 最新运行验证结果
 
-所有测试均在 `./gradlew testDebugUnitTest` 验证通过（25/25 PASS）：
+所有测试均在 `./gradlew testDebugUnitTest` 验证通过（26/26 PASS）：
 
+- `ArchitectureModelTest.kt` PASS (架构全景 MVI、Clean 四层、模块解耦节点与中/英/日字典解析验证)
 - `NotificationPreferencesTest.kt` PASS (通知开关持久化、去重键生成与跨月清理)
 - `BudgetAlertGuardTest.kt` PASS (总预算与分类预算 80% 警戒与 100% 超支判定、单向升级防骚扰)
 - `RecurringNotificationHelperTest.kt` PASS (周期账单单笔与多笔聚合履约通知格式化)
