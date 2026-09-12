@@ -100,97 +100,68 @@ fun SettingsApmSection(
                 contentPadding = 0.dp
             )
 
-            // Seed & Clear Buttons Row (长按“生成数据”按钮切换高危清空按钮的显隐)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val seedBtnText = if (targetMonthTitle.isNotBlank()) {
-                    "${AppStrings.SEED_DATA_BTN.tr(lang)} ($targetMonthTitle)"
-                } else {
-                    AppStrings.SEED_DATA_BTN.tr(lang)
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    color = Color.Transparent,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .combinedClickable(
-                            onClick = onSeedDemoData,
-                            onLongClick = { toggleDangerZone() }
-                        )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Science,
-                            contentDescription = "Seed",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(AppDimens.IconSizeMedium)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        AutoResizeText(
-                            text = seedBtnText,
-                            maxLines = 1,
-                            targetTextSize = 12.sp,
-                            minTextSize = 8.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = isDangerZoneVisible,
-                    enter = fadeIn() + expandHorizontally(),
-                    exit = fadeOut() + shrinkHorizontally(),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    CommonButton(
-                        text = AppStrings.CLEAR_ALL.tr(lang),
-                        onClick = {
-                            isDangerZoneVisible = false
-                            onConfirmClearAll()
-                        },
-                        style = CommonButtonStyle.Danger,
-                        icon = {
-                            Icon(
-                                Icons.Default.DeleteSweep,
-                                contentDescription = "Clear",
-                                modifier = Modifier.size(AppDimens.IconSizeMedium)
-                            )
-                        },
-                        contentPadding = PaddingValues(horizontal = 6.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                    )
-                }
+            val seedBtnText = if (targetMonthTitle.isNotBlank()) {
+                "${AppStrings.SEED_DATA_BTN.tr(lang)} ($targetMonthTitle)"
+            } else {
+                AppStrings.SEED_DATA_BTN.tr(lang)
             }
 
-            // 模拟系统通知全宽按钮
+            // 1. 生成本月数据按钮 (全宽，长按切换高危清空按钮的显隐)
+            CommonButton(
+                text = seedBtnText,
+                onClick = onSeedDemoData,
+                onLongClick = { toggleDangerZone() },
+                style = CommonButtonStyle.Outlined,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Science,
+                        contentDescription = "Seed",
+                        modifier = Modifier.size(AppDimens.IconSizeMedium)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            )
+
+            // 2. 清空数据高危暗门按钮 (展开时全宽显示)
+            AnimatedVisibility(
+                visible = isDangerZoneVisible,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                CommonButton(
+                    text = AppStrings.CLEAR_ALL.tr(lang),
+                    onClick = {
+                        isDangerZoneVisible = false
+                        onConfirmClearAll()
+                    },
+                    style = CommonButtonStyle.Danger,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.DeleteSweep,
+                            contentDescription = "Clear",
+                            modifier = Modifier.size(AppDimens.IconSizeMedium)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                )
+            }
+
+            // 3. 模拟系统通知全宽按钮
             CommonButton(
                 text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
                 onClick = onOpenSimulateNotifications,
                 style = CommonButtonStyle.Outlined,
                 icon = {
                     Icon(
-                        Icons.Default.NotificationsActive,
+                        imageVector = Icons.Default.NotificationsActive,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
                 },
-                contentPadding = PaddingValues(horizontal = 6.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)

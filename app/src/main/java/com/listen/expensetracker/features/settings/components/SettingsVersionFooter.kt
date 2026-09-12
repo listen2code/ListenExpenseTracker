@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,7 +76,7 @@ fun SettingsVersionFooter(
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
-        contentPadding = AppDimens.SpaceLarge,
+        contentPadding = AppDimens.SpaceStandard,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
@@ -104,7 +105,9 @@ fun SettingsVersionFooter(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
             )
 
             // Version Card with 5-tap developer mode trigger
