@@ -41,3 +41,23 @@ object AppDimens {
     val TextHeader = 16.sp
     val TextDisplay = 18.sp
 }
+
+/**
+ * Global App Constants including Deep Link routing and Security defaults.
+ */
+object AppConstants {
+    const val DEFAULT_LANG = "zh"
+    const val RECURRING_TAG = "[周期]"
+
+    object DeepLink {
+        const val SCHEME = "lexpense"
+        const val HOST_QUICK_ADD = "quick_add"
+        const val HOST_BUDGET_CENTER = "budget_center"
+        const val HOST_TRANSACTIONS = "transactions"
+        const val HOST_UPDATE = "update"
+
+        const val PARAM_FILTER = "filter"
+        const val PARAM_VERSION = "version"
+        const val VALUE_RECURRING = "recurring"
+    }
+}

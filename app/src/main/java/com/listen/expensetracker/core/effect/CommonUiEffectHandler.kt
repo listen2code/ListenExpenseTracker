@@ -16,16 +16,16 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.core.net.toUri
 
 /**
- * Universal Centralized Composable Hook to collect and handle CommonUiEffect across ViewModels.
- * Eliminates duplicate LaunchedEffect boilerplate for Toast, Snackbar, ShareText, Browser URL, and Navigation.
+ * 集中化 UI 副作用处理器 (Common UI Effect Handler)。
+ * 对称于 AppSideEffectHandler，负责跨 ViewModel 统一收集并执行通用的 UI 反馈任务（如 Toast、Snackbar、分享、导航等）。
  *
- * @param viewModels List of ViewModels producing CommonUiEffect (使用 vararg 允许一次性传入所有 ViewModels，单点注册)
- * @param snackbarHostState Active SnackbarHostState to show transient feedback
- * @param onNavigateBack Optional callback for back navigation
- * @param onNavigateTo Optional callback for screen routing
+ * @param viewModels 产生通用副作用的 ViewModel 列表
+ * @param snackbarHostState 用于显示 Snackbar 的全局状态宿主
+ * @param onNavigateBack 自定义返回导航逻辑
+ * @param onNavigateTo 自定义路由跳转逻辑
  */
 @Composable
-fun CollectCommonUiEffects(
+fun CommonUiEffectHandler(
     vararg viewModels: BaseViewModel<*, *>,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit = {},
@@ -35,10 +35,8 @@ fun CollectCommonUiEffects(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     viewModels.forEach { vm ->
-        // 以 vm 作为 key，为每一个 ViewModel 启动一个独立互不干扰的协程收集器
+        // 为每个 ViewModel 开启独立的订阅协程，互不阻塞
         LaunchedEffect(vm) {
-            // 使用 collectLatest：如果新 Effect 在旧 Effect 完成前到达，会取消旧的收集协程。
-            // 这对于 Snackbar 这类会挂起(suspend)直到消失的 UI 元素尤为重要，防止队列阻塞。
             vm.viewEffect.collectLatest { effect ->
                 when (effect) {
                     is CommonUiEffect.ShowToast -> {
@@ -70,8 +68,7 @@ fun CollectCommonUiEffects(
                         keyboardController?.hide()
                     }
                     else -> {
-                        // 为什么留空：业务画面专属的具体副作用（如 ScrollToMonth、ScrollToTop 等）
-                        // 不属于基础通用 Effect，它们交由各 Screen 在内部独立消费，全局收集器在此直接忽略。
+                        // 业务画面专属的副作用交由各 Screen 独立消费，全局处理器在此忽略
                     }
                 }
             }
@@ -80,8 +77,7 @@ fun CollectCommonUiEffects(
 }
 
 /**
- * Helper function to launch Android native Chooser intent for text sharing.
- * 使用 Intent.createChooser 拉起 Android 系统原生的分享面板(Share Sheet)。
+ * 辅助函数：拉起系统分享面板
  */
 fun shareSystemText(context: Context, content: String, title: String) {
     val sendIntent = Intent().apply {
@@ -96,8 +92,7 @@ fun shareSystemText(context: Context, content: String, title: String) {
 }
 
 /**
- * Helper function to open an external web URL via system browser.
- * 采用静默的 try-catch：即使用户设备上没有安装浏览器，也不会发生崩溃(Crash)。
+ * 辅助函数：通过外部浏览器打开 URL
  */
 fun openBrowserUrl(context: Context, url: String) {
     try {

@@ -1,6 +1,7 @@
 package com.listen.expensetracker.core.state
 
 import android.app.Application
+import android.content.Intent
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -9,17 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.listen.expensetracker.data.db.TransactionEntity
-import com.listen.expensetracker.data.db.TransactionType
-import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeriod
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.Calendar
@@ -45,6 +43,28 @@ class ExpenseAppState(
     val snackbarHostState: SnackbarHostState
 ) {
     /**
+     * 单向数据流管道：用于接收和处理外部 Intent (如 DeepLink、小组件点击)。
+     * 使用 Channel.CONFLATED 确保新意图总是能替换旧意图，避免积压。
+     */
+    private val _intentChannel = Channel<Intent>(capacity = Channel.CONFLATED)
+    val intentChannel = _intentChannel
+
+    fun sendIntent(intent: Intent) {
+        _intentChannel.trySend(intent)
+    }
+
+    /**
+     * App 是否已完成首屏初始加载。一旦变为 true，则再也不会变回 false。
+     * 用于精确控制 SplashScreen 的消失时机，避免后续的下拉刷新等操作再次触发启动页逻辑。
+     */
+    var isInitialReady by mutableStateOf(false)
+        private set
+
+    fun markReady() {
+        if (!isInitialReady) isInitialReady = true
+    }
+
+    /**
      * Active navigation tab state.
      */
     var currentTab by mutableStateOf(NavTab.TRANSACTIONS)
@@ -63,8 +83,8 @@ class ExpenseAppState(
 
     // 追踪上一个“非设置”的 Tab。因为“设置(Settings)”是一个中立的 Tab，
     // 不具备时间流属性，因此不应该参与时间状态的同步。
-    private var lastTimeTab: NavTab = NavTab.TRANSACTIONS
-    private var preserveStatisticsYearOnReturn = false
+    internal var lastTimeTab: NavTab = NavTab.TRANSACTIONS
+    internal var preserveStatisticsYearOnReturn = false
 
     /**
      * 核心复杂逻辑：在“流水(Transactions)”和“统计(Statistics)”之间切换时，执行双向的月份/年份偏移量同步。
@@ -112,66 +132,6 @@ class ExpenseAppState(
         }
     }
 
-    fun navigateToTransactionsCategory(categoryName: String, monthOffset: Int) {
-        preserveStatisticsYearOnReturn = false
-        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByCategory(categoryName, monthOffset))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
-    fun navigateToTransactionsAnnualCategory(year: Int, categoryName: String) {
-        preserveStatisticsYearOnReturn = false
-        val curYear = Calendar.getInstance().get(Calendar.YEAR)
-        statisticsViewModel.handleIntent(StatisticsIntent.SetYearOffset(year - curYear))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByAnnualCategory(year, categoryName))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
-    fun navigateToTransactionsDate(monthOffset: Int, day: Int, dateLabel: String = "") {
-        preserveStatisticsYearOnReturn = false
-        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByDate(monthOffset, day, dateLabel))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
-    fun navigateToTransaction(monthOffset: Int, transaction: TransactionEntity) {
-        preserveStatisticsYearOnReturn = false
-        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
-        val cal = Calendar.getInstance().apply { timeInMillis = transaction.timestamp }
-        transactionsViewModel.handleIntent(TransactionsIntent.FilterByTransaction(monthOffset, transaction.id, cal.get(Calendar.DAY_OF_MONTH), transaction.amount))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
-    fun navigateToBudgetAdjustment(monthOffset: Int) {
-        preserveStatisticsYearOnReturn = false
-        statisticsViewModel.handleIntent(StatisticsIntent.SetMonthOffset(monthOffset))
-        statisticsViewModel.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
-        transactionsViewModel.handleIntent(TransactionsIntent.SetMonthOffset(monthOffset))
-        transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
-        transactionsViewModel.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
-    fun navigateToTransactionsMonth(monthOffset: Int) {
-        // 这是整个应用中唯一将该标志位置为 true 的地方，用于标识发生了“从年度下钻到月度”的行为
-        preserveStatisticsYearOnReturn = true
-        // [Feature] 从年度收支总览/各月走势穿透到流水画面时，清除即存的筛选条件（搜索词、分类、账户、类型、金额等），确保完整展示该月份全量流水
-        transactionsViewModel.handleIntent(TransactionsIntent.ResetAllFilters)
-        transactionsViewModel.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
-        transactionsViewModel.handleIntent(TransactionsIntent.SelectMonth(monthOffset))
-        lastTimeTab = NavTab.TRANSACTIONS
-        currentTab = NavTab.TRANSACTIONS
-    }
-
     /**
      * Top-level active overlay state. Controlled entirely via openOverlay / dismissOverlay.
      */
@@ -197,21 +157,6 @@ class ExpenseAppState(
             NavTab.STATISTICS -> statisticsViewModel.handleIntent(StatisticsIntent.ScrollToTop)
             NavTab.SETTINGS -> settingsViewModel.handleIntent(SettingsIntent.ScrollToTop)
         }
-    }
-
-    /**
-     * 快捷拉起记账弹窗，预选指定分类与收支类型
-     */
-    fun openQuickAdd(
-        categoryId: String? = null,
-        type: String = TransactionType.EXPENSE
-    ) {
-        switchTab(NavTab.TRANSACTIONS)
-        transactionsViewModel.handleIntent(
-            TransactionsIntent.OpenDialog(
-                TransactionsDialog.AddTransaction(initialCategoryId = categoryId, initialType = type)
-            )
-        )
     }
 }
 

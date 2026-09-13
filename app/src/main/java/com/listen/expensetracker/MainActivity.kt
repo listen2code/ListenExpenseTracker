@@ -1,94 +1,96 @@
 package com.listen.expensetracker
 
-// 移除冗余的导航及UI组件引用（已收敛至 MainApp.kt），遵守单文件 250 行架构规则
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.listen.expensetracker.core.effect.CollectCommonUiEffects
+import androidx.fragment.app.FragmentActivity
+import com.listen.expensetracker.core.effect.AppSideEffectHandler
+import com.listen.expensetracker.core.effect.CommonUiEffectHandler
 import com.listen.expensetracker.core.overlay.AppOverlayHost
 import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.BiometricLockOverlay
-import com.listen.expensetracker.core.security.BiometricSecurityManager
-import com.listen.expensetracker.core.security.SecurityPreferences
 import com.listen.expensetracker.core.state.ExpenseAppState
-import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
-import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
+import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.ListenTheme
 
-import android.content.Intent
-import androidx.compose.runtime.LaunchedEffect
-import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
-
+/**
+ * 应用主入口 Activity。
+ * 采用 FragmentActivity 以支持 androidx.biometric 库。
+ * 核心职责：生命周期分发、系统级副作用协调（安全、Intent 路由）、根 UI 声明。
+ */
 class MainActivity : FragmentActivity() {
 
-    private val pendingQuickAddIntent = mutableStateOf<Intent?>(null)
+    // 缓存当前的 AppState 引用，用于在非 Composable 的生命周期回调中访问 ViewModel 状态
     private var activeAppState: ExpenseAppState? = null
+
+    /**
+     * 安全协调器：统一管理生物识别锁、超时验证、多任务防窥等核心安全逻辑。
+     * 架构：实现 DefaultLifecycleObserver，通过 settingsProvider 动态获取最新偏好，自动响应生命周期事件。
+     */
     private val securityCoordinator = AppSecurityCoordinator(
-        onShakeTriggered = {
-            val app = activeAppState ?: return@AppSecurityCoordinator
-            val currentHide = app.transactionsViewModel.viewState.value.hideBalance
-            app.transactionsViewModel.handleIntent(TransactionsIntent.ToggleHideBalance(!currentHide))
-        }
+        settingsProvider = { activeAppState?.settingsViewModel?.viewState?.value }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 1. 初始化系统启动页 API，必须在 super.onCreate 之前调用
         val splashScreen = installSplashScreen()
+        
+        // 2. 启用全屏边到边体验 (Edge-to-Edge)
         enableEdgeToEdge()
+        
         super.onCreate(savedInstanceState)
-        // [Lifecycle] 全局国际化字典、CrashHandler 及通知渠道已统一在 ListenExpenseApplication 初始化，此处无需重复初始化
+        
+        // 3. 在 UI 挂载前立即执行初次锁定状态检查，并注册生命周期自感知观察者
         securityCoordinator.checkInitialLock(this)
-        pendingQuickAddIntent.value = intent
+        lifecycle.addObserver(securityCoordinator)
 
         setContent {
-            // One-line registration for all ViewModels, Navigation Tabs, and State
+            // 4. 创建并记住全局唯一的 AppState。它是整个 UI 树的单一事实来源。
             val appState = rememberExpenseAppState()
             activeAppState = appState
+
             val settingsState by appState.settingsViewModel.viewState.collectAsState()
-            val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
 
-            // [Security] 实时响应多任务防窥设置变更，常驻注入或按需解除 FLAG_SECURE (Rule 22)
-            LaunchedEffect(settingsState.recentAppsShieldEnabled) {
-                securityCoordinator.applyRecentAppsShield(this@MainActivity, settingsState.recentAppsShieldEnabled)
-            }
+            // 5. 联动控制启动页：只要 AppState 标记为“未就绪”，SplashScreen 就会一直遮盖 Activity。
+            // 它是通过 AppSideEffectHandler 监听首屏加载成功后触发 isInitialReady 的。
+            splashScreen.setKeepOnScreenCondition { !appState.isInitialReady }
 
-            val currentIntent = pendingQuickAddIntent.value
-            val isLocked = securityCoordinator.isAppLocked
-            LaunchedEffect(currentIntent, isLocked) {
-                if (currentIntent != null && !isLocked) {
-                    handleDeepLinkIntent(currentIntent, appState)
-                    pendingQuickAddIntent.value = null
-                }
-            }
+            /**
+             * 系统级副作用处理器 (System-Level Side Effects)
+             * 职责：处理冷/热启动 Intent 路由、多任务预览防窥设置、首屏就绪监控。
+             */
+            AppSideEffectHandler(appState, securityCoordinator)
 
-            splashScreen.setKeepOnScreenCondition { transactionsState.isLoading }
-
-            // Centralized CommonUiEffect collector across all ViewModels (Toast, Undo Snackbar, Share, Navigation)
-            CollectCommonUiEffects(
+            // 业务级副作用处理器 (Global UI Event Collector)
+            // 职责：跨 ViewModel 统一收集并消费 Toast、Snackbar 撤销、分享、导航跳转等瞬时事件。
+            CommonUiEffectHandler(
                 appState.transactionsViewModel,
                 appState.statisticsViewModel,
                 appState.settingsViewModel,
                 snackbarHostState = appState.snackbarHostState
             )
 
+            // 6. 注入全局主题 (ListenTheme) 并根据设置实时应用深色模式和主题色
             ListenTheme(
                 themeMode = settingsState.themeMode,
                 accentColor = settingsState.accentColor,
                 pureBlackDark = settingsState.isPureBlackDark
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    // 生物识别全屏锁屏遮罩层（锁定状态下完全隔离主界面与所有子窗口弹窗）
+                    /**
+                     * 物理隔离层级逻辑：
+                     * - 当 App 处于锁定时：只渲染 BiometricLockOverlay 遮罩，业务组件 (App) 物理卸载，确保隐私安全。
+                     * - 当 App 已解锁：正常渲染 App 主体及全局覆盖物宿主 (AppOverlayHost)。
+                     */
                     if (securityCoordinator.isAppLocked) {
                         BiometricLockOverlay(
                             onUnlockRequest = {
@@ -101,9 +103,10 @@ class MainActivity : FragmentActivity() {
                             lang = settingsState.language
                         )
                     } else {
+                        // 渲染主功能导航架构
                         App(appState = appState)
 
-                        // Top-level Declarative Overlay Host (0 boolean flags, 0 raw ifs)
+                        // 全局声明式覆盖物宿主 (处理全屏加载 HUD、检查器等)
                         AppOverlayHost(appState = appState)
                     }
                 }
@@ -111,78 +114,30 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        val s = activeAppState?.settingsViewModel?.viewState?.value
-        val enabled = s?.biometricLockEnabled ?: SecurityPreferences.isBiometricEnabled(this)
-        val supported = s?.isBiometricSupported ?: BiometricSecurityManager.isBiometricOrCredentialAvailable(this)
-        val timeout = s?.lockTimeoutSeconds ?: SecurityPreferences.getLockTimeoutSeconds(this)
-        val lang = s?.language ?: "zh"
-        val shield = s?.recentAppsShieldEnabled ?: true
-
-        securityCoordinator.onStart(this, enabled, supported, timeout, lang, shield)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val s = activeAppState?.settingsViewModel?.viewState?.value
-        if (s != null) {
-            securityCoordinator.onResume(this, s.recentAppsShieldEnabled, s.shakeToHideBalanceEnabled)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val shield = activeAppState?.settingsViewModel?.viewState?.value?.recentAppsShieldEnabled ?: true
-        securityCoordinator.onPause(this, shield)
-    }
-
+    /**
+     * 热启动意图捕获：当 App 已经在后台，通过 DeepLink 或小组件再次唤起时，
+     * 将新 Intent 投递到 UDF 管道进行单向分发处理。
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        pendingQuickAddIntent.value = intent
+        activeAppState?.sendIntent(intent)
     }
 
+    /**
+     * 退出前台清理与云同步：
+     * 静默触发 Google Drive 云端自动备份检查（自动防抖与脏检查）。
+     */
     override fun onStop() {
         super.onStop()
-        securityCoordinator.onStop()
-        if (securityCoordinator.isAppLocked) {
-            pendingQuickAddIntent.value = null
-        }
         GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
     }
 
-    private fun handleDeepLinkIntent(intent: Intent, appState: ExpenseAppState) {
-        val data = intent.data
-        if (data != null && data.scheme == "lexpense") {
-            when (data.host) {
-                "quick_add" -> {
-                    val (categoryId, type) = ListenExpenseAppWidgetProvider.parseQuickAddIntent(intent) ?: return
-                    appState.openQuickAdd(categoryId, type)
-                }
-                "budget_center" -> {
-                    appState.switchTab(NavTab.TRANSACTIONS)
-                    appState.transactionsViewModel.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthlyBudget))
-                }
-                "transactions" -> {
-                    appState.switchTab(NavTab.TRANSACTIONS)
-                    if (data.getQueryParameter("filter") == "recurring") {
-                        appState.transactionsViewModel.handleIntent(TransactionsIntent.SearchQueryChange("[周期]"))
-                    }
-                }
-                "update" -> {
-                    appState.switchTab(NavTab.SETTINGS)
-                    val version = data.getQueryParameter("version") ?: ""
-                    appState.settingsViewModel.handleIntent(SettingsIntent.CheckForUpdates(version))
-                }
-            }
-            return
-        }
-        val (categoryId, type) = ListenExpenseAppWidgetProvider.parseQuickAddIntent(intent) ?: return
-        appState.openQuickAdd(categoryId, type)
-    }
-
     companion object {
+        /**
+         * 分类 ID 规范化桥接：
+         * 将来自小组件或外部 Intent 的分类 ID 转换为标准格式，确保路由精准匹配。
+         */
         fun normalizeCategoryId(raw: String?): String? = ListenExpenseAppWidgetProvider.normalizeCategoryId(raw)
     }
 }
