@@ -1,7 +1,7 @@
 package com.listen.expensetracker.data.model
 
-import com.listen.expensetracker.core.i18n.tr
-
+import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.core.i18n.AppLanguage
 import com.listen.expensetracker.data.i18n.AppStrings
 
 data class AccountTypeItem(
@@ -10,8 +10,8 @@ data class AccountTypeItem(
     val customName: String? = null,
     val isSystem: Boolean = true
 ) {
-    fun getDisplayName(lang: String = "zh"): String {
-        return customName ?: if (nameKey.isNotBlank()) nameKey.tr() else key
+    fun getDisplayName(lang: String = AppLanguage.current): String {
+        return customName ?: if (nameKey.isNotBlank()) StringsRes.get(nameKey, lang) else key
     }
 }
 
@@ -57,12 +57,12 @@ object AccountRepository {
         }
     }
 
-    fun getAccountDisplayName(key: String, lang: String = "zh"): String {
-        if (key == ALL_ACCOUNTS_KEY) return AppStrings.FILTER_ALL.tr()
+    fun getAccountDisplayName(key: String, lang: String = AppLanguage.current): String {
+        if (key == ALL_ACCOUNTS_KEY) return StringsRes.get(AppStrings.FILTER_ALL, lang)
         return getAllAccounts().find { it.key == key }?.getDisplayName(lang) ?: key
     }
 
-    fun getAccountName(key: String, lang: String = "zh"): String {
+    fun getAccountName(key: String, lang: String = AppLanguage.current): String {
         return getAccountDisplayName(key, lang)
     }
 

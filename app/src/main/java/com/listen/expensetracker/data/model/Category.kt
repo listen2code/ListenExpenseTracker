@@ -1,6 +1,7 @@
 package com.listen.expensetracker.data.model
 
-import com.listen.expensetracker.core.i18n.tr
+import com.listen.arch.i18n.StringsRes
+import com.listen.expensetracker.core.i18n.AppLanguage
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 
@@ -29,8 +30,8 @@ data class Category(
     val type: String, // "EXPENSE" or "INCOME"
     val isSystem: Boolean = true
 ) {
-    fun getDisplayName(lang: String = "zh"): String {
-        return customName ?: nameKey.tr()
+    fun getDisplayName(lang: String = AppLanguage.current): String {
+        return customName ?: StringsRes.get(nameKey, lang)
     }
 }
 
