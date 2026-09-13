@@ -28,7 +28,6 @@ import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
-import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
@@ -44,7 +43,6 @@ import java.util.Calendar
 fun StatisticsContentList(
     state: StatisticsUiState,
     monthOffset: Int,
-    onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberSaveable(monthOffset, saver = LazyListState.Saver) { LazyListState() },
     onCategoryClick: ((categoryName: String) -> Unit)? = null,

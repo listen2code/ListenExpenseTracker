@@ -97,19 +97,17 @@ fun MainApp(
             // 根据当前选中的导航标签动态渲染对应的业务屏幕
             when (appState.currentTab) {
                 // 账单流水明细界面
-                NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, onIntent ->
+                NavTab.TRANSACTIONS -> CommonRoute(appState.transactionsViewModel) { state, _ ->
                     TransactionsScreen(
                         state = state,
-                        onIntent = onIntent,
                         viewModel = appState.transactionsViewModel,
                         modifier = screenModifier
                     )
                 }
                 // 统计报表与趋势分析界面
-                NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, onIntent ->
+                NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, _ ->
                     StatisticsScreen(
                         state = state,
-                        onIntent = onIntent,
                         viewModel = appState.statisticsViewModel,
                         // 【穿透导航逻辑】从统计图表点击后的深度跳转行为
                         // 1. 跳转至特定月份、特定分类的账单列表
@@ -140,10 +138,9 @@ fun MainApp(
                     )
                 }
                 // 系统设置与偏好配置界面
-                NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, onIntent ->
+                NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, _ ->
                     SettingsScreen(
                         state = state,
-                        onIntent = onIntent,
                         targetMonthOffset = appState.activeMonthOffset,
                         viewModel = appState.settingsViewModel,
                         modifier = screenModifier

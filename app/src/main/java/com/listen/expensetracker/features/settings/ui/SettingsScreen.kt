@@ -24,9 +24,6 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * 纯无状态设置主画面 (SettingsScreen)。
@@ -40,19 +37,17 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
-    onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
     viewModel: SettingsViewModel? = null
 ) {
     // 🌟 一行收拢所有列表滚动、月份标题与系统文件选择器
-    val holder = rememberSettingsStateHolder(state, onIntent, targetMonthOffset, viewModel)
+    val holder = rememberSettingsStateHolder(state, targetMonthOffset, viewModel)
     val lang = state.language
     val sym = state.currencySymbol
 
     BaseScreenScaffold(
-        title = AppStrings.SETTINGS_TITLE.tr(lang),
-        modifier = modifier
+        title = AppStrings.SETTINGS_TITLE.tr(lang), modifier = modifier
     ) { innerPadding ->
         LazyColumn(
             state = holder.listState,
@@ -68,10 +63,10 @@ fun SettingsScreen(
                 SettingsFinanceSection(
                     monthlyBudget = state.monthlyBudget,
                     currencySymbol = sym,
-                    onOpenBudgetDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
-                    onOpenCategoryDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
-                    onOpenAccountDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AccountManage)) },
-                    onOpenRecurringDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.RecurringManage)) },
+                    onOpenBudgetDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
+                    onOpenCategoryDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
+                    onOpenAccountDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.AccountManage)) },
+                    onOpenRecurringDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.RecurringManage)) },
                     lang = lang
                 )
             }
@@ -85,20 +80,15 @@ fun SettingsScreen(
                     autoBackupDrive = state.autoBackupDrive,
                     autoBackupWifiOnly = state.autoBackupWifiOnly,
                     syncState = state.syncState,
-                    onLoginGoogle = { onIntent(SettingsIntent.TriggerGoogleSignIn) },
-                    onLogoutGoogle = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.LogoutConfirm)) },
-                    onToggleAutoBackupDrive = { onIntent(SettingsIntent.ToggleAutoBackupDrive(it)) },
-                    onToggleAutoBackupWifiOnly = { onIntent(SettingsIntent.ToggleAutoBackupWifiOnly(it)) },
-                    onTriggerBackup = { onIntent(SettingsIntent.TriggerCloudBackup) },
-                    onTriggerRestore = { onIntent(SettingsIntent.TriggerCloudRestore) },
-                    onExportExcel = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ExportExcelOptions)) },
-                    onExportJson = {
-                        val fileName = "lexpense_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
-                        holder.exportJsonLauncher.launch(fileName)
-                    },
-                    onImportJson = {
-                        holder.importJsonLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
-                    },
+                    onLoginGoogle = { viewModel?.handleIntent(SettingsIntent.TriggerGoogleSignIn) },
+                    onLogoutGoogle = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.LogoutConfirm)) },
+                    onToggleAutoBackupDrive = { viewModel?.handleIntent(SettingsIntent.ToggleAutoBackupDrive(it)) },
+                    onToggleAutoBackupWifiOnly = { viewModel?.handleIntent(SettingsIntent.ToggleAutoBackupWifiOnly(it)) },
+                    onTriggerBackup = { viewModel?.handleIntent(SettingsIntent.TriggerCloudBackup) },
+                    onTriggerRestore = { viewModel?.handleIntent(SettingsIntent.TriggerCloudRestore) },
+                    onExportExcel = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.ExportExcelOptions)) },
+                    onExportJson = { viewModel?.handleIntent(SettingsIntent.RequestExportJson) },
+                    onImportJson = { viewModel?.handleIntent(SettingsIntent.RequestImportJson) },
                     lang = lang,
                     isOperating = state.isOperating
                 )
@@ -109,14 +99,12 @@ fun SettingsScreen(
                 SettingsAppearanceSection(
                     themeMode = state.themeMode,
                     accentColor = state.accentColor,
-                    language = lang,
-                    onChangeThemeMode = { onIntent(SettingsIntent.ChangeThemeMode(it)) },
-                    onChangeAccentColor = { onIntent(SettingsIntent.ChangeAccentColor(it)) },
-                    onLanguageChange = { onIntent(SettingsIntent.ChangeLanguage(it)) },
                     lang = lang,
+                    onChangeThemeMode = { viewModel?.handleIntent(SettingsIntent.ChangeThemeMode(it)) },
+                    onChangeAccentColor = { viewModel?.handleIntent(SettingsIntent.ChangeAccentColor(it)) },
+                    onLanguageChange = { viewModel?.handleIntent(SettingsIntent.ChangeLanguage(it)) },
                     isPureBlackDark = state.isPureBlackDark,
-                    onTogglePureBlackDark = { onIntent(SettingsIntent.TogglePureBlackDark(it)) }
-                )
+                    onTogglePureBlackDark = { viewModel?.handleIntent(SettingsIntent.TogglePureBlackDark(it)) })
             }
 
             // 4. Notifications & Alert Hub Section
@@ -126,10 +114,10 @@ fun SettingsScreen(
                     budgetAlertsEnabled = state.budgetAlertsEnabled,
                     recurringBillsAlertsEnabled = state.recurringBillsAlertsEnabled,
                     appUpdatesAlertsEnabled = state.appUpdatesAlertsEnabled,
-                    onToggleNotifications = { onIntent(SettingsIntent.ToggleNotifications(it)) },
-                    onToggleBudgetAlerts = { onIntent(SettingsIntent.ToggleBudgetAlerts(it)) },
-                    onToggleRecurringBillsAlerts = { onIntent(SettingsIntent.ToggleRecurringBillsAlerts(it)) },
-                    onToggleAppUpdatesAlerts = { onIntent(SettingsIntent.ToggleAppUpdatesAlerts(it)) },
+                    onToggleNotifications = { viewModel?.handleIntent(SettingsIntent.ToggleNotifications(it)) },
+                    onToggleBudgetAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleBudgetAlerts(it)) },
+                    onToggleRecurringBillsAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleRecurringBillsAlerts(it)) },
+                    onToggleAppUpdatesAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleAppUpdatesAlerts(it)) },
                     lang = lang
                 )
             }
@@ -142,10 +130,10 @@ fun SettingsScreen(
                     recentAppsShieldEnabled = state.recentAppsShieldEnabled,
                     shakeToHideBalanceEnabled = state.shakeToHideBalanceEnabled,
                     isBiometricSupported = state.isBiometricSupported,
-                    onToggleBiometricLock = { onIntent(SettingsIntent.ToggleBiometricLock(it)) },
-                    onChangeLockTimeout = { onIntent(SettingsIntent.ChangeLockTimeout(it)) },
-                    onToggleRecentAppsShield = { onIntent(SettingsIntent.ToggleRecentAppsShield(it)) },
-                    onToggleShakeToHideBalance = { onIntent(SettingsIntent.ToggleShakeToHideBalance(it)) },
+                    onToggleBiometricLock = { viewModel?.handleIntent(SettingsIntent.ToggleBiometricLock(it)) },
+                    onChangeLockTimeout = { viewModel?.handleIntent(SettingsIntent.ChangeLockTimeout(it)) },
+                    onToggleRecentAppsShield = { viewModel?.handleIntent(SettingsIntent.ToggleRecentAppsShield(it)) },
+                    onToggleShakeToHideBalance = { viewModel?.handleIntent(SettingsIntent.ToggleShakeToHideBalance(it)) },
                     lang = lang
                 )
             }
@@ -155,13 +143,12 @@ fun SettingsScreen(
                 item(key = "apm_section") {
                     SettingsApmSection(
                         apmFloatingWindowEnabled = state.apmFloatingWindowEnabled,
-                        onToggleApmFloatingWindow = { onIntent(SettingsIntent.ToggleApmFloatingWindow(it)) },
-                        onSeedDemoData = { onIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
-                        onConfirmClearAll = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
+                        onToggleApmFloatingWindow = { viewModel?.handleIntent(SettingsIntent.ToggleApmFloatingWindow(it)) },
+                        onSeedDemoData = { viewModel?.handleIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
+                        onConfirmClearAll = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,
                         lang = lang,
-                        onOpenSimulateNotifications = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) }
-                    )
+                        onOpenSimulateNotifications = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) })
                 }
             }
 
@@ -170,9 +157,9 @@ fun SettingsScreen(
                 SettingsVersionFooter(
                     isDeveloperMode = state.isDeveloperMode,
                     isCheckingUpdate = state.isCheckingUpdate,
-                    onCheckForUpdates = { onIntent(SettingsIntent.CheckForUpdates(it)) },
-                    onToggleDeveloperMode = { onIntent(SettingsIntent.ToggleDeveloperMode(it)) },
-                    onOpenAboutDialog = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) },
+                    onCheckForUpdates = { viewModel?.handleIntent(SettingsIntent.CheckForUpdates(it)) },
+                    onToggleDeveloperMode = { viewModel?.handleIntent(SettingsIntent.ToggleDeveloperMode(it)) },
+                    onOpenAboutDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) },
                     lang = lang
                 )
             }
@@ -182,10 +169,10 @@ fun SettingsScreen(
     // Feature-Level Dialog Host
     SettingsDialogHost(
         state = state,
-        onIntent = onIntent,
+        viewModel = viewModel,
         onSaveExcelToFile = { startTs, endTs, type, fileName ->
-            onIntent(SettingsIntent.DismissDialog)
-            holder.onPrepareExportExcel(startTs, endTs, type, fileName)
+            viewModel?.handleIntent(SettingsIntent.DismissDialog)
+            viewModel?.handleIntent(SettingsIntent.RequestExportExcel(startTs, endTs, type, fileName))
         }
     )
 }

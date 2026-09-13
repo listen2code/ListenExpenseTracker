@@ -1,26 +1,11 @@
 package com.listen.expensetracker.features.settings.components
 
-import androidx.compose.ui.tooling.preview.Preview
-import com.listen.expensetracker.data.i18n.ExpenseStrings
-import com.listen.uicomponent.theme.ListenTheme
-
-import com.listen.arch.i18n.tr
-
-import com.listen.expensetracker.data.i18n.AppStrings
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,10 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.listen.arch.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -40,24 +27,32 @@ import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.AccentColor
+import com.listen.uicomponent.theme.ListenTheme
 import com.listen.uicomponent.theme.ThemeMode
 
 /**
  * Settings Card for Theme Mode, Accent Color, and Language customization.
+ *
+ * @param themeMode 当前主题模式 (Light/Dark/System)
+ * @param accentColor 当前主题强调色
+ * @param lang 当前系统语言代码 (zh/en/ja)，同时也作为 UI 翻译的上下文。
+ * @param isPureBlackDark 是否开启 AMOLED 纯黑模式
  */
 @Composable
 fun SettingsAppearanceSection(
     themeMode: ThemeMode,
     accentColor: AccentColor,
-    language: String,
+    lang: String,
     onChangeThemeMode: (ThemeMode) -> Unit,
     onChangeAccentColor: (AccentColor) -> Unit,
     onLanguageChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    lang: String = language,
     isPureBlackDark: Boolean = false,
     onTogglePureBlackDark: (Boolean) -> Unit = {}
 ) {
+    // 统一使用传入的 language 进行界面翻译
+    val lang = lang
+
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
         contentPadding = AppDimens.SpaceStandard,
@@ -137,7 +132,7 @@ fun SettingsAppearanceSection(
             }
 
             // Language Selector
-            val currentLangLabel = when (language) {
+            val currentLangLabel = when (lang) {
                 "en" -> "English"
                 "ja" -> "日本語"
                 else -> "简体中文"
@@ -146,7 +141,7 @@ fun SettingsAppearanceSection(
             CommonButton(
                 text = "${AppStrings.SETTINGS_LANGUAGE.tr(lang)}: $currentLangLabel",
                 onClick = {
-                    val next = when (language) {
+                    val next = when (lang) {
                         "zh" -> "en"
                         "en" -> "ja"
                         else -> "zh"
@@ -167,11 +162,10 @@ fun SettingsAppearanceSectionPreview() {
         SettingsAppearanceSection(
             themeMode = ThemeMode.SYSTEM,
             accentColor = AccentColor.EMERALD,
-            language = "zh",
+            lang = "zh",
             onChangeThemeMode = {},
             onChangeAccentColor = {},
-            onLanguageChange = {},
-            lang = "zh"
+            onLanguageChange = {}
         )
     }
 }

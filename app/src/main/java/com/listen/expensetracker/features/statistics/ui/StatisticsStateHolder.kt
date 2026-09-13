@@ -40,7 +40,6 @@ class StatisticsStateHolder(
 @Composable
 fun rememberStatisticsStateHolder(
     state: StatisticsUiState,
-    onIntent: (StatisticsIntent) -> Unit,
     viewModel: StatisticsViewModel? = null
 ): StatisticsStateHolder {
     val lang = state.language
@@ -97,8 +96,7 @@ fun rememberStatisticsStateHolder(
         listState = listState,
         period = state.period,
         selectedMonthOffset = state.selectedMonthOffset,
-        selectedYearOffset = state.selectedYearOffset,
-        onIntent = onIntent
+        selectedYearOffset = state.selectedYearOffset
     )
 
     return remember(

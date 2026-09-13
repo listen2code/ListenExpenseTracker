@@ -13,6 +13,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionPeri
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
+import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import java.util.Calendar
 
 /**
@@ -22,7 +23,7 @@ import java.util.Calendar
 @Composable
 fun TransactionsDialogHost(
     state: TransactionsUiState,
-    onIntent: (TransactionsIntent) -> Unit
+    viewModel: TransactionsViewModel? = null
 ) {
     val lang = state.language
     val sym = state.currencySymbol
@@ -48,17 +49,17 @@ fun TransactionsDialogHost(
                 initialTimestamp = initialDate,
                 initialCategoryId = dialog.initialCategoryId,
                 initialType = dialog.initialType,
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 onSave = { entity ->
-                    onIntent(TransactionsIntent.AddTransaction(
+                    viewModel?.handleIntent(TransactionsIntent.AddTransaction(
                         type = entity.type, categoryId = entity.categoryId, categoryName = entity.categoryName,
                         categoryIcon = entity.categoryIcon, categoryColorHex = entity.categoryColorHex,
                         amount = entity.amount, note = entity.note, accountType = entity.accountType, timestamp = entity.timestamp
                     ))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
                 onSaveAndContinue = { entity ->
-                    onIntent(TransactionsIntent.AddTransaction(
+                    viewModel?.handleIntent(TransactionsIntent.AddTransaction(
                         type = entity.type, categoryId = entity.categoryId, categoryName = entity.categoryName,
                         categoryIcon = entity.categoryIcon, categoryColorHex = entity.categoryColorHex,
                         amount = entity.amount, note = entity.note, accountType = entity.accountType, timestamp = entity.timestamp
@@ -71,14 +72,14 @@ fun TransactionsDialogHost(
             TransactionSheet(
                 transaction = dialog.transaction,
                 currencySymbol = sym,
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 onSave = { updated ->
-                    onIntent(TransactionsIntent.UpdateTransaction(updated))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.UpdateTransaction(updated))
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
                 onDelete = {
-                    onIntent(TransactionsIntent.DeleteTransaction(dialog.transaction.id))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.DeleteTransaction(dialog.transaction.id))
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
                 lang = lang
             )
@@ -89,10 +90,10 @@ fun TransactionsDialogHost(
                 categoryName = tx.categoryName,
                 currencySymbol = sym,
                 amount = tx.amount,
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 onConfirm = {
-                    onIntent(TransactionsIntent.DeleteTransaction(tx.id))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.DeleteTransaction(tx.id))
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
                 lang = lang
             )
@@ -103,24 +104,24 @@ fun TransactionsDialogHost(
                 currentYearOffset = state.selectedYearOffset,
                 isYearMode = state.period == TransactionPeriod.YEAR,
                 onOffsetSelected = { offset ->
-                    onIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
-                    onIntent(TransactionsIntent.SelectMonth(offset))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.MONTH))
+                    viewModel?.handleIntent(TransactionsIntent.SelectMonth(offset))
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
                 onYearSelected = { offset ->
-                    onIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.YEAR))
-                    onIntent(TransactionsIntent.SelectYear(offset))
-                    onIntent(TransactionsIntent.DismissDialog)
+                    viewModel?.handleIntent(TransactionsIntent.ChangePeriod(TransactionPeriod.YEAR))
+                    viewModel?.handleIntent(TransactionsIntent.SelectYear(offset))
+                    viewModel?.handleIntent(TransactionsIntent.DismissDialog)
                 },
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 lang = lang
             )
         }
         is TransactionsDialog.ManageAccount -> {
             AccountManageDialog(
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 onAccountChanged = { newKey ->
-                    onIntent(TransactionsIntent.FilterAccountChange(newKey))
+                    viewModel?.handleIntent(TransactionsIntent.FilterAccountChange(newKey))
                 },
                 lang = lang
             )
@@ -135,10 +136,10 @@ fun TransactionsDialogHost(
                 currentMax = state.customMaxAmount,
                 currencySymbol = sym,
                 lang = lang,
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
-                onReset = { onIntent(TransactionsIntent.ResetAllFilters) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
+                onReset = { viewModel?.handleIntent(TransactionsIntent.ResetAllFilters) },
                 onApply = { type, categories, preset, min, max, sort ->
-                    onIntent(TransactionsIntent.ApplyCompoundFilter(type, categories, preset, min, max, sort))
+                    viewModel?.handleIntent(TransactionsIntent.ApplyCompoundFilter(type, categories, preset, min, max, sort))
                 }
             )
         }
@@ -152,9 +153,9 @@ fun TransactionsDialogHost(
                 hideAmount = state.hideBalance,
                 initialMonthOffset = state.selectedMonthOffset,
                 initialMode = if (dialog is TransactionsDialog.CategoryBudgetEdit) BudgetDialogMode.EDIT else BudgetDialogMode.VIEW,
-                onDismiss = { onIntent(TransactionsIntent.DismissDialog) },
+                onDismiss = { viewModel?.handleIntent(TransactionsIntent.DismissDialog) },
                 onSave = { newBudget, newRatios ->
-                    onIntent(TransactionsIntent.UpdateCategoryBudgets(newBudget, newRatios))
+                    viewModel?.handleIntent(TransactionsIntent.UpdateCategoryBudgets(newBudget, newRatios))
                 }
             )
         }
@@ -167,6 +168,6 @@ fun TransactionsDialogHostPreview() {
     ExpenseStrings.init()
     val state = TransactionsUiState()
     ListenTheme {
-        TransactionsDialogHost(state = state, onIntent = {})
+        TransactionsDialogHost(state = state)
     }
 }

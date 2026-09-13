@@ -13,6 +13,16 @@ import com.listen.uicomponent.theme.ThemeMode
 sealed interface SettingsEffect : CommonUiEffect {
     data object LaunchGoogleSignIn : SettingsEffect
     data object ScrollToTop : SettingsEffect
+    
+    // File System Trigger Effects
+    data class TriggerJsonExport(val fileName: String) : SettingsEffect
+    data object TriggerJsonImport : SettingsEffect
+    data class TriggerExcelExport(
+        val fileName: String,
+        val startTs: Long?,
+        val endTs: Long?,
+        val typeFilter: String
+    ) : SettingsEffect
 }
 
 /**
@@ -111,6 +121,16 @@ sealed interface SettingsIntent {
     data class ToggleRecurringBillsAlerts(val enabled: Boolean) : SettingsIntent
     data class ToggleAppUpdatesAlerts(val enabled: Boolean) : SettingsIntent
     data class TogglePureBlackDark(val enabled: Boolean) : SettingsIntent
+
+    // File System Request Intents
+    data object RequestExportJson : SettingsIntent
+    data object RequestImportJson : SettingsIntent
+    data class RequestExportExcel(
+        val startTs: Long?,
+        val endTs: Long?,
+        val typeFilter: String,
+        val fileName: String
+    ) : SettingsIntent
 
     // Lifecycle Intents
     data object ScreenAppear : SettingsIntent

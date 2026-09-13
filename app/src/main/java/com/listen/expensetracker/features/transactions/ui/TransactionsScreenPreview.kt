@@ -60,8 +60,7 @@ fun TransactionsScreenPreview() {
     )
     ListenTheme {
         TransactionsScreen(
-            state = state,
-            onIntent = {}
+            state = state
         )
     }
 }

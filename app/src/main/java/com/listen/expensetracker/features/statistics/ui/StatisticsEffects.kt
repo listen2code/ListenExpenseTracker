@@ -29,8 +29,7 @@ fun StatisticsEffects(
     listState: LazyListState,
     period: StatisticsPeriod,
     selectedMonthOffset: Int,
-    selectedYearOffset: Int,
-    onIntent: (StatisticsIntent) -> Unit
+    selectedYearOffset: Int
 ) {
     val currentPeriod by rememberUpdatedState(period)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
@@ -98,11 +97,11 @@ fun StatisticsEffects(
                             if (isAtTop) {
                                 if (currentPeriod == StatisticsPeriod.MONTH) {
                                     if (currentMonthOffset != 0 || monthPagerState.currentPage != PAGER_BASE_INDEX) {
-                                        onIntent(StatisticsIntent.SelectMonth(0))
+                                        viewModel.handleIntent(StatisticsIntent.SelectMonth(0))
                                     }
                                 } else {
                                     if (currentYearOffset != 0 || yearPagerState.currentPage != PAGER_BASE_INDEX) {
-                                        onIntent(StatisticsIntent.SelectYear(0))
+                                        viewModel.handleIntent(StatisticsIntent.SelectYear(0))
                                     }
                                 }
                             } else {
@@ -121,7 +120,7 @@ fun StatisticsEffects(
                 .collect { page ->
                     val offset = page - PAGER_BASE_INDEX
                     if (offset != currentMonthOffset) {
-                        onIntent(StatisticsIntent.SetMonthOffset(offset))
+                        viewModel?.handleIntent(StatisticsIntent.SetMonthOffset(offset))
                     }
                 }
         }
@@ -133,7 +132,7 @@ fun StatisticsEffects(
                 .collect { page ->
                     val offset = page - PAGER_BASE_INDEX
                     if (offset != currentYearOffset) {
-                        onIntent(StatisticsIntent.SetYearOffset(offset))
+                        viewModel?.handleIntent(StatisticsIntent.SetYearOffset(offset))
                     }
                 }
         }

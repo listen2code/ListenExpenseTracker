@@ -12,7 +12,6 @@ import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
 import com.listen.expensetracker.features.transactions.components.formatDayGroupHeader
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 
@@ -49,7 +48,6 @@ class TransactionsStateHolder(
 @Composable
 fun rememberTransactionsStateHolder(
     state: TransactionsUiState,
-    onIntent: (TransactionsIntent) -> Unit,
     viewModel: TransactionsViewModel? = null
 ): TransactionsStateHolder {
     val lang = state.language
@@ -112,8 +110,7 @@ fun rememberTransactionsStateHolder(
         period = state.period,
         groupedTransactions = groupedTransactions,
         selectedMonthOffset = state.selectedMonthOffset,
-        selectedYearOffset = state.selectedYearOffset,
-        onIntent = onIntent
+        selectedYearOffset = state.selectedYearOffset
     )
 
     return remember(

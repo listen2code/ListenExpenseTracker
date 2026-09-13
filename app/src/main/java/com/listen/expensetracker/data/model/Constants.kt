@@ -60,4 +60,23 @@ object AppConstants {
         const val PARAM_VERSION = "version"
         const val VALUE_RECURRING = "recurring"
     }
+
+    /**
+     * MIME types used for file system operations (Export/Import).
+     */
+    object MimeTypes {
+        const val JSON = "application/json"
+        const val CSV = "text/csv"
+        const val ANY_TEXT = "text/*"
+        const val ANY = "*/*"
+    }
+
+    /**
+     * Constants related to Data Export and Backups.
+     */
+    object Export {
+        const val BACKUP_FILE_PREFIX = "lexpense_backup_"
+        const val BACKUP_DATE_FORMAT = "yyyyMMdd_HHmmss"
+        const val DEFAULT_TYPE_FILTER = "ALL"
+    }
 }

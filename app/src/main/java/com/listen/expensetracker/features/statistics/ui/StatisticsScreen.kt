@@ -41,7 +41,6 @@ import java.util.Calendar
 @Composable
 fun StatisticsScreen(
     state: StatisticsUiState,
-    onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
@@ -51,7 +50,7 @@ fun StatisticsScreen(
     onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null,
     onNavigateToBudget: ((monthOffset: Int) -> Unit)? = null
 ) {
-    val holder = rememberStatisticsStateHolder(state, onIntent, viewModel)
+    val holder = rememberStatisticsStateHolder(state, viewModel)
     val lang = state.language
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
@@ -61,23 +60,23 @@ fun StatisticsScreen(
                 monthTitle = if (state.period == StatisticsPeriod.MONTH) holder.currentMonthTitle else holder.currentYearTitle,
                 onPreviousMonth = {
                     if (state.period == StatisticsPeriod.MONTH) {
-                        onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                        viewModel?.handleIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset - 1))
                     } else {
-                        onIntent(StatisticsIntent.SelectYear(holder.currentYearOffset - 1))
+                        viewModel?.handleIntent(StatisticsIntent.SelectYear(holder.currentYearOffset - 1))
                     }
                 },
                 onNextMonth = {
                     if (state.period == StatisticsPeriod.MONTH) {
-                        onIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                        viewModel?.handleIntent(StatisticsIntent.SelectMonth(holder.currentMonthOffset + 1))
                     } else {
-                        onIntent(StatisticsIntent.SelectYear(holder.currentYearOffset + 1))
+                        viewModel?.handleIntent(StatisticsIntent.SelectYear(holder.currentYearOffset + 1))
                     }
                 },
-                onTitleClick = { onIntent(StatisticsIntent.OpenMonthPicker) }
+                onTitleClick = { viewModel?.handleIntent(StatisticsIntent.OpenMonthPicker) }
             )
         },
         actions = {
-            IconButton(onClick = { onIntent(StatisticsIntent.ToggleHideAmount(!state.hideAmount)) }) {
+            IconButton(onClick = { viewModel?.handleIntent(StatisticsIntent.ToggleHideAmount(!state.hideAmount)) }) {
                 Icon(
                     imageVector = if (state.hideAmount) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = "Toggle Amount",
@@ -98,7 +97,7 @@ fun StatisticsScreen(
                 items = tabs,
                 selectedIndex = if (isExpenseTab) 0 else 1,
                 onIndexChange = { index ->
-                    onIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) StatisticsTab.EXPENSE else StatisticsTab.INCOME))
+                    viewModel?.handleIntent(StatisticsIntent.ChangeStatisticsTab(if (index == 0) StatisticsTab.EXPENSE else StatisticsTab.INCOME))
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +115,6 @@ fun StatisticsScreen(
                     StatisticsContentList(
                         state = state,
                         monthOffset = pageOffset,
-                        onIntent = onIntent,
                         listState = if (page == holder.monthPagerState.currentPage) holder.listState else rememberLazyListState(),
                         onCategoryClick = onNavigateToTransactions?.let { callback ->
                             { categoryName -> callback(pageOffset, categoryName) }
@@ -141,7 +139,6 @@ fun StatisticsScreen(
                     AnnualStatisticsContentList(
                         state = state,
                         yearOffset = pageOffset,
-                        onIntent = onIntent,
                         listState = if (page == holder.yearPagerState.currentPage) holder.listState else rememberLazyListState(),
                         onAnnualCategoryClick = onNavigateToTransactionsAnnualCategory,
                         onTransactionClick = onNavigateToTransaction?.let { callback ->
@@ -155,5 +152,5 @@ fun StatisticsScreen(
     }
 
     // Feature-Level Dialog Host
-    StatisticsDialogHost(state = state, onIntent = onIntent)
+    StatisticsDialogHost(state = state, viewModel = viewModel)
 }

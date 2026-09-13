@@ -67,12 +67,11 @@ import com.listen.uicomponent.components.BaseScreenScaffold
 @Composable
 fun TransactionsScreen(
     state: TransactionsUiState,
-    onIntent: (TransactionsIntent) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel? = null
 ) {
     // 🌟 一行收拢所有 Pager、ListState 与副作用协同逻辑
-    val holder = rememberTransactionsStateHolder(state, onIntent, viewModel)
+    val holder = rememberTransactionsStateHolder(state, viewModel)
     val lang = state.language
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -83,23 +82,23 @@ fun TransactionsScreen(
                 monthTitle = if (state.period == TransactionPeriod.MONTH) holder.currentMonthTitle else holder.currentYearTitle,
                 onPreviousMonth = {
                     if (state.period == TransactionPeriod.MONTH) {
-                        onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset - 1))
+                        viewModel?.handleIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset - 1))
                     } else {
-                        onIntent(TransactionsIntent.SelectYear(holder.currentYearOffset - 1))
+                        viewModel?.handleIntent(TransactionsIntent.SelectYear(holder.currentYearOffset - 1))
                     }
                 },
                 onNextMonth = {
                     if (state.period == TransactionPeriod.MONTH) {
-                        onIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset + 1))
+                        viewModel?.handleIntent(TransactionsIntent.SelectMonth(holder.currentMonthOffset + 1))
                     } else {
-                        onIntent(TransactionsIntent.SelectYear(holder.currentYearOffset + 1))
+                        viewModel?.handleIntent(TransactionsIntent.SelectYear(holder.currentYearOffset + 1))
                     }
                 },
-                onTitleClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthPicker)) }
+                onTitleClick = { viewModel?.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.MonthPicker)) }
             )
         },
         actions = {
-            IconButton(onClick = { onIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) }) {
+            IconButton(onClick = { viewModel?.handleIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) }) {
                 Icon(
                     imageVector = if (state.hideBalance) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = "Toggle Balance",
@@ -141,12 +140,12 @@ fun TransactionsScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .combinedClickable(
                                 onClick = {
-                                    onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.FilterSheet))
+                                    viewModel?.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.FilterSheet))
                                 },
                                 onLongClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     if (state.hasActiveFilters) {
-                                        onIntent(TransactionsIntent.ResetAllFilters)
+                                        viewModel?.handleIntent(TransactionsIntent.ResetAllFilters)
                                         Toast.makeText(context, AppStrings.FILTER_CLEAR_ACTIVE.tr(lang), Toast.LENGTH_SHORT).show()
                                     }
                                 }
@@ -165,7 +164,7 @@ fun TransactionsScreen(
 
                 // Primary Add Transaction FAB
                 FloatingActionButton(
-                    onClick = { onIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction())) },
+                    onClick = { viewModel?.handleIntent(TransactionsIntent.OpenDialog(TransactionsDialog.AddTransaction())) },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
@@ -183,7 +182,7 @@ fun TransactionsScreen(
             // 1. 顶部常驻搜索栏与账户过滤芯片 (Stationary)
             TransactionsHeaderFilters(
                 state = state,
-                onIntent = onIntent,
+                onIntent = { viewModel?.handleIntent(it) },
                 modifier = Modifier
                     .padding(horizontal = AppDimens.SpaceLarge)
                     .padding(bottom = AppDimens.SpaceSmall)
@@ -201,7 +200,7 @@ fun TransactionsScreen(
                         monthOffset = pageOffset,
                         isYearMode = false,
                         yearOffset = 0,
-                        onIntent = onIntent,
+                        onIntent = { viewModel?.handleIntent(it) },
                         listState = if (page == holder.monthPagerState.currentPage) holder.listState else rememberLazyListState()
                     )
                 }
@@ -216,7 +215,7 @@ fun TransactionsScreen(
                         monthOffset = 0,
                         isYearMode = true,
                         yearOffset = pageOffset,
-                        onIntent = onIntent,
+                        onIntent = { viewModel?.handleIntent(it) },
                         listState = if (page == holder.yearPagerState.currentPage) holder.listState else rememberLazyListState()
                     )
                 }
@@ -225,5 +224,5 @@ fun TransactionsScreen(
     }
 
     // 弹窗宿主分发器
-    TransactionsDialogHost(state = state, onIntent = onIntent)
+    TransactionsDialogHost(state = state, viewModel = viewModel)
 }

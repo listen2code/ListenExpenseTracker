@@ -42,8 +42,7 @@ fun TransactionsEffects(
     period: TransactionPeriod,
     groupedTransactions: Map<String, List<TransactionEntity>>,
     selectedMonthOffset: Int,
-    selectedYearOffset: Int,
-    onIntent: (TransactionsIntent) -> Unit
+    selectedYearOffset: Int
 ) {
     // 使用 rememberUpdatedState 保持长协程引用最新状态，避免 LaunchedEffect 因参数变动频繁重启
     val currentPeriod by rememberUpdatedState(period)
@@ -113,11 +112,11 @@ fun TransactionsEffects(
                             if (isAtTop) {
                                 if (currentPeriod == TransactionPeriod.MONTH) {
                                     if (currentMonthOffset != 0 || monthPagerState.currentPage != PAGER_BASE_INDEX) {
-                                        onIntent(TransactionsIntent.SelectMonth(0))
+                                        viewModel.handleIntent(TransactionsIntent.SelectMonth(0))
                                     }
                                 } else {
                                     if (currentYearOffset != 0 || yearPagerState.currentPage != PAGER_BASE_INDEX) {
-                                        onIntent(TransactionsIntent.SelectYear(0))
+                                        viewModel.handleIntent(TransactionsIntent.SelectYear(0))
                                     }
                                 }
                             } else {
@@ -148,7 +147,7 @@ fun TransactionsEffects(
                 .collect { page ->
                     val offset = page - PAGER_BASE_INDEX
                     if (offset != currentMonthOffset) {
-                        onIntent(TransactionsIntent.SetMonthOffset(offset))
+                        viewModel?.handleIntent(TransactionsIntent.SetMonthOffset(offset))
                     }
                 }
         }
@@ -160,7 +159,7 @@ fun TransactionsEffects(
                 .collect { page ->
                     val offset = page - PAGER_BASE_INDEX
                     if (offset != currentYearOffset) {
-                        onIntent(TransactionsIntent.SetYearOffset(offset))
+                        viewModel?.handleIntent(TransactionsIntent.SetYearOffset(offset))
                     }
                 }
         }

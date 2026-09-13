@@ -27,7 +27,6 @@ import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
-import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 import com.listen.uicomponent.charts.LineChart
@@ -42,7 +41,6 @@ import java.util.Calendar
 fun AnnualStatisticsContentList(
     state: StatisticsUiState,
     yearOffset: Int,
-    onIntent: (StatisticsIntent) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberSaveable(yearOffset, saver = LazyListState.Saver) { LazyListState() },
     onAnnualCategoryClick: ((year: Int, categoryName: String) -> Unit)? = null,

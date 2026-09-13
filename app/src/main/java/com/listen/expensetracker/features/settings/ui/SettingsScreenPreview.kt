@@ -24,8 +24,7 @@ fun SettingsScreenPreview() {
     )
     ListenTheme {
         SettingsScreen(
-            state = state,
-            onIntent = {}
+            state = state
         )
     }
 }

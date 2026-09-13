@@ -19,8 +19,12 @@ import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -44,11 +48,9 @@ class SettingsViewModel(
         val notif = notificationDelegate.populateInitialState()
         updateState {
             copy(
-                notificationsEnabled = notif.notificationsEnabled,
-                budgetAlertsEnabled = notif.budgetAlertsEnabled,
+                notificationsEnabled = notif.notificationsEnabled, budgetAlertsEnabled = notif.budgetAlertsEnabled,
                 budgetWarningThresholdEnabled = notif.budgetWarningThresholdEnabled,
-                recurringBillsAlertsEnabled = notif.recurringBillsAlertsEnabled,
-                appUpdatesAlertsEnabled = notif.appUpdatesAlertsEnabled
+                recurringBillsAlertsEnabled = notif.recurringBillsAlertsEnabled, appUpdatesAlertsEnabled = notif.appUpdatesAlertsEnabled
             )
         }
         observeSettings()
@@ -138,6 +140,14 @@ class SettingsViewModel(
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is SettingsIntent.CheckForUpdates -> notificationDelegate.checkForUpdates(intent.currentVersion, currentState, ::updateState, ::emitEffect)
             
+            // 处理文件系统请求意图
+            is SettingsIntent.RequestExportJson -> {
+                val fileName = AppConstants.Export.BACKUP_FILE_PREFIX + SimpleDateFormat(AppConstants.Export.BACKUP_DATE_FORMAT, Locale.getDefault()).format(Date()) + ".json"
+                emitEffect(SettingsEffect.TriggerJsonExport(fileName))
+            }
+            is SettingsIntent.RequestImportJson -> emitEffect(SettingsEffect.TriggerJsonImport)
+            is SettingsIntent.RequestExportExcel -> emitEffect(SettingsEffect.TriggerExcelExport(intent.fileName, intent.startTs, intent.endTs, intent.typeFilter))
+
             // 【新增加的生命周期 Intent 处理】
             is SettingsIntent.ScreenAppear -> {
                 // 虽然 BaseViewModel 已经自动打印了生命周期 Log，但你可以在这里打印更具业务意义的内容
@@ -160,19 +170,11 @@ class SettingsViewModel(
     }
 
     private fun observeTransactions() {
-        viewModelScope.launch {
-            dao.getAllTransactionsFlow().collectLatest { txs ->
-                updateState { copy(transactions = txs) }
-            }
-        }
+        viewModelScope.launch { dao.getAllTransactionsFlow().collectLatest { txs -> updateState { copy(transactions = txs) } } }
     }
 
     private fun observeRecurringRules() {
-        viewModelScope.launch {
-            recurringDao.getAllRulesFlow().collectLatest { rules ->
-                updateState { copy(recurringRules = rules) }
-            }
-        }
+        viewModelScope.launch { recurringDao.getAllRulesFlow().collectLatest { rules -> updateState { copy(recurringRules = rules) } } }
     }
 
     private fun observeSettings() {
@@ -202,22 +204,13 @@ class SettingsViewModel(
                 prefManager.userDisplayNameFlow,
                 prefManager.userAvatarUrlFlow
             ) { isLoggedIn, email, displayName, avatarUrl ->
-                updateState {
-                    copy(
-                        isLoggedIn = isLoggedIn,
-                        googleAccountEmail = email,
-                        googleDisplayName = displayName,
-                        googleAvatarUrl = avatarUrl
-                    )
-                }
+                updateState { copy(isLoggedIn = isLoggedIn, googleAccountEmail = email, googleDisplayName = displayName, googleAvatarUrl = avatarUrl) }
             }.collectLatest { }
         }
     }
 
     private fun observeSyncState() {
-        viewModelScope.launch {
-            prefManager.lastSyncTimestampFlow.collectLatest { ts -> updateState { copy(lastSyncTimestamp = ts) } }
-        }
+        viewModelScope.launch { prefManager.lastSyncTimestampFlow.collectLatest { ts -> updateState { copy(lastSyncTimestamp = ts) } } }
         viewModelScope.launch {
             CloudSyncManager.syncStateFlow.collectLatest { syncState ->
                 updateState { copy(syncState = syncState, lastSyncTimestamp = syncState.lastSyncTimestamp) }
@@ -233,9 +226,7 @@ class SettingsViewModel(
             val profileResult = GoogleAuthManager.parseGoogleIdCredential(response)
             profileResult.onSuccess { profile ->
                 handleIntent(SettingsIntent.LinkGoogleAccount(profile.email, profile.displayName, profile.avatarUrl))
-            }.onFailure { err ->
-                emitEffect(CommonUiEffect.ShowToast("Google 授权解析失败: ${err.message}"))
-            }
+            }.onFailure { err -> emitEffect(CommonUiEffect.ShowToast("Google 授权解析失败: ${err.message}")) }
         } catch (e: GetCredentialCancellationException) {
             // Cancelled by user
         } catch (e: Throwable) {

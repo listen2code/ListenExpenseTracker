@@ -29,8 +29,7 @@ fun StatisticsScreenPreview() {
     )
     ListenTheme {
         StatisticsScreen(
-            state = state,
-            onIntent = {}
+            state = state
         )
     }
 }

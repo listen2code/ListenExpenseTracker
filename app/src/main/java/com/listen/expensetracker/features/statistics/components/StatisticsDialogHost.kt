@@ -9,6 +9,7 @@ import com.listen.expensetracker.features.common.components.MonthPickerDialog
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsPeriod
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 
 /**
  * Dedicated Dialog Host for Statistics Feature.
@@ -17,7 +18,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
 @Composable
 fun StatisticsDialogHost(
     state: StatisticsUiState,
-    onIntent: (StatisticsIntent) -> Unit
+    viewModel: StatisticsViewModel? = null
 ) {
     if (state.showMonthPicker) {
         MonthPickerDialog(
@@ -25,16 +26,16 @@ fun StatisticsDialogHost(
             currentYearOffset = state.selectedYearOffset,
             isYearMode = state.period == StatisticsPeriod.YEAR,
             onOffsetSelected = { offset ->
-                onIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
-                onIntent(StatisticsIntent.SelectMonth(offset))
-                onIntent(StatisticsIntent.DismissMonthPicker)
+                viewModel?.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.MONTH))
+                viewModel?.handleIntent(StatisticsIntent.SelectMonth(offset))
+                viewModel?.handleIntent(StatisticsIntent.DismissMonthPicker)
             },
             onYearSelected = { offset ->
-                onIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
-                onIntent(StatisticsIntent.SelectYear(offset))
-                onIntent(StatisticsIntent.DismissMonthPicker)
+                viewModel?.handleIntent(StatisticsIntent.ChangePeriod(StatisticsPeriod.YEAR))
+                viewModel?.handleIntent(StatisticsIntent.SelectYear(offset))
+                viewModel?.handleIntent(StatisticsIntent.DismissMonthPicker)
             },
-            onDismiss = { onIntent(StatisticsIntent.DismissMonthPicker) },
+            onDismiss = { viewModel?.handleIntent(StatisticsIntent.DismissMonthPicker) },
             lang = state.language
         )
     }
@@ -45,6 +46,6 @@ fun StatisticsDialogHostPreview() {
     ExpenseStrings.init()
     val state = StatisticsUiState()
     ListenTheme {
-        StatisticsDialogHost(state = state, onIntent = {})
+        StatisticsDialogHost(state = state)
     }
 }
