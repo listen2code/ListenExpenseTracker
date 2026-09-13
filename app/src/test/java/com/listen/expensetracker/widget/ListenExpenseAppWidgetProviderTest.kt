@@ -77,4 +77,18 @@ class ListenExpenseAppWidgetProviderTest {
         assertEquals("com.listen.expensetracker.widget.ACTION_NEXT_MONTH", ListenExpenseAppWidgetProvider.ACTION_NEXT_MONTH)
         assertEquals("com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT", ListenExpenseAppWidgetProvider.ACTION_TOGGLE_HIDE_AMOUNT)
     }
+
+    @Test
+    fun widgetCategoryStrings_resolveToLocalizedNames() {
+        com.listen.expensetracker.data.i18n.ExpenseStrings.init()
+        val catFood = com.listen.arch.i18n.StringsRes.get(com.listen.expensetracker.data.i18n.AppStrings.CAT_FOOD, "zh")
+        val catTransport = com.listen.arch.i18n.StringsRes.get(com.listen.expensetracker.data.i18n.AppStrings.CAT_TRANSPORT, "zh")
+        val catShopping = com.listen.arch.i18n.StringsRes.get(com.listen.expensetracker.data.i18n.AppStrings.CAT_SHOPPING, "zh")
+        val catOther = com.listen.arch.i18n.StringsRes.get(com.listen.expensetracker.data.i18n.AppStrings.CAT_OTHER_EXP, "zh")
+
+        assertEquals("餐饮", catFood)
+        assertEquals("交通", catTransport)
+        assertEquals("购物", catShopping)
+        assertEquals("其他", catOther)
+    }
 }

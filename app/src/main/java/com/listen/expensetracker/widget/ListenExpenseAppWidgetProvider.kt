@@ -12,6 +12,7 @@ import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.BudgetHealthStatus
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        ExpenseStrings.init()
         super.onReceive(context, intent)
         // 这里实现了一个局部状态机（widget-local state machine），
         // 用于处理用户点击操作，如月份前后切换和隐藏/显示金额切换，更新状态后立即触发 UI 渲染。
@@ -61,6 +63,7 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        ExpenseStrings.init()
         // 冷启动或添加小组件时，从 Room 和 DataStore 异步提取数据并渲染。
         // 技术决策: 为什么使用 CoroutineScope(Dispatchers.IO) 而不是 viewModelScope?
         // 因为 Widget 的运行环境是一个独立的 BroadcastReceiver 上下文，没有 ViewModel 生命周期，
@@ -98,11 +101,6 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val ACTION_NEXT_MONTH = "com.listen.expensetracker.widget.ACTION_NEXT_MONTH"
         const val ACTION_TOGGLE_HIDE_AMOUNT = "com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT"
 
-        // 偏好持久化 Key
-        private const val PREFS_NAME = "listen_expense_widget_prefs"
-        private const val KEY_OFFSET_PREFIX = "widget_month_offset_"
-        private const val KEY_HIDE_PREFIX = "widget_hide_amount_"
-
         // 统一小部件与深层链接 (Deep Link) 路由常量，避免在 Activity 中硬编码 (Rule 22)。
         // 采用 URI_SCHEME/URI_HOST 的规范模式，使跨文件的路由配置保持一致且易于维护。
         const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
@@ -112,28 +110,17 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val PARAM_CATEGORY = "category"
         const val PARAM_TYPE = "type"
 
-        // 状态隔离机制: 使用 widgetId 作为 SharedPreferences Key 的后缀。
-        // 这实现了每个小部件实例的独立状态存储，这意味着同一主屏幕上的不同小部件实例
-        // 可以独立展示不同的月份数据，而互不干扰。
-        fun getWidgetMonthOffset(context: Context, widgetId: Int): Int {
-            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            return sp.getInt("$KEY_OFFSET_PREFIX$widgetId", 0)
-        }
+        fun getWidgetMonthOffset(context: Context, widgetId: Int): Int =
+            WidgetPreferences.getMonthOffset(context, widgetId)
 
-        fun setWidgetMonthOffset(context: Context, widgetId: Int, offset: Int) {
-            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            sp.edit().putInt("$KEY_OFFSET_PREFIX$widgetId", offset).apply()
-        }
+        fun setWidgetMonthOffset(context: Context, widgetId: Int, offset: Int) =
+            WidgetPreferences.setMonthOffset(context, widgetId, offset)
 
-        fun getWidgetHideAmount(context: Context, widgetId: Int): Boolean {
-            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            return sp.getBoolean("$KEY_HIDE_PREFIX$widgetId", false)
-        }
+        fun getWidgetHideAmount(context: Context, widgetId: Int): Boolean =
+            WidgetPreferences.getHideAmount(context, widgetId)
 
-        fun setWidgetHideAmount(context: Context, widgetId: Int, hide: Boolean) {
-            val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            sp.edit().putBoolean("$KEY_HIDE_PREFIX$widgetId", hide).apply()
-        }
+        fun setWidgetHideAmount(context: Context, widgetId: Int, hide: Boolean) =
+            WidgetPreferences.setHideAmount(context, widgetId, hide)
 
         private fun triggerWidgetUpdate(context: Context, widgetId: Int) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -150,36 +137,28 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
         fun updateSingleWidget(
             context: Context,
-            appWidgetManager: AppWidgetManager,
-            appWidgetId: Int,
+            manager: AppWidgetManager,
+            widgetId: Int,
             allList: List<TransactionEntity>,
-            currencySymbol: String = "￥",
-            monthlyBudget: Double = 5000.0,
+            currency: String = "￥",
+            budget: Double = 5000.0,
             lang: String = "zh"
         ) {
-            val offset = getWidgetMonthOffset(context, appWidgetId)
-            val hideAmount = getWidgetHideAmount(context, appWidgetId)
+            ExpenseStrings.init()
+            val offset = getWidgetMonthOffset(context, widgetId)
+            val hideAmount = getWidgetHideAmount(context, widgetId)
             val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(offset, lang)
             val totalExpense = calculateMonthlyExpense(allList, startTs, endTs)
-            val health = calculateHealthStatus(totalExpense, monthlyBudget)
+            val health = calculateHealthStatus(totalExpense, budget)
             WidgetLayoutBinder.renderWidget(
-                context = context,
-                manager = appWidgetManager,
-                widgetId = appWidgetId,
-                spent = totalExpense,
-                budget = monthlyBudget,
-                currency = currencySymbol,
-                title = title,
-                health = health,
-                lang = lang,
-                hideAmount = hideAmount,
-                monthOffset = offset
+                context = context, manager = manager, widgetId = widgetId, spent = totalExpense,
+                budget = budget, currency = currency, title = title, health = health,
+                lang = lang, hideAmount = hideAmount, monthOffset = offset
             )
         }
 
         /**
          * 统一标准化分类别名映射，兼容外部调用与旧版分类 ID。
-         * 历史原因可能导致相同的分类存在不同的标识（例如 cat_food 与 c_food），
          * 统一映射可确保向下兼容（Backward Compatibility）。
          */
         fun normalizeCategoryId(raw: String?): String? = when (raw) {
@@ -193,11 +172,6 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         /**
          * 解析小部件或外部 DeepLink 触发的快速记账意图。
          * 若匹配则返回 Pair(categoryId, transactionType)，否则返回 null。
-         * 
-         * 鲁棒性设计 (Dual-source parsing):
-         * 同时支持解析 URI query params 和 Intent extras。
-         * 因为不同的 Android 启动器（Launcher）在转发 PendingIntent 时的行为存在差异，
-         * 这种双重解析可以有效抵御环境碎片化。
          */
         fun parseQuickAddIntent(intent: Intent?): Pair<String?, String>? {
             if (intent == null) return null
@@ -208,14 +182,11 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
             val rawCategory = uri?.getQueryParameter(PARAM_CATEGORY) ?: intent.getStringExtra(EXTRA_QUICK_ADD_CATEGORY)
             val type = uri?.getQueryParameter(PARAM_TYPE) ?: intent.getStringExtra(EXTRA_QUICK_ADD_TYPE) ?: TransactionType.EXPENSE
-            val categoryId = normalizeCategoryId(rawCategory)
-            return Pair(categoryId, type)
+            return Pair(normalizeCategoryId(rawCategory), type)
         }
 
         /**
          * 响应式流触发小部件数据刷新。
-         * 通常在 ViewModel 收集（Collector）数据库 Flow 更新时被调用，
-         * 它会遍历当前屏幕上的所有小部件实例并强制更新。
          */
         fun updateFromTransactions(
             context: Context,
@@ -226,19 +197,16 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         ) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, ListenExpenseAppWidgetProvider::class.java)
-            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
-
-            for (appWidgetId in appWidgetIds) {
-                updateSingleWidget(context, appWidgetManager, appWidgetId, allList, currencySymbol, monthlyBudget, lang)
+            for (id in appWidgetManager.getAppWidgetIds(componentName)) {
+                updateSingleWidget(context, appWidgetManager, id, allList, currencySymbol, monthlyBudget, lang)
             }
         }
 
         /**
          * 纯计算逻辑：过滤指定月份已发生支出
          */
-        fun calculateMonthlyExpense(allList: List<TransactionEntity>, startTs: Long, endTs: Long): Double {
-            return allList.filter { it.type == TransactionType.EXPENSE && it.timestamp in startTs..endTs }.sumOf { it.amount }
-        }
+        fun calculateMonthlyExpense(allList: List<TransactionEntity>, startTs: Long, endTs: Long): Double =
+            allList.filter { it.type == TransactionType.EXPENSE && it.timestamp in startTs..endTs }.sumOf { it.amount }
 
         /**
          * 纯计算逻辑：根据月度支出与总预算判定健康状况
@@ -253,80 +221,24 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        internal fun createOpenAppPendingIntent(context: Context): PendingIntent {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                action = Intent.ACTION_MAIN
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            return PendingIntent.getActivity(context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        }
+        // 统一委托至 WidgetIntentFactory 构建标准 PendingIntent (Rule 21 单文件行数约束)
+        internal fun createOpenAppPendingIntent(context: Context): PendingIntent =
+            WidgetIntentFactory.createOpenAppPendingIntent(context)
 
-        // PendingIntent RequestCode 策略 (widgetId * 10 + N):
-        // 由于 Android 系统会重用相同 Intent 的 PendingIntent，
-        // 必须为每个小部件实例生成唯一的 requestCode，避免不同小部件间的事件被错误合并覆盖。
-        fun createPrevMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
-            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
-                action = ACTION_PREV_MONTH
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            }
-            return PendingIntent.getBroadcast(
-                context,
-                widgetId * 10 + 1,
-                intent,
-                // FLAG_IMMUTABLE: Android 12+ (API 31+) 强制安全要求，防止外部应用篡改 Intent 意图
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        fun createPrevMonthPendingIntent(context: Context, widgetId: Int): PendingIntent =
+            WidgetIntentFactory.createPrevMonthPendingIntent(context, widgetId)
 
-        fun createNextMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
-            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
-                action = ACTION_NEXT_MONTH
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            }
-            return PendingIntent.getBroadcast(
-                context,
-                widgetId * 10 + 2,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        fun createNextMonthPendingIntent(context: Context, widgetId: Int): PendingIntent =
+            WidgetIntentFactory.createNextMonthPendingIntent(context, widgetId)
 
-        fun createToggleEyePendingIntent(context: Context, widgetId: Int): PendingIntent {
-            val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
-                action = ACTION_TOGGLE_HIDE_AMOUNT
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            }
-            return PendingIntent.getBroadcast(
-                context,
-                widgetId * 10 + 3,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        fun createToggleEyePendingIntent(context: Context, widgetId: Int): PendingIntent =
+            WidgetIntentFactory.createToggleEyePendingIntent(context, widgetId)
 
         fun createQuickAddPendingIntent(
             context: Context,
             categoryId: String?,
             requestCode: Int,
             type: String = TransactionType.EXPENSE
-        ): PendingIntent {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                action = Intent.ACTION_VIEW
-                // 双重写入设计 (Belt-and-suspenders):
-                // 同时将分类信息写入 URI Data 和 Intent Extras。
-                // 这极大提高了与不同 Android 启动器的兼容性，防止某些启动器在解析时丢弃 Extras 或截断 URI。
-                data = if (categoryId != null) {
-                    "$URI_SCHEME://$URI_HOST_QUICK_ADD?$PARAM_CATEGORY=$categoryId&$PARAM_TYPE=$type".toUri()
-                } else {
-                    "$URI_SCHEME://$URI_HOST_QUICK_ADD?$PARAM_TYPE=$type".toUri()
-                }
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                if (categoryId != null) {
-                    putExtra(EXTRA_QUICK_ADD_CATEGORY, categoryId)
-                }
-                putExtra(EXTRA_QUICK_ADD_TYPE, type)
-            }
-            return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        }
+        ): PendingIntent = WidgetIntentFactory.createQuickAddPendingIntent(context, categoryId, requestCode, type)
     }
 }
