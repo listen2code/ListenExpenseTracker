@@ -16,8 +16,7 @@ fun SettingsDialogHostPreview() {
     val state = SettingsUiState()
     ListenTheme {
         SettingsDialogHost(
-            state = state,
-            onIntent = {}
+            state = state
         )
     }
 }

@@ -18,8 +18,7 @@ fun AnnualStatisticsContentListPreview() {
     ListenTheme {
         AnnualStatisticsContentList(
             state = state,
-            yearOffset = 0,
-            onIntent = {}
+            yearOffset = 0
         )
     }
 }

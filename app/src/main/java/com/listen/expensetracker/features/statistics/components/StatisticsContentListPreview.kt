@@ -17,8 +17,7 @@ fun StatisticsContentListPreview() {
     ListenTheme {
         StatisticsContentList(
             state = state,
-            monthOffset = 0,
-            onIntent = {}
+            monthOffset = 0
         )
     }
 }

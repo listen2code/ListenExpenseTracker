@@ -25,8 +25,7 @@ fun SettingsDataCenterSectionPreview() {
             onTriggerBackup = {},
             onTriggerRestore = {},
             onExportJson = {},
-            onImportJson = {},
-            lang = "zh"
+            onImportJson = {}
         )
     }
 }
