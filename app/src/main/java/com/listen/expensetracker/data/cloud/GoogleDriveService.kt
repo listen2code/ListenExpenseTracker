@@ -24,9 +24,10 @@ import java.net.URLEncoder
  *
  * 核心设计优势：
  * 1. 零 SDK 依赖：彻底摒弃体积达数兆的 Google API Client，基于原生 HttpURLConnection 极速交互；
- * 2. 自愈鉴权守卫：拦截 UserRecoverableAuthException 并自动拉起系统授权面板，实现故障自愈；
- * 3. 增量覆盖与多部分上传：首次创建走 multipart/related，后续同步走媒体流式 PATCH，极致节省流量；
- * 4. 全链路 APM 追踪：在 SYNC 频道记录每次云端读写的 Trace ID、文件 ID 与耗时。
+ * 2. 精简授权核心：仅依赖轻量级 play-services-auth-base (移除已废弃的完整 play-services-auth)；
+ * 3. 提权自愈：拦截 UserRecoverableAuthException 并自动拉起系统授权面板，实现故障自愈；
+ * 4. 增量覆盖与多部分上传：首次创建走 multipart/related，后续同步走媒体流式 PATCH，极致节省流量；
+ * 5. 全链路 APM 追踪：在 SYNC 频道记录每次云端读写的 Trace ID、文件 ID 与耗时。
  */
 object GoogleDriveService {
 

@@ -2,6 +2,7 @@ package com.listen.expensetracker.features.transactions.components
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.uicomponent.components.CommonFilterChip
 import com.listen.uicomponent.theme.ListenTheme
 
 import android.graphics.Color as AndroidColor
@@ -56,55 +57,15 @@ fun ActiveFilterChipItem(
     icon: ImageVector? = null,
     iconTint: Color? = null
 ) {
-    val containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-    val borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val closeIconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = containerColor,
-        border = BorderStroke(1.dp, borderColor),
+    // [ListenUiComponent] 统一采用 CommonFilterChip 可移除胶囊标签组件 (Rule 25)
+    CommonFilterChip(
+        label = label,
+        removable = true,
+        onRemove = onRemove,
+        icon = icon,
+        iconTint = iconTint,
         modifier = modifier
-            .height(28.dp)
-            .clip(RoundedCornerShape(8.dp))
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(start = 8.dp, end = 4.dp)
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconTint ?: MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(13.dp)
-                )
-            }
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor
-            )
-            Box(
-                modifier = Modifier
-                    .size(18.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                    .clickable(onClick = onRemove),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Remove",
-                    tint = closeIconTint,
-                    modifier = Modifier.size(11.dp)
-                )
-            }
-        }
-    }
+    )
 }
 
 /**

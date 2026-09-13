@@ -42,6 +42,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonColorPicker
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonSegmentedControl
@@ -205,28 +206,14 @@ private fun AddCustomCategoryDialog(
                 singleLine = true
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                colorHexOptions.forEach { hex ->
-                    val col = parseHexColor(hex)
-                    val isSelected = selectedColor == hex
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(col)
-                            .clickable { selectedColor = hex },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isSelected) {
-                            Icon(Icons.Default.Check, contentDescription = "Selected", tint = Color.White, modifier = Modifier.size(AppDimens.IconSizeMedium))
-                        }
-                    }
-                }
-            }
+            // [ListenUiComponent] 使用共通 CommonColorPicker 规范调色板 (Rule 25)
+            CommonColorPicker(
+                colors = colorHexOptions,
+                selectedColor = selectedColor,
+                onColorSelected = { selectedColor = it },
+                circleSize = 28.dp,
+                checkIconSize = AppDimens.IconSizeMedium
+            )
         }
     }
 }

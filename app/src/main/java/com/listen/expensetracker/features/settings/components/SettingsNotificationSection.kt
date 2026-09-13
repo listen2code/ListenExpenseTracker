@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,8 +20,11 @@ import com.listen.arch.i18n.tr
 import com.listen.expensetracker.core.notification.NotificationPermissionHelper
 import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonBanner
+import com.listen.uicomponent.components.CommonBannerType
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonDivider
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 
@@ -102,39 +104,14 @@ fun SettingsNotificationSection(
                 )
             }
 
-            // 系统未授权警告横幅
-            if (!hasSystemPermission) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(AppDimens.CornerCard)
-                        )
-                        .padding(horizontal = AppDimens.SpaceMedium, vertical = AppDimens.SpaceSmall)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = NotificationStrings.SETTINGS_PERMISSION_DENIED_BANNER.tr(lang),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.weight(1f)
-                    )
-                    CommonButton(
-                        text = NotificationStrings.SETTINGS_PERMISSION_GRANT_BTN.tr(lang),
-                        onClick = { NotificationPermissionHelper.openNotificationSettings(context) },
-                        style = CommonButtonStyle.Primary,
-                        modifier = Modifier.padding(start = AppDimens.SpaceSmall)
-                    )
-                }
-            }
+            // [ListenUiComponent] 系统未授权警告横幅采用 CommonBanner 规范呈现 (Rule 25)
+            CommonBanner(
+                message = NotificationStrings.SETTINGS_PERMISSION_DENIED_BANNER.tr(lang),
+                type = CommonBannerType.Warning,
+                visible = !hasSystemPermission,
+                actionText = NotificationStrings.SETTINGS_PERMISSION_GRANT_BTN.tr(lang),
+                onActionClick = { NotificationPermissionHelper.openNotificationSettings(context) }
+            )
 
             // 2. 细分通知项列表（开启总开关后展开，仅 3 个清晰开关）
             AnimatedVisibility(
@@ -143,10 +120,7 @@ fun SettingsNotificationSection(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
+                    CommonDivider(modifier = Modifier.padding(vertical = 2.dp))
 
                     // 1. 预算预警与超支提醒（合并为单开关：80% 警戒与 100% 超支）
                     CommonSwitchRow(
@@ -179,3 +153,23 @@ fun SettingsNotificationSection(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+fun SettingsNotificationSectionPreview() {
+    com.listen.expensetracker.data.i18n.ExpenseStrings.init()
+    com.listen.uicomponent.theme.ListenTheme {
+        SettingsNotificationSection(
+            notificationsEnabled = true,
+            budgetAlertsEnabled = true,
+            recurringBillsAlertsEnabled = false,
+            appUpdatesAlertsEnabled = true,
+            onToggleNotifications = {},
+            onToggleBudgetAlerts = {},
+            onToggleRecurringBillsAlerts = {},
+            onToggleAppUpdatesAlerts = {},
+            lang = "zh"
+        )
+    }
+}
+

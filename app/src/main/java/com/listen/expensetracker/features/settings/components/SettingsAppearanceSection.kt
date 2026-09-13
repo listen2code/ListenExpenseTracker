@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.dp
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonColorPicker
 import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
-import com.listen.uicomponent.theme.parseHexColor
 
 /**
  * Settings Card for Theme Mode, Accent Color, and Language customization.
@@ -122,41 +122,18 @@ fun SettingsAppearanceSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = AppDimens.SpaceExtraSmall),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AccentColor.entries.forEach { accent ->
-                        val isSelected = accentColor == accent
-                        val color = parseHexColor(accent.colorHex)
-
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                                .border(
-                                    width = if (isSelected) 3.dp else 0.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                                .clickable { onChangeAccentColor(accent) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(AppDimens.IconSizeMedium)
-                                )
-                            }
+                // [ListenUiComponent] 使用共通 CommonColorPicker 统一色环调色板组件 (Rule 25)
+                CommonColorPicker(
+                    colors = AccentColor.entries.map { it.colorHex },
+                    selectedColor = accentColor.colorHex,
+                    onColorSelected = { hex ->
+                        AccentColor.entries.find { it.colorHex.equals(hex, ignoreCase = true) }?.let {
+                            onChangeAccentColor(it)
                         }
-                    }
-                }
+                    },
+                    circleSize = 36.dp,
+                    checkIconSize = AppDimens.IconSizeMedium
+                )
             }
 
             // Language Selector

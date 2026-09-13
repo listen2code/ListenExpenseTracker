@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +45,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
+import com.listen.uicomponent.components.CommonDivider
 import com.listen.uicomponent.theme.ListenTheme
 
 /**
@@ -185,7 +185,7 @@ private fun AboutSpecsCard(lang: String) {
     ) {
         items.forEachIndexed { index, (icon, label, value) ->
             if (index > 0) {
-                HorizontalDivider(
+                CommonDivider(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                     modifier = Modifier.padding(vertical = 2.dp)
                 )

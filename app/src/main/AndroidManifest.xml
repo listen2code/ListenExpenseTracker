@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- 基础网络权限：用于 Google Drive 同步和 Google 登录 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- 通知权限：Android 13+ 必须显式申请，用于预算超额提醒 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 生物识别权限：用于指纹/面部识别登录，确保隐私安全 -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:name=".ListenExpenseApplication"
@@ -15,15 +21,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ListenExpenseTracker">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.ListenExpenseTracker.Splash">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- 深度链接配置：快速记账 (lexpense://quick_add) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -31,32 +41,64 @@
                 <data
                     android:scheme="lexpense"
                     android:host="quick_add" />
+            </intent-filter>
+
+            <!-- 深度链接配置：预算中心 (lexpense://budget_center) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="lexpense"
                     android:host="budget_center" />
+            </intent-filter>
+
+            <!-- 深度链接配置：账单流水 (lexpense://transactions) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="lexpense"
                     android:host="transactions" />
+            </intent-filter>
+
+            <!-- 深度链接配置：检查更新 (lexpense://update) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="lexpense"
                     android:host="update" />
             </intent-filter>
         </activity>
 
+        <!-- 桌面小组件接收器 (AppWidget Provider) -->
         <receiver
             android:name=".widget.ListenExpenseAppWidgetProvider"
             android:exported="true">
             <intent-filter>
+                <!-- 标准系统广播：当小组件需要更新（如到达定时更新时间或刚添加到桌面）时触发 -->
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+
+                <!-- 自定义广播：小组件上的“上一个月”点击事件，用于切换账单统计时间 -->
                 <action android:name="com.listen.expensetracker.widget.ACTION_PREV_MONTH" />
+
+                <!-- 自定义广播：小组件上的“下一个月”点击事件 -->
                 <action android:name="com.listen.expensetracker.widget.ACTION_NEXT_MONTH" />
+
+                <!-- 自定义广播：切换金额的可见性（明文/密文），保护隐私 -->
                 <action android:name="com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT" />
             </intent-filter>
+
+            <!-- 关联小组件的元数据配置（如初始布局、最小宽高、更新频率等） -->
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/listen_expense_widget_info" />
         </receiver>
 
+        <!-- 文件共享提供者：用于安全地导出账本数据或分享生成的统计图片 -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

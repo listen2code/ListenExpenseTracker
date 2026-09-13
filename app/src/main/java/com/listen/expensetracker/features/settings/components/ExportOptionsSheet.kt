@@ -11,12 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import com.listen.uicomponent.components.CommonFilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import com.listen.uicomponent.components.CommonBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,25 +101,19 @@ fun ExportOptionsSheet(
         val dateSuffix = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         "ListenExpense_${selectedRange.name.lowercase()}_$dateSuffix.csv"
     }
-    ModalBottomSheet(
+    // [ListenUiComponent] 使用共通 CommonBottomSheet 统一抽屉圆角、避让与标题呈现 (Rule 25)
+    CommonBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        title = AppStrings.EXPORT_EXCEL_TITLE.tr(lang),
         modifier = modifier
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AppDimens.SpaceLarge)
                 .padding(bottom = AppDimens.SpaceSection),
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
-            // 标题
-            Text(
-                text = AppStrings.EXPORT_EXCEL_TITLE.tr(lang),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
 
             // 1. 时间范围筛选
             Text(
@@ -131,20 +125,20 @@ fun ExportOptionsSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedRange == ExportDateRange.ALL,
                     onClick = { selectedRange = ExportDateRange.ALL },
-                    label = { Text(AppStrings.EXPORT_RANGE_ALL.tr(lang)) }
+                    label = AppStrings.EXPORT_RANGE_ALL.tr(lang)
                 )
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedRange == ExportDateRange.THIS_MONTH,
                     onClick = { selectedRange = ExportDateRange.THIS_MONTH },
-                    label = { Text(AppStrings.EXPORT_RANGE_MONTH.tr(lang)) }
+                    label = AppStrings.EXPORT_RANGE_MONTH.tr(lang)
                 )
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedRange == ExportDateRange.THIS_YEAR,
                     onClick = { selectedRange = ExportDateRange.THIS_YEAR },
-                    label = { Text(AppStrings.EXPORT_RANGE_YEAR.tr(lang)) }
+                    label = AppStrings.EXPORT_RANGE_YEAR.tr(lang)
                 )
             }
 
@@ -158,20 +152,20 @@ fun ExportOptionsSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedType == "ALL",
                     onClick = { selectedType = "ALL" },
-                    label = { Text(AppStrings.FILTER_TYPE_ALL.tr(lang)) }
+                    label = AppStrings.FILTER_TYPE_ALL.tr(lang)
                 )
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedType == "EXPENSE",
                     onClick = { selectedType = "EXPENSE" },
-                    label = { Text(AppStrings.TYPE_EXPENSE.tr(lang)) }
+                    label = AppStrings.TYPE_EXPENSE.tr(lang)
                 )
-                FilterChip(
+                CommonFilterChip(
                     selected = selectedType == "INCOME",
                     onClick = { selectedType = "INCOME" },
-                    label = { Text(AppStrings.TYPE_INCOME.tr(lang)) }
+                    label = AppStrings.TYPE_INCOME.tr(lang)
                 )
             }
 

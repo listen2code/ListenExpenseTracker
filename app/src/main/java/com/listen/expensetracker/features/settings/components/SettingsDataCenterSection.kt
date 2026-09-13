@@ -15,8 +15,8 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import com.listen.uicomponent.components.CommonDivider
 import androidx.compose.material3.MaterialTheme
 import com.listen.uicomponent.components.CommonSwitchRow
 import androidx.compose.material3.Text
@@ -177,10 +177,7 @@ fun SettingsDataCenterSection(
             }
 
             // Subtle Divider separating Cloud and Local File operations
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
+            CommonDivider(modifier = Modifier.padding(vertical = 2.dp))
 
             // Part B: Local File-based Data Export & Import
             CommonButton(

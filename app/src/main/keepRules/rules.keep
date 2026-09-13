@@ -1,12 +1,24 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
-#
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# ListenExpenseTracker 项目专用 R8/ProGuard 保留规则
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+# 1. 核心数据模型与数据库实体 (Data Models & Room Entities)
+# 作用：防止 Room 数据库映射失败，以及 Google Drive 同步时 JSON 序列化/反序列化崩溃。
+# 场景：这些类被 Room 框架和 Google API 频繁反射调用。
+-keep class com.listen.expensetracker.data.model.** { *; }
+-keep class com.listen.expensetracker.data.db.** { *; }
+
+# 2. 云端同步与 Google 服务 (Google Drive Sync)
+# 作用：确保 Google 登录回调、驱动 API 调用逻辑在混淆后依然能正确识别身份。
+-keep class com.listen.expensetracker.data.cloud.** { *; }
+
+# 3. 桌面小组件 (AppWidget Provider)
+# 作用：系统需要根据 AndroidManifest 中的全路径反射创建小组件，必须禁止改名。
+-keep class com.listen.expensetracker.widget.** { *; }
+
+# 4. 应用全局入口
+# 作用：确保自定义 Application 及其中的初始化逻辑（如性能监控、异常捕获）不被删除。
+-keep class com.listen.expensetracker.ListenExpenseApplication { *; }
+
+# 如果你的项目以后使用了 WebView 且需要 JS 调用 Java，请在此处补充规则：
+#-keepclassmembers class com.listen.expensetracker.webapp.JSInterface {
 #   public *;
 #}

@@ -300,3 +300,22 @@
 - **全量单测触发时机**：
   1. 涉及底层核心基础设施（`ListenArch` 底座架构、Room 数据库迁移、跨模块核心拦截器等）的破坏性改造；
   2. 准备发版打包、或用户明确要求“跑一下全量测试 / 完整回归”。
+
+---
+
+## 25. 优先使用与沉淀通用 UI 组件规范 (Prioritize & Extract Common UI Components to ListenUiComponent Rule)
+
+- **优先复用原则 (ListenUiComponent First)**：
+  - 在编写或重构任何业务界面与功能卡片时，**必须优先检索并使用通用组件库 `:ListenUiComponent` 中已有的组件**，严禁在业务模块中重复手写具有通用交互或视觉特征的基础控件；
+  - 核心通用组件对照索引：
+    - **弹窗与抽屉**：优先使用 `CommonDialog`、`CommonBottomSheet`（替代裸写 `AlertDialog`、`ModalBottomSheet`）；
+    - **提示与空态**：全局统一使用 `CommonBanner`（各类 Informative/Warning/Success/Error 提示条）、`CommonEmpty`（空数据缺省页/缺省占位）；
+    - **基础控件**：优先使用 `CommonButton`（主副操作按钮）、`CommonSwitchRow`（开关设置行）、`CommonDivider`（统一内边距与透明度的分割线）、`CommonBadge`（徽标与状态标签）、`CommonText`、`SurfaceCard` 等；
+    - **特色输入与图表**：优先使用 `SearchBarInput`（带防抖与清空搜索栏）、`NumericKeypad`（金额与数字软键盘）、折线图/柱状图/饼图等图表组件。
+- **积极下沉与沉淀原则 (Extraction & Generalization)**：
+  - **识别标准**：任何业务 UI 中实现的、不包含特定业务实体（如 Transaction、Account、Budget 等）且不绑定宿主独占文言/逻辑的纯 UI 交互控件（例如步进器 `CommonStepper`、筛选胶囊 `CommonFilterChip`、颜色选择器 `ColorPicker`、轮播卡片容器等），**应积极提取并沉淀到 `:ListenUiComponent` 模块**；
+  - **沉淀设计要求**：
+    1. 保持无状态（Stateless）或状态提升（State Hoisting），对外暴露标准参数与回调；
+    2. 支持 Compose Preview，遵循设计规范与主题适配；
+    3. 杜绝反向依赖宿主业务模块，确保作为通用库的独立可复用性。
+

@@ -46,3 +46,32 @@
 
 # 7. Android 桌面小组件 (AppWidget)
 -keep class com.listen.expensetracker.widget.** { *; }
+
+# 8. Coil 图片加载库
+# 保证图片异步加载和转换逻辑不被混淆
+-keep class coil.** { *; }
+-dontwarn coil.**
+
+# 9. AboutLibraries (开源许可声明库)
+# 必须保留元数据，否则应用内的开源许可页面将无法显示内容
+-keep class com.mikepenz.aboutlibraries.** { *; }
+
+# 10. Jetpack Lifecycle & ViewModel
+# 显式保留 ViewModel 的构造函数，防止 Compose 或 Hilt 反射创建实例时失败
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    public <init>(...);
+}
+
+# 11. Kotlin 运行时通用安全规则
+# 处理 Kotlin 反射、默认构造函数标记等
+-keep class kotlin.reflect.jvm.internal.** { *; }
+-keep class kotlin.Metadata { *; }
+-keep class kotlin.jvm.internal.DefaultConstructorMarker { *; }
+-dontwarn kotlin.**
+
+# 12. 常见序列化库通用保护 (针对 Google Drive 同步可能的 JSON 转换)
+# 如果你使用了 kotlinx.serialization 或 Gson，保留相关的注解和标记
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}

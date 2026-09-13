@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,6 +39,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
+import com.listen.uicomponent.components.CommonEmpty
 import com.listen.uicomponent.components.CommonText
 
 /**
@@ -142,31 +142,12 @@ fun AccountManageDialog(
 
             if (customAccounts.isEmpty()) {
                 item(key = "custom_empty") {
-                    Surface(
-                        shape = RoundedCornerShape(AppDimens.CornerCard),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(AppDimens.SpaceMedium),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                            CommonText(
-                                text = AppStrings.CUSTOM_ACCOUNTS_EMPTY.tr(lang),
-                                fontSize = AppDimens.TextSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
+                    // [ListenUiComponent] 使用 CommonEmpty 统一空数据缺省页规范 (Rule 25)
+                    CommonEmpty(
+                        message = AppStrings.CUSTOM_ACCOUNTS_EMPTY.tr(lang),
+                        icon = Icons.Default.Info,
+                        height = 80.dp
+                    )
                 }
             } else {
                 items(customAccounts, key = { it.key }) { acct ->

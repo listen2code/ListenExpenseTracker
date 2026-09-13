@@ -12,19 +12,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.listen.arch.apm.CrashHandler
 import com.listen.expensetracker.core.effect.CollectCommonUiEffects
 import com.listen.expensetracker.core.overlay.AppOverlayHost
 import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.BiometricLockOverlay
 import com.listen.expensetracker.core.security.BiometricSecurityManager
 import com.listen.expensetracker.core.security.SecurityPreferences
-import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
-import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsDialog
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
@@ -50,9 +47,7 @@ class MainActivity : FragmentActivity() {
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        ExpenseStrings.init()
-        CrashHandler.init(this)
-        LocalNotificationManager.createNotificationChannels(this)
+        // [Lifecycle] 全局国际化字典、CrashHandler 及通知渠道已统一在 ListenExpenseApplication 初始化，此处无需重复初始化
         securityCoordinator.checkInitialLock(this)
         pendingQuickAddIntent.value = intent
 
