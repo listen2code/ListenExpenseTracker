@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
     id("jacoco")
+    alias(libs.plugins.aboutlibraries)
 }
 
 val keystoreProperties = Properties()
@@ -27,7 +28,7 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        val vName = "0.0.39"
+        val vName = "0.0.40"
         versionName = vName
 
         // Auto-generate versionCode: major.minor.patch -> major * 10000 + minor * 100 + patch (e.g., 0.0.1 -> 1, 1.2.3 -> 10203)
@@ -116,6 +117,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 

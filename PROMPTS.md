@@ -216,17 +216,25 @@
 
 ---
 
-## 20. 金额展示禁止省略号截断与自适应缩放规范 (Amount Display Auto-Resize Standard)
+## 20. 金额展示布局防变形、严禁缩略与自适应缩小规范 (Amount Layout Anti-Deformation & Zero-Truncation Standard)
 
-- **严禁对任何财务金额文本使用省略号截断（`TextOverflow.Ellipsis` / `android:ellipsize="end"`）**：
-  - 金额是记账类 App 的核心生命线，省略号截断（如 `￥12...` 或 `￥99...`）会造成极严重的误导与信息丢失；
-- **自适应缩放替代截断**：
-  1. **Compose UI 视图**：
-     - 所有金额展示优先使用通用组件 `CommonText`，配置 `maxLines = 1` 并显式开启 `autoResize = true`；
-     - 必须配合设置合适的 `minFontSize`（例如主金额 `minFontSize = 14.sp`、副金额 `minFontSize = 10.sp`），确保在极端大金额或窄屏设备上字体平滑等比缩小，完整展示每一位数字与小数；
-  2. **桌面小部件 / RemoteViews XML**：
-     - 严禁在金额 `TextView` 上声明 `android:ellipsize="end"`；
-     - 必须配置原生自适应字号属性 `android:autoSizeTextType="uniform"` / `app:autoSizeTextType="uniform"`，配合 `autoSizeMinTextSize` 与 `autoSizeMaxTextSize`，确保 RemoteViews 在不同启动器分辨率下完整呈现无缺漏。
+- **布局设计双向极端值考量 (Small & Large Amount Extremes)**：
+  - 在设计任何展示金额的组件布局（如账户余额、分类结余、预算进度、账单条目等）时，**必须同时全面考虑金额数值极小（如 `￥0`、`￥0.01`）与极大（如千万/亿级 `￥99,999,999.00`）两种边界场景**；
+  - **严禁布局变形与异常换行**：必须确保在数值极大或极小时，组件布局**绝对不会变形、挤压错位，也严禁发生非预期的断词折行（Unintended Line Wrapping）**；
+- **严禁截断与缩略 (Strictly Zero Truncation & No Ellipsis)**：
+  - 金额是记账类 App 的核心生命线，**绝对不允许使用省略号截断（`TextOverflow.Ellipsis` / `android:ellipsize="end"`）**，也**严禁任何形式的字符缩略（如 `￥12...` 或 `￥99...`）**，杜绝误导用户或引发财务信息遗漏；
+- **自适应字号缩小机制 (Mandatory Auto-Resize Font Scaling)**：
+  - **如果空间实在展示不下，必须通过自适应字体缩小（Auto-Resize）来完整呈现**，保持单行展示并将字号从标准字阶平滑缩小至设定的下限字阶：
+    1. **Compose UI 视图**：
+       - 所有金额展示统一使用通用组件 `CommonText`，配置 `maxLines = 1` 并显式开启 `autoResize = true`；
+       - 必须配合合理配置 `minFontSize`（例如主卡片大金额 `targetFontSize = 24.sp, minFontSize = 14.sp`；列表副金额 `targetFontSize = 14.sp, minFontSize = 9.sp`），确保在极端大金额或极窄屏设备上等比缩小，完整展示每一位数字、小数与货币符号；
+    2. **水平 Row 排版防挤压规范**：
+       - 在“标题/分类 + 金额”、“图标 + 金额”等水平排布中，需明确伸缩优先级（如标题使用 `Modifier.weight(1f, fill = false)`，金额配置单行自适应缩放），防止金额膨胀时将同行其他元素挤出屏幕边界；
+    3. **桌面小部件 / RemoteViews XML**：
+       - 严禁在金额 `TextView` 上声明 `android:ellipsize="end"`；
+       - 必须配置原生自适应字号属性 `android:autoSizeTextType="uniform"` / `app:autoSizeTextType="uniform"`，配合 `autoSizeMinTextSize` 与 `autoSizeMaxTextSize`，确保 RemoteViews 在各类启动器与桌面分辨率下完整呈现无缺漏；
+- **Preview 边界值验证要求**：
+  - 编写 `@Preview` 预览时，应有意识地 Mock 极端大金额（如 `￥88,888,888.88`）或包含多语言长前缀的金额状态，验证布局抗压能力。
 
 ---
 
@@ -264,17 +272,19 @@
 
 ---
 
-## 23. 组件目录 @Composable 预览全覆盖规范 (Component Directory @Preview Standard)
+## 23. 全面 @Composable 组件 @Preview 预览强制覆盖规范 (Mandatory @Composable @Preview Rule)
 
-- **核心原则**：全工程中所有位于 `components/` 目录下的可独立呈现的 `@Composable` 组件，**必须提供配套的 `@Preview` 预览支持**，以便在 Android Studio / IDE 中进行可视化走查与独立交互验证；
-- **分层与行数控制原则**：
-  1. **轻量组件（文件 $\le 195$ 行）**：直接在组件文件末尾追加简洁的 `@Preview` 函数；
-  2. **复杂/高行数组件（文件接近或超过 200 行）**：**严禁强行将 Preview 塞入原文件导致行数突破 250 行红线**，必须在同级 `components/` 目录下建立独立的 `[ComponentName]Preview.kt` 专用预览文件（如 `TransactionSheetPreview.kt`、`SettingsDataCenterSectionPreview.kt`）；
+- **核心强制原则 (Mandatory Rule)**：
+  - **凡是新增或封装的任何 `@Composable` UI 组件**（包括但不限于通用基础组件、功能卡片、列表项、弹窗 Dialog / 抽屉 Sheet、设置区块 Section 以及 Screen 界面），**必须强制为其添加配套的 `@Preview` 预览支持**；
+  - 杜绝“盲写 UI”，确保每个新添或修改的组件在 Android Studio / IDE Compose 预览面板中免运行直接可视化走查、校验边距排版与交互态。
+- **分层与单文件行数红线控制（$\le 250$ 行）**：
+  1. **同文件内预览（文件行数 $\le 195$ 行）**：直接在组件文件末尾编写简洁配套的 `@Preview` 函数；
+  2. **独立预览文件（文件行数接近或超过 200 行）**：**严禁为塞入 Preview 而突破 250 行代码红线**，必须在同级目录下创建专用的 `[ComponentName]Preview.kt` 文件承接预览（如 `TransactionSheetPreview.kt`、`SettingsScreenPreview.kt`、`SettingsDataCenterSectionPreview.kt`）。
 - **Preview 编写基准要求**：
-  1. 必须使用 `@Preview(showBackground = true)` 注解，确保预览背景及边距清晰可见；
-  2. 必须统一包裹在 `ListenTheme` 主题容器中，确保主题色、字体排版、暗黑/明亮色阶生效；
-  3. 宿主 App 组件预览首行必须执行 `ExpenseStrings.init()`，确保多语言资源正常解析，杜绝预览渲染报错；
-  4. 优先覆盖有数据态（正常业务数据）与特殊状态（如空状态、告警态、编辑态等），提供具有一线参考价值的真实 Mock 参数。
+  1. 必须添加 `@Preview(showBackground = true)` 注解，确保预览背景及内外部边距清晰可见；
+  2. 必须统一包裹在 `ListenTheme` 主题容器中，确保主题色、文字样式、暗黑/明亮色阶正常应用；
+  3. 宿主 App 组件预览首行必须执行 `ExpenseStrings.init()`，确保多语言资源正常解析，杜绝预览渲染报空指针崩溃；
+  4. 优先覆盖有真实数据态（代表性 Mock 数据）与典型边缘状态（如空数据态、超长文本态、告警态、编辑态等）。
 
 ---
 

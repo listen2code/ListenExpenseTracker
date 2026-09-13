@@ -179,6 +179,8 @@ object AppStrings {
     const val APP_CORE_SDK_LABEL = "app_core_sdk_label"
     const val APP_FEATURES_LABEL = "app_features_label"
     const val APP_FEATURES_DESC = "app_features_desc"
+    const val OPEN_SOURCE_LICENSES = "open_source_licenses"
+    const val VIEW_LICENSES_BTN = "view_licenses_btn"
 
     // Dialogs & Prompts
     const val MANAGE_ACCOUNTS_TITLE = "manage_accounts_title"

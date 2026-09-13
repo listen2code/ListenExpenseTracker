@@ -54,6 +54,7 @@ import com.listen.uicomponent.theme.ListenTheme
 @Composable
 fun AboutAppDialog(
     onDismiss: () -> Unit,
+    onOpenLicenses: () -> Unit = {},
     lang: String = "zh"
 ) {
     val context = LocalContext.current
@@ -100,8 +101,13 @@ fun AboutAppDialog(
                 versionName = versionName,
                 versionCode = versionCode
             )
-
             AboutSpecsCard(lang = lang)
+            CommonButton(
+                text = AppStrings.VIEW_LICENSES_BTN.tr(lang),
+                onClick = onOpenLicenses,
+                style = CommonButtonStyle.Outlined,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

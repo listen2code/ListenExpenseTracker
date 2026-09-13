@@ -26,6 +26,7 @@ sealed interface SettingsDialog {
     data object ClearConfirm : SettingsDialog
     data object LogoutConfirm : SettingsDialog
     data object AboutApp : SettingsDialog
+    data object OpenSourceLicenses : SettingsDialog
     data class UpdateAvailable(val releaseInfo: ReleaseInfo) : SettingsDialog
     data object ExportExcelOptions : SettingsDialog
     data object SimulateNotifications : SettingsDialog

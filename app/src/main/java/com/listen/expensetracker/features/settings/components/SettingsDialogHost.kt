@@ -145,6 +145,13 @@ fun SettingsDialogHost(
         is SettingsDialog.AboutApp -> {
             AboutAppDialog(
                 onDismiss = { onIntent(SettingsIntent.DismissDialog) },
+                onOpenLicenses = { onIntent(SettingsIntent.OpenDialog(SettingsDialog.OpenSourceLicenses)) },
+                lang = lang
+            )
+        }
+        is SettingsDialog.OpenSourceLicenses -> {
+            OpenSourceLicensesDialog(
+                onDismiss = { onIntent(SettingsIntent.DismissDialog) },
                 lang = lang
             )
         }
