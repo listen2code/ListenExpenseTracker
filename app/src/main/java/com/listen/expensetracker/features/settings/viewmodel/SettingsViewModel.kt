@@ -2,7 +2,6 @@ package com.listen.expensetracker.features.settings.viewmodel
 
 import android.app.Application
 import android.content.Context
-import androidx.core.content.pm.PackageInfoCompat
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +11,7 @@ import com.listen.arch.apm.TraceManager
 import com.listen.arch.i18n.tr
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
+import com.listen.arch.mvi.LifecycleEvent
 import com.listen.arch.sync.CloudSyncManager
 import com.listen.expensetracker.auth.GoogleAuthManager
 import com.listen.expensetracker.core.security.BiometricSecurityManager
@@ -21,8 +21,6 @@ import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
 import com.listen.expensetracker.data.pref.observeExpensePreferences
-import com.listen.expensetracker.data.update.UpdateCheckerService
-import com.listen.expensetracker.data.update.UpdateResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -139,8 +137,26 @@ class SettingsViewModel(
             is SettingsIntent.OpenDialog -> updateState { copy(activeDialog = intent.dialog) }
             is SettingsIntent.DismissDialog -> updateState { copy(activeDialog = null) }
             is SettingsIntent.CheckForUpdates -> notificationDelegate.checkForUpdates(intent.currentVersion, currentState, ::updateState, ::emitEffect)
+            
+            // 【新增加的生命周期 Intent 处理】
+            is SettingsIntent.ScreenAppear -> {
+                // 虽然 BaseViewModel 已经自动打印了生命周期 Log，但你可以在这里打印更具业务意义的内容
+                ApmLogger.d("SettingsVM", "Settings screen is now active. Fetching user preferences...")
+            }
+            is SettingsIntent.ScreenDisappear -> {
+                ApmLogger.d("SettingsVM", "Settings screen is now hidden.")
+            }
             else -> Unit
         }
+    }
+
+    /**
+     * 实现 Intent 映射逻辑：将底层的 LifecycleEvent 转换为业务专用的 SettingsIntent。
+     */
+    override fun toLifecycleIntent(event: LifecycleEvent): SettingsIntent? = when (event) {
+        LifecycleEvent.ON_RESUME -> SettingsIntent.ScreenAppear
+        LifecycleEvent.ON_PAUSE -> SettingsIntent.ScreenDisappear
+        else -> null
     }
 
     private fun observeTransactions() {

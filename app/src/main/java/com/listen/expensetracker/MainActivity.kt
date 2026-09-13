@@ -104,7 +104,10 @@ class MainActivity : FragmentActivity() {
                         )
                     } else {
                         // 渲染主功能导航架构
-                        App(appState = appState)
+                        MainApp(
+                            appState = appState,
+                            lang = settingsState.language
+                        )
 
                         // 全局声明式覆盖物宿主 (处理全屏加载 HUD、检查器等)
                         AppOverlayHost(appState = appState)

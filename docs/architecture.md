@@ -121,20 +121,20 @@ inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I>> CommonRoute(
         // 1. 系统级生命周期监听 (前后台切换 / 多任务防窥恢复)
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_APPEAR)
-                Lifecycle.Event.ON_PAUSE  -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_DISAPPEAR)
+                Lifecycle.Event.ON_RESUME -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_RESUME)
+                Lifecycle.Event.ON_PAUSE  -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE)
                 else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
 
         // 2. Compose 树首次挂载生命周期
-        viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_APPEAR)
+        viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_RESUME)
 
         // 3. Compose 树离开/切换 Tab 卸载生命周期
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_DISAPPEAR)
+            viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE)
         }
     }
 

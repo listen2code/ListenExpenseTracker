@@ -29,6 +29,9 @@ inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I>> CommonRoute(
     viewModel: VM = viewModel(),
     crossinline content: @Composable (state: S, onIntent: (I) -> Unit) -> Unit
 ) {
+    // 获取当前 Composable 作用域内的生命周期持有者 (LifecycleOwner)。
+    // 在 Compose 中，LocalLifecycleOwner 是一个 CompositionLocal，它提供了当前组件所在的 Activity 或 Fragment 的生命周期。
+    // 我们需要它来监听系统的生命周期事件（如 ON_RESUME, ON_PAUSE），以便将这些事件同步给 ViewModel。
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // 全工程唯一定点收口：捕获系统生命周期与页面挂载/卸载并派发为 MVI Intent
@@ -39,19 +42,23 @@ inline fun <S : Any, I : Any, reified VM : BaseViewModel<S, I>> CommonRoute(
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_APPEAR)
-                Lifecycle.Event.ON_PAUSE -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_DISAPPEAR)
+                Lifecycle.Event.ON_CREATE -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_CREATE)
+                Lifecycle.Event.ON_START -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_START)
+                Lifecycle.Event.ON_RESUME -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_RESUME)
+                Lifecycle.Event.ON_PAUSE -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE)
+                Lifecycle.Event.ON_STOP -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_STOP)
+                Lifecycle.Event.ON_DESTROY -> viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_DESTROY)
                 else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         // 覆盖 Compose 组件首次挂载生命周期
-        viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_APPEAR)
+        viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_RESUME)
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             // 覆盖 Compose 组件卸载生命周期
-            viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_DISAPPEAR)
+            viewModel.dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE)
         }
     }
 

@@ -149,8 +149,9 @@ class TransactionsViewModel(
     }
 
     override fun toLifecycleIntent(event: LifecycleEvent): TransactionsIntent? = when (event) {
-        LifecycleEvent.ON_APPEAR -> TransactionsIntent.ScreenAppear
-        LifecycleEvent.ON_DISAPPEAR -> TransactionsIntent.ScreenDisappear
+        LifecycleEvent.ON_RESUME -> TransactionsIntent.ScreenAppear
+        LifecycleEvent.ON_PAUSE -> TransactionsIntent.ScreenDisappear
+        else -> null
     }
 
     private fun observeSettings() = observeExpensePreferences(prefManager) { prefs ->

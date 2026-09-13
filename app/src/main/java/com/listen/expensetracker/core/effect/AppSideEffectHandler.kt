@@ -15,6 +15,10 @@ import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.ShakeDetector
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
+import com.listen.expensetracker.core.state.checkForUpdates
+import com.listen.expensetracker.core.state.openBudgetCenter
+import com.listen.expensetracker.core.state.openQuickAdd
+import com.listen.expensetracker.core.state.openRecurringTransactions
 import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppConstants.DeepLink
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent

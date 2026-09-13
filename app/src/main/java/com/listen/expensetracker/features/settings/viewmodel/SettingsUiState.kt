@@ -111,5 +111,9 @@ sealed interface SettingsIntent {
     data class ToggleRecurringBillsAlerts(val enabled: Boolean) : SettingsIntent
     data class ToggleAppUpdatesAlerts(val enabled: Boolean) : SettingsIntent
     data class TogglePureBlackDark(val enabled: Boolean) : SettingsIntent
+
+    // Lifecycle Intents
+    data object ScreenAppear : SettingsIntent
+    data object ScreenDisappear : SettingsIntent
 }
 
