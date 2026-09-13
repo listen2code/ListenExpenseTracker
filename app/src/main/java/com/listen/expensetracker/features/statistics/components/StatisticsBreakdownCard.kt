@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.CalculationResult
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -61,7 +61,7 @@ fun StatisticsBreakdownCard(
 
             if (shares.isEmpty() || totalAmount <= 0.0) {
                 CommonEmpty(
-                    message = if (expenseTab) AppStrings.EMPTY_MONTH_EXPENSE.tr(lang) else AppStrings.EMPTY_MONTH_INCOME.tr(lang),
+                    message = if (expenseTab) AppStrings.EMPTY_MONTH_EXPENSE.tr() else AppStrings.EMPTY_MONTH_INCOME.tr(),
                     modifier = Modifier.padding(vertical = AppDimens.SpaceSection)
                 )
             } else {
@@ -69,7 +69,7 @@ fun StatisticsBreakdownCard(
                     DonutChart(
                         items = shares,
                         totalValue = totalAmount,
-                        centerTitle = if (expenseTab) AppStrings.TOTAL_EXPENSE.tr(lang) else AppStrings.TOTAL_INCOME.tr(lang),
+                        centerTitle = if (expenseTab) AppStrings.TOTAL_EXPENSE.tr() else AppStrings.TOTAL_INCOME.tr(),
                         centerValueText = if (hideAmount) "••••" else "$currencySymbol${totalAmount.formatAmount()}",
                         currencySymbol = currencySymbol,
                         hideAmount = hideAmount,

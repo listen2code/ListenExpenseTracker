@@ -6,7 +6,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.R
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -49,7 +49,7 @@ object WidgetLayoutBinder {
             title
         }
         views.setTextViewText(R.id.widget_month_title, displayMonthTitle)
-        views.setTextViewText(R.id.widget_spent_label, AppStrings.TYPE_EXPENSE.tr(lang))
+        views.setTextViewText(R.id.widget_spent_label, AppStrings.TYPE_EXPENSE.tr())
         views.setTextViewText(R.id.widget_spent_amount, formattedSpent)
 
         // 动态字号计算 (Dynamic font size stepping):
@@ -67,14 +67,14 @@ object WidgetLayoutBinder {
 
         val remainingText = if (budget > 0) {
             if (hideAmount) {
-                if (remaining >= 0) "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} ••••" else "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} ••••"
+                if (remaining >= 0) "${AppStrings.BUDGET_REMAINING_PREFIX.tr()} ••••" else "${AppStrings.BUDGET_OVER_PREFIX.tr()} ••••"
             } else if (remaining >= 0) {
-                "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} $currency${remaining.formatAmount()}"
+                "${AppStrings.BUDGET_REMAINING_PREFIX.tr()} $currency${remaining.formatAmount()}"
             } else {
-                "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} $currency${(-remaining).formatAmount()}"
+                "${AppStrings.BUDGET_OVER_PREFIX.tr()} $currency${(-remaining).formatAmount()}"
             }
         } else {
-            AppStrings.BUDGET_NO_LIMIT.tr(lang)
+            AppStrings.BUDGET_NO_LIMIT.tr()
         }
         views.setTextViewText(R.id.widget_budget_remaining, remainingText)
         val targetRemainingSp = if (remainingText.length > 11) 9.5f else 11f
@@ -87,9 +87,9 @@ object WidgetLayoutBinder {
         // 3. 健康状态徽章与三态彩色进度条显隐联动
         // Triple 解构语法 (Destructuring): 在单行表达式中完成徽章文案、背景 Drawable、文本颜色的全方位映射，代码极为紧凑。
         val (badgeText, badgeBg, badgeColor) = when (health) {
-            BudgetHealthStatus.NORMAL -> Triple(AppStrings.BUDGET_STATUS_NORMAL.tr(lang), R.drawable.widget_badge_normal, R.color.widget_health_normal)
-            BudgetHealthStatus.WARNING -> Triple(AppStrings.BUDGET_STATUS_WARNING.tr(lang), R.drawable.widget_badge_warning, R.color.widget_health_warning)
-            BudgetHealthStatus.OVERBUDGET -> Triple(AppStrings.BUDGET_STATUS_OVER.tr(lang), R.drawable.widget_badge_over, R.color.widget_health_over)
+            BudgetHealthStatus.NORMAL -> Triple(AppStrings.BUDGET_STATUS_NORMAL.tr(), R.drawable.widget_badge_normal, R.color.widget_health_normal)
+            BudgetHealthStatus.WARNING -> Triple(AppStrings.BUDGET_STATUS_WARNING.tr(), R.drawable.widget_badge_warning, R.color.widget_health_warning)
+            BudgetHealthStatus.OVERBUDGET -> Triple(AppStrings.BUDGET_STATUS_OVER.tr(), R.drawable.widget_badge_over, R.color.widget_health_over)
         }
         views.setTextViewText(R.id.widget_health_badge, badgeText)
         views.setInt(R.id.widget_health_badge, "setBackgroundResource", badgeBg)
@@ -111,10 +111,10 @@ object WidgetLayoutBinder {
         views.setProgressBar(activeProgressBarId, 100, progressPercent, false)
 
         // 4. 动态配置 4 大高频快捷分类按钮文案（上下布局，仅需更新文本子控件）
-        views.setTextViewText(R.id.widget_btn_food_text, AppStrings.CAT_FOOD.tr(lang))
-        views.setTextViewText(R.id.widget_btn_transport_text, AppStrings.CAT_TRANSPORT.tr(lang))
-        views.setTextViewText(R.id.widget_btn_shopping_text, AppStrings.CAT_SHOPPING.tr(lang))
-        views.setTextViewText(R.id.widget_btn_daily_text, AppStrings.CAT_OTHER_EXP.tr(lang))
+        views.setTextViewText(R.id.widget_btn_food_text, AppStrings.CAT_FOOD.tr())
+        views.setTextViewText(R.id.widget_btn_transport_text, AppStrings.CAT_TRANSPORT.tr())
+        views.setTextViewText(R.id.widget_btn_shopping_text, AppStrings.CAT_SHOPPING.tr())
+        views.setTextViewText(R.id.widget_btn_daily_text, AppStrings.CAT_OTHER_EXP.tr())
 
         // 5. 意图路由绑定 (月份左右切换、眼睛显隐切换、打开 App、4个快捷记账)
         views.setOnClickPendingIntent(R.id.widget_btn_prev_month, ListenExpenseAppWidgetProvider.createPrevMonthPendingIntent(context, widgetId))

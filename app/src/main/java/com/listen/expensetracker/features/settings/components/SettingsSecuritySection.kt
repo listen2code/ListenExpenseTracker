@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -41,7 +41,6 @@ fun SettingsSecuritySection(
     onChangeLockTimeout: (Int) -> Unit,
     onToggleRecentAppsShield: (Boolean) -> Unit,
     onToggleShakeToHideBalance: (Boolean) -> Unit,
-    lang: String,
     modifier: Modifier = Modifier
 ) {
     SurfaceCard(
@@ -62,7 +61,7 @@ fun SettingsSecuritySection(
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )
                 Text(
-                    text = AppStrings.SETTINGS_SECURITY_TITLE.tr(lang),
+                    text = AppStrings.SETTINGS_SECURITY_TITLE.tr(),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle
                 )
@@ -70,13 +69,13 @@ fun SettingsSecuritySection(
 
             // 1. 生物识别应用锁开关
             val biometricDesc = if (!isBiometricSupported) {
-                AppStrings.SECURITY_BIOMETRIC_UNAVAILABLE.tr(lang)
+                AppStrings.SECURITY_BIOMETRIC_UNAVAILABLE.tr()
             } else {
-                AppStrings.SECURITY_BIOMETRIC_LOCK_DESC.tr(lang)
+                AppStrings.SECURITY_BIOMETRIC_LOCK_DESC.tr()
             }
 
             CommonSwitchRow(
-                title = AppStrings.SECURITY_BIOMETRIC_LOCK_TITLE.tr(lang),
+                title = AppStrings.SECURITY_BIOMETRIC_LOCK_TITLE.tr(),
                 checked = biometricLockEnabled && isBiometricSupported,
                 onCheckedChange = { onToggleBiometricLock(it) },
                 subtitle = biometricDesc,
@@ -91,16 +90,16 @@ fun SettingsSecuritySection(
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Text(
-                        text = AppStrings.SECURITY_TIMEOUT_TITLE.tr(lang),
+                        text = AppStrings.SECURITY_TIMEOUT_TITLE.tr(),
                         fontSize = AppDimens.TextSubtitle,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     val timeoutOptions = listOf(
-                        0 to AppStrings.SECURITY_TIMEOUT_IMMEDIATE.tr(lang),
-                        60 to AppStrings.SECURITY_TIMEOUT_1MIN.tr(lang),
-                        300 to AppStrings.SECURITY_TIMEOUT_5MIN.tr(lang)
+                        0 to AppStrings.SECURITY_TIMEOUT_IMMEDIATE.tr(),
+                        60 to AppStrings.SECURITY_TIMEOUT_1MIN.tr(),
+                        300 to AppStrings.SECURITY_TIMEOUT_5MIN.tr()
                     )
 
                     CommonSegmentedControl(
@@ -113,19 +112,19 @@ fun SettingsSecuritySection(
 
             // 3. 多任务后台防窥保护
             CommonSwitchRow(
-                title = AppStrings.SECURITY_RECENT_APPS_TITLE.tr(lang),
+                title = AppStrings.SECURITY_RECENT_APPS_TITLE.tr(),
                 checked = recentAppsShieldEnabled,
                 onCheckedChange = { onToggleRecentAppsShield(it) },
-                subtitle = AppStrings.SECURITY_RECENT_APPS_DESC.tr(lang),
+                subtitle = AppStrings.SECURITY_RECENT_APPS_DESC.tr(),
                 contentPadding = 0.dp
             )
 
             // 4. 手势防窥（摇一摇/双击结余）
             CommonSwitchRow(
-                title = AppStrings.SECURITY_GESTURE_TITLE.tr(lang),
+                title = AppStrings.SECURITY_GESTURE_TITLE.tr(),
                 checked = shakeToHideBalanceEnabled,
                 onCheckedChange = { onToggleShakeToHideBalance(it) },
-                subtitle = AppStrings.SECURITY_GESTURE_DESC.tr(lang),
+                subtitle = AppStrings.SECURITY_GESTURE_DESC.tr(),
                 contentPadding = 0.dp
             )
         }
@@ -147,7 +146,6 @@ fun SettingsSecuritySectionPreview() {
             onChangeLockTimeout = {},
             onToggleRecentAppsShield = {},
             onToggleShakeToHideBalance = {},
-            lang = "zh",
             modifier = Modifier.padding(16.dp)
         )
     }

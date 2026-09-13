@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AnnualTransactionEngine
@@ -176,10 +176,10 @@ fun TransactionsContentList(
             item(key = "empty_transactions_view") {
                 if (state.hasActiveFilters) {
                     CommonEmpty(
-                        message = "${AppStrings.EMPTY_SEARCH_TITLE.tr(lang)}\n${AppStrings.EMPTY_SEARCH_DESC.tr(lang)}",
+                        message = "${AppStrings.EMPTY_SEARCH_TITLE.tr()}\n${AppStrings.EMPTY_SEARCH_DESC.tr()}",
                         action = {
                             CommonButton(
-                                text = AppStrings.FILTER_CLEAR_ACTIVE.tr(lang),
+                                text = AppStrings.FILTER_CLEAR_ACTIVE.tr(),
                                 style = CommonButtonStyle.Outlined,
                                 onClick = { onIntent(TransactionsIntent.ResetAllFilters) }
                             )
@@ -187,11 +187,11 @@ fun TransactionsContentList(
                     )
                 } else {
                     CommonEmpty(
-                        message = AppStrings.EMPTY_TRANSACTIONS.tr(lang),
+                        message = AppStrings.EMPTY_TRANSACTIONS.tr(),
                         action = if (state.isDeveloperMode) {
                             {
                                 CommonButton(
-                                    text = AppStrings.SEED_MONTH_DEMO_DATA.tr(lang),
+                                    text = AppStrings.SEED_MONTH_DEMO_DATA.tr(),
                                     style = CommonButtonStyle.Tonal,
                                     onClick = { onIntent(TransactionsIntent.SeedDemoData(if (isYearMode) 0 else monthOffset)) }
                                 )

@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.notification.NotificationPermissionHelper
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -49,7 +49,7 @@ fun SettingsNotificationSimulateDialog(
         if (!NotificationPermissionHelper.hasNotificationPermission(context)) {
             Toast.makeText(
                 context,
-                NotificationStrings.SIMULATE_PERMISSION_REQUIRED_TOAST.tr(lang),
+                NotificationStrings.SIMULATE_PERMISSION_REQUIRED_TOAST.tr(),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -58,17 +58,17 @@ fun SettingsNotificationSimulateDialog(
         action()
         Toast.makeText(
             context,
-            NotificationStrings.SIMULATE_SENT_TOAST.tr(lang),
+            NotificationStrings.SIMULATE_SENT_TOAST.tr(),
             Toast.LENGTH_SHORT
         ).show()
     }
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = NotificationStrings.SIMULATE_NOTIFICATIONS_TITLE.tr(lang),
+        title = NotificationStrings.SIMULATE_NOTIFICATIONS_TITLE.tr(),
         dismissButton = {
             CommonButton(
-                text = AppStrings.BTN_CANCEL.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Outlined
             )
@@ -77,7 +77,7 @@ fun SettingsNotificationSimulateDialog(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
             CommonText(
-                text = NotificationStrings.SIMULATE_NOTIFICATIONS_DESC.tr(lang),
+                text = NotificationStrings.SIMULATE_NOTIFICATIONS_DESC.tr(),
                 fontSize = AppDimens.TextCaption,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -86,7 +86,7 @@ fun SettingsNotificationSimulateDialog(
 
             // 1. 模拟 80% 预算警戒
             CommonButton(
-                text = NotificationStrings.SIMULATE_BUDGET_WARNING.tr(lang),
+                text = NotificationStrings.SIMULATE_BUDGET_WARNING.tr(),
                 onClick = {
                     dispatchSimulation {
                         LocalNotificationManager.sendBudgetAlert(
@@ -105,7 +105,7 @@ fun SettingsNotificationSimulateDialog(
 
             // 2. 模拟 100% 预算超支
             CommonButton(
-                text = NotificationStrings.SIMULATE_BUDGET_OVERRUN.tr(lang),
+                text = NotificationStrings.SIMULATE_BUDGET_OVERRUN.tr(),
                 onClick = {
                     dispatchSimulation {
                         LocalNotificationManager.sendBudgetAlert(
@@ -125,7 +125,7 @@ fun SettingsNotificationSimulateDialog(
 
             // 3. 模拟周期账单入账
             CommonButton(
-                text = NotificationStrings.SIMULATE_RECURRING_BILL.tr(lang),
+                text = NotificationStrings.SIMULATE_RECURRING_BILL.tr(),
                 onClick = {
                     dispatchSimulation {
                         LocalNotificationManager.sendRecurringBillAlert(
@@ -148,7 +148,7 @@ fun SettingsNotificationSimulateDialog(
 
             // 4. 模拟版本更新通知
             CommonButton(
-                text = NotificationStrings.SIMULATE_APP_UPDATE.tr(lang),
+                text = NotificationStrings.SIMULATE_APP_UPDATE.tr(),
                 onClick = {
                     dispatchSimulation {
                         LocalNotificationManager.sendAppUpdateAlert(

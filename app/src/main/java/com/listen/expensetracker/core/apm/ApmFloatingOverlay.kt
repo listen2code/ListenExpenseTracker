@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.arch.apm.ApmLogger
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.effect.shareSystemText
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.apm.LogEntryUi
@@ -213,7 +213,7 @@ fun ApmFloatingOverlay(
                         logs = logs,
                         onClearLogs = { ApmLogger.clear() },
                         onExportLogs = {
-                            val shareTitle = AppStrings.APM_SHARE_TITLE.tr(lang)
+                            val shareTitle = AppStrings.APM_SHARE_TITLE.tr()
                             val logText = logs.joinToString("\n") {
                                 "[${it.channelName}][${it.levelName}] ${it.tag}: ${it.message}"
                             }

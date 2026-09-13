@@ -41,7 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.AnnualMonthSummary
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -100,7 +100,7 @@ fun AnnualOverviewCard(
                         modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
                     Text(
-                        text = AppStrings.ANNUAL_OVERVIEW_TITLE.tr(lang),
+                        text = AppStrings.ANNUAL_OVERVIEW_TITLE.tr(),
                         fontWeight = FontWeight.Bold,
                         fontSize = AppDimens.TextTitle,
                         color = MaterialTheme.colorScheme.onSurface
@@ -111,8 +111,8 @@ fun AnnualOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LegendItem(color = Color(0xFFEF4444), label = AppStrings.TYPE_EXPENSE.tr(lang))
-                    LegendItem(color = Color(0xFF10B981), label = AppStrings.TYPE_INCOME.tr(lang))
+                    LegendItem(color = Color(0xFFEF4444), label = AppStrings.TYPE_EXPENSE.tr())
+                    LegendItem(color = Color(0xFF10B981), label = AppStrings.TYPE_INCOME.tr())
                 }
             }
 

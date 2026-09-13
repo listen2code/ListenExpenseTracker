@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.AnnualMonthSummary
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -87,7 +87,7 @@ fun AnnualOverviewMonthDetail(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "${AppStrings.BALANCE_TITLE.tr(lang)}: $balStr",
+                        text = "${AppStrings.BALANCE_TITLE.tr()}: $balStr",
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = balColor
@@ -98,12 +98,12 @@ fun AnnualOverviewMonthDetail(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${AppStrings.TYPE_EXPENSE.tr(lang)}: $expStr",
+                        text = "${AppStrings.TYPE_EXPENSE.tr()}: $expStr",
                         fontSize = AppDimens.TextMicro,
                         color = Color(0xFFEF4444)
                     )
                     Text(
-                        text = "${AppStrings.TYPE_INCOME.tr(lang)}: $incStr",
+                        text = "${AppStrings.TYPE_INCOME.tr()}: $incStr",
                         fontSize = AppDimens.TextMicro,
                         color = Color(0xFF10B981)
                     )

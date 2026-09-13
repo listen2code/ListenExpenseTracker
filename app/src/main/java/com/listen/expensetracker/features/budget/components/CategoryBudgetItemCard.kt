@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
@@ -118,15 +118,15 @@ fun CategoryBudgetItemCard(
                     val badgeText = when (status.status) {
                         BudgetHealthStatus.NORMAL -> {
                             val remStr = if (hideAmount) "••••" else "$currencySymbol${status.remainingAmount.formatAmount()}"
-                            "${AppStrings.BUDGET_REMAINING_PREFIX.tr(lang)} $remStr"
+                            "${AppStrings.BUDGET_REMAINING_PREFIX.tr()} $remStr"
                         }
                         BudgetHealthStatus.WARNING -> {
                             val remStr = if (hideAmount) "••••" else "$currencySymbol${status.remainingAmount.formatAmount()}"
-                            "${AppStrings.BUDGET_ONLY_REMAINING_PREFIX.tr(lang)} $remStr"
+                            "${AppStrings.BUDGET_ONLY_REMAINING_PREFIX.tr()} $remStr"
                         }
                         BudgetHealthStatus.OVERBUDGET -> {
                             val overStr = if (hideAmount) "••••" else "$currencySymbol${abs(status.spentAmount - status.budgetAmount).formatAmount()}"
-                            "${AppStrings.BUDGET_OVER_PREFIX.tr(lang)} $overStr"
+                            "${AppStrings.BUDGET_OVER_PREFIX.tr()} $overStr"
                         }
                     }
                     Text(

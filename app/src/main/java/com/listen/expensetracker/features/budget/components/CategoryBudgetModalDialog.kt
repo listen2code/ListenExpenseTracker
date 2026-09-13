@@ -26,7 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.CategoryBudgetEngine
 import com.listen.expensetracker.data.engine.formatAmount
@@ -85,21 +85,21 @@ fun CategoryBudgetModalDialog(
             }
         },
         title = if (mode == BudgetDialogMode.VIEW) {
-            AppStrings.BUDGET_CENTER_TITLE.tr(lang)
+            AppStrings.BUDGET_CENTER_TITLE.tr()
         } else {
-            AppStrings.BUDGET_ADJUST_TITLE.tr(lang)
+            AppStrings.BUDGET_ADJUST_TITLE.tr()
         },
         modifier = modifier,
         confirmButton = {
             if (mode == BudgetDialogMode.VIEW) {
                 CommonButton(
-                    text = AppStrings.COMMON_DONE.tr(lang),
+                    text = AppStrings.COMMON_DONE.tr(),
                     onClick = onDismiss,
                     style = CommonButtonStyle.Primary
                 )
             } else {
                 CommonButton(
-                    text = AppStrings.COMMON_SAVE.tr(lang),
+                    text = AppStrings.COMMON_SAVE.tr(),
                     onClick = {
                         onSave(editTotalBudget.coerceAtLeast(1.0), editRatios)
                         if (initialMode == BudgetDialogMode.VIEW) {
@@ -116,7 +116,7 @@ fun CategoryBudgetModalDialog(
         dismissButton = {
             if (mode == BudgetDialogMode.VIEW) {
                 CommonButton(
-                    text = AppStrings.BUDGET_ADJUST_TITLE.tr(lang),
+                    text = AppStrings.BUDGET_ADJUST_TITLE.tr(),
                     onClick = { mode = BudgetDialogMode.EDIT },
                     style = CommonButtonStyle.Secondary,
                     icon = {
@@ -129,7 +129,7 @@ fun CategoryBudgetModalDialog(
                 )
             } else {
                 CommonButton(
-                    text = AppStrings.COMMON_CANCEL.tr(lang),
+                    text = AppStrings.COMMON_CANCEL.tr(),
                     onClick = {
                         if (initialMode == BudgetDialogMode.VIEW) {
                             editBudgetInput = if (monthlyBudget > 0) monthlyBudget.formatAmount() else "5000"

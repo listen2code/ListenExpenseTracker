@@ -2,7 +2,7 @@ package com.listen.expensetracker.features.settings.viewmodel
 
 import android.app.Application
 import androidx.core.content.pm.PackageInfoCompat
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.core.notification.NotificationPreferences
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -93,11 +93,11 @@ class SettingsNotificationDelegate(
                 }
                 is UpdateResult.AlreadyLatest -> {
                     updateState { it.copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(String.format(AppStrings.ALREADY_LATEST_VERSION.tr(lang), currentVersion)))
+                    emitEffect(CommonUiEffect.ShowToast(String.format(AppStrings.ALREADY_LATEST_VERSION.tr(), currentVersion)))
                 }
                 is UpdateResult.Error -> {
                     updateState { it.copy(isCheckingUpdate = false) }
-                    emitEffect(CommonUiEffect.ShowToast(AppStrings.CHECK_UPDATE_FAILED.tr(lang)))
+                    emitEffect(CommonUiEffect.ShowToast(AppStrings.CHECK_UPDATE_FAILED.tr()))
                 }
             }
         }

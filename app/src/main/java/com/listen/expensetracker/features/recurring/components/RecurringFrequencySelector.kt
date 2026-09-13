@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -48,10 +48,10 @@ fun RecurringFrequencySelector(
         RecurringFrequency.YEARLY
     )
     val freqLabels = listOf(
-        AppStrings.RECURRING_FREQ_DAILY.tr(lang),
-        AppStrings.RECURRING_FREQ_WEEKLY.tr(lang),
-        AppStrings.RECURRING_FREQ_MONTHLY.tr(lang),
-        AppStrings.RECURRING_FREQ_YEARLY.tr(lang)
+        AppStrings.RECURRING_FREQ_DAILY.tr(),
+        AppStrings.RECURRING_FREQ_WEEKLY.tr(),
+        AppStrings.RECURRING_FREQ_MONTHLY.tr(),
+        AppStrings.RECURRING_FREQ_YEARLY.tr()
     )
 
     Column(
@@ -107,13 +107,13 @@ private fun WeeklyDayPicker(
     modifier: Modifier = Modifier
 ) {
     val weekdays = listOf(
-        1 to AppStrings.WEEKDAY_MON.tr(lang),
-        2 to AppStrings.WEEKDAY_TUE.tr(lang),
-        3 to AppStrings.WEEKDAY_WED.tr(lang),
-        4 to AppStrings.WEEKDAY_THU.tr(lang),
-        5 to AppStrings.WEEKDAY_FRI.tr(lang),
-        6 to AppStrings.WEEKDAY_SAT.tr(lang),
-        7 to AppStrings.WEEKDAY_SUN.tr(lang)
+        1 to AppStrings.WEEKDAY_MON.tr(),
+        2 to AppStrings.WEEKDAY_TUE.tr(),
+        3 to AppStrings.WEEKDAY_WED.tr(),
+        4 to AppStrings.WEEKDAY_THU.tr(),
+        5 to AppStrings.WEEKDAY_FRI.tr(),
+        6 to AppStrings.WEEKDAY_SAT.tr(),
+        7 to AppStrings.WEEKDAY_SUN.tr()
     )
 
     Row(

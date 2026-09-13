@@ -1,7 +1,7 @@
 package com.listen.expensetracker.features.recurring.engine
 
 import android.content.Context
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.notification.NotificationPreferences
 import com.listen.expensetracker.data.db.RecurringRuleEntity
@@ -33,8 +33,8 @@ object RecurringNotificationHelper {
         return if (executedRules.size == 1) {
             val rule = executedRules.first()
             val accountName = AccountRepository.getAccountDisplayName(rule.accountType, lang)
-            val title = NotificationStrings.NOTIFY_RECURRING_SINGLE_TITLE.tr(lang)
-            val body = NotificationStrings.NOTIFY_RECURRING_SINGLE_BODY.tr(lang).format(
+            val title = NotificationStrings.NOTIFY_RECURRING_SINGLE_TITLE.tr()
+            val body = NotificationStrings.NOTIFY_RECURRING_SINGLE_BODY.tr().format(
                 rule.title,
                 currencySymbol,
                 rule.amount.formatAmount(),
@@ -52,8 +52,8 @@ object RecurringNotificationHelper {
         } else {
             val totalExpense = executedRules.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
             val count = executedRules.size
-            val title = NotificationStrings.NOTIFY_RECURRING_MULTI_TITLE.tr(lang).format(count)
-            val body = NotificationStrings.NOTIFY_RECURRING_MULTI_BODY.tr(lang).format(
+            val title = NotificationStrings.NOTIFY_RECURRING_MULTI_TITLE.tr().format(count)
+            val body = NotificationStrings.NOTIFY_RECURRING_MULTI_BODY.tr().format(
                 count,
                 currencySymbol,
                 totalExpense.formatAmount()

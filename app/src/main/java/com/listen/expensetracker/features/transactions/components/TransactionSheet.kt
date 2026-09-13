@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -96,7 +96,7 @@ fun TransactionSheet(
     var showCategoryManageDialog by remember { mutableStateOf(false) }
     var accountToDelete by remember { mutableStateOf<AccountTypeItem?>(null) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-    val typeOptions = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang))
+    val typeOptions = listOf(AppStrings.TYPE_EXPENSE.tr(), AppStrings.TYPE_INCOME.tr())
 
     CommonBottomSheet(
         onDismissRequest = onDismiss,
@@ -147,7 +147,7 @@ fun TransactionSheet(
             CommonEditText(
                 value = note,
                 onValueChange = { note = it },
-                placeholder = AppStrings.TRANSACTION_NOTE_HINT.tr(lang),
+                placeholder = AppStrings.TRANSACTION_NOTE_HINT.tr(),
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.EditNote,
@@ -205,7 +205,7 @@ fun TransactionSheet(
                     amountExpression = if (amountExpression.length > 1) amountExpression.dropLast(1) else "0"
                 },
                 onDonePress = { createTransaction()?.let { onSave(it) } },
-                doneText = AppStrings.COMMON_DONE.tr(lang) + " ✓",
+                doneText = AppStrings.COMMON_DONE.tr() + " ✓",
                 onContinuePress = if (!isEditMode && onSaveAndContinue != null) {
                     {
                         createTransaction()?.let { tx ->
@@ -213,11 +213,11 @@ fun TransactionSheet(
                             amountExpression = "0"; note = ""
                             val now = System.currentTimeMillis()
                             selectedTimestamp = if (isSameCalendarDay(tx.timestamp, now)) maxOf(now, tx.timestamp + 1000L) else tx.timestamp + 1000L
-                            Toast.makeText(context, AppStrings.MSG_SAVED_CONTINUE.tr(lang), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, AppStrings.MSG_SAVED_CONTINUE.tr(), Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else null,
-                continueText = if (!isEditMode && onSaveAndContinue != null) AppStrings.COMMON_CONTINUE.tr(lang) + " +" else null,
+                continueText = if (!isEditMode && onSaveAndContinue != null) AppStrings.COMMON_CONTINUE.tr() + " +" else null,
                 modifier = Modifier.fillMaxWidth()
             )
         }

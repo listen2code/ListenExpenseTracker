@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
@@ -39,7 +39,6 @@ import com.listen.uicomponent.theme.ListenTheme
  * @param onOpenCategoryDialog Callback to open category management dialog
  * @param onOpenAccountDialog Callback to open asset account management dialog
  * @param modifier Composable modifier (first optional parameter)
- * @param lang ISO language code
  */
 @Composable
 fun SettingsFinanceSection(
@@ -49,8 +48,7 @@ fun SettingsFinanceSection(
     onOpenCategoryDialog: () -> Unit,
     onOpenAccountDialog: () -> Unit,
     onOpenRecurringDialog: () -> Unit,
-    modifier: Modifier = Modifier,
-    lang: String = "zh"
+    modifier: Modifier = Modifier
 ) {
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -70,7 +68,7 @@ fun SettingsFinanceSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.SETTINGS_FINANCE_RULES.tr(lang),
+                    text = AppStrings.SETTINGS_FINANCE_RULES.tr(),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -81,7 +79,7 @@ fun SettingsFinanceSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = "${AppStrings.MONTHLY_BUDGET.tr(lang)}: $currencySymbol${monthlyBudget.formatAmount()}",
+                    text = "${AppStrings.MONTHLY_BUDGET.tr()}: $currencySymbol${monthlyBudget.formatAmount()}",
                     onClick = onOpenBudgetDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {
@@ -97,7 +95,7 @@ fun SettingsFinanceSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.RECURRING_TITLE.tr(lang),
+                    text = AppStrings.RECURRING_TITLE.tr(),
                     onClick = onOpenRecurringDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {
@@ -119,7 +117,7 @@ fun SettingsFinanceSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
+                    text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(),
                     onClick = onOpenCategoryDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {
@@ -135,7 +133,7 @@ fun SettingsFinanceSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
+                    text = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(),
                     onClick = onOpenAccountDialog,
                     style = CommonButtonStyle.Outlined,
                     icon = {
@@ -165,8 +163,7 @@ fun SettingsFinanceSectionPreview() {
             onOpenBudgetDialog = {},
             onOpenCategoryDialog = {},
             onOpenAccountDialog = {},
-            onOpenRecurringDialog = {},
-            lang = "en"
+            onOpenRecurringDialog = {}
         )
     }
 }

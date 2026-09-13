@@ -15,7 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -51,7 +51,6 @@ fun StatisticsScreen(
     onNavigateToBudget: ((monthOffset: Int) -> Unit)? = null
 ) {
     val holder = rememberStatisticsStateHolder(state, viewModel)
-    val lang = state.language
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
     BaseScreenScaffold(
@@ -92,7 +91,7 @@ fun StatisticsScreen(
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
             // 1. 顶部支出/收入分析切换栏
-            val tabs = listOf(AppStrings.TAB_EXPENSE_ANALYSIS.tr(lang), AppStrings.TAB_INCOME_ANALYSIS.tr(lang))
+            val tabs = listOf(AppStrings.TAB_EXPENSE_ANALYSIS.tr(), AppStrings.TAB_INCOME_ANALYSIS.tr())
             CommonSegmentedControl(
                 items = tabs,
                 selectedIndex = if (isExpenseTab) 0 else 1,

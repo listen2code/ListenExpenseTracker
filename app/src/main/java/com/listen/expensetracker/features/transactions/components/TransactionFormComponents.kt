@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountTypeItem
 import com.listen.expensetracker.data.model.AppDimens
@@ -128,7 +128,7 @@ fun TransactionCategoryPicker(
                         )
                     }
                     Text(
-                        text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
+                        text = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(),
                         fontSize = AppDimens.TextMicro,
                         color = MaterialTheme.colorScheme.primary
                     )

@@ -1,7 +1,7 @@
 package com.listen.expensetracker.features.budget.engine
 
 import android.content.Context
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.notification.NotificationPreferences
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -71,8 +71,8 @@ object BudgetAlertGuard {
                 val dedupKey = "$yearMonth:TOTAL:${BudgetAlertLevel.OVERBUDGET.name}"
                 if (!NotificationPreferences.isNotified(context, dedupKey)) {
                     val overrun = result.totalSpent - totalBudget
-                    val title = NotificationStrings.NOTIFY_BUDGET_OVERRUN_TOTAL_TITLE.tr(lang)
-                    val body = NotificationStrings.NOTIFY_BUDGET_OVERRUN_TOTAL_BODY.tr(lang).format(
+                    val title = NotificationStrings.NOTIFY_BUDGET_OVERRUN_TOTAL_TITLE.tr()
+                    val body = NotificationStrings.NOTIFY_BUDGET_OVERRUN_TOTAL_BODY.tr().format(
                         currencySymbol, result.totalSpent.formatAmount(),
                         currencySymbol, overrun.formatAmount()
                     )
@@ -101,8 +101,8 @@ object BudgetAlertGuard {
             } else if (result.usageRatio >= 0.8f && NotificationPreferences.isBudgetWarningThresholdEnabled(context)) {
                 val dedupKey = "$yearMonth:TOTAL:${BudgetAlertLevel.WARNING.name}"
                 if (!NotificationPreferences.isNotified(context, dedupKey)) {
-                    val title = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_TITLE.tr(lang)
-                    val body = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_BODY.tr(lang).format(
+                    val title = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_TITLE.tr()
+                    val body = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_BODY.tr().format(
                         result.usageRatio * 100f,
                         currencySymbol,
                         result.remainingBudget.formatAmount()
@@ -143,8 +143,8 @@ object BudgetAlertGuard {
                 val dedupKey = "$yearMonth:${status.category.id}:${BudgetAlertLevel.OVERBUDGET.name}"
                 if (!NotificationPreferences.isNotified(context, dedupKey)) {
                     val overrun = status.spentAmount - status.budgetAmount
-                    val title = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_TITLE.tr(lang).format(catName)
-                    val body = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_BODY.tr(lang).format(
+                    val title = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_TITLE.tr().format(catName)
+                    val body = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_BODY.tr().format(
                         currencySymbol, status.spentAmount.formatAmount(),
                         currencySymbol, overrun.formatAmount()
                     )
@@ -173,8 +173,8 @@ object BudgetAlertGuard {
             } else if (status.usageRatio >= 0.8f && NotificationPreferences.isBudgetWarningThresholdEnabled(context)) {
                 val dedupKey = "$yearMonth:${status.category.id}:${BudgetAlertLevel.WARNING.name}"
                 if (!NotificationPreferences.isNotified(context, dedupKey)) {
-                    val title = NotificationStrings.NOTIFY_BUDGET_WARNING_CAT_TITLE.tr(lang).format(catName)
-                    val body = NotificationStrings.NOTIFY_BUDGET_WARNING_CAT_BODY.tr(lang).format(
+                    val title = NotificationStrings.NOTIFY_BUDGET_WARNING_CAT_TITLE.tr().format(catName)
+                    val body = NotificationStrings.NOTIFY_BUDGET_WARNING_CAT_BODY.tr().format(
                         status.usageRatio * 100f
                     )
                     val alert = BudgetAlert(

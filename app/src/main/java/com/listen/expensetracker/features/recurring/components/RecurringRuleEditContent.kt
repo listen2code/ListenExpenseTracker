@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.ExecutionType
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -70,7 +70,7 @@ fun RecurringRuleEditContent(
     ) {
         // 1. 收支分段切换
         CommonSegmentedControl(
-            items = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang)),
+            items = listOf(AppStrings.TYPE_EXPENSE.tr(), AppStrings.TYPE_INCOME.tr()),
             selectedIndex = if (state.type == TransactionType.EXPENSE) 0 else 1,
             onIndexChange = {
                 state.type = if (it == 0) TransactionType.EXPENSE else TransactionType.INCOME
@@ -93,7 +93,7 @@ fun RecurringRuleEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CommonText(
-                        text = AppStrings.RECURRING_RULE_NAME.tr(lang),
+                        text = AppStrings.RECURRING_RULE_NAME.tr(),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -112,7 +112,7 @@ fun RecurringRuleEditContent(
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (state.title.isEmpty()) {
                                     CommonText(
-                                        text = AppStrings.RECURRING_NAME_HINT.tr(lang),
+                                        text = AppStrings.RECURRING_NAME_HINT.tr(),
                                         fontSize = AppDimens.TextSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                     )
@@ -131,7 +131,7 @@ fun RecurringRuleEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CommonText(
-                        text = AppStrings.RECURRING_AMOUNT_LABEL.tr(lang),
+                        text = AppStrings.RECURRING_AMOUNT_LABEL.tr(),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -208,7 +208,7 @@ fun RecurringRuleEditContent(
 
         // 5. 履约模式
         CommonSegmentedControl(
-            items = listOf(AppStrings.RECURRING_EXEC_AUTO.tr(lang), AppStrings.RECURRING_EXEC_NOTIFY.tr(lang)),
+            items = listOf(AppStrings.RECURRING_EXEC_AUTO.tr(), AppStrings.RECURRING_EXEC_NOTIFY.tr()),
             selectedIndex = if (state.executionType == ExecutionType.AUTO_INSERT) 0 else 1,
             onIndexChange = { state.executionType = if (it == 0) ExecutionType.AUTO_INSERT else ExecutionType.NOTIFY_CONFIRM }
         )

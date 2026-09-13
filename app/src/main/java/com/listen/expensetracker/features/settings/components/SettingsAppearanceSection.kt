@@ -16,7 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.AppLanguage
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -35,14 +36,12 @@ import com.listen.uicomponent.theme.ThemeMode
  *
  * @param themeMode 当前主题模式 (Light/Dark/System)
  * @param accentColor 当前主题强调色
- * @param lang 当前系统语言代码 (zh/en/ja)，同时也作为 UI 翻译的上下文。
  * @param isPureBlackDark 是否开启 AMOLED 纯黑模式
  */
 @Composable
 fun SettingsAppearanceSection(
     themeMode: ThemeMode,
     accentColor: AccentColor,
-    lang: String,
     onChangeThemeMode: (ThemeMode) -> Unit,
     onChangeAccentColor: (AccentColor) -> Unit,
     onLanguageChange: (String) -> Unit,
@@ -50,8 +49,6 @@ fun SettingsAppearanceSection(
     isPureBlackDark: Boolean = false,
     onTogglePureBlackDark: (Boolean) -> Unit = {}
 ) {
-    // 统一使用传入的 language 进行界面翻译
-    val lang = lang
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -71,7 +68,7 @@ fun SettingsAppearanceSection(
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )
                 Text(
-                    text = AppStrings.SETTINGS_APPEARANCE.tr(lang),
+                    text = AppStrings.SETTINGS_APPEARANCE.tr(),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle
                 )
@@ -80,16 +77,16 @@ fun SettingsAppearanceSection(
             // Theme Mode Segmented Switch
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = AppStrings.SETTINGS_THEME_MODE.tr(lang),
+                    text = AppStrings.SETTINGS_THEME_MODE.tr(),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 val modes = listOf(
-                    ThemeMode.LIGHT to AppStrings.THEME_LIGHT.tr(lang),
-                    ThemeMode.DARK to AppStrings.THEME_DARK.tr(lang),
-                    ThemeMode.SYSTEM to AppStrings.THEME_SYSTEM.tr(lang)
+                    ThemeMode.LIGHT to AppStrings.THEME_LIGHT.tr(),
+                    ThemeMode.DARK to AppStrings.THEME_DARK.tr(),
+                    ThemeMode.SYSTEM to AppStrings.THEME_SYSTEM.tr()
                 )
 
                 CommonSegmentedControl(
@@ -100,8 +97,8 @@ fun SettingsAppearanceSection(
 
                 // AMOLED 纯黑夜间节能模式开关
                 CommonSwitchRow(
-                    title = AppStrings.AMOLED_PURE_BLACK_TITLE.tr(lang),
-                    subtitle = AppStrings.AMOLED_PURE_BLACK_DESC.tr(lang),
+                    title = AppStrings.AMOLED_PURE_BLACK_TITLE.tr(),
+                    subtitle = AppStrings.AMOLED_PURE_BLACK_DESC.tr(),
                     checked = isPureBlackDark,
                     onCheckedChange = onTogglePureBlackDark,
                     contentPadding = 0.dp
@@ -111,7 +108,7 @@ fun SettingsAppearanceSection(
             // Accent Color Selection Row
             Column(verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 Text(
-                    text = AppStrings.SETTINGS_ACCENT_COLOR.tr(lang),
+                    text = AppStrings.SETTINGS_ACCENT_COLOR.tr(),
                     fontSize = AppDimens.TextSubtitle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -132,16 +129,17 @@ fun SettingsAppearanceSection(
             }
 
             // Language Selector
-            val currentLangLabel = when (lang) {
+            val currentLang = AppLanguage.current
+            val currentLangLabel = when (currentLang) {
                 "en" -> "English"
                 "ja" -> "日本語"
                 else -> "简体中文"
             }
 
             CommonButton(
-                text = "${AppStrings.SETTINGS_LANGUAGE.tr(lang)}: $currentLangLabel",
+                text = "${AppStrings.SETTINGS_LANGUAGE.tr()}: $currentLangLabel",
                 onClick = {
-                    val next = when (lang) {
+                    val next = when (currentLang) {
                         "zh" -> "en"
                         "en" -> "ja"
                         else -> "zh"
@@ -162,7 +160,6 @@ fun SettingsAppearanceSectionPreview() {
         SettingsAppearanceSection(
             themeMode = ThemeMode.SYSTEM,
             accentColor = AccentColor.EMERALD,
-            lang = "zh",
             onChangeThemeMode = {},
             onChangeAccentColor = {},
             onLanguageChange = {}

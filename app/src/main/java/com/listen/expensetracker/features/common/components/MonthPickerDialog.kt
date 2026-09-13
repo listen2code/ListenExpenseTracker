@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -92,7 +92,7 @@ fun MonthPickerDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = if (viewMode == MonthPickerViewMode.YEARS) AppStrings.SELECT_YEAR_TITLE.tr(lang) else AppStrings.SELECT_MONTH_DIALOG.tr(lang),
+        title = if (viewMode == MonthPickerViewMode.YEARS) AppStrings.SELECT_YEAR_TITLE.tr() else AppStrings.SELECT_MONTH_DIALOG.tr(),
         confirmButton = {
             TextButton(
                 onClick = {
@@ -101,12 +101,12 @@ fun MonthPickerDialog(
                 }
             ) {
                 CommonText(
-                    text = (if (viewMode == MonthPickerViewMode.YEARS) AppStrings.JUMP_TO_THIS_YEAR else AppStrings.JUMP_TO_THIS_MONTH).tr(lang),
+                    text = (if (viewMode == MonthPickerViewMode.YEARS) AppStrings.JUMP_TO_THIS_YEAR else AppStrings.JUMP_TO_THIS_MONTH).tr(),
                     fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary
                 )
             }
         },
-        dismissButton = { CommonButton(text = AppStrings.BTN_CANCEL.tr(lang), onClick = onDismiss, style = CommonButtonStyle.Text) },
+        dismissButton = { CommonButton(text = AppStrings.BTN_CANCEL.tr(), onClick = onDismiss, style = CommonButtonStyle.Text) },
         modifier = modifier
     ) {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -169,7 +169,7 @@ fun MonthPickerDialog(
                     TextButton(onClick = { viewMode = MonthPickerViewMode.MONTHS }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(13.dp), tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(4.dp))
-                        CommonText(text = AppStrings.BACK_TO_MONTHS.tr(lang), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                        CommonText(text = AppStrings.BACK_TO_MONTHS.tr(), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                     }
                 }
                 LazyVerticalGrid(

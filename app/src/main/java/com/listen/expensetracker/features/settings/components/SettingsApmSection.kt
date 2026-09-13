@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.i18n.NotificationStrings
@@ -41,7 +41,6 @@ fun SettingsApmSection(
     onToggleApmFloatingWindow: (Boolean) -> Unit,
     onSeedDemoData: () -> Unit,
     onConfirmClearAll: () -> Unit,
-    lang: String,
     modifier: Modifier = Modifier,
     targetMonthTitle: String = "",
     onOpenSimulateNotifications: () -> Unit = {}
@@ -54,9 +53,9 @@ fun SettingsApmSection(
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         isDangerZoneVisible = !isDangerZoneVisible
         val tip = if (isDangerZoneVisible) {
-            AppStrings.DANGER_ZONE_UNLOCKED_TOAST.tr(lang)
+            AppStrings.DANGER_ZONE_UNLOCKED_TOAST.tr()
         } else {
-            AppStrings.DANGER_ZONE_LOCKED_TOAST.tr(lang)
+            AppStrings.DANGER_ZONE_LOCKED_TOAST.tr()
         }
         Toast.makeText(context, tip, Toast.LENGTH_SHORT).show()
     }
@@ -86,24 +85,24 @@ fun SettingsApmSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.SETTINGS_SYSTEM_OPS.tr(lang),
+                    text = AppStrings.SETTINGS_SYSTEM_OPS.tr(),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
 
             // APM Floating Window Switch
             CommonSwitchRow(
-                title = AppStrings.APM_FLOATING_WINDOW_TITLE.tr(lang),
+                title = AppStrings.APM_FLOATING_WINDOW_TITLE.tr(),
                 checked = apmFloatingWindowEnabled,
                 onCheckedChange = onToggleApmFloatingWindow,
-                subtitle = AppStrings.APM_FLOATING_WINDOW_DESC.tr(lang),
+                subtitle = AppStrings.APM_FLOATING_WINDOW_DESC.tr(),
                 contentPadding = 0.dp
             )
 
             val seedBtnText = if (targetMonthTitle.isNotBlank()) {
-                "${AppStrings.SEED_DATA_BTN.tr(lang)} ($targetMonthTitle)"
+                "${AppStrings.SEED_DATA_BTN.tr()} ($targetMonthTitle)"
             } else {
-                AppStrings.SEED_DATA_BTN.tr(lang)
+                AppStrings.SEED_DATA_BTN.tr()
             }
 
             // 1. 生成本月数据按钮 (全宽，长按切换高危清空按钮的显隐)
@@ -131,7 +130,7 @@ fun SettingsApmSection(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 CommonButton(
-                    text = AppStrings.CLEAR_ALL.tr(lang),
+                    text = AppStrings.CLEAR_ALL.tr(),
                     onClick = {
                         isDangerZoneVisible = false
                         onConfirmClearAll()
@@ -152,7 +151,7 @@ fun SettingsApmSection(
 
             // 3. 模拟系统通知全宽按钮
             CommonButton(
-                text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(lang),
+                text = NotificationStrings.SIMULATE_NOTIFICATIONS_BTN.tr(),
                 onClick = onOpenSimulateNotifications,
                 style = CommonButtonStyle.Outlined,
                 icon = {
@@ -179,8 +178,7 @@ fun SettingsApmSectionPreview() {
             apmFloatingWindowEnabled = true,
             onToggleApmFloatingWindow = {},
             onSeedDemoData = {},
-            onConfirmClearAll = {},
-            lang = "zh"
+            onConfirmClearAll = {}
         )
     }
 }

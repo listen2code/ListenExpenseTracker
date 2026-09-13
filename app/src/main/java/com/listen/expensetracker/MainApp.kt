@@ -17,7 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.LocalAppLanguage
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.route.CommonRoute
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.NavTab
@@ -36,14 +37,14 @@ import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
  * 负责底部导航栏 (NavigationBar)、Tab 切换、双击回到顶部手势及 Screen 路由调度。
  *
  * @param appState 统一应用状态持有者
- * @param lang 当前语言偏好，用于 UI 翻译
  * @param modifier Composable 修饰符（可选参数）
+ * @param lang 当前语言偏好（默认为全局 CompositionLocal [LocalAppLanguage]）
  */
 @Composable
 fun MainApp(
     appState: ExpenseAppState,
-    lang: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lang: String = LocalAppLanguage.current
 ) {
     // 记录底部导航栏 Tab 上次被点击的时间，用于实现双击回到顶部的交互逻辑（阈值 350 毫秒内有效）
     var lastTabClickTime by remember { mutableLongStateOf(0L) }
@@ -73,8 +74,8 @@ fun MainApp(
                                 appState.switchTab(tab)
                             }
                         },
-                        icon = { Icon(tab.icon, contentDescription = tab.labelKey.tr(lang)) },
-                        label = { Text(tab.labelKey.tr(lang)) }
+                        icon = { Icon(tab.icon, contentDescription = tab.labelKey.tr()) },
+                        label = { Text(tab.labelKey.tr()) }
                     )
                 }
             }

@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
@@ -112,7 +112,7 @@ fun AnnualStatisticsContentList(
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = AppStrings.TREND_YEAR_MONTHLY.tr(lang),
+                            text = AppStrings.TREND_YEAR_MONTHLY.tr(),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -124,7 +124,7 @@ fun AnnualStatisticsContentList(
                             chartHeight = AppDimens.ChartHeightStandard,
                             currencySymbol = sym,
                             hideAmount = state.hideAmount,
-                            maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxMonthlyVal),
+                            maxLabel = AppStrings.CHART_MAX.tr().format(sym, maxMonthlyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${calc.totalExpense.formatAmount()}",
                             onTooltipClick = onNavigateToTransactionsMonth?.let { cb ->
                                 { pt ->
@@ -160,7 +160,7 @@ fun AnnualStatisticsContentList(
                     currencySymbol = sym,
                     lang = lang,
                     modifier = Modifier.fillMaxWidth(),
-                    averageLabel = if (expenseTab) AppStrings.STATS_MONTH_AVG_EXPENSE.tr(lang) else AppStrings.STATS_MONTH_AVG_INCOME.tr(lang),
+                    averageLabel = if (expenseTab) AppStrings.STATS_MONTH_AVG_EXPENSE.tr() else AppStrings.STATS_MONTH_AVG_INCOME.tr(),
                     hideAmount = state.hideAmount,
                     onMaxTransactionClick = onTransactionClick
                 )
@@ -171,7 +171,7 @@ fun AnnualStatisticsContentList(
         if (activeShares.isNotEmpty()) {
             item(key = "annual_ranking_header") {
                 Text(
-                    text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr(lang) else AppStrings.INCOME_RANKING.tr(lang),
+                    text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr() else AppStrings.INCOME_RANKING.tr(),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle,
                     color = MaterialTheme.colorScheme.onSurface,

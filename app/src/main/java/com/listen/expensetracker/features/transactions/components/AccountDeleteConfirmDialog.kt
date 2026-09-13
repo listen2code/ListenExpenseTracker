@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -36,11 +36,11 @@ fun AccountDeleteConfirmDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE.tr(lang),
+        title = AppStrings.DELETE_ACCOUNT_CONFIRM_TITLE.tr(),
         modifier = modifier,
         confirmButton = {
             CommonButton(
-                text = AppStrings.COMMON_DELETE.tr(lang),
+                text = AppStrings.COMMON_DELETE.tr(),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onConfirm()
@@ -50,7 +50,7 @@ fun AccountDeleteConfirmDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.COMMON_CANCEL.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -64,7 +64,7 @@ fun AccountDeleteConfirmDialog(
                 color = MaterialTheme.colorScheme.primary
             )
             CommonText(
-                text = AppStrings.DELETE_ACCOUNT_CONFIRM_DESC.tr(lang),
+                text = AppStrings.DELETE_ACCOUNT_CONFIRM_DESC.tr(),
                 fontSize = AppDimens.TextSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

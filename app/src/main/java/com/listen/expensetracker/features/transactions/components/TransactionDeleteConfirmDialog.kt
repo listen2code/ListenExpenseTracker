@@ -6,7 +6,7 @@ import com.listen.uicomponent.theme.ListenTheme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -26,20 +26,20 @@ fun TransactionDeleteConfirmDialog(
     onConfirm: () -> Unit,
     lang: String = "zh"
 ) {
-    val desc = AppStrings.DELETE_TRANSACTION_DESC.tr(lang).format(categoryName, currencySymbol, amount)
+    val desc = AppStrings.DELETE_TRANSACTION_DESC.tr().format(categoryName, currencySymbol, amount)
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.DELETE_TRANSACTION_TITLE.tr(lang),
+        title = AppStrings.DELETE_TRANSACTION_TITLE.tr(),
         confirmButton = {
             CommonButton(
-                text = AppStrings.COMMON_DELETE.tr(lang),
+                text = AppStrings.COMMON_DELETE.tr(),
                 onClick = onConfirm,
                 style = CommonButtonStyle.Danger
             )
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.COMMON_CANCEL.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Outlined
             )

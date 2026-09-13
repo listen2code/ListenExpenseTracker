@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -90,10 +90,10 @@ fun SettingsDialogHost(
         is SettingsDialog.ClearConfirm -> {
             CommonDialog(
                 onDismissRequest = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.CONFIRM_CLEAR_TITLE.tr(lang),
+                title = AppStrings.CONFIRM_CLEAR_TITLE.tr(),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.BTN_DELETE.tr(lang),
+                        text = AppStrings.BTN_DELETE.tr(),
                         onClick = {
                             viewModel?.handleIntent(SettingsIntent.ClearAllData)
                             viewModel?.handleIntent(SettingsIntent.DismissDialog)
@@ -103,14 +103,14 @@ fun SettingsDialogHost(
                 },
                 dismissButton = {
                     CommonButton(
-                        text = AppStrings.BTN_CANCEL.tr(lang),
+                        text = AppStrings.BTN_CANCEL.tr(),
                         onClick = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
                         style = CommonButtonStyle.Outlined
                     )
                 }
             ) {
                 CommonText(
-                    text = AppStrings.CONFIRM_CLEAR_DESC.tr(lang),
+                    text = AppStrings.CONFIRM_CLEAR_DESC.tr(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -118,10 +118,10 @@ fun SettingsDialogHost(
         is SettingsDialog.LogoutConfirm -> {
             CommonDialog(
                 onDismissRequest = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
-                title = AppStrings.GOOGLE_LOGOUT_CONFIRM_TITLE.tr(lang),
+                title = AppStrings.GOOGLE_LOGOUT_CONFIRM_TITLE.tr(),
                 confirmButton = {
                     CommonButton(
-                        text = AppStrings.GOOGLE_LOGOUT_BTN.tr(lang),
+                        text = AppStrings.GOOGLE_LOGOUT_BTN.tr(),
                         onClick = {
                             viewModel?.handleIntent(SettingsIntent.UnlinkGoogleAccount)
                             viewModel?.handleIntent(SettingsIntent.DismissDialog)
@@ -131,14 +131,14 @@ fun SettingsDialogHost(
                 },
                 dismissButton = {
                     CommonButton(
-                        text = AppStrings.BTN_CANCEL.tr(lang),
+                        text = AppStrings.BTN_CANCEL.tr(),
                         onClick = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
                         style = CommonButtonStyle.Outlined
                     )
                 }
             ) {
                 CommonText(
-                    text = AppStrings.GOOGLE_LOGOUT_CONFIRM_DESC.tr(lang),
+                    text = AppStrings.GOOGLE_LOGOUT_CONFIRM_DESC.tr(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -204,7 +204,7 @@ fun SettingsDialogHost(
                         color = MaterialTheme.colorScheme.primary
                     )
                     CommonText(
-                        text = AppStrings.CLOUD_STATUS_SYNCING.tr(lang),
+                        text = AppStrings.CLOUD_STATUS_SYNCING.tr(),
                         fontSize = AppDimens.TextBody,
                         color = MaterialTheme.colorScheme.onSurface
                     )

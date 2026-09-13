@@ -1,6 +1,6 @@
 package com.listen.expensetracker.features.statistics.components
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
@@ -50,7 +50,7 @@ fun MetricsSummaryCard(
     hideAmount: Boolean = false,
     onMaxTransactionClick: ((TransactionEntity) -> Unit)? = null
 ) {
-    val noneText = AppStrings.COMMON_NONE.tr(lang)
+    val noneText = AppStrings.COMMON_NONE.tr()
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,
@@ -64,7 +64,7 @@ fun MetricsSummaryCard(
             // Daily / Monthly Average
             Column {
                 Text(
-                    text = averageLabel ?: if (isExpenseTab) AppStrings.DAILY_AVERAGE_EXPENSE.tr(lang) else AppStrings.DAILY_AVERAGE_INCOME.tr(lang),
+                    text = averageLabel ?: if (isExpenseTab) AppStrings.DAILY_AVERAGE_EXPENSE.tr() else AppStrings.DAILY_AVERAGE_INCOME.tr(),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -101,7 +101,7 @@ fun MetricsSummaryCard(
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = if (isExpenseTab) AppStrings.MAX_EXPENSE.tr(lang) else AppStrings.MAX_INCOME.tr(lang),
+                        text = if (isExpenseTab) AppStrings.MAX_EXPENSE.tr() else AppStrings.MAX_INCOME.tr(),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColor

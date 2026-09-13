@@ -25,7 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.LocalAppLanguage
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -39,13 +40,13 @@ import com.listen.uicomponent.theme.ListenTheme
  *
  * @param onUnlockRequest 点击解锁回调，拉起生物识别或锁屏密码鉴权
  * @param modifier Composable 修饰符（首个可选参数）
- * @param lang 国际化语言代码
+ * @param lang 国际化语言代码（默认为全局 CompositionLocal [LocalAppLanguage]）
  */
 @Composable
 fun BiometricLockOverlay(
     onUnlockRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    lang: String = "zh"
+    lang: String = LocalAppLanguage.current
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -78,7 +79,7 @@ fun BiometricLockOverlay(
 
             // 标题
             CommonText(
-                text = AppStrings.SECURITY_LOCKED_TITLE.tr(lang),
+                text = AppStrings.SECURITY_LOCKED_TITLE.tr(),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -89,7 +90,7 @@ fun BiometricLockOverlay(
 
             // 说明文案
             CommonText(
-                text = AppStrings.SECURITY_LOCKED_DESC.tr(lang),
+                text = AppStrings.SECURITY_LOCKED_DESC.tr(),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -99,7 +100,7 @@ fun BiometricLockOverlay(
 
             // 解锁操作按钮
             CommonButton(
-                text = AppStrings.SECURITY_UNLOCK_BUTTON.tr(lang),
+                text = AppStrings.SECURITY_UNLOCK_BUTTON.tr(),
                 onClick = onUnlockRequest,
                 icon = {
                     Icon(

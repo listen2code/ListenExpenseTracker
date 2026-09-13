@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import com.listen.expensetracker.core.i18n.LocalAppLanguage
 import com.listen.expensetracker.core.effect.AppSideEffectHandler
 import com.listen.expensetracker.core.effect.CommonUiEffectHandler
 import com.listen.expensetracker.core.overlay.AppOverlayHost
@@ -79,38 +81,38 @@ class MainActivity : FragmentActivity() {
                 snackbarHostState = appState.snackbarHostState
             )
 
-            // 6. 注入全局主题 (ListenTheme) 并根据设置实时应用深色模式和主题色
-            ListenTheme(
-                themeMode = settingsState.themeMode,
-                accentColor = settingsState.accentColor,
-                pureBlackDark = settingsState.isPureBlackDark
+            // 6. 注入全局语言环境 (CompositionLocal) 与主题 (ListenTheme)
+            CompositionLocalProvider(
+                LocalAppLanguage provides settingsState.language
             ) {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    /**
-                     * 物理隔离层级逻辑：
-                     * - 当 App 处于锁定时：只渲染 BiometricLockOverlay 遮罩，业务组件 (App) 物理卸载，确保隐私安全。
-                     * - 当 App 已解锁：正常渲染 App 主体及全局覆盖物宿主 (AppOverlayHost)。
-                     */
-                    if (securityCoordinator.isAppLocked) {
-                        BiometricLockOverlay(
-                            onUnlockRequest = {
-                                securityCoordinator.promptUnlock(
-                                    this@MainActivity,
-                                    settingsState.language,
-                                    settingsState.recentAppsShieldEnabled
-                                )
-                            },
-                            lang = settingsState.language
-                        )
-                    } else {
-                        // 渲染主功能导航架构
-                        MainApp(
-                            appState = appState,
-                            lang = settingsState.language
-                        )
+                ListenTheme(
+                    themeMode = settingsState.themeMode,
+                    accentColor = settingsState.accentColor,
+                    pureBlackDark = settingsState.isPureBlackDark
+                ) {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        /**
+                         * 物理隔离层级逻辑：
+                         * - 当 App 处于锁定时：只渲染 BiometricLockOverlay 遮罩，业务组件 (App) 物理卸载，确保隐私安全。
+                         * - 当 App 已解锁：正常渲染 App 主体及全局覆盖物宿主 (AppOverlayHost)。
+                         */
+                        if (securityCoordinator.isAppLocked) {
+                            BiometricLockOverlay(
+                                onUnlockRequest = {
+                                    securityCoordinator.promptUnlock(
+                                        this@MainActivity,
+                                        settingsState.language,
+                                        settingsState.recentAppsShieldEnabled
+                                    )
+                                }
+                            )
+                        } else {
+                            // 渲染主功能导航架构（无需层层传 lang，由 LocalAppLanguage 自动提供）
+                            MainApp(appState = appState)
 
-                        // 全局声明式覆盖物宿主 (处理全屏加载 HUD、检查器等)
-                        AppOverlayHost(appState = appState)
+                            // 全局声明式覆盖物宿主 (处理全屏加载 HUD、检查器等)
+                            AppOverlayHost(appState = appState)
+                        }
                     }
                 }
             }

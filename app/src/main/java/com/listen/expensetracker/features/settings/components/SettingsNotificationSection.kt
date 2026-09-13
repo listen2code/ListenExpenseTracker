@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.notification.NotificationPermissionHelper
 import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -42,7 +42,6 @@ fun SettingsNotificationSection(
     onToggleBudgetAlerts: (Boolean) -> Unit,
     onToggleRecurringBillsAlerts: (Boolean) -> Unit,
     onToggleAppUpdatesAlerts: (Boolean) -> Unit,
-    lang: String,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -86,13 +85,13 @@ fun SettingsNotificationSection(
                     )
                     Column {
                         Text(
-                            text = NotificationStrings.SETTINGS_NOTIFICATIONS_SECTION.tr(lang),
+                            text = NotificationStrings.SETTINGS_NOTIFICATIONS_SECTION.tr(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = NotificationStrings.SETTINGS_NOTIFICATIONS_ENABLE_DESC.tr(lang),
+                            text = NotificationStrings.SETTINGS_NOTIFICATIONS_ENABLE_DESC.tr(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -106,10 +105,10 @@ fun SettingsNotificationSection(
 
             // [ListenUiComponent] 系统未授权警告横幅采用 CommonBanner 规范呈现 (Rule 25)
             CommonBanner(
-                message = NotificationStrings.SETTINGS_PERMISSION_DENIED_BANNER.tr(lang),
+                message = NotificationStrings.SETTINGS_PERMISSION_DENIED_BANNER.tr(),
                 type = CommonBannerType.Warning,
                 visible = !hasSystemPermission,
-                actionText = NotificationStrings.SETTINGS_PERMISSION_GRANT_BTN.tr(lang),
+                actionText = NotificationStrings.SETTINGS_PERMISSION_GRANT_BTN.tr(),
                 onActionClick = { NotificationPermissionHelper.openNotificationSettings(context) }
             )
 
@@ -124,8 +123,8 @@ fun SettingsNotificationSection(
 
                     // 1. 预算预警与超支提醒（合并为单开关：80% 警戒与 100% 超支）
                     CommonSwitchRow(
-                        title = NotificationStrings.SETTINGS_BUDGET_ALERTS.tr(lang),
-                        subtitle = NotificationStrings.SETTINGS_BUDGET_ALERTS_DESC.tr(lang),
+                        title = NotificationStrings.SETTINGS_BUDGET_ALERTS.tr(),
+                        subtitle = NotificationStrings.SETTINGS_BUDGET_ALERTS_DESC.tr(),
                         checked = budgetAlertsEnabled,
                         onCheckedChange = onToggleBudgetAlerts,
                         contentPadding = 0.dp
@@ -133,8 +132,8 @@ fun SettingsNotificationSection(
 
                     // 2. 周期账单自动入账提醒
                     CommonSwitchRow(
-                        title = NotificationStrings.SETTINGS_RECURRING_ALERTS.tr(lang),
-                        subtitle = NotificationStrings.SETTINGS_RECURRING_ALERTS_DESC.tr(lang),
+                        title = NotificationStrings.SETTINGS_RECURRING_ALERTS.tr(),
+                        subtitle = NotificationStrings.SETTINGS_RECURRING_ALERTS_DESC.tr(),
                         checked = recurringBillsAlertsEnabled,
                         onCheckedChange = onToggleRecurringBillsAlerts,
                         contentPadding = 0.dp
@@ -142,8 +141,8 @@ fun SettingsNotificationSection(
 
                     // 3. 新版本发布更新提醒
                     CommonSwitchRow(
-                        title = NotificationStrings.SETTINGS_UPDATE_ALERTS.tr(lang),
-                        subtitle = NotificationStrings.SETTINGS_UPDATE_ALERTS_DESC.tr(lang),
+                        title = NotificationStrings.SETTINGS_UPDATE_ALERTS.tr(),
+                        subtitle = NotificationStrings.SETTINGS_UPDATE_ALERTS_DESC.tr(),
                         checked = appUpdatesAlertsEnabled,
                         onCheckedChange = onToggleAppUpdatesAlerts,
                         contentPadding = 0.dp
@@ -167,8 +166,7 @@ fun SettingsNotificationSectionPreview() {
             onToggleNotifications = {},
             onToggleBudgetAlerts = {},
             onToggleRecurringBillsAlerts = {},
-            onToggleAppUpdatesAlerts = {},
-            lang = "zh"
+            onToggleAppUpdatesAlerts = {}
         )
     }
 }

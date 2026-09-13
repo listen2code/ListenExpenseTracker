@@ -1,6 +1,6 @@
 package com.listen.expensetracker.features.transactions.components
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 
 import com.listen.expensetracker.data.i18n.AppStrings
 
@@ -76,14 +76,14 @@ fun DateGroupHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
             if (dayExpense > 0) {
                 Text(
-                    text = if (hideAmount) "${AppStrings.TYPE_EXPENSE.tr(lang)} ••••" else "${AppStrings.TYPE_EXPENSE.tr(lang)} $currencySymbol${dayExpense.formatAmount()}",
+                    text = if (hideAmount) "${AppStrings.TYPE_EXPENSE.tr()} ••••" else "${AppStrings.TYPE_EXPENSE.tr()} $currencySymbol${dayExpense.formatAmount()}",
                     fontSize = AppDimens.TextCaption,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (dayIncome > 0) {
                 Text(
-                    text = if (hideAmount) "${AppStrings.TYPE_INCOME.tr(lang)} ••••" else "${AppStrings.TYPE_INCOME.tr(lang)} $currencySymbol${dayIncome.formatAmount()}",
+                    text = if (hideAmount) "${AppStrings.TYPE_INCOME.tr()} ••••" else "${AppStrings.TYPE_INCOME.tr()} $currencySymbol${dayIncome.formatAmount()}",
                     fontSize = AppDimens.TextCaption,
                     color = IncomeGreen
                 )

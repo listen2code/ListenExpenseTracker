@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.formatAmount
@@ -105,7 +105,7 @@ fun ExportOptionsSheet(
     CommonBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        title = AppStrings.EXPORT_EXCEL_TITLE.tr(lang),
+        title = AppStrings.EXPORT_EXCEL_TITLE.tr(),
         modifier = modifier
     ) {
         Column(
@@ -117,7 +117,7 @@ fun ExportOptionsSheet(
 
             // 1. 时间范围筛选
             Text(
-                text = AppStrings.EXPORT_RANGE_LABEL.tr(lang),
+                text = AppStrings.EXPORT_RANGE_LABEL.tr(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -128,23 +128,23 @@ fun ExportOptionsSheet(
                 CommonFilterChip(
                     selected = selectedRange == ExportDateRange.ALL,
                     onClick = { selectedRange = ExportDateRange.ALL },
-                    label = AppStrings.EXPORT_RANGE_ALL.tr(lang)
+                    label = AppStrings.EXPORT_RANGE_ALL.tr()
                 )
                 CommonFilterChip(
                     selected = selectedRange == ExportDateRange.THIS_MONTH,
                     onClick = { selectedRange = ExportDateRange.THIS_MONTH },
-                    label = AppStrings.EXPORT_RANGE_MONTH.tr(lang)
+                    label = AppStrings.EXPORT_RANGE_MONTH.tr()
                 )
                 CommonFilterChip(
                     selected = selectedRange == ExportDateRange.THIS_YEAR,
                     onClick = { selectedRange = ExportDateRange.THIS_YEAR },
-                    label = AppStrings.EXPORT_RANGE_YEAR.tr(lang)
+                    label = AppStrings.EXPORT_RANGE_YEAR.tr()
                 )
             }
 
             // 2. 交易类型筛选
             Text(
-                text = AppStrings.EXPORT_TYPE_LABEL.tr(lang),
+                text = AppStrings.EXPORT_TYPE_LABEL.tr(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -155,17 +155,17 @@ fun ExportOptionsSheet(
                 CommonFilterChip(
                     selected = selectedType == "ALL",
                     onClick = { selectedType = "ALL" },
-                    label = AppStrings.FILTER_TYPE_ALL.tr(lang)
+                    label = AppStrings.FILTER_TYPE_ALL.tr()
                 )
                 CommonFilterChip(
                     selected = selectedType == "EXPENSE",
                     onClick = { selectedType = "EXPENSE" },
-                    label = AppStrings.TYPE_EXPENSE.tr(lang)
+                    label = AppStrings.TYPE_EXPENSE.tr()
                 )
                 CommonFilterChip(
                     selected = selectedType == "INCOME",
                     onClick = { selectedType = "INCOME" },
-                    label = AppStrings.TYPE_INCOME.tr(lang)
+                    label = AppStrings.TYPE_INCOME.tr()
                 )
             }
 
@@ -183,7 +183,7 @@ fun ExportOptionsSheet(
                     Text(
                         text = String.format(
                             Locale.getDefault(),
-                            AppStrings.EXPORT_PREVIEW_SUMMARY.tr(lang),
+                            AppStrings.EXPORT_PREVIEW_SUMMARY.tr(),
                             filteredList.size,
                             "$currencySymbol${totalSum.formatAmount()}"
                         ),
@@ -200,7 +200,7 @@ fun ExportOptionsSheet(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = AppStrings.EXPORT_ACTION_SAVE.tr(lang),
+                    text = AppStrings.EXPORT_ACTION_SAVE.tr(),
                     onClick = { onSaveToFile(startTs, endTs, selectedType, defaultFileName) },
                     style = CommonButtonStyle.Primary,
                     icon = { Icon(Icons.Default.FileDownload, contentDescription = "Save", modifier = Modifier.size(18.dp)) },
@@ -209,7 +209,7 @@ fun ExportOptionsSheet(
                 )
 
                 CommonButton(
-                    text = AppStrings.EXPORT_ACTION_SHARE.tr(lang),
+                    text = AppStrings.EXPORT_ACTION_SHARE.tr(),
                     onClick = { onShare(startTs, endTs, selectedType) },
                     style = CommonButtonStyle.Outlined,
                     icon = { Icon(Icons.Default.Share, contentDescription = "Share", modifier = Modifier.size(18.dp)) },

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AccountTypeItem
@@ -114,9 +114,9 @@ fun AccountCardItem(
                     ) {
                         CommonText(
                             text = if (acct.isSystem) {
-                                AppStrings.ACCOUNT_BADGE_SYSTEM.tr(lang)
+                                AppStrings.ACCOUNT_BADGE_SYSTEM.tr()
                             } else {
-                                AppStrings.ACCOUNT_BADGE_CUSTOM.tr(lang)
+                                AppStrings.ACCOUNT_BADGE_CUSTOM.tr()
                             },
                             fontSize = 9.sp,
                             color = if (acct.isSystem) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,

@@ -8,7 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import androidx.compose.ui.platform.LocalContext
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.settings.components.SettingsApmSection
@@ -30,8 +31,9 @@ import com.listen.uicomponent.components.BaseScreenScaffold
  *
  * Google 官方 UI State Holder 架构规范：
  * 1. 业务与偏好数据由 [state] ([SettingsUiState]) 纯数据类驱动；
- * 2. 界面系统契约调用与滚动位置由 [rememberSettingsStateHolder] 封装接管；
- * 3. 页面布局与各设置分组（财务参数、云端同步中心、外观偏好、运维工具）彻底解耦。
+ * 2. 界面交互状态（列表滚动、月份标题计算）由 [rememberSettingsStateHolder] 纯状态持有者管理；
+ * 3. 画面级副作用与系统 ActivityResult 契约监听由 [SettingsEffects] 独立挂载；
+ * 4. 页面布局与各设置分组（财务参数、云端同步中心、外观偏好、运维工具）彻底解耦。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,13 +43,20 @@ fun SettingsScreen(
     targetMonthOffset: Int = 0,
     viewModel: SettingsViewModel? = null
 ) {
-    // 🌟 一行收拢所有列表滚动、月份标题与系统文件选择器
-    val holder = rememberSettingsStateHolder(state, targetMonthOffset, viewModel)
-    val lang = state.language
+    // 🌟 UI 交互状态（滚动位置、标题计算）
+    val holder = rememberSettingsStateHolder(state, targetMonthOffset)
+    val context = LocalContext.current
     val sym = state.currencySymbol
 
+    // 🌟 独立挂载画面专用副作用监听与系统契约交互 (区分于 UI 状态持有者 SettingsStateHolder)
+    SettingsEffects(
+        viewModel = viewModel,
+        context = context,
+        listState = holder.listState
+    )
+
     BaseScreenScaffold(
-        title = AppStrings.SETTINGS_TITLE.tr(lang), modifier = modifier
+        title = AppStrings.SETTINGS_TITLE.tr(), modifier = modifier
     ) { innerPadding ->
         LazyColumn(
             state = holder.listState,
@@ -66,8 +75,7 @@ fun SettingsScreen(
                     onOpenBudgetDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.MonthlyBudget)) },
                     onOpenCategoryDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.CategoryManage)) },
                     onOpenAccountDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.AccountManage)) },
-                    onOpenRecurringDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.RecurringManage)) },
-                    lang = lang
+                    onOpenRecurringDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.RecurringManage)) }
                 )
             }
 
@@ -89,7 +97,6 @@ fun SettingsScreen(
                     onExportExcel = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.ExportExcelOptions)) },
                     onExportJson = { viewModel?.handleIntent(SettingsIntent.RequestExportJson) },
                     onImportJson = { viewModel?.handleIntent(SettingsIntent.RequestImportJson) },
-                    lang = lang,
                     isOperating = state.isOperating
                 )
             }
@@ -99,7 +106,6 @@ fun SettingsScreen(
                 SettingsAppearanceSection(
                     themeMode = state.themeMode,
                     accentColor = state.accentColor,
-                    lang = lang,
                     onChangeThemeMode = { viewModel?.handleIntent(SettingsIntent.ChangeThemeMode(it)) },
                     onChangeAccentColor = { viewModel?.handleIntent(SettingsIntent.ChangeAccentColor(it)) },
                     onLanguageChange = { viewModel?.handleIntent(SettingsIntent.ChangeLanguage(it)) },
@@ -117,8 +123,7 @@ fun SettingsScreen(
                     onToggleNotifications = { viewModel?.handleIntent(SettingsIntent.ToggleNotifications(it)) },
                     onToggleBudgetAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleBudgetAlerts(it)) },
                     onToggleRecurringBillsAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleRecurringBillsAlerts(it)) },
-                    onToggleAppUpdatesAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleAppUpdatesAlerts(it)) },
-                    lang = lang
+                    onToggleAppUpdatesAlerts = { viewModel?.handleIntent(SettingsIntent.ToggleAppUpdatesAlerts(it)) }
                 )
             }
 
@@ -133,8 +138,7 @@ fun SettingsScreen(
                     onToggleBiometricLock = { viewModel?.handleIntent(SettingsIntent.ToggleBiometricLock(it)) },
                     onChangeLockTimeout = { viewModel?.handleIntent(SettingsIntent.ChangeLockTimeout(it)) },
                     onToggleRecentAppsShield = { viewModel?.handleIntent(SettingsIntent.ToggleRecentAppsShield(it)) },
-                    onToggleShakeToHideBalance = { viewModel?.handleIntent(SettingsIntent.ToggleShakeToHideBalance(it)) },
-                    lang = lang
+                    onToggleShakeToHideBalance = { viewModel?.handleIntent(SettingsIntent.ToggleShakeToHideBalance(it)) }
                 )
             }
 
@@ -147,7 +151,6 @@ fun SettingsScreen(
                         onSeedDemoData = { viewModel?.handleIntent(SettingsIntent.SeedDemoData(targetMonthOffset)) },
                         onConfirmClearAll = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.ClearConfirm)) },
                         targetMonthTitle = holder.currentMonthTitle,
-                        lang = lang,
                         onOpenSimulateNotifications = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.SimulateNotifications)) })
                 }
             }
@@ -159,8 +162,7 @@ fun SettingsScreen(
                     isCheckingUpdate = state.isCheckingUpdate,
                     onCheckForUpdates = { viewModel?.handleIntent(SettingsIntent.CheckForUpdates(it)) },
                     onToggleDeveloperMode = { viewModel?.handleIntent(SettingsIntent.ToggleDeveloperMode(it)) },
-                    onOpenAboutDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) },
-                    lang = lang
+                    onOpenAboutDialog = { viewModel?.handleIntent(SettingsIntent.OpenDialog(SettingsDialog.AboutApp)) }
                 )
             }
         }

@@ -26,7 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.engine.RecurringTransactionEngine
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -65,11 +65,11 @@ fun RecurringTransactionsDialog(
     }
 
     val dialogTitle = if (mode == RecurringDialogMode.LIST) {
-        AppStrings.RECURRING_TITLE.tr(lang)
+        AppStrings.RECURRING_TITLE.tr()
     } else if (editingRule != null) {
-        AppStrings.RECURRING_EDIT_RULE.tr(lang)
+        AppStrings.RECURRING_EDIT_RULE.tr()
     } else {
-        AppStrings.RECURRING_ADD_RULE.tr(lang)
+        AppStrings.RECURRING_ADD_RULE.tr()
     }
 
     CommonDialog(
@@ -85,13 +85,13 @@ fun RecurringTransactionsDialog(
         confirmButton = {
             if (mode == RecurringDialogMode.LIST) {
                 CommonButton(
-                    text = AppStrings.COMMON_DONE.tr(lang),
+                    text = AppStrings.COMMON_DONE.tr(),
                     style = CommonButtonStyle.Primary,
                     onClick = onDismiss
                 )
             } else {
                 CommonButton(
-                    text = AppStrings.COMMON_SAVE.tr(lang),
+                    text = AppStrings.COMMON_SAVE.tr(),
                     style = CommonButtonStyle.Primary,
                     enabled = editState.isValid,
                     onClick = {
@@ -104,7 +104,7 @@ fun RecurringTransactionsDialog(
         dismissButton = {
             if (mode == RecurringDialogMode.LIST) {
                 CommonButton(
-                    text = AppStrings.RECURRING_ADD_RULE.tr(lang),
+                    text = AppStrings.RECURRING_ADD_RULE.tr(),
                     style = CommonButtonStyle.Tonal,
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     onClick = {
@@ -114,7 +114,7 @@ fun RecurringTransactionsDialog(
                 )
             } else if (editingRule != null) {
                 CommonButton(
-                    text = AppStrings.COMMON_DELETE.tr(lang),
+                    text = AppStrings.COMMON_DELETE.tr(),
                     style = CommonButtonStyle.Danger,
                     onClick = {
                         onDeleteRule(editingRule!!.id)
@@ -123,7 +123,7 @@ fun RecurringTransactionsDialog(
                 )
             } else {
                 CommonButton(
-                    text = AppStrings.COMMON_CANCEL.tr(lang),
+                    text = AppStrings.COMMON_CANCEL.tr(),
                     style = CommonButtonStyle.Text,
                     onClick = { mode = RecurringDialogMode.LIST }
                 )
@@ -169,7 +169,7 @@ fun RecurringTransactionsDialog(
                                 contentAlignment = Alignment.Center
                             ) {
                                 CommonEmpty(
-                                    message = "${AppStrings.RECURRING_EMPTY_TITLE.tr(lang)}\n${AppStrings.RECURRING_EMPTY_DESC.tr(lang)}"
+                                    message = "${AppStrings.RECURRING_EMPTY_TITLE.tr()}\n${AppStrings.RECURRING_EMPTY_DESC.tr()}"
                                 )
                             }
                         } else {

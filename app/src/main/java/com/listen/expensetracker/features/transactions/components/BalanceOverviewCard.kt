@@ -1,6 +1,6 @@
 package com.listen.expensetracker.features.transactions.components
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -82,7 +82,7 @@ fun BalanceOverviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = AppStrings.BALANCE_TITLE.tr(lang),
+                    text = AppStrings.BALANCE_TITLE.tr(),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -113,7 +113,7 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = AppStrings.TOTAL_EXPENSE.tr(lang),
+                        text = AppStrings.TOTAL_EXPENSE.tr(),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -133,7 +133,7 @@ fun BalanceOverviewCard(
                     horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)
                 ) {
                     Text(
-                        text = AppStrings.TOTAL_INCOME.tr(lang),
+                        text = AppStrings.TOTAL_INCOME.tr(),
                         fontSize = AppDimens.TextCaption,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -184,7 +184,7 @@ fun BalanceOverviewCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = (if (isYearMode) AppStrings.ANNUAL_BUDGET else AppStrings.MONTHLY_BUDGET).tr(lang),
+                            text = (if (isYearMode) AppStrings.ANNUAL_BUDGET else AppStrings.MONTHLY_BUDGET).tr(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -206,11 +206,11 @@ fun BalanceOverviewCard(
 
                     Text(
                         text = if (hideBalance) {
-                            if (isOverBudget) "${AppStrings.OVER_BUDGET.tr(lang)} ••••" else "${AppStrings.USED_BUDGET.tr(lang)} ••••"
+                            if (isOverBudget) "${AppStrings.OVER_BUDGET.tr()} ••••" else "${AppStrings.USED_BUDGET.tr()} ••••"
                         } else if (isOverBudget) {
-                            "${AppStrings.OVER_BUDGET.tr(lang)} $currencySymbol${(totalExpense - monthlyBudget).formatAmount()}"
+                            "${AppStrings.OVER_BUDGET.tr()} $currencySymbol${(totalExpense - monthlyBudget).formatAmount()}"
                         } else {
-                            "${AppStrings.USED_BUDGET.tr(lang)} ${"%.0f".format(budgetUsageRatio * 100)}%"
+                            "${AppStrings.USED_BUDGET.tr()} ${"%.0f".format(budgetUsageRatio * 100)}%"
                         },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,

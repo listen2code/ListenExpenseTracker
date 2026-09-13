@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.common.components.MonthNavigationCapsule
@@ -72,7 +72,6 @@ fun TransactionsScreen(
 ) {
     // 🌟 一行收拢所有 Pager、ListState 与副作用协同逻辑
     val holder = rememberTransactionsStateHolder(state, viewModel)
-    val lang = state.language
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -146,7 +145,7 @@ fun TransactionsScreen(
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     if (state.hasActiveFilters) {
                                         viewModel?.handleIntent(TransactionsIntent.ResetAllFilters)
-                                        Toast.makeText(context, AppStrings.FILTER_CLEAR_ACTIVE.tr(lang), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, AppStrings.FILTER_CLEAR_ACTIVE.tr(), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             )
@@ -154,7 +153,7 @@ fun TransactionsScreen(
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Default.Tune,
-                                contentDescription = AppStrings.FILTER_TITLE.tr(lang),
+                                contentDescription = AppStrings.FILTER_TITLE.tr(),
                                 tint = filterContentColor,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -168,7 +167,7 @@ fun TransactionsScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = AppStrings.BTN_ADD_TRANSACTION.tr(lang))
+                    Icon(Icons.Default.Add, contentDescription = AppStrings.BTN_ADD_TRANSACTION.tr())
                 }
             }
         },

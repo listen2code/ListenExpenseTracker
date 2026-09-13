@@ -43,7 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.apm.LogEntryUi
@@ -113,7 +113,7 @@ fun ApmFloatingInspectorCard(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = AppStrings.APM_LOGS_TITLE.tr(lang),
+                        text = AppStrings.APM_LOGS_TITLE.tr(),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -128,13 +128,13 @@ fun ApmFloatingInspectorCard(
                 ) {
                     ApmActionButton(
                         icon = Icons.Default.DeleteSweep,
-                        label = AppStrings.APM_BTN_CLEAR.tr(lang),
+                        label = AppStrings.APM_BTN_CLEAR.tr(),
                         isPrimary = false,
                         onClick = onClearLogs
                     )
                     ApmActionButton(
                         icon = Icons.Default.Share,
-                        label = AppStrings.APM_BTN_EXPORT.tr(lang),
+                        label = AppStrings.APM_BTN_EXPORT.tr(),
                         isPrimary = true,
                         onClick = onExportLogs
                     )
@@ -185,7 +185,7 @@ fun ApmFloatingInspectorCard(
             SearchBarInput(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                placeholder = AppStrings.APM_SEARCH_PLACEHOLDER.tr(lang),
+                placeholder = AppStrings.APM_SEARCH_PLACEHOLDER.tr(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -200,7 +200,7 @@ fun ApmFloatingInspectorCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = AppStrings.APM_EMPTY_LOGS.tr(lang),
+                        text = AppStrings.APM_EMPTY_LOGS.tr(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )

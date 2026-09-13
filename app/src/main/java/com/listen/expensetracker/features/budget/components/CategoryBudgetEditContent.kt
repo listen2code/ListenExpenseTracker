@@ -28,7 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.Category
@@ -65,7 +65,7 @@ fun CategoryBudgetEditContent(
         CommonEditText(
             value = budgetInput,
             onValueChange = { input -> onBudgetInputChange(input.take(10)) },
-            label = AppStrings.MONTHLY_BUDGET.tr(lang),
+            label = AppStrings.MONTHLY_BUDGET.tr(),
             placeholder = "5000",
             leadingIcon = { CommonText(text = currencySymbol, fontWeight = FontWeight.Bold) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -109,15 +109,15 @@ fun CategoryBudgetEditContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = AppStrings.BUDGET_ALLOCATED.tr(lang).format(totalAllocatedPercent),
+                        text = AppStrings.BUDGET_ALLOCATED.tr().format(totalAllocatedPercent),
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = allocColor
                     )
                     val hintText = when {
-                        totalAllocatedPercent == 100 -> AppStrings.BUDGET_FULLY_ALLOCATED.tr(lang)
-                        totalAllocatedPercent > 100 -> AppStrings.BUDGET_EXCEED_HINT.tr(lang).format(totalAllocatedPercent - 100)
-                        else -> AppStrings.BUDGET_REMAINING_HINT.tr(lang).format(100 - totalAllocatedPercent)
+                        totalAllocatedPercent == 100 -> AppStrings.BUDGET_FULLY_ALLOCATED.tr()
+                        totalAllocatedPercent > 100 -> AppStrings.BUDGET_EXCEED_HINT.tr().format(totalAllocatedPercent - 100)
+                        else -> AppStrings.BUDGET_REMAINING_HINT.tr().format(100 - totalAllocatedPercent)
                     }
                     Text(text = hintText, fontSize = 11.sp, color = allocColor, fontWeight = FontWeight.Medium)
                 }
@@ -158,7 +158,7 @@ fun CategoryBudgetEditContent(
                         contentPadding = 6.dp
                     ) {
                         Text(
-                            text = AppStrings.BUDGET_AUTO_EQUALIZE.tr(lang),
+                            text = AppStrings.BUDGET_AUTO_EQUALIZE.tr(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -178,7 +178,7 @@ fun CategoryBudgetEditContent(
                         contentPadding = 6.dp
                     ) {
                         Text(
-                            text = AppStrings.BUDGET_RESET_DEFAULT.tr(lang),
+                            text = AppStrings.BUDGET_RESET_DEFAULT.tr(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

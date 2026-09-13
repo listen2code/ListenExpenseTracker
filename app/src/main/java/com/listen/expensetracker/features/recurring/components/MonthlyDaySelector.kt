@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
@@ -52,7 +52,7 @@ fun MonthlyDaySelector(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CommonText(text = AppStrings.RECURRING_DUE_DAY_LABEL.tr(lang), fontSize = AppDimens.TextSmall)
+            CommonText(text = AppStrings.RECURRING_DUE_DAY_LABEL.tr(), fontSize = AppDimens.TextSmall)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -70,9 +70,9 @@ fun MonthlyDaySelector(
                     modifier = Modifier.padding(horizontal = 4.dp)
                 ) {
                     val dayLabel = if (dayOfPeriod == 28) {
-                        AppStrings.RECURRING_MONTH_END_DETAIL.tr(lang)
+                        AppStrings.RECURRING_MONTH_END_DETAIL.tr()
                     } else {
-                        AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(dayOfPeriod)
+                        AppStrings.RECURRING_DAY_SUFFIX.tr().format(dayOfPeriod)
                     }
                     CommonText(
                         text = dayLabel,
@@ -109,9 +109,9 @@ fun MonthlyDaySelector(
                         .clickable { onDayChange(day) }
                 ) {
                     val quickLabel = if (day == 28) {
-                        AppStrings.RECURRING_MONTH_END.tr(lang)
+                        AppStrings.RECURRING_MONTH_END.tr()
                     } else {
-                        AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(day)
+                        AppStrings.RECURRING_DAY_SUFFIX.tr().format(day)
                     }
                     CommonText(
                         text = quickLabel,

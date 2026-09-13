@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -89,12 +89,12 @@ fun TransactionFilterBottomSheet(
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
             // 1. Transaction Type Section
-            FilterSectionHeader(AppStrings.FILTER_TYPE.tr(lang))
+            FilterSectionHeader(AppStrings.FILTER_TYPE.tr())
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 listOf(
-                    TransactionType.ALL to AppStrings.FILTER_TYPE_ALL.tr(lang),
-                    TransactionType.EXPENSE to AppStrings.TYPE_EXPENSE.tr(lang),
-                    TransactionType.INCOME to AppStrings.TYPE_INCOME.tr(lang)
+                    TransactionType.ALL to AppStrings.FILTER_TYPE_ALL.tr(),
+                    TransactionType.EXPENSE to AppStrings.TYPE_EXPENSE.tr(),
+                    TransactionType.INCOME to AppStrings.TYPE_INCOME.tr()
                 ).forEach { (typeKey, label) ->
                     FilterChip(
                         selected = selectedType == typeKey,
@@ -109,7 +109,7 @@ fun TransactionFilterBottomSheet(
             }
 
             // 2. Category Section with Icon and Text (Multi-Selectable)
-            FilterSectionHeader(AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang))
+            FilterSectionHeader(AppStrings.SETTINGS_CATEGORY_MANAGE.tr())
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall),
@@ -118,7 +118,7 @@ fun TransactionFilterBottomSheet(
                 FilterChip(
                     selected = selectedCategories.isEmpty(), onClick = { selectedCategories = emptySet() },
                     leadingIcon = { Icon(Icons.Default.Apps, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    label = { Text(AppStrings.FILTER_ALL.tr(lang), fontSize = 12.sp) },
+                    label = { Text(AppStrings.FILTER_ALL.tr(), fontSize = 12.sp) },
                     colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer)
                 )
                 categories.forEach { cat ->
@@ -135,12 +135,12 @@ fun TransactionFilterBottomSheet(
             }
 
             // 3. Amount Range Section
-            FilterSectionHeader(AppStrings.FILTER_AMOUNT.tr(lang))
+            FilterSectionHeader(AppStrings.FILTER_AMOUNT.tr())
             FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall), verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 AmountFilterPreset.entries.forEach { preset ->
                     FilterChip(
                         selected = selectedPreset == preset, onClick = { selectedPreset = preset },
-                        label = { Text(preset.labelKey.tr(lang), fontSize = 12.sp) },
+                        label = { Text(preset.labelKey.tr(), fontSize = 12.sp) },
                         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer)
                     )
                 }
@@ -150,23 +150,23 @@ fun TransactionFilterBottomSheet(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall), verticalAlignment = Alignment.CenterVertically) {
                     CompactFilterAmountInput(
                         value = minAmountText, onValueChange = { minAmountText = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                        placeholder = AppStrings.FILTER_MIN_AMOUNT.tr(lang), currencySymbol = currencySymbol, modifier = Modifier.weight(1f)
+                        placeholder = AppStrings.FILTER_MIN_AMOUNT.tr(), currencySymbol = currencySymbol, modifier = Modifier.weight(1f)
                     )
                     Text("—", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     CompactFilterAmountInput(
                         value = maxAmountText, onValueChange = { maxAmountText = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                        placeholder = AppStrings.FILTER_MAX_AMOUNT.tr(lang), currencySymbol = currencySymbol, modifier = Modifier.weight(1f)
+                        placeholder = AppStrings.FILTER_MAX_AMOUNT.tr(), currencySymbol = currencySymbol, modifier = Modifier.weight(1f)
                     )
                 }
             }
 
             // 4. Sort Order Section
-            FilterSectionHeader(AppStrings.FILTER_SORT.tr(lang))
+            FilterSectionHeader(AppStrings.FILTER_SORT.tr())
             FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall), verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceSmall)) {
                 TransactionSortOrder.entries.forEach { order ->
                     FilterChip(
                         selected = selectedSortOrder == order, onClick = { selectedSortOrder = order },
-                        label = { Text(order.displayNameKey.tr(lang), fontSize = 12.sp) },
+                        label = { Text(order.displayNameKey.tr(), fontSize = 12.sp) },
                         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer)
                     )
                 }
@@ -177,7 +177,7 @@ fun TransactionFilterBottomSheet(
             // 5. Action Buttons (Reset & Done)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)) {
                 CommonButton(
-                    text = AppStrings.FILTER_RESET.tr(lang),
+                    text = AppStrings.FILTER_RESET.tr(),
                     onClick = {
                         selectedType = "ALL"
                         selectedCategories = emptySet()
@@ -191,7 +191,7 @@ fun TransactionFilterBottomSheet(
                     style = CommonButtonStyle.Outlined, modifier = Modifier.weight(1f)
                 )
                 CommonButton(
-                    text = AppStrings.FILTER_APPLY.tr(lang),
+                    text = AppStrings.FILTER_APPLY.tr(),
                     onClick = {
                         onApply(selectedType, selectedCategories, selectedPreset, minAmountText.toDoubleOrNull(), maxAmountText.toDoubleOrNull(), selectedSortOrder)
                         onDismiss()

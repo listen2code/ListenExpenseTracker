@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -56,7 +56,6 @@ fun SettingsVersionFooter(
     onCheckForUpdates: (String) -> Unit,
     onToggleDeveloperMode: (Boolean) -> Unit,
     onOpenAboutDialog: () -> Unit,
-    lang: String,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -86,7 +85,7 @@ fun SettingsVersionFooter(
         ) {
             // Check for updates action button
             CommonButton(
-                text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr(lang) else AppStrings.CHECK_UPDATE.tr(lang),
+                text = if (isCheckingUpdate) AppStrings.CHECKING_UPDATES.tr() else AppStrings.CHECK_UPDATE.tr(),
                 onClick = { onCheckForUpdates(versionName) },
                 enabled = !isCheckingUpdate,
                 style = CommonButtonStyle.Outlined,
@@ -121,7 +120,7 @@ fun SettingsVersionFooter(
                     .combinedClickable(
                         onClick = {
                             if (isDeveloperMode) {
-                                Toast.makeText(context, AppStrings.DEVELOPER_MODE_ALREADY.tr(lang), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, AppStrings.DEVELOPER_MODE_ALREADY.tr(), Toast.LENGTH_SHORT).show()
                                 return@combinedClickable
                             }
                             val now = System.currentTimeMillis()
@@ -137,7 +136,7 @@ fun SettingsVersionFooter(
                                 onToggleDeveloperMode(true)
                             } else if (clickCount in 3..4) {
                                 val remaining = 5 - clickCount
-                                val stepMsg = String.format(AppStrings.DEVELOPER_MODE_STEPS.tr(lang), remaining)
+                                val stepMsg = String.format(AppStrings.DEVELOPER_MODE_STEPS.tr(), remaining)
                                 Toast.makeText(context, stepMsg, Toast.LENGTH_SHORT).show()
                             }
                         },
@@ -172,8 +171,7 @@ fun SettingsVersionFooterPreview() {
             isCheckingUpdate = false,
             onCheckForUpdates = {},
             onToggleDeveloperMode = {},
-            onOpenAboutDialog = {},
-            lang = "zh"
+            onOpenAboutDialog = {}
         )
     }
 }

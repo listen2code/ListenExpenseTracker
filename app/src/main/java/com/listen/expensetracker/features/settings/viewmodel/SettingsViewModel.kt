@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.arch.mvi.LifecycleEvent
@@ -110,7 +110,7 @@ class SettingsViewModel(
                     prefManager.setDeveloperMode(true)
                     updateState { copy(isDeveloperMode = true) }
                     val lang = currentState.language
-                    emitEffect(CommonUiEffect.ShowToast(AppStrings.DEVELOPER_MODE_ENABLED.tr(lang)))
+                    emitEffect(CommonUiEffect.ShowToast(AppStrings.DEVELOPER_MODE_ENABLED.tr()))
                 }
             }
             is SettingsIntent.LinkGoogleAccount -> viewModelScope.launch {

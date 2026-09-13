@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.FinancialInsightItem
 import com.listen.expensetracker.data.engine.InsightSeverity
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -84,7 +84,7 @@ fun InsightCarouselCard(
                         modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
                     Text(
-                        text = AppStrings.INSIGHT_SECTION_TITLE.tr(lang),
+                        text = AppStrings.INSIGHT_SECTION_TITLE.tr(),
                         fontWeight = FontWeight.Bold,
                         fontSize = AppDimens.TextTitle,
                         color = MaterialTheme.colorScheme.onSurface

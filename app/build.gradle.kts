@@ -46,7 +46,7 @@ android {
         // 说明：36 为 Android 16 正式版本，已稳定适配主流生产环境。
         targetSdk = 36
 
-        val vName = "0.0.42"
+        val vName = "0.0.43"
         versionName = vName
 
         // 自动计算版本号：major.minor.patch -> major * 10000 + minor * 100 + patch (例如 0.0.40 -> 40)

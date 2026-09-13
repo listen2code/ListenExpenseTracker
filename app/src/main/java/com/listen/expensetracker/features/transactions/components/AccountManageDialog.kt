@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AccountTypeItem
@@ -64,7 +64,7 @@ fun AccountManageDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
+        title = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(),
         modifier = modifier,
         icon = {
             Box(
@@ -84,7 +84,7 @@ fun AccountManageDialog(
         },
         confirmButton = {
             CommonButton(
-                text = AppStrings.ADD_ACCOUNT.tr(lang),
+                text = AppStrings.ADD_ACCOUNT.tr(),
                 onClick = { showAddDialog = true },
                 style = CommonButtonStyle.Primary,
                 icon = {
@@ -98,7 +98,7 @@ fun AccountManageDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.COMMON_DONE.tr(lang),
+                text = AppStrings.COMMON_DONE.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -113,7 +113,7 @@ fun AccountManageDialog(
             // 1. Built-in Accounts Section
             item(key = "header_system") {
                 CommonText(
-                    text = AppStrings.SYSTEM_ACCOUNTS_SECTION.tr(lang),
+                    text = AppStrings.SYSTEM_ACCOUNTS_SECTION.tr(),
                     fontSize = AppDimens.TextCaption,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -133,7 +133,7 @@ fun AccountManageDialog(
             item(key = "header_custom") {
                 Spacer(modifier = Modifier.height(AppDimens.SpaceSmall))
                 CommonText(
-                    text = AppStrings.CUSTOM_ACCOUNTS_SECTION.tr(lang),
+                    text = AppStrings.CUSTOM_ACCOUNTS_SECTION.tr(),
                     fontSize = AppDimens.TextCaption,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -144,7 +144,7 @@ fun AccountManageDialog(
                 item(key = "custom_empty") {
                     // [ListenUiComponent] 使用 CommonEmpty 统一空数据缺省页规范 (Rule 25)
                     CommonEmpty(
-                        message = AppStrings.CUSTOM_ACCOUNTS_EMPTY.tr(lang),
+                        message = AppStrings.CUSTOM_ACCOUNTS_EMPTY.tr(),
                         icon = Icons.Default.Info,
                         height = 80.dp
                     )
@@ -166,7 +166,7 @@ fun AccountManageDialog(
     if (showAddDialog) {
         AccountEditDialog(
             initialName = "",
-            title = AppStrings.ADD_ACCOUNT.tr(lang),
+            title = AppStrings.ADD_ACCOUNT.tr(),
             onDismiss = { showAddDialog = false },
             onConfirm = { name ->
                 val created = AccountRepository.addAccount(name)
@@ -182,7 +182,7 @@ fun AccountManageDialog(
     accountToEdit?.let { acct ->
         AccountEditDialog(
             initialName = acct.customName ?: "",
-            title = AppStrings.EDIT_ACCOUNT.tr(lang),
+            title = AppStrings.EDIT_ACCOUNT.tr(),
             onDismiss = { accountToEdit = null },
             onConfirm = { name ->
                 AccountRepository.updateAccount(acct.key, name)

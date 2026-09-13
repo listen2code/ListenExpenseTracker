@@ -9,7 +9,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.MainActivity
 import com.listen.expensetracker.R
 import com.listen.expensetracker.data.i18n.NotificationStrings
@@ -41,10 +41,10 @@ object LocalNotificationManager {
         // 1. 预算超支与警戒预警渠道 (高优先级，带震动与横幅)
         val budgetChannel = NotificationChannel(
             CHANNEL_BUDGET_ALERTS,
-            NotificationStrings.CHANNEL_BUDGET_ALERTS_NAME.tr(lang),
+            NotificationStrings.CHANNEL_BUDGET_ALERTS_NAME.tr(),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = NotificationStrings.CHANNEL_BUDGET_ALERTS_DESC.tr(lang)
+            description = NotificationStrings.CHANNEL_BUDGET_ALERTS_DESC.tr()
             enableVibration(true)
             enableLights(true)
         }
@@ -52,20 +52,20 @@ object LocalNotificationManager {
         // 2. 周期账单自动履约入账渠道 (默认优先级，温和提示音)
         val recurringChannel = NotificationChannel(
             CHANNEL_RECURRING_BILLS,
-            NotificationStrings.CHANNEL_RECURRING_BILLS_NAME.tr(lang),
+            NotificationStrings.CHANNEL_RECURRING_BILLS_NAME.tr(),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = NotificationStrings.CHANNEL_RECURRING_BILLS_DESC.tr(lang)
+            description = NotificationStrings.CHANNEL_RECURRING_BILLS_DESC.tr()
             enableVibration(true)
         }
 
         // 3. 应用版本更新提醒渠道 (默认优先级)
         val updateChannel = NotificationChannel(
             CHANNEL_APP_UPDATES,
-            NotificationStrings.CHANNEL_APP_UPDATES_NAME.tr(lang),
+            NotificationStrings.CHANNEL_APP_UPDATES_NAME.tr(),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = NotificationStrings.CHANNEL_APP_UPDATES_DESC.tr(lang)
+            description = NotificationStrings.CHANNEL_APP_UPDATES_DESC.tr()
             enableVibration(false)
         }
 

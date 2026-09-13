@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -69,10 +69,10 @@ fun CategoryManageDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
+        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(),
         confirmButton = {
             CommonButton(
-                text = AppStrings.BTN_ADD_TRANSACTION.tr(lang),
+                text = AppStrings.BTN_ADD_TRANSACTION.tr(),
                 onClick = { showAddDialog = true },
                 style = CommonButtonStyle.Primary,
                 icon = {
@@ -82,7 +82,7 @@ fun CategoryManageDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.BTN_DONE.tr(lang),
+                text = AppStrings.BTN_DONE.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -93,7 +93,7 @@ fun CategoryManageDialog(
             verticalArrangement = Arrangement.spacedBy(AppDimens.SpaceMedium)
         ) {
             CommonSegmentedControl(
-                items = listOf(AppStrings.TYPE_EXPENSE.tr(lang), AppStrings.TYPE_INCOME.tr(lang)),
+                items = listOf(AppStrings.TYPE_EXPENSE.tr(), AppStrings.TYPE_INCOME.tr()),
                 selectedIndex = if (activeType == TransactionType.EXPENSE) 0 else 1,
                 onIndexChange = { index ->
                     activeType = if (index == 0) TransactionType.EXPENSE else TransactionType.INCOME
@@ -171,10 +171,10 @@ private fun AddCustomCategoryDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(lang),
+        title = AppStrings.SETTINGS_CATEGORY_MANAGE.tr(),
         confirmButton = {
             CommonButton(
-                text = AppStrings.BTN_SAVE.tr(lang),
+                text = AppStrings.BTN_SAVE.tr(),
                 onClick = {
                     if (name.isNotBlank()) {
                         CategoryRepository.addCustomCategory(
@@ -192,7 +192,7 @@ private fun AddCustomCategoryDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.BTN_CANCEL.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -202,7 +202,7 @@ private fun AddCustomCategoryDialog(
             CommonEditText(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
+                placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(),
                 singleLine = true
             )
 

@@ -3,7 +3,7 @@ package com.listen.expensetracker.features.transactions.viewmodel
 import android.app.Application
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.TraceManager
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.arch.mvi.CommonUiEffect
 import com.listen.expensetracker.data.db.TransactionDao
 import com.listen.expensetracker.data.db.TransactionEntity
@@ -48,8 +48,8 @@ class TransactionMutationHandler(
             dao.deleteTransaction(entity)
         }
         emitEffect(CommonUiEffect.ShowSnackbar(
-            message = AppStrings.UNDO_DELETE_TOAST.tr(lang),
-            actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(lang),
+            message = AppStrings.UNDO_DELETE_TOAST.tr(),
+            actionLabel = AppStrings.UNDO_ACTION_LABEL.tr(),
             onAction = { onRestore(entity) }
         ))
     }
@@ -58,19 +58,19 @@ class TransactionMutationHandler(
         TraceManager.trace(channel = ApmLogChannel.DB, tag = "RoomDB", operationName = "RestoreTransaction", traceId = traceId) {
             dao.insertTransaction(tx)
         }
-        emitEffect(CommonUiEffect.ShowToast(AppStrings.UNDO_SUCCESS_TOAST.tr(lang)))
+        emitEffect(CommonUiEffect.ShowToast(AppStrings.UNDO_SUCCESS_TOAST.tr()))
     }
 
     fun seedDemoData(monthOffset: Int, lang: String) = scope.launch {
         val (startTs, endTs, title) = TransactionCalculationEngine.getMonthRangeAndTitle(monthOffset, lang)
         val count = dao.getTransactionCountInRange(startTs, endTs)
         if (count > 0) {
-            emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_HAS_DATA_ERROR.tr(lang)))
+            emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_HAS_DATA_ERROR.tr()))
             return@launch
         }
         val accounts = AccountRepository.getAllAccounts().map { it.key }.ifEmpty { listOf("CASH", "BANK", "CREDIT") }
         val generated = DemoDataEngine.generate(monthOffset, lang, accounts)
         dao.insertTransactions(generated)
-        emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr(lang).format(title, generated.size)))
+        emitEffect(CommonUiEffect.ShowToast(AppStrings.SEED_MONTH_SUCCESS_TOAST.tr().format(title, generated.size)))
     }
 }

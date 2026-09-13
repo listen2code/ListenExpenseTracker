@@ -25,9 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -59,8 +59,7 @@ fun SettingsDataCenterSection(
     onExportExcel: () -> Unit = {},
     onExportJson: () -> Unit,
     onImportJson: () -> Unit,
-    isOperating: Boolean = false,
-    lang: String = "zh"
+    isOperating: Boolean = false
 ) {
     val isLoggedIn = !googleAccountEmail.isNullOrBlank()
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
@@ -83,7 +82,7 @@ fun SettingsDataCenterSection(
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
                 Text(
-                    text = AppStrings.SETTINGS_DATA_CENTER.tr(lang),
+                    text = AppStrings.SETTINGS_DATA_CENTER.tr(),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -99,17 +98,17 @@ fun SettingsDataCenterSection(
 
                 // Auto-Backup to Google Drive Switch Row
                 CommonSwitchRow(
-                    title = AppStrings.AUTO_BACKUP_DRIVE_TITLE.tr(lang),
+                    title = AppStrings.AUTO_BACKUP_DRIVE_TITLE.tr(),
                     checked = autoBackupDrive,
                     onCheckedChange = onToggleAutoBackupDrive,
-                    subtitle = AppStrings.AUTO_BACKUP_DRIVE_DESC.tr(lang),
+                    subtitle = AppStrings.AUTO_BACKUP_DRIVE_DESC.tr(),
                     contentPadding = 0.dp
                 )
 
                 // Wi-Fi Only Switch Row (Conditional on Auto Backup enabled)
                 if (autoBackupDrive) {
                     CommonSwitchRow(
-                        title = AppStrings.AUTO_BACKUP_WIFI_ONLY_TITLE.tr(lang),
+                        title = AppStrings.AUTO_BACKUP_WIFI_ONLY_TITLE.tr(),
                         checked = autoBackupWifiOnly,
                         onCheckedChange = onToggleAutoBackupWifiOnly,
                         contentPadding = 0.dp
@@ -119,8 +118,7 @@ fun SettingsDataCenterSection(
                 // Sync Status Indicators
                 SyncStatusIndicator(
                     syncState = syncState,
-                    sdf = sdf,
-                    lang = lang
+                    sdf = sdf
                 )
 
                 // Cloud Action Buttons
@@ -130,7 +128,7 @@ fun SettingsDataCenterSection(
                 ) {
                     val isBusy = isOperating || syncState.status == SyncStatus.SYNCING
                     CommonButton(
-                        text = if (isBusy) AppStrings.CLOUD_STATUS_SYNCING.tr(lang) else AppStrings.CLOUD_BACKUP_BTN.tr(lang),
+                        text = if (isBusy) AppStrings.CLOUD_STATUS_SYNCING.tr() else AppStrings.CLOUD_BACKUP_BTN.tr(),
                         onClick = onTriggerBackup,
                         enabled = !isBusy,
                         style = CommonButtonStyle.Primary,
@@ -150,7 +148,7 @@ fun SettingsDataCenterSection(
                     )
 
                     CommonButton(
-                        text = AppStrings.CLOUD_RESTORE_BTN.tr(lang),
+                        text = AppStrings.CLOUD_RESTORE_BTN.tr(),
                         onClick = onTriggerRestore,
                         enabled = !isBusy,
                         style = CommonButtonStyle.Outlined,
@@ -162,13 +160,13 @@ fun SettingsDataCenterSection(
             } else {
                 // Not Logged In State
                 CommonText(
-                    text = AppStrings.GOOGLE_LOGIN_REQUIRED.tr(lang),
+                    text = AppStrings.GOOGLE_LOGIN_REQUIRED.tr(),
                     fontSize = AppDimens.TextSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 CommonButton(
-                    text = AppStrings.GOOGLE_LOGIN_BTN.tr(lang),
+                    text = AppStrings.GOOGLE_LOGIN_BTN.tr(),
                     onClick = onLoginGoogle,
                     style = CommonButtonStyle.Primary,
                     icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(18.dp)) },
@@ -181,7 +179,7 @@ fun SettingsDataCenterSection(
 
             // Part B: Local File-based Data Export & Import
             CommonButton(
-                text = AppStrings.EXPORT_EXCEL_BTN.tr(lang),
+                text = AppStrings.EXPORT_EXCEL_BTN.tr(),
                 onClick = onExportExcel,
                 style = CommonButtonStyle.Primary,
                 icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export Excel", modifier = Modifier.size(16.dp)) },
@@ -194,7 +192,7 @@ fun SettingsDataCenterSection(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.SpaceStandard)
             ) {
                 CommonButton(
-                    text = AppStrings.EXPORT_JSON.tr(lang),
+                    text = AppStrings.EXPORT_JSON.tr(),
                     onClick = onExportJson,
                     style = CommonButtonStyle.Outlined,
                     icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(16.dp)) },
@@ -203,7 +201,7 @@ fun SettingsDataCenterSection(
                 )
 
                 CommonButton(
-                    text = AppStrings.IMPORT_JSON.tr(lang),
+                    text = AppStrings.IMPORT_JSON.tr(),
                     onClick = onImportJson,
                     style = CommonButtonStyle.Outlined,
                     icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(16.dp)) },

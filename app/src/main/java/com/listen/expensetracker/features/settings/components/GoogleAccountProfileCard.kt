@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -129,7 +129,6 @@ fun GoogleAccountProfileCard(
 fun SyncStatusIndicator(
     syncState: SyncState,
     sdf: SimpleDateFormat,
-    lang: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -138,10 +137,10 @@ fun SyncStatusIndicator(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val statusText = when (syncState.status) {
-            SyncStatus.SYNCING -> AppStrings.CLOUD_STATUS_SYNCING.tr(lang)
-            SyncStatus.SUCCESS -> AppStrings.CLOUD_STATUS_SUCCESS.tr(lang)
-            SyncStatus.ERROR -> AppStrings.CLOUD_STATUS_ERROR.tr(lang)
-            SyncStatus.IDLE -> AppStrings.CLOUD_STATUS_IDLE.tr(lang)
+            SyncStatus.SYNCING -> AppStrings.CLOUD_STATUS_SYNCING.tr()
+            SyncStatus.SUCCESS -> AppStrings.CLOUD_STATUS_SUCCESS.tr()
+            SyncStatus.ERROR -> AppStrings.CLOUD_STATUS_ERROR.tr()
+            SyncStatus.IDLE -> AppStrings.CLOUD_STATUS_IDLE.tr()
         }
         val statusColor = when (syncState.status) {
             SyncStatus.SYNCING -> MaterialTheme.colorScheme.primary
@@ -167,7 +166,7 @@ fun SyncStatusIndicator(
 
         if (syncState.lastSyncTimestamp > 0) {
             Text(
-                text = "${AppStrings.CLOUD_LAST_SYNC.tr(lang)}${sdf.format(Date(syncState.lastSyncTimestamp))}",
+                text = "${AppStrings.CLOUD_LAST_SYNC.tr()}${sdf.format(Date(syncState.lastSyncTimestamp))}",
                 fontSize = AppDimens.TextMicro,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

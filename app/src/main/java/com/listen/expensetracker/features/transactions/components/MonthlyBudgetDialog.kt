@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
@@ -69,7 +69,7 @@ fun MonthlyBudgetDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.BUDGET_DIALOG_TITLE.tr(lang),
+        title = AppStrings.BUDGET_DIALOG_TITLE.tr(),
         modifier = modifier,
         icon = {
             Box(
@@ -89,7 +89,7 @@ fun MonthlyBudgetDialog(
         },
         confirmButton = {
             CommonButton(
-                text = AppStrings.COMMON_SAVE.tr(lang),
+                text = AppStrings.COMMON_SAVE.tr(),
                 onClick = {
                     val newBudget = budgetInput.toDoubleOrNull()?.coerceAtLeast(1.0) ?: currentBudget
                     onConfirm(newBudget)
@@ -100,7 +100,7 @@ fun MonthlyBudgetDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.COMMON_CANCEL.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -173,7 +173,7 @@ fun MonthlyBudgetDialog(
                         modifier = Modifier.size(16.dp)
                     )
                     CommonText(
-                        text = "${AppStrings.TOTAL_EXPENSE.tr(lang)}: $currencySymbol${spentAmount.formatAmount()}",
+                        text = "${AppStrings.TOTAL_EXPENSE.tr()}: $currencySymbol${spentAmount.formatAmount()}",
                         fontSize = AppDimens.TextCaption,
                         color = if (isOver) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )

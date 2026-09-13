@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
 import com.listen.expensetracker.data.engine.formatAmount
@@ -95,7 +95,7 @@ fun ActiveFilterTagsRow(
     ) {
         // 0. Annual Category Filter Tag (Scheme B)
         state.activeAnnualFilter?.let { annual ->
-            val tagText = AppStrings.FILTER_ANNUAL_TAG.tr(lang).format(annual.year, annual.categoryName)
+            val tagText = AppStrings.FILTER_ANNUAL_TAG.tr().format(annual.year, annual.categoryName)
             ActiveFilterChipItem(
                 label = tagText,
                 onRemove = { onIntent(TransactionsIntent.ClearAnnualFilter) }
@@ -105,7 +105,7 @@ fun ActiveFilterTagsRow(
         // 1. Transaction Type Tag
         if (state.typeFilter != TransactionType.ALL && state.activeAnnualFilter == null) {
             ActiveFilterChipItem(
-                label = if (state.typeFilter == TransactionType.EXPENSE) AppStrings.TYPE_EXPENSE.tr(lang) else AppStrings.TYPE_INCOME.tr(lang),
+                label = if (state.typeFilter == TransactionType.EXPENSE) AppStrings.TYPE_EXPENSE.tr() else AppStrings.TYPE_INCOME.tr(),
                 onRemove = { onIntent(TransactionsIntent.ClearTypeFilter) }
             )
         }
@@ -136,7 +136,7 @@ fun ActiveFilterTagsRow(
                 val maxStr = state.customMaxAmount?.let { "${state.currencySymbol}${it.formatAmount()}" } ?: "∞"
                 "$minStr ~ $maxStr"
             } else {
-                state.amountPreset.labelKey.tr(lang)
+                state.amountPreset.labelKey.tr()
             }
             ActiveFilterChipItem(
                 label = amountLabel,
@@ -147,14 +147,14 @@ fun ActiveFilterTagsRow(
         // 4. Sort Order Tag (if non-default)
         if (state.sortOrder != TransactionSortOrder.DATE_DESC) {
             ActiveFilterChipItem(
-                label = state.sortOrder.displayNameKey.tr(lang),
+                label = state.sortOrder.displayNameKey.tr(),
                 onRemove = { onIntent(TransactionsIntent.ClearSortOrder) }
             )
         }
 
         // Clear All Link
         Text(
-            text = AppStrings.FILTER_CLEAR_ACTIVE.tr(lang),
+            text = AppStrings.FILTER_CLEAR_ACTIVE.tr(),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,

@@ -30,7 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.update.ReleaseInfo
@@ -53,7 +53,7 @@ fun UpdateAvailableDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = String.format(AppStrings.UPDATE_FOUND_TITLE.tr(lang), releaseInfo.tagName),
+        title = String.format(AppStrings.UPDATE_FOUND_TITLE.tr(), releaseInfo.tagName),
         icon = {
             Box(
                 modifier = Modifier
@@ -72,7 +72,7 @@ fun UpdateAvailableDialog(
         },
         confirmButton = {
             CommonButton(
-                text = AppStrings.BTN_UPDATE.tr(lang),
+                text = AppStrings.BTN_UPDATE.tr(),
                 onClick = {
                     openGooglePlay(context)
                     onDismiss()
@@ -82,7 +82,7 @@ fun UpdateAvailableDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.BTN_CANCEL.tr(lang),
+                text = AppStrings.BTN_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Outlined
             )
@@ -113,7 +113,7 @@ fun UpdateAvailableDialog(
                         .padding(AppDimens.SpaceMedium)
                 ) {
                     CommonText(
-                        text = AppStrings.CHANGELOG_TITLE.tr(lang),
+                        text = AppStrings.CHANGELOG_TITLE.tr(),
                         fontSize = AppDimens.TextSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary

@@ -12,7 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
@@ -40,7 +40,7 @@ fun AccountEditDialog(
         modifier = modifier,
         confirmButton = {
             CommonButton(
-                text = AppStrings.COMMON_SAVE.tr(lang),
+                text = AppStrings.COMMON_SAVE.tr(),
                 onClick = {
                     val trimmed = name.trim()
                     if (trimmed.isNotBlank()) onConfirm(trimmed)
@@ -51,7 +51,7 @@ fun AccountEditDialog(
         },
         dismissButton = {
             CommonButton(
-                text = AppStrings.COMMON_CANCEL.tr(lang),
+                text = AppStrings.COMMON_CANCEL.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Text
             )
@@ -61,7 +61,7 @@ fun AccountEditDialog(
             CommonEditText(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = AppStrings.ACCOUNT_NAME_INPUT.tr(lang),
+                placeholder = AppStrings.ACCOUNT_NAME_INPUT.tr(),
                 singleLine = true
             )
         }

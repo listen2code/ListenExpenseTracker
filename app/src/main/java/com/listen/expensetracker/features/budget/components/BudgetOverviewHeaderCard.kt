@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.CategoryBudgetCalculationResult
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -90,7 +90,7 @@ fun BudgetOverviewHeaderCard(
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     val remStr = if (hideAmount) "••••" else "$currencySymbol${abs(result.remainingBudget).formatAmount()}"
-                    val prefix = if (result.remainingBudget >= 0) AppStrings.BUDGET_REMAINING_PREFIX.tr(lang) else AppStrings.BUDGET_OVER_PREFIX.tr(lang)
+                    val prefix = if (result.remainingBudget >= 0) AppStrings.BUDGET_REMAINING_PREFIX.tr() else AppStrings.BUDGET_OVER_PREFIX.tr()
                     val remText = "$prefix $remStr"
                     Text(
                         text = "${(result.usageRatio * 100).toInt()}% · $remText",
@@ -121,7 +121,7 @@ fun BudgetOverviewHeaderCard(
             ) {
                 if (result.overBudgetCount > 0) {
                     CommonBadge(
-                        text = AppStrings.BUDGET_COUNT_OVER.tr(lang).format(result.overBudgetCount),
+                        text = AppStrings.BUDGET_COUNT_OVER.tr().format(result.overBudgetCount),
                         style = CommonBadgeStyle.Error,
                         showDot = true,
                         size = CommonBadgeSize.Small
@@ -129,14 +129,14 @@ fun BudgetOverviewHeaderCard(
                 }
                 if (result.warningCount > 0) {
                     CommonBadge(
-                        text = AppStrings.BUDGET_COUNT_WARNING.tr(lang).format(result.warningCount),
+                        text = AppStrings.BUDGET_COUNT_WARNING.tr().format(result.warningCount),
                         style = CommonBadgeStyle.Warning,
                         showDot = true,
                         size = CommonBadgeSize.Small
                     )
                 }
                 CommonBadge(
-                    text = AppStrings.BUDGET_COUNT_NORMAL.tr(lang).format(result.normalCount),
+                    text = AppStrings.BUDGET_COUNT_NORMAL.tr().format(result.normalCount),
                     style = CommonBadgeStyle.Success,
                     showDot = true,
                     size = CommonBadgeSize.Small

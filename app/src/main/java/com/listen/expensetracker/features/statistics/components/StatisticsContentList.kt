@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.FinancialInsightEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
@@ -134,7 +134,7 @@ fun StatisticsContentList(
                 SurfaceCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = AppStrings.TREND_MONTH_DAILY.tr(lang),
+                            text = AppStrings.TREND_MONTH_DAILY.tr(),
                             fontWeight = FontWeight.Bold,
                             fontSize = AppDimens.TextTitle,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -146,7 +146,7 @@ fun StatisticsContentList(
                             chartHeight = AppDimens.ChartHeightStandard,
                             currencySymbol = sym,
                             hideAmount = state.hideAmount,
-                            maxLabel = AppStrings.CHART_MAX.tr(lang).format(sym, maxDailyVal),
+                            maxLabel = AppStrings.CHART_MAX.tr().format(sym, maxDailyVal),
                             totalLabel = if (state.hideAmount) "••••" else "$sym${calc.totalExpense.formatAmount()}",
                             onTooltipClick = onDateClick?.let { cb -> { pt -> pt.label.toIntOrNull()?.let { day -> cb(day, pt.subLabel ?: "") } } },
                             modifier = Modifier.fillMaxWidth()
@@ -182,7 +182,7 @@ fun StatisticsContentList(
         if (activeShares.isNotEmpty()) {
             item(key = "ranking_header") {
                 Text(
-                    text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr(lang) else AppStrings.INCOME_RANKING.tr(lang),
+                    text = if (isExpenseTab) AppStrings.EXPENSE_RANKING.tr() else AppStrings.INCOME_RANKING.tr(),
                     fontWeight = FontWeight.Bold,
                     fontSize = AppDimens.TextTitle,
                     color = MaterialTheme.colorScheme.onSurface,

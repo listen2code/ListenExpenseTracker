@@ -27,7 +27,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
 import com.listen.expensetracker.data.model.AppDimens
@@ -67,7 +67,7 @@ fun TransactionsHeaderFilters(
         SearchBarInput(
             query = state.searchQuery,
             onQueryChange = { onIntent(TransactionsIntent.SearchQueryChange(it)) },
-            placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(lang),
+            placeholder = AppStrings.SEARCH_PLACEHOLDER.tr(),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -114,7 +114,7 @@ fun TransactionsHeaderFilters(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(lang),
+                    contentDescription = AppStrings.MANAGE_ACCOUNTS_TITLE.tr(),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )

@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.uicomponent.theme.ListenTheme
@@ -61,7 +61,7 @@ fun OpenSourceLicensesContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = AppStrings.OPEN_SOURCE_LICENSES.tr(lang),
+                        text = AppStrings.OPEN_SOURCE_LICENSES.tr(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

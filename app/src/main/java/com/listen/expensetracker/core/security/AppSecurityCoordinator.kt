@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
@@ -110,8 +110,8 @@ class AppSecurityCoordinator(
         isAuthenticating = true
         BiometricSecurityManager.promptUnlock(
             activity = activity,
-            title = AppStrings.SECURITY_UNLOCK_PROMPT_TITLE.tr(lang),
-            subtitle = AppStrings.SECURITY_UNLOCK_PROMPT_SUBTITLE.tr(lang),
+            title = AppStrings.SECURITY_UNLOCK_PROMPT_TITLE.tr(),
+            subtitle = AppStrings.SECURITY_UNLOCK_PROMPT_SUBTITLE.tr(),
             onSuccess = {
                 isAuthenticating = false
                 isAppLocked = false

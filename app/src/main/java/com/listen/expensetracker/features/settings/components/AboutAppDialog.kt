@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.R
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
@@ -81,10 +81,10 @@ fun AboutAppDialog(
 
     CommonDialog(
         onDismissRequest = onDismiss,
-        title = AppStrings.ABOUT_APP.tr(lang),
+        title = AppStrings.ABOUT_APP.tr(),
         confirmButton = {
             CommonButton(
-                text = AppStrings.BTN_DONE.tr(lang),
+                text = AppStrings.BTN_DONE.tr(),
                 onClick = onDismiss,
                 style = CommonButtonStyle.Primary
             )
@@ -103,7 +103,7 @@ fun AboutAppDialog(
             )
             AboutSpecsCard(lang = lang)
             CommonButton(
-                text = AppStrings.VIEW_LICENSES_BTN.tr(lang),
+                text = AppStrings.VIEW_LICENSES_BTN.tr(),
                 onClick = onOpenLicenses,
                 style = CommonButtonStyle.Outlined,
                 modifier = Modifier.fillMaxWidth()
@@ -170,9 +170,9 @@ private fun AboutAppHeader(
 private fun AboutSpecsCard(lang: String) {
     val items = remember(lang) {
         listOf(
-            Triple(Icons.Default.Layers, AppStrings.APP_ARCHITECTURE_LABEL.tr(lang), "MVI + Clean Architecture + Room"),
-            Triple(Icons.Default.Code, AppStrings.APP_CORE_SDK_LABEL.tr(lang), "ListenArch · ListenUiComponent"),
-            Triple(Icons.Default.Security, AppStrings.APP_FEATURES_LABEL.tr(lang), AppStrings.APP_FEATURES_DESC.tr(lang))
+            Triple(Icons.Default.Layers, AppStrings.APP_ARCHITECTURE_LABEL.tr(), "MVI + Clean Architecture + Room"),
+            Triple(Icons.Default.Code, AppStrings.APP_CORE_SDK_LABEL.tr(), "ListenArch · ListenUiComponent"),
+            Triple(Icons.Default.Security, AppStrings.APP_FEATURES_LABEL.tr(), AppStrings.APP_FEATURES_DESC.tr())
         )
     }
     Column(

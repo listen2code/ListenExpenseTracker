@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.db.TransactionType
@@ -61,19 +61,19 @@ fun RecurringRuleItemCard(
     val accountName = AccountRepository.getAccountDisplayName(rule.accountType, lang)
 
     val freqLabel = when (rule.frequency) {
-        RecurringFrequency.DAILY -> AppStrings.RECURRING_FREQ_DAILY.tr(lang)
-        RecurringFrequency.WEEKLY -> "${AppStrings.RECURRING_FREQ_WEEKLY.tr(lang)}${getWeekdayName(rule.dayOfPeriod, lang)}"
-        RecurringFrequency.MONTHLY -> "${AppStrings.RECURRING_FREQ_MONTHLY.tr(lang)} ${AppStrings.RECURRING_DAY_SUFFIX.tr(lang).format(rule.dayOfPeriod)}"
-        RecurringFrequency.YEARLY -> AppStrings.RECURRING_FREQ_YEARLY.tr(lang)
+        RecurringFrequency.DAILY -> AppStrings.RECURRING_FREQ_DAILY.tr()
+        RecurringFrequency.WEEKLY -> "${AppStrings.RECURRING_FREQ_WEEKLY.tr()}${getWeekdayName(rule.dayOfPeriod, lang)}"
+        RecurringFrequency.MONTHLY -> "${AppStrings.RECURRING_FREQ_MONTHLY.tr()} ${AppStrings.RECURRING_DAY_SUFFIX.tr().format(rule.dayOfPeriod)}"
+        RecurringFrequency.YEARLY -> AppStrings.RECURRING_FREQ_YEARLY.tr()
     }
 
     val daysDiff = ((rule.nextExecutionDate - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)).toInt()
     val countdownText = if (!rule.isEnabled) {
-        AppStrings.RECURRING_PAUSED.tr(lang)
+        AppStrings.RECURRING_PAUSED.tr()
     } else if (daysDiff <= 0) {
-        AppStrings.RECURRING_DUE_TODAY.tr(lang)
+        AppStrings.RECURRING_DUE_TODAY.tr()
     } else {
-        AppStrings.RECURRING_DAYS_LEFT.tr(lang).format(daysDiff)
+        AppStrings.RECURRING_DAYS_LEFT.tr().format(daysDiff)
     }
 
     Surface(
@@ -204,11 +204,11 @@ fun RecurringRuleItemCard(
 }
 
 private fun getWeekdayName(day: Int, lang: String): String = when (day) {
-    1 -> AppStrings.WEEKDAY_MON.tr(lang)
-    2 -> AppStrings.WEEKDAY_TUE.tr(lang)
-    3 -> AppStrings.WEEKDAY_WED.tr(lang)
-    4 -> AppStrings.WEEKDAY_THU.tr(lang)
-    5 -> AppStrings.WEEKDAY_FRI.tr(lang)
-    6 -> AppStrings.WEEKDAY_SAT.tr(lang)
-    else -> AppStrings.WEEKDAY_SUN.tr(lang)
+    1 -> AppStrings.WEEKDAY_MON.tr()
+    2 -> AppStrings.WEEKDAY_TUE.tr()
+    3 -> AppStrings.WEEKDAY_WED.tr()
+    4 -> AppStrings.WEEKDAY_THU.tr()
+    5 -> AppStrings.WEEKDAY_FRI.tr()
+    6 -> AppStrings.WEEKDAY_SAT.tr()
+    else -> AppStrings.WEEKDAY_SUN.tr()
 }

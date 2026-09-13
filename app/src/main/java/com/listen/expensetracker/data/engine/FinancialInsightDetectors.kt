@@ -1,6 +1,6 @@
 package com.listen.expensetracker.data.engine
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.i18n.AppStrings
 import java.util.Calendar
@@ -48,8 +48,8 @@ internal object FinancialInsightDetectors {
             // 达成 20% 稳健储蓄基准线
             FinancialInsightItem(
                 id = "insight_savings_rate",
-                title = AppStrings.INSIGHT_SAVINGS_HEALTHY_TITLE.tr(lang),
-                description = AppStrings.INSIGHT_SAVINGS_HEALTHY_DESC.tr(lang).format(
+                title = AppStrings.INSIGHT_SAVINGS_HEALTHY_TITLE.tr(),
+                description = AppStrings.INSIGHT_SAVINGS_HEALTHY_DESC.tr().format(
                     "$currencySymbol${currentIncomeTotal.formatAmount()}",
                     "$currencySymbol${currentTotal.formatAmount()}",
                     (savingsRate * 100).formatPercentage()
@@ -61,8 +61,8 @@ internal object FinancialInsightDetectors {
             // 支出超过收入，亮起最高级别赤字警报
             FinancialInsightItem(
                 id = "insight_deficit",
-                title = AppStrings.INSIGHT_DEFICIT_TITLE.tr(lang),
-                description = AppStrings.INSIGHT_DEFICIT_DESC.tr(lang).format("$currencySymbol${abs(net).formatAmount()}"),
+                title = AppStrings.INSIGHT_DEFICIT_TITLE.tr(),
+                description = AppStrings.INSIGHT_DEFICIT_DESC.tr().format("$currencySymbol${abs(net).formatAmount()}"),
                 severity = InsightSeverity.DANGER
             )
         } else null
@@ -116,8 +116,8 @@ internal object FinancialInsightDetectors {
         if (weekendAvg >= weekdayAvg * 1.6 && weekendSum > 100.0) {
             return FinancialInsightItem(
                 id = "insight_weekend_shift",
-                title = AppStrings.INSIGHT_WEEKEND_SHIFT_TITLE.tr(lang),
-                description = AppStrings.INSIGHT_WEEKEND_SHIFT_DESC.tr(lang).format(
+                title = AppStrings.INSIGHT_WEEKEND_SHIFT_TITLE.tr(),
+                description = AppStrings.INSIGHT_WEEKEND_SHIFT_DESC.tr().format(
                     "$currencySymbol${weekendAvg.formatAmount()}",
                     "$currencySymbol${weekdayAvg.formatAmount()}",
                     "%.1f".format(weekendAvg / weekdayAvg)
@@ -149,8 +149,8 @@ internal object FinancialInsightDetectors {
             val totalMicroAmount = microTxs.sumOf { it.amount }
             return FinancialInsightItem(
                 id = "insight_latte_factor",
-                title = AppStrings.INSIGHT_LATTE_FACTOR_TITLE.tr(lang),
-                description = AppStrings.INSIGHT_LATTE_FACTOR_DESC.tr(lang).format(
+                title = AppStrings.INSIGHT_LATTE_FACTOR_TITLE.tr(),
+                description = AppStrings.INSIGHT_LATTE_FACTOR_DESC.tr().format(
                     microTxs.size,
                     "${currencySymbol}35",
                     "$currencySymbol${totalMicroAmount.formatAmount()}"
@@ -199,8 +199,8 @@ internal object FinancialInsightDetectors {
         if (noSpendCount >= 3) {
             return FinancialInsightItem(
                 id = "insight_no_spend_days",
-                title = AppStrings.INSIGHT_NO_SPEND_TITLE.tr(lang),
-                description = AppStrings.INSIGHT_NO_SPEND_DESC.tr(lang).format(noSpendCount),
+                title = AppStrings.INSIGHT_NO_SPEND_TITLE.tr(),
+                description = AppStrings.INSIGHT_NO_SPEND_DESC.tr().format(noSpendCount),
                 severity = InsightSeverity.POSITIVE
             )
         }

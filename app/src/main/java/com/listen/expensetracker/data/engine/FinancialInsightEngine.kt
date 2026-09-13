@@ -1,6 +1,6 @@
 package com.listen.expensetracker.data.engine
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
@@ -52,8 +52,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_mom_increase",
-                        title = AppStrings.INSIGHT_MOM_INC_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_MOM_INC_DESC.tr(lang).format(pctStr),
+                        title = AppStrings.INSIGHT_MOM_INC_TITLE.tr(),
+                        description = AppStrings.INSIGHT_MOM_INC_DESC.tr().format(pctStr),
                         severity = InsightSeverity.WARNING,
                         diffPercentage = (diff * 100).toFloat()
                     )
@@ -62,8 +62,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_mom_decrease",
-                        title = AppStrings.INSIGHT_MOM_DEC_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_MOM_DEC_DESC.tr(lang).format(pctStr),
+                        title = AppStrings.INSIGHT_MOM_DEC_TITLE.tr(),
+                        description = AppStrings.INSIGHT_MOM_DEC_DESC.tr().format(pctStr),
                         severity = InsightSeverity.POSITIVE,
                         diffPercentage = (diff * 100).toFloat()
                     )
@@ -84,8 +84,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_burn_rate",
-                        title = AppStrings.INSIGHT_BURN_RATE_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_BURN_RATE_DESC.tr(lang).format("$currencySymbol${dailyAvg.formatAmount()}", exhaustedDay),
+                        title = AppStrings.INSIGHT_BURN_RATE_TITLE.tr(),
+                        description = AppStrings.INSIGHT_BURN_RATE_DESC.tr().format("$currencySymbol${dailyAvg.formatAmount()}", exhaustedDay),
                         severity = InsightSeverity.WARNING,
                         isBudgetAction = true
                     )
@@ -94,8 +94,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_budget_frugal",
-                        title = AppStrings.INSIGHT_BUDGET_FRUGAL_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_BUDGET_FRUGAL_DESC.tr(lang).format(
+                        title = AppStrings.INSIGHT_BUDGET_FRUGAL_TITLE.tr(),
+                        description = AppStrings.INSIGHT_BUDGET_FRUGAL_DESC.tr().format(
                             (currentDay * 100) / maxDays,
                             ((currentTotal / monthlyBudget) * 100).formatPercentage()
                         ),
@@ -116,8 +116,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_cat_dominant_${dominant.key}",
-                        title = AppStrings.INSIGHT_CAT_DOMINANT_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_CAT_DOMINANT_DESC.tr(lang).format(catName, ((dominant.value / currentTotal) * 100).formatPercentage()),
+                        title = AppStrings.INSIGHT_CAT_DOMINANT_TITLE.tr(),
+                        description = AppStrings.INSIGHT_CAT_DOMINANT_DESC.tr().format(catName, ((dominant.value / currentTotal) * 100).formatPercentage()),
                         severity = InsightSeverity.WARNING,
                         categoryId = dominant.key,
                         isCategoryAction = true
@@ -135,8 +135,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_cat_jump_$catId",
-                        title = AppStrings.INSIGHT_CAT_JUMP_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_CAT_JUMP_DESC.tr(lang).format(catName, "%.1f".format(amt / prevAmt), "$currencySymbol${amt.formatAmount()}"),
+                        title = AppStrings.INSIGHT_CAT_JUMP_TITLE.tr(),
+                        description = AppStrings.INSIGHT_CAT_JUMP_DESC.tr().format(catName, "%.1f".format(amt / prevAmt), "$currencySymbol${amt.formatAmount()}"),
                         severity = InsightSeverity.INFO,
                         categoryId = catId,
                         isCategoryAction = true
@@ -172,8 +172,8 @@ object FinancialInsightEngine {
                 insights.add(
                     FinancialInsightItem(
                         id = "insight_peak_day",
-                        title = AppStrings.INSIGHT_PEAK_DAY_TITLE.tr(lang),
-                        description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr(lang).format(peakDay, "$currencySymbol${peakDayAmount.formatAmount()}"),
+                        title = AppStrings.INSIGHT_PEAK_DAY_TITLE.tr(),
+                        description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr().format(peakDay, "$currencySymbol${peakDayAmount.formatAmount()}"),
                         severity = InsightSeverity.INFO,
                         targetDay = peakDay,
                         targetDateLabel = "${month}月${peakDay}日"
@@ -190,11 +190,11 @@ object FinancialInsightEngine {
         // 10. 兜底提示卡片（当月数据平稳或记录较少时）
         if (insights.isEmpty()) {
             val isOver = currentTotal > monthlyBudget && monthlyBudget > 0
-            val statusTitle = if (isOver) AppStrings.INSIGHT_OVER_TITLE.tr(lang) else AppStrings.INSIGHT_STEADY_TITLE.tr(lang)
+            val statusTitle = if (isOver) AppStrings.INSIGHT_OVER_TITLE.tr() else AppStrings.INSIGHT_STEADY_TITLE.tr()
             val statusDesc = if (isOver) {
-                AppStrings.INSIGHT_OVER_DESC.tr(lang).format("$currencySymbol${(currentTotal - monthlyBudget).formatAmount()}")
+                AppStrings.INSIGHT_OVER_DESC.tr().format("$currencySymbol${(currentTotal - monthlyBudget).formatAmount()}")
             } else {
-                AppStrings.INSIGHT_STEADY_DESC.tr(lang)
+                AppStrings.INSIGHT_STEADY_DESC.tr()
             }
             insights.add(
                 FinancialInsightItem(

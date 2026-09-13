@@ -1,6 +1,6 @@
 package com.listen.expensetracker.data.engine
 
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.ExecutionType
 import com.listen.expensetracker.data.db.RecurringFrequency
 import com.listen.expensetracker.data.db.RecurringRuleEntity
@@ -80,7 +80,7 @@ object DemoDataEngine {
             return TransactionEntity(
                 id = UUID.randomUUID().toString(),
                 type = if (isIncome) TransactionType.INCOME else TransactionType.EXPENSE,
-                categoryId = catId, categoryName = nameKey.tr(lang),
+                categoryId = catId, categoryName = nameKey.tr(),
                 categoryIcon = catId, categoryColorHex = colorHex,
                 amount = amt, timestamp = tCal.timeInMillis, note = note, accountType = acc
             )
@@ -125,7 +125,7 @@ object DemoDataEngine {
             generated.add(
                 TransactionEntity(
                     id = UUID.randomUUID().toString(), type = TransactionType.EXPENSE,
-                    categoryId = catId, categoryName = tpl?.categoryNameKey?.tr(lang) ?: catId,
+                    categoryId = catId, categoryName = tpl?.categoryNameKey?.tr() ?: catId,
                     categoryIcon = catId, categoryColorHex = tpl?.colorHex ?: "#3B82F6",
                     amount = baseAmt, timestamp = bCal.timeInMillis, note = note, accountType = "BANK"
                 )
@@ -146,7 +146,7 @@ object DemoDataEngine {
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "住房租金" else if (lang == "ja") "家賃" else "Apartment Rent",
                 type = TransactionType.EXPENSE, categoryId = "c_shopping",
-                categoryName = AppStrings.CAT_SHOPPING.tr(lang), categoryIcon = "c_shopping",
+                categoryName = AppStrings.CAT_SHOPPING.tr(), categoryIcon = "c_shopping",
                 categoryColorHex = "#EC4899", amount = 2600.0, accountType = "BANK",
                 note = if (lang == "zh") "每月1日房租" else "Monthly Rent", frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 1, startDate = now, nextExecutionDate = getNextExec(1), executionType = ExecutionType.AUTO_INSERT
@@ -155,7 +155,7 @@ object DemoDataEngine {
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "Netflix 会员" else if (lang == "ja") "Netflix 会員" else "Netflix",
                 type = TransactionType.EXPENSE, categoryId = "c_entertainment",
-                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang), categoryIcon = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(), categoryIcon = "c_entertainment",
                 categoryColorHex = "#8B5CF6", amount = 45.0, accountType = "BANK",
                 note = if (lang == "zh") "高级家庭套餐" else "Premium", frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 5, startDate = now, nextExecutionDate = getNextExec(5), executionType = ExecutionType.AUTO_INSERT
@@ -164,7 +164,7 @@ object DemoDataEngine {
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "每月薪资" else if (lang == "ja") "毎月の給与" else "Monthly Salary",
                 type = TransactionType.INCOME, categoryId = "c_salary",
-                categoryName = AppStrings.CAT_SALARY.tr(lang), categoryIcon = "c_salary",
+                categoryName = AppStrings.CAT_SALARY.tr(), categoryIcon = "c_salary",
                 categoryColorHex = "#10B981", amount = 18000.0, accountType = "BANK",
                 note = if (lang == "zh") "固定工资发放" else "Base Salary", frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 10, startDate = now, nextExecutionDate = getNextExec(10), executionType = ExecutionType.NOTIFY_CONFIRM
@@ -173,7 +173,7 @@ object DemoDataEngine {
                 id = UUID.randomUUID().toString(),
                 title = if (lang == "zh") "iCloud 云存储" else if (lang == "ja") "iCloud ストレージ" else "iCloud Storage",
                 type = TransactionType.EXPENSE, categoryId = "c_entertainment",
-                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(lang), categoryIcon = "c_entertainment",
+                categoryName = AppStrings.CAT_ENTERTAINMENT.tr(), categoryIcon = "c_entertainment",
                 categoryColorHex = "#8B5CF6", amount = 21.0, accountType = "CREDIT",
                 note = if (lang == "zh") "200GB 空间" else "200GB Plan", frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 15, startDate = now, nextExecutionDate = getNextExec(15), executionType = ExecutionType.AUTO_INSERT

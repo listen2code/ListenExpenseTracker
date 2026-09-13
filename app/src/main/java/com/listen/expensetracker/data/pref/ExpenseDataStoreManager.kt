@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.listen.arch.data.pref.BaseDataStoreManager
 import com.listen.arch.data.pref.archDataStore
+import com.listen.expensetracker.core.i18n.AppLanguage
 import com.listen.expensetracker.core.security.SecurityPreferences
 import com.listen.expensetracker.data.engine.defaultCurrencySymbolForLanguage
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
@@ -42,8 +43,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
     }
 
     val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
+        val lang = prefs[KEY_LANGUAGE] ?: "zh"
+        AppLanguage.update(lang)
         ExpensePreferences(
-            language = prefs[KEY_LANGUAGE] ?: "zh",
+            language = lang,
             themeMode = try {
                 ThemeMode.valueOf(prefs[KEY_THEME_MODE] ?: "SYSTEM")
             } catch (_: Exception) {

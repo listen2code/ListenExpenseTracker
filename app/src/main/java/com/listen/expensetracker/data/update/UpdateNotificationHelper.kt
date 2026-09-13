@@ -1,7 +1,7 @@
 package com.listen.expensetracker.data.update
 
 import android.content.Context
-import com.listen.arch.i18n.tr
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.notification.LocalNotificationManager
 import com.listen.expensetracker.core.notification.NotificationPreferences
 import com.listen.expensetracker.data.i18n.NotificationStrings
@@ -29,13 +29,13 @@ object UpdateNotificationHelper {
             return null
         }
 
-        val title = NotificationStrings.NOTIFY_UPDATE_TITLE.tr(lang).format(releaseInfo.tagName)
+        val title = NotificationStrings.NOTIFY_UPDATE_TITLE.tr().format(releaseInfo.tagName)
         val changelogPreview = releaseInfo.changelog.lines()
             .map { it.trim().removePrefix("-").removePrefix("*").trim() }
             .firstOrNull { it.isNotBlank() }
             ?: releaseInfo.title
 
-        val body = NotificationStrings.NOTIFY_UPDATE_BODY.tr(lang).format(changelogPreview)
+        val body = NotificationStrings.NOTIFY_UPDATE_BODY.tr().format(changelogPreview)
 
         if (sendNotification) {
             LocalNotificationManager.sendAppUpdateAlert(
