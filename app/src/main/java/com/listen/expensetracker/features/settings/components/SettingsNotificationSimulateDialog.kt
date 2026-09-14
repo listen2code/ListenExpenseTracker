@@ -92,8 +92,8 @@ fun SettingsNotificationSimulateDialog(
                         LocalNotificationManager.sendBudgetAlert(
                             context = context,
                             notificationId = LocalNotificationManager.ID_BUDGET_TOTAL_ALERT,
-                            title = "⚠️ 月度总预算警戒线提醒",
-                            content = "本月总支出已达总预算的 82.5%，剩余可用额度 ¥875.00。"
+                            title = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_TITLE.tr(),
+                            content = NotificationStrings.NOTIFY_BUDGET_WARNING_TOTAL_BODY.tr().format(82.5f, "¥", "875.00")
                         )
                     }
                 },
@@ -111,8 +111,8 @@ fun SettingsNotificationSimulateDialog(
                         LocalNotificationManager.sendBudgetAlert(
                             context = context,
                             notificationId = LocalNotificationManager.ID_BUDGET_CATEGORY_ALERT_BASE + 1,
-                            title = "🚨 餐饮分类预算已超支",
-                            content = "本月餐饮分类支出已达 ¥1,820.00，超出分类预算 ¥320.00，请注意控制开支！",
+                            title = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_TITLE.tr().format(AppStrings.CAT_FOOD.tr()),
+                            content = NotificationStrings.NOTIFY_BUDGET_OVERRUN_CAT_BODY.tr().format("¥", "1,820.00", "¥", "320.00"),
                             categoryId = "c_food"
                         )
                     }
@@ -131,11 +131,11 @@ fun SettingsNotificationSimulateDialog(
                         LocalNotificationManager.sendRecurringBillAlert(
                             context = context,
                             notificationId = LocalNotificationManager.ID_RECURRING_ALERT,
-                            title = "📅 周期账单已自动记账入库 (2笔)",
-                            content = "今日已自动履约记账 2 笔周期账单，合计支出 ¥3,650.00。点击查看流水。",
+                            title = NotificationStrings.NOTIFY_RECURRING_MULTI_TITLE.tr().format(2),
+                            content = NotificationStrings.NOTIFY_RECURRING_MULTI_BODY.tr().format(2, "¥", "3,650.00"),
                             details = listOf(
-                                "• 房租: ¥3,500.00 (住房 / 现金)",
-                                "• 宽带光纤费: ¥150.00 (通讯 / 银行卡)"
+                                "• ${AppStrings.CAT_HOUSING.tr()}: ¥3,500.00",
+                                "• ${AppStrings.CAT_SHOPPING.tr()}: ¥150.00"
                             )
                         )
                     }
@@ -154,8 +154,8 @@ fun SettingsNotificationSimulateDialog(
                         LocalNotificationManager.sendAppUpdateAlert(
                             context = context,
                             notificationId = LocalNotificationManager.ID_UPDATE_ALERT,
-                            title = "🚀 发现 Listen 记账新版本 v1.5.0",
-                            content = "全新功能就绪：本地通知预警中枢上线，支持点击直接穿透分类预算！",
+                            title = NotificationStrings.NOTIFY_UPDATE_TITLE.tr().format("v1.5.0"),
+                            content = NotificationStrings.NOTIFY_UPDATE_BODY.tr().format("v1.5.0"),
                             versionName = "v1.5.0"
                         )
                     }

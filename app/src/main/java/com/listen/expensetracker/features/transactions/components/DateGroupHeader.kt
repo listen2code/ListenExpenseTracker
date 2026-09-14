@@ -32,8 +32,17 @@ import java.util.Calendar
 fun formatDayGroupHeader(timestamp: Long): String {
     val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
     val day = "%02d".format(cal.get(Calendar.DAY_OF_MONTH))
-    val weekdays = arrayOf("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六")
-    val weekday = weekdays[cal.get(Calendar.DAY_OF_WEEK) - 1]
+    val weekdayKeys = arrayOf(
+        AppStrings.WEEKDAY_SUN,
+        AppStrings.WEEKDAY_MON,
+        AppStrings.WEEKDAY_TUE,
+        AppStrings.WEEKDAY_WED,
+        AppStrings.WEEKDAY_THU,
+        AppStrings.WEEKDAY_FRI,
+        AppStrings.WEEKDAY_SAT
+    )
+    val key = weekdayKeys[cal.get(Calendar.DAY_OF_WEEK) - 1]
+    val weekday = key.tr()
     val year = cal.get(Calendar.YEAR)
     val month = "%02d".format(cal.get(Calendar.MONTH) + 1)
     return "$day $weekday $year.$month"

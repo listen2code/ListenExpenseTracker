@@ -51,16 +51,16 @@ class SettingsSyncDelegate(
             driveResult.onSuccess {
                 prefManager.setLastSyncTimestamp(System.currentTimeMillis())
                 CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
-                onToast("已成功备份至 Google Drive 云端硬盘 (${allList.size} 条)")
+                onToast(AppStrings.BACKUP_DRIVE_SUCCESS_TOAST.tr().format(allList.size))
             }.onFailure { err ->
                 CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
-                onToast("Google Drive 上传异常: ${err.message}")
+                onToast(AppStrings.BACKUP_DRIVE_ERROR_TOAST.tr().format(err.message ?: ""))
             }
         } catch (e: Throwable) {
             val allList = dao.getAllTransactions()
             val payload = TransactionBackupManager.exportToJson(allList)
             CloudSyncManager.backupToCloud(payload, allList.size, email, traceId)
-            onToast("已备份至本地快照 (Drive 凭据待授权: ${e.message})")
+            onToast(AppStrings.BACKUP_LOCAL_SNAPSHOT_TOAST.tr().format(e.message ?: ""))
         } finally {
             onOperating(false)
         }
@@ -86,7 +86,7 @@ class SettingsSyncDelegate(
                 if (list.isNotEmpty()) {
                     dao.insertTransactions(list)
                     prefManager.setLastSyncTimestamp(System.currentTimeMillis())
-                    onToast("已从 Google Drive 成功恢复 ${list.size} 条账单")
+                    onToast(AppStrings.RESTORE_DRIVE_SUCCESS_TOAST.tr().format(list.size))
                 } else {
                     onToast(AppStrings.RESTORE_EMPTY_TOAST.tr())
                 }
@@ -96,10 +96,10 @@ class SettingsSyncDelegate(
                     val list = TransactionBackupManager.importFromJson(payload)
                     if (list.isNotEmpty()) {
                         dao.insertTransactions(list)
-                        onToast("已从快照恢复 ${list.size} 条账单")
+                        onToast(AppStrings.RESTORE_SNAPSHOT_SUCCESS_TOAST.tr().format(list.size))
                     }
                 }.onFailure {
-                    onToast("云端恢复失败: ${driveErr.message}")
+                    onToast(AppStrings.RESTORE_CLOUD_FAILED_TOAST.tr().format(driveErr.message ?: ""))
                 }
             }
         } catch (e: Throwable) {
@@ -108,10 +108,10 @@ class SettingsSyncDelegate(
                 val list = TransactionBackupManager.importFromJson(payload)
                 if (list.isNotEmpty()) {
                     dao.insertTransactions(list)
-                    onToast("已从快照恢复 ${list.size} 条账单")
+                    onToast(AppStrings.RESTORE_SNAPSHOT_SUCCESS_TOAST.tr().format(list.size))
                 }
             }.onFailure {
-                onToast("恢复失败: ${e.message}")
+                onToast(AppStrings.RESTORE_FAILED_TOAST.tr().format(e.message ?: ""))
             }
         } finally {
             onOperating(false)
@@ -152,9 +152,9 @@ class SettingsSyncDelegate(
             application.contentResolver.openOutputStream(uri)?.use { os ->
                 os.write(json.toByteArray(Charsets.UTF_8))
             }
-            onToast(if (lang == "en") "Successfully exported ${allList.size} records to JSON file" else "已成功导出 ${allList.size} 条账单至 JSON 文件")
+            onToast(AppStrings.EXPORT_JSON_SUCCESS_TOAST.tr().format(allList.size))
         } catch (e: Throwable) {
-            onToast(if (lang == "en") "Export failed: ${e.message}" else "导出 JSON 文件失败: ${e.message}")
+            onToast(AppStrings.EXPORT_JSON_FAILED_TOAST.tr().format(e.message ?: ""))
         }
     }
 
@@ -166,12 +166,12 @@ class SettingsSyncDelegate(
             val list = TransactionBackupManager.importFromJson(json)
             if (list.isNotEmpty()) {
                 dao.insertTransactions(list)
-                onToast(if (lang == "en") "Successfully imported ${list.size} records" else "成功导入 ${list.size} 条账单数据")
+                onToast(AppStrings.IMPORT_JSON_SUCCESS_TOAST.tr().format(list.size))
             } else {
-                onToast(if (lang == "en") "JSON content is empty or invalid" else "JSON 文件内容解析失败或为空")
+                onToast(AppStrings.IMPORT_JSON_EMPTY_OR_INVALID_TOAST.tr())
             }
         } catch (e: Throwable) {
-            onToast(if (lang == "en") "Import failed: ${e.message}" else "导入 JSON 文件失败: ${e.message}")
+            onToast(AppStrings.IMPORT_JSON_FAILED_TOAST.tr().format(e.message ?: ""))
         }
     }
 
@@ -190,9 +190,9 @@ class SettingsSyncDelegate(
             application.contentResolver.openOutputStream(uri)?.use { os ->
                 os.write(bytes)
             }
-            onToast(if (lang == "en") "Successfully exported ${filtered.size} records to Excel file" else "已成功导出 ${filtered.size} 条账单至 Excel 表格")
+            onToast(AppStrings.EXPORT_EXCEL_SUCCESS_TOAST.tr().format(filtered.size))
         } catch (e: Throwable) {
-            onToast(if (lang == "en") "Export failed: ${e.message}" else "导出 Excel 失败: ${e.message}")
+            onToast(AppStrings.EXPORT_EXCEL_FAILED_TOAST.tr().format(e.message ?: ""))
         }
     }
 
@@ -219,13 +219,13 @@ class SettingsSyncDelegate(
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            val title = if (lang == "en") "Share Excel Statement" else "分享账单表格"
+            val title = AppStrings.SHARE_EXCEL_TITLE.tr()
             val chooser = Intent.createChooser(shareIntent, title).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             application.startActivity(chooser)
         } catch (e: Throwable) {
-            onToast(if (lang == "en") "Share failed: ${e.message}" else "分享账单失败: ${e.message}")
+            onToast(AppStrings.SHARE_EXCEL_FAILED_TOAST.tr().format(e.message ?: ""))
         }
     }
 }

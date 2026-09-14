@@ -2,7 +2,7 @@ package com.listen.expensetracker.data.i18n
 
 /**
  * Type-safe Internationalization String Constants for ListenExpenseTracker.
- * Allows idiomatic, Flutter-like usage across the app: `AppStrings.APP_VERSION_LABEL.tr(lang)`.
+ * Allows idiomatic, Flutter-like usage across the app: `AppStrings.APP_VERSION_LABEL.tr()`.
  */
 object AppStrings {
     // Navigation
@@ -360,4 +360,32 @@ object AppStrings {
     const val STATS_YEAR_FORMAT = "stats_year_format"
     const val STATS_MONTH_AVG_EXPENSE = "stats_month_avg_expense"
     const val STATS_MONTH_AVG_INCOME = "stats_month_avg_income"
+
+    // Sync & Backup Toasts
+    const val BACKUP_DRIVE_SUCCESS_TOAST = "backup_drive_success_toast"
+    const val BACKUP_DRIVE_ERROR_TOAST = "backup_drive_error_toast"
+    const val BACKUP_LOCAL_SNAPSHOT_TOAST = "backup_local_snapshot_toast"
+    const val RESTORE_DRIVE_SUCCESS_TOAST = "restore_drive_success_toast"
+    const val RESTORE_SNAPSHOT_SUCCESS_TOAST = "restore_snapshot_success_toast"
+    const val RESTORE_CLOUD_FAILED_TOAST = "restore_cloud_failed_toast"
+    const val EXPORT_JSON_SUCCESS_TOAST = "export_json_success_toast"
+    const val EXPORT_JSON_FAILED_TOAST = "export_json_failed_toast"
+    const val IMPORT_JSON_SUCCESS_TOAST = "import_json_success_toast"
+    const val IMPORT_JSON_EMPTY_OR_INVALID_TOAST = "import_json_empty_or_invalid_toast"
+    const val IMPORT_JSON_FAILED_TOAST = "import_json_failed_toast"
+    const val EXPORT_EXCEL_SUCCESS_TOAST = "export_excel_success_toast"
+    const val EXPORT_EXCEL_FAILED_TOAST = "export_excel_failed_toast"
+    const val SHARE_EXCEL_TITLE = "share_excel_title"
+    const val SHARE_EXCEL_FAILED_TOAST = "share_excel_failed_toast"
+
+    // Settings & Account Operations
+    const val RECURRING_RULE_SAVED_TOAST = "recurring_rule_saved_toast"
+    const val RECURRING_RULE_DELETED_TOAST = "recurring_rule_deleted_toast"
+    const val GOOGLE_ACCOUNT_LINKED_TOAST = "google_account_linked_toast"
+    const val GOOGLE_ACCOUNT_LOGOUT_TOAST = "google_account_logout_toast"
+    const val GOOGLE_AUTH_RESOLVE_FAILED_TOAST = "google_auth_resolve_failed_toast"
+    const val GOOGLE_LOGIN_FAILED_TOAST = "google_login_failed_toast"
+
+    // UI Badges & Formatting
+    const val RECURRING_BADGE_LABEL = "recurring_badge_label"
 }

@@ -79,8 +79,8 @@ class SettingsViewModel(
                 prefManager.setCategoryBudgetRatios(intent.ratios)
                 updateState { copy(monthlyBudget = intent.budget, categoryBudgetRatios = intent.ratios) }
             }
-            is SettingsIntent.SaveRecurringRule -> viewModelScope.launch { recurringDao.insertRule(intent.rule); emitEffect(CommonUiEffect.ShowToast("已保存周期规则")) }
-            is SettingsIntent.DeleteRecurringRule -> viewModelScope.launch { recurringDao.deleteRuleById(intent.ruleId); emitEffect(CommonUiEffect.ShowToast("已删除周期规则")) }
+            is SettingsIntent.SaveRecurringRule -> viewModelScope.launch { recurringDao.insertRule(intent.rule); emitEffect(CommonUiEffect.ShowToast(AppStrings.RECURRING_RULE_SAVED_TOAST.tr())) }
+            is SettingsIntent.DeleteRecurringRule -> viewModelScope.launch { recurringDao.deleteRuleById(intent.ruleId); emitEffect(CommonUiEffect.ShowToast(AppStrings.RECURRING_RULE_DELETED_TOAST.tr())) }
             is SettingsIntent.ToggleRecurringRule -> viewModelScope.launch { recurringDao.updateRule(intent.rule.copy(isEnabled = intent.isEnabled)) }
             is SettingsIntent.ToggleAutoBackupDrive -> viewModelScope.launch {
                 prefManager.setAutoBackupDrive(intent.enabled)
@@ -109,19 +109,18 @@ class SettingsViewModel(
                 if (intent.enabled && !currentState.isDeveloperMode) {
                     prefManager.setDeveloperMode(true)
                     updateState { copy(isDeveloperMode = true) }
-                    val lang = currentState.language
                     emitEffect(CommonUiEffect.ShowToast(AppStrings.DEVELOPER_MODE_ENABLED.tr()))
                 }
             }
             is SettingsIntent.LinkGoogleAccount -> viewModelScope.launch {
                 prefManager.setLoggedIn(true, intent.email, intent.displayName ?: "", intent.avatarUrl ?: "")
-                emitEffect(CommonUiEffect.ShowToast("Google 账号已成功连携: ${intent.email}"))
+                emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_ACCOUNT_LINKED_TOAST.tr().format(intent.email)))
                 GoogleDriveAutoBackupManager.scheduleAutoBackup(application, delayMs = 2000L)
             }
             is SettingsIntent.UnlinkGoogleAccount -> viewModelScope.launch {
                 GoogleAuthManager.clearCredentials(application)
                 prefManager.setLoggedIn(false, "", "", "")
-                emitEffect(CommonUiEffect.ShowToast("已安全退出 Google 账号"))
+                emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_ACCOUNT_LOGOUT_TOAST.tr()))
             }
             is SettingsIntent.TriggerCloudBackup -> viewModelScope.launch {
                 syncDelegate.triggerCloudBackup(currentState.googleAccountEmail, currentState.language, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
@@ -226,12 +225,12 @@ class SettingsViewModel(
             val profileResult = GoogleAuthManager.parseGoogleIdCredential(response)
             profileResult.onSuccess { profile ->
                 handleIntent(SettingsIntent.LinkGoogleAccount(profile.email, profile.displayName, profile.avatarUrl))
-            }.onFailure { err -> emitEffect(CommonUiEffect.ShowToast("Google 授权解析失败: ${err.message}")) }
+            }.onFailure { err -> emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_AUTH_RESOLVE_FAILED_TOAST.tr().format(err.message ?: ""))) }
         } catch (e: GetCredentialCancellationException) {
             // Cancelled by user
         } catch (e: Throwable) {
             ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")
-            emitEffect(CommonUiEffect.ShowToast("Google 登录未成功 (${e.javaClass.simpleName}): ${e.message}"))
+            emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_LOGIN_FAILED_TOAST.tr().format(e.javaClass.simpleName, e.message ?: "")))
         }
     }
 
