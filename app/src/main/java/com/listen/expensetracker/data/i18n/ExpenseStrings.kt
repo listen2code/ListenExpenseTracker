@@ -361,7 +361,12 @@ object ExpenseStrings {
         AppStrings.GOOGLE_ACCOUNT_LOGOUT_TOAST to "已安全退出 Google 账号",
         AppStrings.GOOGLE_AUTH_RESOLVE_FAILED_TOAST to "Google 授权解析失败: %s",
         AppStrings.GOOGLE_LOGIN_FAILED_TOAST to "Google 登录未成功 (%s): %s",
-        AppStrings.RECURRING_BADGE_LABEL to "周期"
+        AppStrings.RECURRING_BADGE_LABEL to "周期",
+        AppStrings.LABEL_THIS_MONTH to "本月",
+        AppStrings.LABEL_THIS_YEAR to "今年",
+        AppStrings.CSV_HEADER to "交易单号,日期时间,类型,分类,金额,账户,备注",
+        AppStrings.DRIVE_AUTH_PERMISSION_PROMPT to "请在弹出的 Google 授权窗口中点击「允许」，完成后再次点击备份",
+        AppStrings.DRIVE_BACKUP_NOT_FOUND to "未在 Google 云端硬盘中找到 %s 备份文件"
     )
 
     private val enMap = mapOf(
@@ -709,7 +714,12 @@ object ExpenseStrings {
         AppStrings.GOOGLE_ACCOUNT_LOGOUT_TOAST to "Safely signed out of Google account",
         AppStrings.GOOGLE_AUTH_RESOLVE_FAILED_TOAST to "Google authorization parsing failed: %s",
         AppStrings.GOOGLE_LOGIN_FAILED_TOAST to "Google sign-in unsuccessful (%s): %s",
-        AppStrings.RECURRING_BADGE_LABEL to "Sub"
+        AppStrings.RECURRING_BADGE_LABEL to "Sub",
+        AppStrings.LABEL_THIS_MONTH to "This Month",
+        AppStrings.LABEL_THIS_YEAR to "This Year",
+        AppStrings.CSV_HEADER to "Transaction ID,Date & Time,Type,Category,Amount,Account,Note",
+        AppStrings.DRIVE_AUTH_PERMISSION_PROMPT to "Please grant permission in the Google authorization popup, then try backing up again",
+        AppStrings.DRIVE_BACKUP_NOT_FOUND to "Backup file %s not found in Google Drive"
     )
 
     private val jaMap = mapOf(
@@ -1057,6 +1067,11 @@ object ExpenseStrings {
         AppStrings.GOOGLE_ACCOUNT_LOGOUT_TOAST to "Google アカウントからログアウトしました",
         AppStrings.GOOGLE_AUTH_RESOLVE_FAILED_TOAST to "Google 認証の解析に失敗しました: %s",
         AppStrings.GOOGLE_LOGIN_FAILED_TOAST to "Google ログインに失敗しました (%s): %s",
-        AppStrings.RECURRING_BADGE_LABEL to "定期"
+        AppStrings.RECURRING_BADGE_LABEL to "定期",
+        AppStrings.LABEL_THIS_MONTH to "今月",
+        AppStrings.LABEL_THIS_YEAR to "今年",
+        AppStrings.CSV_HEADER to "取引ID,日時,種類,カテゴリ,金額,口座,メモ",
+        AppStrings.DRIVE_AUTH_PERMISSION_PROMPT to "Google 認証ウィンドウで「許可」をタップし、再度バックアップしてください",
+        AppStrings.DRIVE_BACKUP_NOT_FOUND to "Google ドライブに %s バックアップファイルが見つかりません"
     )
 }

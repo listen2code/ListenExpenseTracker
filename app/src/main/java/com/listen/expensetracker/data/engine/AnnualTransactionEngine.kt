@@ -2,6 +2,7 @@ package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.components.ProgressSegment
@@ -38,7 +39,8 @@ object AnnualTransactionEngine {
             val itemYear = itemCal.get(Calendar.YEAR)
             val itemMonth = itemCal.get(Calendar.MONTH) + 1
             val itemDay = itemCal.get(Calendar.DAY_OF_MONTH)
-            val dateLabelZh = "${itemMonth}月${itemDay}日"
+            val dateLabelZh = AppConstants.DateFormat.formatMonthDay(itemMonth, itemDay, "zh")
+            val dateLabelEn = AppConstants.DateFormat.formatMonthDay(itemMonth, itemDay, "en")
             val matchesQuery = cleanQuery.isEmpty() ||
                 item.categoryName.lowercase().contains(cleanQuery) ||
                 item.note.lowercase().contains(cleanQuery) ||
@@ -46,13 +48,14 @@ object AnnualTransactionEngine {
                 "%.2f".format(item.amount).contains(cleanQuery) ||
                 item.amount.toLong().toString() == cleanQuery ||
                 dateLabelZh.contains(cleanQuery) ||
+                dateLabelEn.contains(cleanQuery) ||
                 "$itemYear".contains(cleanQuery) ||
                 "%02d-%02d".format(itemMonth, itemDay).contains(cleanQuery) ||
                 "$itemMonth-$itemDay".contains(cleanQuery)
 
-            val matchesAccount = accountFilter == "ALL" || item.accountType == accountFilter
-            val matchesType = typeFilter == "ALL" || item.type.equals(typeFilter, ignoreCase = true)
-            val matchesCategory = activeCategories.isEmpty() || activeCategories.contains("ALL") ||
+            val matchesAccount = accountFilter == AppConstants.FILTER_ALL || item.accountType == accountFilter
+            val matchesType = typeFilter == AppConstants.FILTER_ALL || item.type.equals(typeFilter, ignoreCase = true)
+            val matchesCategory = activeCategories.isEmpty() || activeCategories.contains(AppConstants.FILTER_ALL) ||
                 activeCategories.any { catFilter ->
                     item.categoryName.equals(catFilter, ignoreCase = true) ||
                     item.categoryId.equals(catFilter, ignoreCase = true) ||

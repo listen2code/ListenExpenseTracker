@@ -2,11 +2,6 @@ package com.listen.expensetracker.features.settings.components
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.net.toUri
-import com.listen.expensetracker.data.i18n.ExpenseStrings
-import com.listen.uicomponent.theme.ListenTheme
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,15 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Modern dialog presented when a newer GitHub Release is detected.
@@ -46,7 +45,6 @@ import com.listen.uicomponent.components.CommonText
 fun UpdateAvailableDialog(
     releaseInfo: ReleaseInfo,
     onDismiss: () -> Unit,
-    lang: String = "zh"
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -150,7 +148,6 @@ fun UpdateAvailableDialogPreview() {
         UpdateAvailableDialog(
             releaseInfo = sampleRelease,
             onDismiss = {},
-            lang = "zh"
         )
     }
 }

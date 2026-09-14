@@ -40,11 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
 import java.util.Calendar
+import java.util.Locale
 
 private enum class MonthPickerViewMode { MONTHS, YEARS }
 
@@ -85,10 +88,11 @@ fun MonthPickerDialog(
     var yearPageBase by remember { mutableIntStateOf((viewingYear / 12) * 12) }
 
     val monthNames = remember(lang) {
-        if (lang.lowercase() == "en") listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-        else (1..12).map { "${it}月" }
+        (0..11).map { AppConstants.DateFormat.getMonthLabel(it, lang) }
     }
-    val yearFormat = if (lang.lowercase() == "en") "$viewingYear" else "${viewingYear}年"
+    val yearFormat = remember(viewingYear, lang) {
+        String.format(Locale.getDefault(), ExpenseStrings.get(AppStrings.STATS_YEAR_FORMAT, lang), viewingYear)
+    }
 
     CommonDialog(
         onDismissRequest = onDismiss,
@@ -178,7 +182,7 @@ fun MonthPickerDialog(
                 ) {
                     val yearsList = (0..11).map { yearPageBase + it }
                     items(yearsList) { yr ->
-                        val yrLabel = if (lang.lowercase() == "en") "$yr" else "${yr}年"
+                        val yrLabel = String.format(Locale.getDefault(), ExpenseStrings.get(AppStrings.STATS_YEAR_FORMAT, lang), yr)
                         PickerGridItem(
                             label = yrLabel,
                             isSelected = isYearMode && yr == activeYear,

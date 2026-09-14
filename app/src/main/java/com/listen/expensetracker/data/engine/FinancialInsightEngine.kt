@@ -4,6 +4,7 @@ import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import java.util.Calendar
 import kotlin.math.abs
 
@@ -176,7 +177,7 @@ object FinancialInsightEngine {
                         description = AppStrings.INSIGHT_PEAK_DAY_DESC.tr().format(peakDay, "$currencySymbol${peakDayAmount.formatAmount()}"),
                         severity = InsightSeverity.INFO,
                         targetDay = peakDay,
-                        targetDateLabel = "${month}月${peakDay}日"
+                        targetDateLabel = AppConstants.DateFormat.formatMonthDay(month, peakDay, lang)
                     )
                 )
             }

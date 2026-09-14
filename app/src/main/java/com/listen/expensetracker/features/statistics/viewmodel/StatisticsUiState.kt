@@ -1,7 +1,10 @@
 package com.listen.expensetracker.features.statistics.viewmodel
 
 import com.listen.arch.mvi.CommonUiEffect
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.uicomponent.charts.BarChartItem
 import com.listen.uicomponent.charts.LineChartPoint
 import com.listen.uicomponent.charts.PieChartItem
@@ -48,11 +51,11 @@ data class StatisticsUiState(
     val statisticsTab: StatisticsTab = StatisticsTab.EXPENSE,
     val period: StatisticsPeriod = StatisticsPeriod.MONTH,
     val selectedMonthOffset: Int = 0,
-    val monthTitle: String = "本月",
+    val monthTitle: String = AppStrings.LABEL_THIS_MONTH.tr(),
     val selectedYearOffset: Int = 0,
-    val yearTitle: String = "今年",
-    val currencySymbol: String = "￥",
-    val language: String = "zh",
+    val yearTitle: String = AppStrings.LABEL_THIS_YEAR.tr(),
+    val currencySymbol: String = AppConstants.DEFAULT_CURRENCY,
+    val language: String = AppConstants.DEFAULT_LANG,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accentColor: AccentColor = AccentColor.EMERALD,
     val showMonthPicker: Boolean = false,

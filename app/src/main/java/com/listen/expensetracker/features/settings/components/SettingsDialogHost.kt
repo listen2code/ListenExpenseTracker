@@ -159,8 +159,7 @@ fun SettingsDialogHost(
         is SettingsDialog.UpdateAvailable -> {
             UpdateAvailableDialog(
                 releaseInfo = state.activeDialog.releaseInfo,
-                onDismiss = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
-                lang = lang
+                onDismiss = { viewModel?.handleIntent(SettingsIntent.DismissDialog) }
             )
         }
         is SettingsDialog.ExportExcelOptions -> {

@@ -47,7 +47,57 @@ object AppDimens {
  */
 object AppConstants {
     const val DEFAULT_LANG = "zh"
+    const val DEFAULT_CURRENCY = "￥"
+    const val FILTER_ALL = "ALL"
     const val RECURRING_TAG = "[周期]"
+
+    object Language {
+        const val ZH = "zh"
+        const val EN = "en"
+        const val JA = "ja"
+
+        const val ZH_NAME = "简体中文"
+        const val EN_NAME = "English"
+        const val JA_NAME = "日本語"
+
+        fun getDisplayName(lang: String): String = when (lang.lowercase()) {
+            EN -> EN_NAME
+            JA -> JA_NAME
+            else -> ZH_NAME
+        }
+    }
+
+    object DateFormat {
+        const val ISO_DATE = "yyyy-MM-dd"
+        const val YEAR_MONTH_CN = "yyyy年MM月"
+        const val MONTH_YEAR_EN = "MMM yyyy"
+        const val BACKUP_TIMESTAMP = "yyyyMMdd_HHmmss"
+        const val TIME_DEFAULT = "HH:mm"
+
+        val MONTH_NAMES_EN = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+        fun getMonthLabel(monthIndex: Int, lang: String): String {
+            return if (lang.lowercase() == Language.EN) {
+                MONTH_NAMES_EN.getOrElse(monthIndex) { "${monthIndex + 1}" }
+            } else {
+                "${monthIndex + 1}月"
+            }
+        }
+
+        fun formatMonthDay(month: Int, day: Int, lang: String): String {
+            return if (lang.lowercase() == Language.EN) {
+                "$month/$day"
+            } else {
+                "${month}月${day}日"
+            }
+        }
+    }
+
+    object Account {
+        const val CASH = "CASH"
+        const val BANK = "BANK"
+        const val CREDIT = "CREDIT"
+    }
 
     object DeepLink {
         const val SCHEME = "lexpense"

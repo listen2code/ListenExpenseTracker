@@ -25,6 +25,7 @@ import com.listen.expensetracker.core.i18n.AppLanguage
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
@@ -141,19 +142,15 @@ fun SettingsAppearanceSection(
 
             // Language Selector
             val currentLang = AppLanguage.current
-            val currentLangLabel = when (currentLang) {
-                "en" -> "English"
-                "ja" -> "日本語"
-                else -> "简体中文"
-            }
+            val currentLangLabel = AppConstants.Language.getDisplayName(currentLang)
 
             CommonButton(
                 text = "${AppStrings.SETTINGS_LANGUAGE.tr()}: $currentLangLabel",
                 onClick = {
                     val next = when (currentLang) {
-                        "zh" -> "en"
-                        "en" -> "ja"
-                        else -> "zh"
+                        AppConstants.Language.ZH -> AppConstants.Language.EN
+                        AppConstants.Language.EN -> AppConstants.Language.JA
+                        else -> AppConstants.Language.ZH
                     }
                     onLanguageChange(next)
                 },

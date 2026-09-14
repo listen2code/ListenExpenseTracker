@@ -7,6 +7,7 @@ import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.db.TransactionDao
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.model.AppConstants
 import java.util.Calendar
 
 data class RecurringMonthlyBaseline(
@@ -118,7 +119,7 @@ object RecurringTransactionEngine {
         for (rule in dueRules) {
             if (rule.executionType == ExecutionType.AUTO_INSERT) {
                 val baseNote = rule.note.ifEmpty { rule.title }
-                val recurringNote = if (baseNote.startsWith("[周期]")) baseNote else "[周期] $baseNote"
+                val recurringNote = if (baseNote.startsWith(AppConstants.RECURRING_TAG)) baseNote else "${AppConstants.RECURRING_TAG} $baseNote"
                 val tx = TransactionEntity(
                     type = rule.type,
                     categoryId = rule.categoryId,

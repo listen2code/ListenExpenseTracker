@@ -27,6 +27,7 @@ import com.listen.expensetracker.data.engine.FinancialInsightEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsTab
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
@@ -106,7 +107,7 @@ fun StatisticsContentList(
                             // [Bugfix] 消费峰值日跳转对齐走势图逻辑，携带具体日期（如 "9月2日"）关键字精准匹配 (Rule 22)
                             val dateLabel = item.targetDateLabel ?: run {
                                 val c = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset) }
-                                "${c.get(Calendar.MONTH) + 1}月${item.targetDay}日"
+                                AppConstants.DateFormat.formatMonthDay(c.get(Calendar.MONTH) + 1, item.targetDay, lang)
                             }
                             onDateClick?.invoke(item.targetDay, dateLabel)
                         }

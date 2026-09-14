@@ -1,7 +1,11 @@
 package com.listen.expensetracker.data.backup
 
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import java.io.ByteArrayOutputStream
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
@@ -53,12 +57,12 @@ object TransactionBackupManager {
                     id = map["id"] ?: UUID.randomUUID().toString(),
                     type = map["type"] ?: TransactionType.EXPENSE,
                     categoryId = map["categoryId"] ?: "c_other_exp",
-                    categoryName = map["categoryName"] ?: "其他",
+                    categoryName = map["categoryName"] ?: AppStrings.CAT_OTHER_EXP.tr(),
                     categoryIcon = map["categoryIcon"] ?: "c_other_exp",
                     categoryColorHex = map["categoryColorHex"] ?: "#6B7280",
                     amount = map["amount"]?.toDoubleOrNull() ?: 0.0,
                     note = map["note"] ?: "",
-                    accountType = map["accountType"] ?: "CASH",
+                    accountType = map["accountType"] ?: AppConstants.Account.CASH,
                     timestamp = map["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
                 )
                 list.add(tx)
@@ -131,19 +135,16 @@ object TransactionBackupManager {
         bos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
         val writer = OutputStreamWriter(bos, Charsets.UTF_8)
 
-        val header = when (lang.lowercase()) {
-            "en" -> "Transaction ID,Date & Time,Type,Category,Amount,Account,Note"
-            "ja" -> "取引ID,日時,種類,カテゴリ,金額,口座,メモ"
-            else -> "交易单号,日期时间,类型,分类,金额,账户,备注"
-        }
+        val header = ExpenseStrings.get(AppStrings.CSV_HEADER, lang)
         writer.write(header + "\r\n")
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         for (tx in transactions) {
             val dateStr = sdf.format(Date(tx.timestamp))
-            val typeStr = when {
-                tx.type == TransactionType.INCOME -> if (lang == "en") "Income" else if (lang == "ja") "収入" else "收入"
-                else -> if (lang == "en") "Expense" else if (lang == "ja") "支出" else "支出"
+            val typeStr = if (tx.type == TransactionType.INCOME) {
+                ExpenseStrings.get(AppStrings.TYPE_INCOME, lang)
+            } else {
+                ExpenseStrings.get(AppStrings.TYPE_EXPENSE, lang)
             }
             val cleanCategory = escapeCsvField(tx.categoryName)
             val amountStr = String.format(Locale.US, "%.2f", tx.amount)

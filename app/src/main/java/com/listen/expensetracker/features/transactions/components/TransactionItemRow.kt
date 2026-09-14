@@ -33,6 +33,7 @@ import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AccountRepository
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.components.CommonText
@@ -109,8 +110,8 @@ fun TransactionItemRow(
                     )
                 }
 
-                val isRecurring = transaction.note.startsWith("[周期]")
-                val displayNote = if (isRecurring) transaction.note.removePrefix("[周期]").trim() else transaction.note
+                val isRecurring = transaction.note.startsWith(AppConstants.RECURRING_TAG)
+                val displayNote = if (isRecurring) transaction.note.removePrefix(AppConstants.RECURRING_TAG).trim() else transaction.note
 
                 Column(modifier = Modifier.weight(1f, fill = true)) {
                     Row(

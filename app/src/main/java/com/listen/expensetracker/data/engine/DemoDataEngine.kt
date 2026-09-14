@@ -7,6 +7,7 @@ import com.listen.expensetracker.data.db.RecurringRuleEntity
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import java.util.Calendar
 import java.util.UUID
 import kotlin.random.Random
@@ -87,34 +88,34 @@ object DemoDataEngine {
         }
 
         // 1. 真实月度薪资发放 (16000元，结余率达 85% > 20%，触发 insight_savings_rate)
-        generated.add(makeTx("c_salary", AppStrings.CAT_SALARY, "#10B981", 16000.0, wkDay1, 10, 0, if (lang == "zh") "月度薪资发放" else "Monthly Salary", isIncome = true))
+        generated.add(makeTx("c_salary", AppStrings.CAT_SALARY, "#10B981", 16000.0, wkDay1, 10, 0, DemoDataStrings.getSalaryNote(lang), isIncome = true))
 
         // 2. 周末峰值与大额异动 (触发 insight_peak_day, insight_weekend_shift, insight_category_dominant, insight_cat_jump)
         // 周末集中消费：数码购物 1350元 (占总支出 59% >= 45%) + 演唱会门票 480元 (较上月60元增长 8.7x > 1.8x)
-        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 1350.0, wDay, 14, 30, if (lang == "zh") "降噪无线耳机" else "Noise Canceling Earbuds", acc = "CREDIT"))
-        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 480.0, wDay, 19, 45, if (lang == "zh") "演唱会门票" else "Concert Tickets"))
+        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 1350.0, wDay, 14, 30, DemoDataStrings.getEarbudsNote(lang), acc = AppConstants.Account.CREDIT))
+        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 480.0, wDay, 19, 45, DemoDataStrings.getConcertNote(lang)))
 
         // 3. 工作日日常支出与周期订阅
-        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 120.0, wkDay1, 15, 20, if (lang == "zh") "日常服饰配件" else "Apparel Accessories"))
-        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 45.0, wkDay1, 9, 0, if (lang == "zh") "[周期] 流媒体月度订阅" else "[周期] Streaming Subscription"))
-        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 160.0, wkDay2, 19, 0, if (lang == "zh") "日式寿喜烧" else "Japanese Sukiyaki"))
+        generated.add(makeTx("c_shopping", AppStrings.CAT_SHOPPING, "#EC4899", 120.0, wkDay1, 15, 20, DemoDataStrings.getApparelNote(lang)))
+        generated.add(makeTx("c_entertainment", AppStrings.CAT_ENTERTAINMENT, "#8B5CF6", 45.0, wkDay1, 9, 0, DemoDataStrings.getStreamingNote(lang)))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 160.0, wkDay2, 19, 0, DemoDataStrings.getSukiyakiNote(lang)))
 
         // 4. 注入 6 笔 <= 35 元的高频小额支出 (触发拿铁因子 insight_latte_factor)
-        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 22.0, wkDay1, 8, 30, if (lang == "zh") "星巴克拿铁" else "Starbucks Latte", acc = "CASH"))
-        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 28.0, wkDay1, 12, 15, if (lang == "zh") "便当午餐" else "Lunch Bento", acc = "CASH"))
-        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 6.0, wkDay1, 18, 0, if (lang == "zh") "地铁通勤" else "Subway Commute", acc = "CASH"))
-        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 18.0, wkDay2, 14, 0, if (lang == "zh") "下午茶果茶" else "Fruit Tea", acc = "CASH"))
-        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 12.0, wkDay2, 8, 45, if (lang == "zh") "公交出行" else "City Bus", acc = "CASH"))
-        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 15.0, wkDay2, 21, 30, if (lang == "zh") "便利店零食" else "Snack", acc = "CASH"))
+        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 22.0, wkDay1, 8, 30, DemoDataStrings.getLatteNote(lang), acc = AppConstants.Account.CASH))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 28.0, wkDay1, 12, 15, DemoDataStrings.getBentoNote(lang), acc = AppConstants.Account.CASH))
+        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 6.0, wkDay1, 18, 0, DemoDataStrings.getSubwayNote(lang), acc = AppConstants.Account.CASH))
+        generated.add(makeTx("c_cafe", AppStrings.CAT_CAFE, "#84CC16", 18.0, wkDay2, 14, 0, DemoDataStrings.getFruitTeaNote(lang), acc = AppConstants.Account.CASH))
+        generated.add(makeTx("c_transport", AppStrings.CAT_TRANSPORT, "#3B82F6", 12.0, wkDay2, 8, 45, DemoDataStrings.getBusNote(lang), acc = AppConstants.Account.CASH))
+        generated.add(makeTx("c_food", AppStrings.CAT_FOOD, "#EF4444", 15.0, wkDay2, 21, 30, DemoDataStrings.getSnackNote(lang), acc = AppConstants.Account.CASH))
 
         // 5. 跨月对比基准垫底生成：上月支出总计 1240 元，触发环比上涨 (+81.9% > 12%)
         val prevCal = Calendar.getInstance().apply { add(Calendar.MONTH, monthOffset - 1) }
         val prevMaxDay = prevCal.getActualMaximum(Calendar.DAY_OF_MONTH)
         val prevBaselineList = listOf(
-            Triple("c_food", 450.0, if (lang == "zh") "上月日常餐饮" else "Past Dining"),
-            Triple("c_transport", 280.0, if (lang == "zh") "上月交通出行" else "Past Commute"),
-            Triple("c_shopping", 450.0, if (lang == "zh") "上月日常百货" else "Past Groceries"),
-            Triple("c_entertainment", 60.0, if (lang == "zh") "上月电影票" else "Past Movie")
+            Triple("c_food", 450.0, DemoDataStrings.getPastDiningNote(lang)),
+            Triple("c_transport", 280.0, DemoDataStrings.getPastCommuteNote(lang)),
+            Triple("c_shopping", 450.0, DemoDataStrings.getPastGroceriesNote(lang)),
+            Triple("c_entertainment", 60.0, DemoDataStrings.getPastMovieNote(lang))
         )
         prevBaselineList.forEachIndexed { idx, (catId, baseAmt, note) ->
             val bCal = (prevCal.clone() as Calendar).apply {
@@ -144,38 +145,38 @@ object DemoDataEngine {
         return listOf(
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
-                title = if (lang == "zh") "住房租金" else if (lang == "ja") "家賃" else "Apartment Rent",
+                title = DemoDataStrings.getRentTitle(lang),
                 type = TransactionType.EXPENSE, categoryId = "c_shopping",
                 categoryName = AppStrings.CAT_SHOPPING.tr(), categoryIcon = "c_shopping",
-                categoryColorHex = "#EC4899", amount = 2600.0, accountType = "BANK",
-                note = if (lang == "zh") "每月1日房租" else "Monthly Rent", frequency = RecurringFrequency.MONTHLY,
+                categoryColorHex = "#EC4899", amount = 2600.0, accountType = AppConstants.Account.BANK,
+                note = DemoDataStrings.getRentNote(lang), frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 1, startDate = now, nextExecutionDate = getNextExec(1), executionType = ExecutionType.AUTO_INSERT
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
-                title = if (lang == "zh") "Netflix 会员" else if (lang == "ja") "Netflix 会員" else "Netflix",
+                title = DemoDataStrings.getNetflixTitle(lang),
                 type = TransactionType.EXPENSE, categoryId = "c_entertainment",
                 categoryName = AppStrings.CAT_ENTERTAINMENT.tr(), categoryIcon = "c_entertainment",
-                categoryColorHex = "#8B5CF6", amount = 45.0, accountType = "BANK",
-                note = if (lang == "zh") "高级家庭套餐" else "Premium", frequency = RecurringFrequency.MONTHLY,
+                categoryColorHex = "#8B5CF6", amount = 45.0, accountType = AppConstants.Account.BANK,
+                note = DemoDataStrings.getNetflixNote(lang), frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 5, startDate = now, nextExecutionDate = getNextExec(5), executionType = ExecutionType.AUTO_INSERT
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
-                title = if (lang == "zh") "每月薪资" else if (lang == "ja") "毎月の給与" else "Monthly Salary",
+                title = DemoDataStrings.getSalaryTitle(lang),
                 type = TransactionType.INCOME, categoryId = "c_salary",
                 categoryName = AppStrings.CAT_SALARY.tr(), categoryIcon = "c_salary",
-                categoryColorHex = "#10B981", amount = 18000.0, accountType = "BANK",
-                note = if (lang == "zh") "固定工资发放" else "Base Salary", frequency = RecurringFrequency.MONTHLY,
+                categoryColorHex = "#10B981", amount = 18000.0, accountType = AppConstants.Account.BANK,
+                note = DemoDataStrings.getSalaryRuleNote(lang), frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 10, startDate = now, nextExecutionDate = getNextExec(10), executionType = ExecutionType.NOTIFY_CONFIRM
             ),
             RecurringRuleEntity(
                 id = UUID.randomUUID().toString(),
-                title = if (lang == "zh") "iCloud 云存储" else if (lang == "ja") "iCloud ストレージ" else "iCloud Storage",
+                title = DemoDataStrings.getCloudTitle(lang),
                 type = TransactionType.EXPENSE, categoryId = "c_entertainment",
                 categoryName = AppStrings.CAT_ENTERTAINMENT.tr(), categoryIcon = "c_entertainment",
-                categoryColorHex = "#8B5CF6", amount = 21.0, accountType = "CREDIT",
-                note = if (lang == "zh") "200GB 空间" else "200GB Plan", frequency = RecurringFrequency.MONTHLY,
+                categoryColorHex = "#8B5CF6", amount = 21.0, accountType = AppConstants.Account.CREDIT,
+                note = DemoDataStrings.getCloudNote(lang), frequency = RecurringFrequency.MONTHLY,
                 dayOfPeriod = 15, startDate = now, nextExecutionDate = getNextExec(15), executionType = ExecutionType.AUTO_INSERT
             )
         )

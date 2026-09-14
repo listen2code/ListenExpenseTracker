@@ -2,6 +2,9 @@ package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionSortOrder
 import com.listen.uicomponent.charts.BarChartItem
@@ -51,11 +54,11 @@ object TransactionCalculationEngine {
         accountFilter: String,
         budget: Double,
         sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
-        currencySymbol: String = "￥",
-        lang: String = "zh",
-        typeFilter: String = "ALL",
+        currencySymbol: String = AppConstants.DEFAULT_CURRENCY,
+        lang: String = AppConstants.DEFAULT_LANG,
+        typeFilter: String = AppConstants.FILTER_ALL,
         selectedCategories: Set<String> = emptySet(),
-        categoryFilter: String = "ALL",
+        categoryFilter: String = AppConstants.FILTER_ALL,
         amountPreset: AmountFilterPreset = AmountFilterPreset.ALL,
         customMinAmount: Double? = null,
         customMaxAmount: Double? = null
@@ -63,7 +66,7 @@ object TransactionCalculationEngine {
         val cleanQuery = query.trim().lowercase()
         val (startTs, endTs, title) = getMonthRangeAndTitle(currentOffset, lang)
         val monthFilteredList = allList.filter { it.timestamp in startTs..endTs }
-        val activeCategories = if (selectedCategories.isNotEmpty()) selectedCategories else if (categoryFilter != "ALL") setOf(categoryFilter) else emptySet()
+        val activeCategories = if (selectedCategories.isNotEmpty()) selectedCategories else if (categoryFilter != AppConstants.FILTER_ALL) setOf(categoryFilter) else emptySet()
 
         // 采用多维度的过滤管道模式 (Filter Pipeline)：
         // 管道层层过滤涵盖：文本查询、账户类型、账单分类、金额范围。
@@ -71,9 +74,8 @@ object TransactionCalculationEngine {
             val itemCal = Calendar.getInstance().apply { timeInMillis = item.timestamp }
             val itemMonth = itemCal.get(Calendar.MONTH) + 1
             val itemDay = itemCal.get(Calendar.DAY_OF_MONTH)
-            // 刻意囊括了中文日期（X月X日）和 ISO数字（MM-dd）等不同维度的数据标签，
-            // 使得用户可以通过自然语言习惯直接从查询栏搜索特定日期的账单流水。
-            val dateLabelZh = "${itemMonth}月${itemDay}日"
+            val dateLabelZh = AppConstants.DateFormat.formatMonthDay(itemMonth, itemDay, "zh")
+            val dateLabelEn = AppConstants.DateFormat.formatMonthDay(itemMonth, itemDay, "en")
             val matchesQuery = cleanQuery.isEmpty() ||
                     item.categoryName.lowercase().contains(cleanQuery) ||
                     item.note.lowercase().contains(cleanQuery) ||
@@ -81,11 +83,12 @@ object TransactionCalculationEngine {
                     "%.2f".format(item.amount).contains(cleanQuery) ||
                     item.amount.toLong().toString() == cleanQuery ||
                     dateLabelZh.contains(cleanQuery) ||
+                    dateLabelEn.contains(cleanQuery) ||
                     "%02d-%02d".format(itemMonth, itemDay).contains(cleanQuery) ||
                     "$itemMonth-$itemDay".contains(cleanQuery)
-            val matchesAccount = accountFilter == "ALL" || item.accountType == accountFilter
-            val matchesType = typeFilter == "ALL" || item.type.equals(typeFilter, ignoreCase = true)
-            val matchesCategory = activeCategories.isEmpty() || activeCategories.contains("ALL") ||
+            val matchesAccount = accountFilter == AppConstants.FILTER_ALL || item.accountType == accountFilter
+            val matchesType = typeFilter == AppConstants.FILTER_ALL || item.type.equals(typeFilter, ignoreCase = true)
+            val matchesCategory = activeCategories.isEmpty() || activeCategories.contains(AppConstants.FILTER_ALL) ||
                     activeCategories.any { catFilter ->
                         item.categoryName.equals(catFilter, ignoreCase = true) ||
                         item.categoryId.equals(catFilter, ignoreCase = true) ||
@@ -119,13 +122,10 @@ object TransactionCalculationEngine {
 
         val expenseShares = calculateCategoryShares(finalSorted.filter { it.type == TransactionType.EXPENSE }, totalExp)
         val expenseSegments = expenseShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
-
         val incomeShares = calculateCategoryShares(finalSorted.filter { it.type == TransactionType.INCOME }, totalInc)
         val incomeSegments = incomeShares.map { ProgressSegment(colorHex = it.colorHex, percentage = it.percentage) }
-
         val maxExpenseTx = finalSorted.filter { it.type == TransactionType.EXPENSE }.maxByOrNull { it.amount }
         val maxIncomeTx = finalSorted.filter { it.type == TransactionType.INCOME }.maxByOrNull { it.amount }
-
         val daysInMonth = getDaysInMonth(currentOffset)
         val dailyAvgExp = if (daysInMonth > 0) totalExp / daysInMonth else 0.0
         val dailyAvgInc = if (daysInMonth > 0) totalInc / daysInMonth else 0.0
@@ -187,20 +187,15 @@ object TransactionCalculationEngine {
             val c = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -i) }
             val dayKey = sdf.format(c.time)
             val sum = dayGroups[dayKey]?.sumOf { it.amount } ?: 0.0
-            result.add(
-                BarChartItem(
-                    label = dayKey,
-                    value = sum,
-                    colorHex = "#3B82F6"
-                )
-            )
+            result.add(BarChartItem(label = dayKey, value = sum, colorHex = "#3B82F6"))
         }
         return result
     }
 
     fun calculateMonthDailyTrend(
         expenses: List<TransactionEntity>,
-        offset: Int
+        offset: Int,
+        lang: String = AppConstants.DEFAULT_LANG
     ): List<LineChartPoint> {
         val cal = Calendar.getInstance().apply { add(Calendar.MONTH, offset) }
         val maxDaysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -212,14 +207,13 @@ object TransactionCalculationEngine {
         val result = mutableListOf<LineChartPoint>()
         for (day in 1..maxDaysInMonth) {
             val sum = dayGroups[day]?.sumOf { it.amount } ?: 0.0
-            result.add(LineChartPoint(label = "$day", value = sum, subLabel = "${month}月${day}日"))
+            result.add(LineChartPoint(label = "$day", value = sum, subLabel = AppConstants.DateFormat.formatMonthDay(month, day, lang)))
         }
         return result
     }
 
-    fun getMonthRangeAndTitle(offset: Int, lang: String = "zh"): Triple<Long, Long, String> {
+    fun getMonthRangeAndTitle(offset: Int, lang: String = AppConstants.DEFAULT_LANG): Triple<Long, Long, String> {
         val cal = Calendar.getInstance().apply {
-            // 利用 Calendar 计算月份边缘 Case（当前月份 1号 0时0分0秒）
             add(Calendar.MONTH, offset)
             set(Calendar.DAY_OF_MONTH, 1)
             set(Calendar.HOUR_OF_DAY, 0)
@@ -233,15 +227,11 @@ object TransactionCalculationEngine {
         val endTs = cal.timeInMillis
 
         val sdf = when (lang.lowercase()) {
-            "en" -> SimpleDateFormat("MMM yyyy", Locale.ENGLISH)
-            "ja" -> SimpleDateFormat("yyyy年MM月", Locale.JAPANESE)
-            else -> SimpleDateFormat("yyyy年MM月", Locale.CHINESE)
+            AppConstants.Language.EN -> SimpleDateFormat(AppConstants.DateFormat.MONTH_YEAR_EN, Locale.ENGLISH)
+            AppConstants.Language.JA -> SimpleDateFormat(AppConstants.DateFormat.YEAR_MONTH_CN, Locale.JAPANESE)
+            else -> SimpleDateFormat(AppConstants.DateFormat.YEAR_MONTH_CN, Locale.CHINESE)
         }
-        val currentPrefix = when (lang.lowercase()) {
-            "en" -> "This Month"
-            "ja" -> "今月"
-            else -> "本月"
-        }
+        val currentPrefix = ExpenseStrings.get(AppStrings.LABEL_THIS_MONTH, lang)
         val formatted = sdf.format(Date(startTs))
         val title = if (offset == 0) "$currentPrefix ($formatted)" else formatted
 

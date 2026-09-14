@@ -134,7 +134,7 @@ object LocalNotificationManager {
             val inboxStyle = NotificationCompat.InboxStyle().setBigContentTitle(title)
             details.take(5).forEach { inboxStyle.addLine(it) }
             if (details.size > 5) {
-                inboxStyle.setSummaryText("+${details.size - 5} 条更多账单")
+                inboxStyle.setSummaryText(String.format(NotificationStrings.NOTIFY_MORE_BILLS_SUFFIX.tr(), details.size - 5))
             }
             builder.setStyle(inboxStyle)
         } else {

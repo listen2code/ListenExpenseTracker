@@ -2,10 +2,14 @@ package com.listen.expensetracker.data.engine
 
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.uicomponent.charts.LineChartPoint
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.components.ProgressSegment
 import java.util.Calendar
+import java.util.Locale
 
 /**
  * 年度维度计算结果模型。
@@ -67,18 +71,13 @@ object AnnualCalculationEngine {
         }
         val endTs = endCal.timeInMillis
 
+        val yearFmt = ExpenseStrings.get(AppStrings.STATS_YEAR_FORMAT, lang)
+        val formattedYear = String.format(Locale.getDefault(), yearFmt, targetYear)
         val title = if (yearOffset == 0) {
-            when (lang.lowercase()) {
-                "en" -> "This Year ($targetYear)"
-                "ja" -> "今年 (${targetYear}年)"
-                else -> "今年 (${targetYear}年)"
-            }
+            val prefix = ExpenseStrings.get(AppStrings.LABEL_THIS_YEAR, lang)
+            "$prefix ($formattedYear)"
         } else {
-            when (lang.lowercase()) {
-                "en" -> "$targetYear"
-                "ja" -> "${targetYear}年"
-                else -> "${targetYear}年"
-            }
+            formattedYear
         }
 
         return Triple(startTs, endTs, title)
@@ -179,14 +178,7 @@ object AnnualCalculationEngine {
             val exp = monthTxs.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
             val inc = monthTxs.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
 
-            val label = when (lang.lowercase()) {
-                "en" -> when (monthIdx) {
-                    0 -> "Jan"; 1 -> "Feb"; 2 -> "Mar"; 3 -> "Apr"; 4 -> "May"; 5 -> "Jun"
-                    6 -> "Jul"; 7 -> "Aug"; 8 -> "Sep"; 9 -> "Oct"; 10 -> "Nov"; else -> "Dec"
-                }
-                "ja" -> "${monthIdx + 1}月"
-                else -> "${monthIdx + 1}月"
-            }
+            val label = AppConstants.DateFormat.getMonthLabel(monthIdx, lang)
 
             AnnualMonthSummary(
                 monthIndex = monthIdx + 1,

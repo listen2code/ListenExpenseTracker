@@ -30,6 +30,7 @@ object NotificationStrings {
     const val NOTIFY_RECURRING_SINGLE_BODY = "notify_recurring_single_body"
     const val NOTIFY_RECURRING_MULTI_TITLE = "notify_recurring_multi_title"
     const val NOTIFY_RECURRING_MULTI_BODY = "notify_recurring_multi_body"
+    const val NOTIFY_MORE_BILLS_SUFFIX = "notify_more_bills_suffix"
 
     // 版本更新通知文案
     const val NOTIFY_UPDATE_TITLE = "notify_update_title"
@@ -88,6 +89,7 @@ object NotificationStrings {
         NOTIFY_RECURRING_SINGLE_BODY to "已自动记录「%s」：%s%s（%s）",
         NOTIFY_RECURRING_MULTI_TITLE to "📅 自动记账提醒（共 %d 笔）",
         NOTIFY_RECURRING_MULTI_BODY to "已自动履约入账 %d 笔周期账单，合计支出 %s%s。点击查看流水明细。",
+        NOTIFY_MORE_BILLS_SUFFIX to "+%d 条更多账单",
 
         NOTIFY_UPDATE_TITLE to "🚀 发现新版本 %s 已发布",
         NOTIFY_UPDATE_BODY to "全新版本已就绪！%s，点击查看更新详情。",
@@ -138,6 +140,7 @@ object NotificationStrings {
         NOTIFY_RECURRING_SINGLE_BODY to "Recorded \"%s\": %s%s (%s)",
         NOTIFY_RECURRING_MULTI_TITLE to "📅 Recurring Bills Auto-Recorded (%d)",
         NOTIFY_RECURRING_MULTI_BODY to "Auto-recorded %d recurring bills, total %s%s. Tap to review.",
+        NOTIFY_MORE_BILLS_SUFFIX to "+%d more records",
 
         NOTIFY_UPDATE_TITLE to "🚀 New Version %s Available",
         NOTIFY_UPDATE_BODY to "New release is ready! %s. Tap to check updates.",
@@ -188,6 +191,7 @@ object NotificationStrings {
         NOTIFY_RECURRING_SINGLE_BODY to "「%s」を自動記帳しました: %s%s（%s）",
         NOTIFY_RECURRING_MULTI_TITLE to "📅 自動記帳のお知らせ（合計 %d 件）",
         NOTIFY_RECURRING_MULTI_BODY to "%d 件の定期収支を自動記帳しました（合計 %s%s）。タップして確認。",
+        NOTIFY_MORE_BILLS_SUFFIX to "+%d 件のその他の記録",
 
         NOTIFY_UPDATE_TITLE to "🚀 新バージョン %s がリリースされました",
         NOTIFY_UPDATE_BODY to "新バージョンが利用可能です！%s。タップして詳細を確認。",

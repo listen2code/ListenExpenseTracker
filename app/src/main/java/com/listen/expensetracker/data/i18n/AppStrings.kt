@@ -388,4 +388,11 @@ object AppStrings {
 
     // UI Badges & Formatting
     const val RECURRING_BADGE_LABEL = "recurring_badge_label"
+
+    // Time, Export & Cloud Strings
+    const val LABEL_THIS_MONTH = "label_this_month"
+    const val LABEL_THIS_YEAR = "label_this_year"
+    const val CSV_HEADER = "csv_header"
+    const val DRIVE_AUTH_PERMISSION_PROMPT = "drive_auth_permission_prompt"
+    const val DRIVE_BACKUP_NOT_FOUND = "drive_backup_not_found"
 }

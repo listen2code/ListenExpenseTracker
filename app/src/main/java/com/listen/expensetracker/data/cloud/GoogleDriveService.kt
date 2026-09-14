@@ -8,6 +8,8 @@ import com.google.android.gms.auth.UserRecoverableAuthException
 import com.listen.arch.apm.ApmLogChannel
 import com.listen.arch.apm.ApmLogger
 import com.listen.arch.apm.TraceManager
+import com.listen.expensetracker.core.i18n.tr
+import com.listen.expensetracker.data.i18n.AppStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -51,7 +53,7 @@ object GoogleDriveService {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
-            throw IllegalStateException("请在弹出的 Google 授权窗口中点击「允许」，完成后再次点击备份")
+            throw IllegalStateException(AppStrings.DRIVE_AUTH_PERMISSION_PROMPT.tr())
         }
     }
 
@@ -91,7 +93,7 @@ object GoogleDriveService {
         TraceManager.trace(ApmLogChannel.SYNC, "GoogleDrive", "DownloadBackup", traceId) {
             try {
                 val fileId = findBackupFileId(accessToken)
-                    ?: return@trace Result.failure(IllegalStateException("未在 Google 云端硬盘中找到 $BACKUP_FILE_NAME 备份文件"))
+                    ?: return@trace Result.failure(IllegalStateException(String.format(AppStrings.DRIVE_BACKUP_NOT_FOUND.tr(), BACKUP_FILE_NAME)))
 
                 val downloadUrl = "$DRIVE_API_FILES/$fileId?alt=media"
                 val connection = (URL(downloadUrl).openConnection() as HttpURLConnection).apply {

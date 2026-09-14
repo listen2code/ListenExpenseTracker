@@ -1,9 +1,12 @@
 package com.listen.expensetracker.features.transactions.viewmodel
 
 import com.listen.arch.mvi.CommonUiEffect
+import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.engine.AmountFilterPreset
+import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.CategoryBudgetConfig
 import com.listen.uicomponent.theme.AccentColor
 import com.listen.uicomponent.theme.ThemeMode
@@ -65,20 +68,20 @@ data class TransactionsUiState(
     val isOverBudget: Boolean = false,
     val hideBalance: Boolean = false,
     val searchQuery: String = "",
-    val selectedAccountFilter: String = "ALL",
-    val typeFilter: String = "ALL",
+    val selectedAccountFilter: String = AppConstants.FILTER_ALL,
+    val typeFilter: String = AppConstants.FILTER_ALL,
     val selectedCategories: Set<String> = emptySet(),
     val amountPreset: AmountFilterPreset = AmountFilterPreset.ALL,
     val customMinAmount: Double? = null,
     val customMaxAmount: Double? = null,
     val period: TransactionPeriod = TransactionPeriod.MONTH,
     val selectedMonthOffset: Int = 0,
-    val monthTitle: String = "本月",
+    val monthTitle: String = AppStrings.LABEL_THIS_MONTH.tr(),
     val selectedYearOffset: Int = 0,
-    val yearTitle: String = "今年",
+    val yearTitle: String = AppStrings.LABEL_THIS_YEAR.tr(),
     val sortOrder: TransactionSortOrder = TransactionSortOrder.DATE_DESC,
-    val currencySymbol: String = "￥",
-    val language: String = "zh",
+    val currencySymbol: String = AppConstants.DEFAULT_CURRENCY,
+    val language: String = AppConstants.DEFAULT_LANG,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accentColor: AccentColor = AccentColor.EMERALD,
     val activeDialog: TransactionsDialog? = null,
