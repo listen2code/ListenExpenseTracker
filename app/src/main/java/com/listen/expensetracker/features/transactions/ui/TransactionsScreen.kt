@@ -53,6 +53,7 @@ import com.listen.expensetracker.features.transactions.viewmodel.TransactionsInt
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 纯无状态流水主画面 (TransactionsScreen)。
@@ -112,7 +113,7 @@ fun TransactionsScreen(
             IconButton(onClick = { viewModel?.handleIntent(TransactionsIntent.ToggleHideBalance(!state.hideBalance)) }) {
                 Icon(
                     imageVector = if (state.hideBalance) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = "Toggle Balance",
+                    contentDescription = AppConstants.ContentDescription.TOGGLE_BALANCE,
                     tint = MaterialTheme.colorScheme.primary
                 )
             }

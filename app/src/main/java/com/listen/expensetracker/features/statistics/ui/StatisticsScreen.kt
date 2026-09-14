@@ -32,6 +32,7 @@ import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewMod
 import com.listen.uicomponent.components.BaseScreenScaffold
 import com.listen.uicomponent.components.CommonSegmentedControl
 import java.util.Calendar
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 纯无状态统计分析主画面 (StatisticsScreen)。
@@ -91,7 +92,7 @@ fun StatisticsScreen(
             IconButton(onClick = { viewModel?.handleIntent(StatisticsIntent.ToggleHideAmount(!state.hideAmount)) }) {
                 Icon(
                     imageVector = if (state.hideAmount) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = "Toggle Amount",
+                    contentDescription = AppConstants.ContentDescription.TOGGLE_AMOUNT,
                     tint = MaterialTheme.colorScheme.primary
                 )
             }

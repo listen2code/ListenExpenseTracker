@@ -37,6 +37,7 @@ import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Modern dialog presented when a newer GitHub Release is detected.
@@ -62,7 +63,7 @@ fun UpdateAvailableDialog(
             ) {
                 Icon(
                     imageVector = Icons.Default.SystemUpdate,
-                    contentDescription = "New Version",
+                    contentDescription = AppConstants.ContentDescription.NEW_VERSION,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(24.dp)
                 )

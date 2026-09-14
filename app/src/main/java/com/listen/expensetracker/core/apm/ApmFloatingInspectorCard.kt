@@ -48,6 +48,7 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.apm.LogEntryUi
 import com.listen.uicomponent.components.SearchBarInput
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 全局 APM 悬浮窗展开面板卡片 (ApmFloatingInspectorCard)。
@@ -108,7 +109,7 @@ fun ApmFloatingInspectorCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.BugReport,
-                        contentDescription = "APM",
+                        contentDescription = AppConstants.ContentDescription.APM,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
@@ -144,7 +145,7 @@ fun ApmFloatingInspectorCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Collapse",
+                            contentDescription = AppConstants.ContentDescription.COLLAPSE,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )

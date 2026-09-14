@@ -50,6 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Reusable horizontal category picker row for transaction edit and add sheets.
@@ -122,7 +123,7 @@ fun TransactionCategoryPicker(
                     ) {
                         Icon(
                             Icons.Default.Add,
-                            contentDescription = "Manage Categories",
+                            contentDescription = AppConstants.ContentDescription.MANAGE_CATEGORIES,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
@@ -218,7 +219,7 @@ fun TransactionDatePickerButton(
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
         modifier = modifier.height(38.dp)
     ) {
-        Icon(Icons.Default.CalendarToday, contentDescription = "Date", modifier = Modifier.size(16.dp))
+        Icon(Icons.Default.CalendarToday, contentDescription = AppConstants.ContentDescription.DATE, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(6.dp))
         Text(sdf.format(Date(selectedTimestamp)), fontSize = AppDimens.TextSmall)
     }

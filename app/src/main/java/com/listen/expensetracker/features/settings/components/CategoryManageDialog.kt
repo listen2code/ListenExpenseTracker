@@ -48,6 +48,7 @@ import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.parseHexColor
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Category Management Dialog allowing custom category creation and deletion using standardized ListenUiComponent elements.
@@ -76,7 +77,7 @@ fun CategoryManageDialog(
                 onClick = { showAddDialog = true },
                 style = CommonButtonStyle.Primary,
                 icon = {
-                    Icon(Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(AppDimens.IconSizeMedium))
+                    Icon(Icons.Default.Add, contentDescription = AppConstants.ContentDescription.ADD, modifier = Modifier.size(AppDimens.IconSizeMedium))
                 }
             )
         },
@@ -135,7 +136,7 @@ fun CategoryManageDialog(
                                 },
                                 modifier = Modifier.size(20.dp)
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
+                                Icon(Icons.Default.Delete, contentDescription = AppConstants.ContentDescription.DELETE, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
                             }
                         }
                     }

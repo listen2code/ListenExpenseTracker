@@ -43,6 +43,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Settings Bottom Version Footer Item.
@@ -99,7 +100,7 @@ fun SettingsVersionFooter(
                     } else {
                         Icon(
                             imageVector = Icons.Default.SystemUpdate,
-                            contentDescription = "Update",
+                            contentDescription = AppConstants.ContentDescription.UPDATE,
                             modifier = Modifier.size(AppDimens.IconSizeMedium)
                         )
                     }

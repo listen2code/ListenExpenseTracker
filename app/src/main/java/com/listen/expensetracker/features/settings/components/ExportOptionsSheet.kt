@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.listen.expensetracker.data.model.AppConstants
 
 enum class ExportDateRange {
     ALL, THIS_MONTH, THIS_YEAR
@@ -203,7 +204,7 @@ fun ExportOptionsSheet(
                     text = AppStrings.EXPORT_ACTION_SAVE.tr(),
                     onClick = { onSaveToFile(startTs, endTs, selectedType, defaultFileName) },
                     style = CommonButtonStyle.Primary,
-                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Save", modifier = Modifier.size(18.dp)) },
+                    icon = { Icon(Icons.Default.FileDownload, contentDescription = AppConstants.ContentDescription.SAVE, modifier = Modifier.size(18.dp)) },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp),
                     modifier = Modifier.weight(1f)
                 )
@@ -212,7 +213,7 @@ fun ExportOptionsSheet(
                     text = AppStrings.EXPORT_ACTION_SHARE.tr(),
                     onClick = { onShare(startTs, endTs, selectedType) },
                     style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.Share, contentDescription = "Share", modifier = Modifier.size(18.dp)) },
+                    icon = { Icon(Icons.Default.Share, contentDescription = AppConstants.ContentDescription.SHARE, modifier = Modifier.size(18.dp)) },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp),
                     modifier = Modifier.weight(1f)
                 )

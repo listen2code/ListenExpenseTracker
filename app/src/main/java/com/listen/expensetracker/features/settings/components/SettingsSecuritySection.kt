@@ -25,6 +25,7 @@ import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 设置页「安全与隐私」卡片组件 (SettingsSecuritySection)。
@@ -56,7 +57,7 @@ fun SettingsSecuritySection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Security,
-                    contentDescription = "Security",
+                    contentDescription = AppConstants.ContentDescription.SECURITY,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )

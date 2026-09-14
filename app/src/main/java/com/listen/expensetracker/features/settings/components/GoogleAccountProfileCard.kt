@@ -41,6 +41,7 @@ import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Clean profile banner displaying the connected Google user account with avatar and logout action.
@@ -73,7 +74,7 @@ fun GoogleAccountProfileCard(
                         .data(avatarUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Google Avatar",
+                    contentDescription = AppConstants.ContentDescription.GOOGLE_AVATAR,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(36.dp)
@@ -115,7 +116,7 @@ fun GoogleAccountProfileCard(
         IconButton(onClick = onLogout) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Logout,
-                contentDescription = "Logout",
+                contentDescription = AppConstants.ContentDescription.LOGOUT,
                 tint = ExpenseRed
             )
         }

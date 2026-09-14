@@ -31,6 +31,7 @@ import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 年度收支总览卡片 - 选中月份详情条 (AnnualOverviewMonthDetail)。
@@ -120,7 +121,7 @@ fun AnnualOverviewMonthDetail(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "View in Transactions",
+                        contentDescription = AppConstants.ContentDescription.VIEW_IN_TRANSACTIONS,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )

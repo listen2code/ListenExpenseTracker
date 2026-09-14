@@ -29,6 +29,7 @@ import com.listen.expensetracker.data.i18n.NotificationStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.*
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * APM 运维可观测性与数据测试卡片 (SettingsApmSection)。
@@ -80,7 +81,7 @@ fun SettingsApmSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Science,
-                    contentDescription = "Ops",
+                    contentDescription = AppConstants.ContentDescription.OPS,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
@@ -114,7 +115,7 @@ fun SettingsApmSection(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Science,
-                        contentDescription = "Seed",
+                        contentDescription = AppConstants.ContentDescription.SEED,
                         modifier = Modifier.size(AppDimens.IconSizeMedium)
                     )
                 },
@@ -139,7 +140,7 @@ fun SettingsApmSection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "Clear",
+                            contentDescription = AppConstants.ContentDescription.CLEAR,
                             modifier = Modifier.size(AppDimens.IconSizeMedium)
                         )
                     },

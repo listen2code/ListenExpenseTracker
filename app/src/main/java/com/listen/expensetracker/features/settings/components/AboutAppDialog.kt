@@ -47,6 +47,7 @@ import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonDivider
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * About Application Dialog displaying package version, design architecture, and app core highlights.
@@ -130,7 +131,7 @@ private fun AboutAppHeader(
         if (appIconBitmap != null) {
             Image(
                 bitmap = appIconBitmap,
-                contentDescription = "lExpense",
+                contentDescription = AppConstants.ContentDescription.APP_ICON,
                 modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp))
             )
         } else {

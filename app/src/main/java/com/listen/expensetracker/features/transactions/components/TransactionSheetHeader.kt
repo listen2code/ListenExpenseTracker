@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonSegmentedControl
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 统一记账弹窗页眉操作栏 (TransactionSheetHeader)。
@@ -77,7 +78,7 @@ fun TransactionSheetHeader(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = AppConstants.ContentDescription.DELETE,
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp)
                 )

@@ -142,7 +142,7 @@ fun TransactionItemRow(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Repeat,
-                                    contentDescription = "Recurring",
+                                    contentDescription = AppConstants.ContentDescription.RECURRING,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(9.dp)
                                 )

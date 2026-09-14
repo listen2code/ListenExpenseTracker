@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.listen.expensetracker.R
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Full-screen immersive dialog presenting all third-party open source licenses.
@@ -76,7 +77,7 @@ fun OpenSourceLicensesContent(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = AppConstants.ContentDescription.BACK
                         )
                     }
                 },
@@ -84,7 +85,7 @@ fun OpenSourceLicensesContent(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
+                            contentDescription = AppConstants.ContentDescription.CLOSE
                         )
                     }
                 },

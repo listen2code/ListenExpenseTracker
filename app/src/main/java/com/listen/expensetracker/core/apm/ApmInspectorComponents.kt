@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * APM 日志面板顶部紧凑操作按钮。
@@ -141,7 +142,7 @@ fun ApmBubbleContent(errorCount: Int) {
             ) {
                 Icon(
                     imageVector = Icons.Default.BugReport,
-                    contentDescription = "APM Bubble",
+                    contentDescription = AppConstants.ContentDescription.APM_BUBBLE,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(28.dp)
                 )

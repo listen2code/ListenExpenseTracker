@@ -32,6 +32,7 @@ import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 每月扣款日选择器（支持 1~31 日任意步进与高频日期预设快捷选择）。
@@ -61,7 +62,7 @@ fun MonthlyDaySelector(
                     onClick = { onDayChange(if (dayOfPeriod > 1) dayOfPeriod - 1 else 28) },
                     modifier = Modifier.size(32.dp)
                 ) {
-                    Icon(Icons.Default.Remove, contentDescription = "Prev", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Remove, contentDescription = AppConstants.ContentDescription.PREV, modifier = Modifier.size(16.dp))
                 }
                 Surface(
                     shape = RoundedCornerShape(AppDimens.CornerButton),
@@ -86,7 +87,7 @@ fun MonthlyDaySelector(
                     onClick = { onDayChange(if (dayOfPeriod < 28) dayOfPeriod + 1 else 1) },
                     modifier = Modifier.size(32.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Next", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Add, contentDescription = AppConstants.ContentDescription.NEXT, modifier = Modifier.size(16.dp))
                 }
             }
         }

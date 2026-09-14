@@ -69,7 +69,7 @@ fun SettingsAppearanceSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Palette,
-                    contentDescription = "Theme",
+                    contentDescription = AppConstants.ContentDescription.THEME,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeLarge)
                 )

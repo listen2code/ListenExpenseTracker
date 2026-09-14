@@ -39,6 +39,7 @@ import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.IncomeGreen
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Ultra-Compact Balance Overview Card Component.
@@ -198,7 +199,7 @@ fun BalanceOverviewCard(
                         }
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Budget",
+                            contentDescription = AppConstants.ContentDescription.EDIT_BUDGET,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             modifier = Modifier.size(11.dp)
                         )

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.model.Category
 import kotlin.math.roundToInt
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 单个分类预算比例调整行 (CategoryRatioRow)。
@@ -89,7 +90,7 @@ fun CategoryRatioRow(
                 onClick = { onRatioChange((percent - 5).coerceAtLeast(0) / 100f) },
                 modifier = Modifier.size(28.dp)
             ) {
-                Icon(imageVector = Icons.Default.Remove, contentDescription = "-", modifier = Modifier.size(16.dp))
+                Icon(imageVector = Icons.Default.Remove, contentDescription = AppConstants.ContentDescription.MINUS, modifier = Modifier.size(16.dp))
             }
             Text(
                 text = "$percent%",
@@ -102,7 +103,7 @@ fun CategoryRatioRow(
                 onClick = { onRatioChange((percent + 5).coerceAtMost(100) / 100f) },
                 modifier = Modifier.size(28.dp)
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "+", modifier = Modifier.size(16.dp))
+                Icon(imageVector = Icons.Default.Add, contentDescription = AppConstants.ContentDescription.PLUS, modifier = Modifier.size(16.dp))
             }
         }
     }

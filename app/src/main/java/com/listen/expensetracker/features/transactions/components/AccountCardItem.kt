@@ -42,6 +42,7 @@ import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.ExpenseRed
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Polished single account card row with vibrant badge, clean typography, and action buttons.
@@ -137,7 +138,7 @@ fun AccountCardItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = AppConstants.ContentDescription.EDIT,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -148,7 +149,7 @@ fun AccountCardItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.DeleteOutline,
-                            contentDescription = "Delete",
+                            contentDescription = AppConstants.ContentDescription.DELETE,
                             tint = ExpenseRed,
                             modifier = Modifier.size(16.dp)
                         )

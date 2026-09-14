@@ -122,7 +122,7 @@ fun MonthPickerDialog(
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { viewingYear--; yearPageBase = (viewingYear / 12) * 12 }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = AppConstants.ContentDescription.PREV, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -133,11 +133,11 @@ fun MonthPickerDialog(
                         CommonText(text = yearFormat, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         if (onYearSelected != null) {
                             Spacer(modifier = Modifier.width(2.dp))
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Year", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = AppConstants.ContentDescription.SELECT_YEAR, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                         }
                     }
                     IconButton(onClick = { viewingYear++; yearPageBase = (viewingYear / 12) * 12 }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = AppConstants.ContentDescription.NEXT, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -162,11 +162,11 @@ fun MonthPickerDialog(
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { yearPageBase -= 12 }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev Dec", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = AppConstants.ContentDescription.PREV_DECADE, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     }
                     CommonText(text = "$yearPageBase - ${yearPageBase + 11}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     IconButton(onClick = { yearPageBase += 12 }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Dec", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = AppConstants.ContentDescription.NEXT_DECADE, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp), horizontalArrangement = Arrangement.Start) {

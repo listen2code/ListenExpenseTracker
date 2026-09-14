@@ -42,6 +42,7 @@ import com.listen.expensetracker.data.model.Category
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.charts.PieChartItem
 import com.listen.uicomponent.theme.parseHexColor
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Modern Category Ranking Item displaying podium badges (#1 🥇, #2 🥈, #3 🥉),
@@ -207,7 +208,7 @@ fun RankingCategoryItem(
                 if (onClick != null) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "View in Transactions",
+                        contentDescription = AppConstants.ContentDescription.VIEW_IN_TRANSACTIONS,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                         modifier = Modifier.size(14.dp)
                     )

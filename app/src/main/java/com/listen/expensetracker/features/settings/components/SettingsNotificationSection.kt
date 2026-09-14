@@ -27,6 +27,7 @@ import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDivider
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 设置页「通知与提醒」高紧凑统一控制面板 (SettingsNotificationSection)。
@@ -79,7 +80,7 @@ fun SettingsNotificationSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
+                        contentDescription = AppConstants.ContentDescription.NOTIFICATIONS,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )

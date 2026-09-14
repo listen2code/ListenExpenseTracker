@@ -36,6 +36,7 @@ import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Unified Data Center Section Card.
@@ -77,7 +78,7 @@ fun SettingsDataCenterSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Storage,
-                    contentDescription = "Data Center",
+                    contentDescription = AppConstants.ContentDescription.DATA_CENTER,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
@@ -140,7 +141,7 @@ fun SettingsDataCenterSection(
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
                             } else {
-                                Icon(Icons.Default.CloudUpload, contentDescription = "Backup", modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.CloudUpload, contentDescription = AppConstants.ContentDescription.BACKUP, modifier = Modifier.size(16.dp))
                             }
                         },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
@@ -152,7 +153,7 @@ fun SettingsDataCenterSection(
                         onClick = onTriggerRestore,
                         enabled = !isBusy,
                         style = CommonButtonStyle.Outlined,
-                        icon = { Icon(Icons.Default.CloudDownload, contentDescription = "Restore", modifier = Modifier.size(16.dp)) },
+                        icon = { Icon(Icons.Default.CloudDownload, contentDescription = AppConstants.ContentDescription.RESTORE, modifier = Modifier.size(16.dp)) },
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
                     )
@@ -169,7 +170,7 @@ fun SettingsDataCenterSection(
                     text = AppStrings.GOOGLE_LOGIN_BTN.tr(),
                     onClick = onLoginGoogle,
                     style = CommonButtonStyle.Primary,
-                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Login", modifier = Modifier.size(18.dp)) },
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = AppConstants.ContentDescription.LOGIN, modifier = Modifier.size(18.dp)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -182,7 +183,7 @@ fun SettingsDataCenterSection(
                 text = AppStrings.EXPORT_EXCEL_BTN.tr(),
                 onClick = onExportExcel,
                 style = CommonButtonStyle.Primary,
-                icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export Excel", modifier = Modifier.size(16.dp)) },
+                icon = { Icon(Icons.Default.FileDownload, contentDescription = AppConstants.ContentDescription.EXPORT_EXCEL, modifier = Modifier.size(16.dp)) },
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -195,7 +196,7 @@ fun SettingsDataCenterSection(
                     text = AppStrings.EXPORT_JSON.tr(),
                     onClick = onExportJson,
                     style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.FileDownload, contentDescription = "Export JSON", modifier = Modifier.size(16.dp)) },
+                    icon = { Icon(Icons.Default.FileDownload, contentDescription = AppConstants.ContentDescription.EXPORT_JSON, modifier = Modifier.size(16.dp)) },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 )
@@ -204,7 +205,7 @@ fun SettingsDataCenterSection(
                     text = AppStrings.IMPORT_JSON.tr(),
                     onClick = onImportJson,
                     style = CommonButtonStyle.Outlined,
-                    icon = { Icon(Icons.Default.FileUpload, contentDescription = "Import JSON", modifier = Modifier.size(16.dp)) },
+                    icon = { Icon(Icons.Default.FileUpload, contentDescription = AppConstants.ContentDescription.IMPORT_JSON, modifier = Modifier.size(16.dp)) },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 )

@@ -28,6 +28,7 @@ import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Finance Preferences & Rules Section Card.
@@ -63,7 +64,7 @@ fun SettingsFinanceSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Tune,
-                    contentDescription = "Finance Rules",
+                    contentDescription = AppConstants.ContentDescription.FINANCE_RULES,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(AppDimens.IconSizeMedium)
                 )
@@ -85,7 +86,7 @@ fun SettingsFinanceSection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Savings,
-                            contentDescription = "Budget",
+                            contentDescription = AppConstants.ContentDescription.BUDGET,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -101,7 +102,7 @@ fun SettingsFinanceSection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.AccountBalanceWallet,
-                            contentDescription = "Recurring",
+                            contentDescription = AppConstants.ContentDescription.RECURRING,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -123,7 +124,7 @@ fun SettingsFinanceSection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Category,
-                            contentDescription = "Categories",
+                            contentDescription = AppConstants.ContentDescription.CATEGORIES,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -139,7 +140,7 @@ fun SettingsFinanceSection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.AccountBalanceWallet,
-                            contentDescription = "Accounts",
+                            contentDescription = AppConstants.ContentDescription.ACCOUNTS,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )

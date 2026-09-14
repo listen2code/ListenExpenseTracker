@@ -39,6 +39,7 @@ import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
 import kotlinx.coroutines.launch
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 分类预算中心主看板内容 (CategoryBudgetCenterContent)。
@@ -99,7 +100,7 @@ fun CategoryBudgetCenterContent(
                         },
                         modifier = Modifier.size(26.dp)
                     ) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = AppConstants.ContentDescription.PREV, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                     }
                     Text(text = monthTitle, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 6.dp))
                     IconButton(
@@ -112,7 +113,7 @@ fun CategoryBudgetCenterContent(
                         },
                         modifier = Modifier.size(26.dp)
                     ) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = AppConstants.ContentDescription.NEXT, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                     }
                 }
             }
