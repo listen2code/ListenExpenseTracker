@@ -10,19 +10,14 @@ import com.listen.expensetracker.data.engine.AnnualCalculationEngine
 import com.listen.expensetracker.data.engine.TransactionCalculationEngine
 import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
-import com.listen.expensetracker.features.statistics.viewmodel.StatisticsIntent
 import com.listen.expensetracker.features.statistics.viewmodel.StatisticsUiState
-import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
-
 /**
  * 统计分析画面专用 UI 状态持有者 (StatisticsStateHolder)。
  *
- * Google 官方 UI State Holder 设计模式说明：
- * 1. 【职责解耦】：
- *    - [StatisticsUiState]：存放业务领域只读数据，由 ViewModel 状态机持有；
- *    - [StatisticsStateHolder]：承载界面控件与动画调度状态（Month/Year PagerState, LazyListState, 滚动计算, 副作用触发），生命周期与 Compose 树绑定。
- * 2. 【杜绝内存泄漏】：严禁将 PagerState/LazyListState 放入 ViewModel；
- * 3. 【极致纯净的 Screen】：将状态初始化与效应调度全部收拢在此，使 Screen 函数专注于纯声明式视图渲染。
+ * 【架构设计】：
+ * 遵循 Google 官方推荐的 "Plain State Holder" 模式。
+ * 核心职责：仅负责持有 UI 自身的交互状态（Month/Year PagerState, LazyListState, 标题计算）。
+ * 副作用与手势协同监听在 [StatisticsEffects] 中由 Screen 独立挂载，与本状态容器职责严格区分。
  */
 class StatisticsStateHolder(
     val monthPagerState: PagerState,
@@ -39,8 +34,7 @@ class StatisticsStateHolder(
  */
 @Composable
 fun rememberStatisticsStateHolder(
-    state: StatisticsUiState,
-    viewModel: StatisticsViewModel? = null
+    state: StatisticsUiState
 ): StatisticsStateHolder {
     val lang = state.language
 
@@ -87,17 +81,6 @@ fun rememberStatisticsStateHolder(
     val (_, _, currentYearTitle) = remember(activeYearOffset, lang) {
         AnnualCalculationEngine.getYearRangeAndTitle(activeYearOffset, lang)
     }
-
-    // 5. 挂载画面专用副作用与手势监听
-    StatisticsEffects(
-        viewModel = viewModel,
-        monthPagerState = monthPagerState,
-        yearPagerState = yearPagerState,
-        listState = listState,
-        period = state.period,
-        selectedMonthOffset = state.selectedMonthOffset,
-        selectedYearOffset = state.selectedYearOffset
-    )
 
     return remember(
         monthPagerState, yearPagerState, listState,

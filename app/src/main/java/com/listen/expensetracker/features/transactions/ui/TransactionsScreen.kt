@@ -70,10 +70,22 @@ fun TransactionsScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel? = null
 ) {
-    // 🌟 一行收拢所有 Pager、ListState 与副作用协同逻辑
-    val holder = rememberTransactionsStateHolder(state, viewModel)
+    // 🌟 UI 交互状态（PagerState、LazyListState、日期分组计算）
+    val holder = rememberTransactionsStateHolder(state)
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+
+    // 🌟 独立挂载画面专用副作用监听与手势协同 (区分于 UI 状态持有者 TransactionsStateHolder)
+    TransactionsEffects(
+        viewModel = viewModel,
+        monthPagerState = holder.monthPagerState,
+        yearPagerState = holder.yearPagerState,
+        listState = holder.listState,
+        period = state.period,
+        groupedTransactions = holder.groupedTransactions,
+        selectedMonthOffset = state.selectedMonthOffset,
+        selectedYearOffset = state.selectedYearOffset
+    )
 
     BaseScreenScaffold(
         titleSlot = {

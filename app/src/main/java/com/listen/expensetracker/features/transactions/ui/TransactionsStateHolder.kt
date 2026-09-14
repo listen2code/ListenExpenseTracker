@@ -13,17 +13,14 @@ import com.listen.expensetracker.features.common.components.PAGER_BASE_INDEX
 import com.listen.expensetracker.features.common.components.PAGER_PAGE_COUNT
 import com.listen.expensetracker.features.transactions.components.formatDayGroupHeader
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsUiState
-import com.listen.expensetracker.features.transactions.viewmodel.TransactionsViewModel
 
 /**
  * 流水画面专用 UI 状态持有者 (TransactionsStateHolder)。
  *
- * Google 官方 UI State Holder 设计模式说明：
- * 1. 【职责解耦】：
- *    - [TransactionsUiState]：存放业务领域只读数据（账单、预算、搜索关键字等），由 ViewModel 管理，支持 JVM 纯净单测；
- *    - [TransactionsStateHolder]：存放 Compose 控件状态与动画协调（PagerState, LazyListState, 滚动计算, 副作用触发），生命周期跟随 Compose 树。
- * 2. 【杜绝内存泄漏】：严禁将 PagerState/LazyListState 等持有 Compose 布局引用的对象放入 ViewModel；
- * 3. 【极致纯净的 Screen】：将状态初始化与效应调度全部收拢在此，使 Screen Composable 开门见山只写 UI 布局。
+ * 【架构设计】：
+ * 遵循 Google 官方推荐的 "Plain State Holder" 模式。
+ * 核心职责：仅负责持有 UI 自身的交互状态（Month/Year PagerState, LazyListState, 流水按天分组, 标题计算）。
+ * 副作用与手势协同监听在 [TransactionsEffects] 中由 Screen 独立挂载，与本状态容器职责严格区分。
  */
 class TransactionsStateHolder(
     val monthPagerState: PagerState,
@@ -42,13 +39,11 @@ class TransactionsStateHolder(
  * 创建并记住 [TransactionsStateHolder] 的 Composable 辅助函数。
  *
  * - 使用 [rememberPagerState] 与虚拟基准页 [PAGER_BASE_INDEX] 支撑双向无限滑动；
- * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现进程死亡或配置变更后的列表位置恢复；
- * - 在状态容器内部安全挂载 [TransactionsEffects]，避免向 Screen 暴露杂乱的效应监听逻辑。
+ * - 使用 [rememberSaveable] 配合 [LazyListState.Saver] 实现进程死亡或配置变更后的列表位置恢复。
  */
 @Composable
 fun rememberTransactionsStateHolder(
-    state: TransactionsUiState,
-    viewModel: TransactionsViewModel? = null
+    state: TransactionsUiState
 ): TransactionsStateHolder {
     val lang = state.language
 
@@ -100,18 +95,6 @@ fun rememberTransactionsStateHolder(
     val (_, _, currentYearTitle) = remember(activeYearOffset, lang) {
         AnnualCalculationEngine.getYearRangeAndTitle(activeYearOffset, lang)
     }
-
-    // 6. 挂载画面专用副作用与手势监听
-    TransactionsEffects(
-        viewModel = viewModel,
-        monthPagerState = monthPagerState,
-        yearPagerState = yearPagerState,
-        listState = listState,
-        period = state.period,
-        groupedTransactions = groupedTransactions,
-        selectedMonthOffset = state.selectedMonthOffset,
-        selectedYearOffset = state.selectedYearOffset
-    )
 
     return remember(
         monthPagerState, yearPagerState, listState, groupedTransactions,

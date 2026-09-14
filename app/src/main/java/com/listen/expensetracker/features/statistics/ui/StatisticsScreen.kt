@@ -50,7 +50,20 @@ fun StatisticsScreen(
     onNavigateToTransaction: ((monthOffset: Int, transaction: TransactionEntity) -> Unit)? = null,
     onNavigateToBudget: ((monthOffset: Int) -> Unit)? = null
 ) {
-    val holder = rememberStatisticsStateHolder(state, viewModel)
+    // 🌟 UI 交互状态（PagerState、LazyListState、标题计算）
+    val holder = rememberStatisticsStateHolder(state)
+
+    // 🌟 独立挂载画面专用副作用监听与手势协同 (区分于 UI 状态持有者 StatisticsStateHolder)
+    StatisticsEffects(
+        viewModel = viewModel,
+        monthPagerState = holder.monthPagerState,
+        yearPagerState = holder.yearPagerState,
+        listState = holder.listState,
+        period = state.period,
+        selectedMonthOffset = state.selectedMonthOffset,
+        selectedYearOffset = state.selectedYearOffset
+    )
+
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE
 
     BaseScreenScaffold(
