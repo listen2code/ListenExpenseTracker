@@ -1,5 +1,10 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -95,14 +100,20 @@ fun SettingsAppearanceSection(
                     onIndexChange = { index -> onChangeThemeMode(modes[index].first) }
                 )
 
-                // AMOLED 纯黑夜间节能模式开关
-                CommonSwitchRow(
-                    title = AppStrings.AMOLED_PURE_BLACK_TITLE.tr(),
-                    subtitle = AppStrings.AMOLED_PURE_BLACK_DESC.tr(),
-                    checked = isPureBlackDark,
-                    onCheckedChange = onTogglePureBlackDark,
-                    contentPadding = 0.dp
-                )
+                // AMOLED 纯黑夜间节能模式开关：仅在深色和跟随系统选项时才显示
+                AnimatedVisibility(
+                    visible = themeMode == ThemeMode.DARK || themeMode == ThemeMode.SYSTEM,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    CommonSwitchRow(
+                        title = AppStrings.AMOLED_PURE_BLACK_TITLE.tr(),
+                        subtitle = AppStrings.AMOLED_PURE_BLACK_DESC.tr(),
+                        checked = isPureBlackDark,
+                        onCheckedChange = onTogglePureBlackDark,
+                        contentPadding = 0.dp
+                    )
+                }
             }
 
             // Accent Color Selection Row

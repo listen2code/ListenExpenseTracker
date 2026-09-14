@@ -24,11 +24,17 @@ import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 import com.listen.uicomponent.theme.ListenTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import com.listen.expensetracker.R
+import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 
 /**
  * Full-screen immersive dialog presenting all third-party open source licenses.
- * Powered by AboutLibraries M3 container with automated dependency detection.
+ * Powered by AboutLibraries M3 container with automated dependency detection and crash-safe fallback.
  */
 @Composable
 fun OpenSourceLicensesDialog(
@@ -97,9 +103,34 @@ fun OpenSourceLicensesContent(
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
-            LibrariesContainer(
-                modifier = Modifier.fillMaxSize()
-            )
+            val context = LocalContext.current
+            val libs = remember(context) {
+                try {
+                    val jsonString = context.resources.openRawResource(R.raw.aboutlibraries)
+                        .bufferedReader().use { it.readText() }
+                    Libs.Builder().withJson(jsonString).build()
+                } catch (_: Throwable) {
+                    null
+                }
+            }
+
+            if (libs != null) {
+                LibrariesContainer(
+                    libraries = libs,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = AppStrings.OPEN_SOURCE_LICENSES.tr(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

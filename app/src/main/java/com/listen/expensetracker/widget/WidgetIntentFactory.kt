@@ -66,6 +66,19 @@ object WidgetIntentFactory {
         )
     }
 
+    fun createResetMonthPendingIntent(context: Context, widgetId: Int): PendingIntent {
+        val intent = Intent(context, ListenExpenseAppWidgetProvider::class.java).apply {
+            action = ListenExpenseAppWidgetProvider.ACTION_RESET_MONTH
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            widgetId * 10 + 4,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     fun createQuickAddPendingIntent(
         context: Context,
         categoryId: String?,

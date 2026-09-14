@@ -116,10 +116,18 @@ object WidgetLayoutBinder {
         views.setTextViewText(R.id.widget_btn_shopping_text, AppStrings.CAT_SHOPPING.tr())
         views.setTextViewText(R.id.widget_btn_daily_text, AppStrings.CAT_OTHER_EXP.tr())
 
-        // 5. 意图路由绑定 (月份左右切换、眼睛显隐切换、打开 App、4个快捷记账)
+        // 5. 意图路由绑定 (月份左右切换、回到当月、眼睛显隐切换、打开 App、4个快捷记账)
         views.setOnClickPendingIntent(R.id.widget_btn_prev_month, ListenExpenseAppWidgetProvider.createPrevMonthPendingIntent(context, widgetId))
         views.setOnClickPendingIntent(R.id.widget_btn_next_month, ListenExpenseAppWidgetProvider.createNextMonthPendingIntent(context, widgetId))
         views.setOnClickPendingIntent(R.id.widget_btn_toggle_eye, ListenExpenseAppWidgetProvider.createToggleEyePendingIntent(context, widgetId))
+
+        // 重定位到当月 (仅非当月即 monthOffset != 0 时显示，点击一键归位)
+        val showToday = monthOffset != 0
+        views.setViewVisibility(R.id.widget_btn_today, if (showToday) View.VISIBLE else View.GONE)
+        val resetMonthIntent = ListenExpenseAppWidgetProvider.createResetMonthPendingIntent(context, widgetId)
+        if (showToday) {
+            views.setOnClickPendingIntent(R.id.widget_btn_today, resetMonthIntent)
+        }
 
         val openAppPendingIntent = ListenExpenseAppWidgetProvider.createOpenAppPendingIntent(context)
         // 防误触架构设计 (Anti-mistouch architecture): 
@@ -128,7 +136,8 @@ object WidgetLayoutBinder {
         views.setOnClickPendingIntent(R.id.widget_spent_container, openAppPendingIntent)
         views.setOnClickPendingIntent(R.id.widget_spent_amount, openAppPendingIntent)
         views.setOnClickPendingIntent(R.id.widget_budget_remaining, openAppPendingIntent)
-        views.setOnClickPendingIntent(R.id.widget_month_title, openAppPendingIntent)
+        // 易用性双通道设计：非当月时点击月份标题也可重置回当月；当月时点击则拉起主应用
+        views.setOnClickPendingIntent(R.id.widget_month_title, if (showToday) resetMonthIntent else openAppPendingIntent)
         views.setOnClickPendingIntent(R.id.widget_app_icon, openAppPendingIntent)
         views.setOnClickPendingIntent(R.id.widget_health_badge, openAppPendingIntent)
 

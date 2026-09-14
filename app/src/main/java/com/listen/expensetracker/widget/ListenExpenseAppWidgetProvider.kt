@@ -55,6 +55,10 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                 setWidgetHideAmount(context, widgetId, !currentHide)
                 triggerWidgetUpdate(context, widgetId)
             }
+            ACTION_RESET_MONTH -> {
+                setWidgetMonthOffset(context, widgetId, 0)
+                triggerWidgetUpdate(context, widgetId)
+            }
         }
     }
 
@@ -64,10 +68,7 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         ExpenseStrings.init()
-        // 冷启动或添加小组件时，从 Room 和 DataStore 异步提取数据并渲染。
-        // 技术决策: 为什么使用 CoroutineScope(Dispatchers.IO) 而不是 viewModelScope?
-        // 因为 Widget 的运行环境是一个独立的 BroadcastReceiver 上下文，没有 ViewModel 生命周期，
-        // 因此必须使用独立的协程作用域来执行异步的数据库和偏好设置读取。
+        // 冷启动或添加小组件时，从 Room 和 DataStore 异步提取数据并渲染
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = AppDatabase.getInstance(context)
@@ -78,9 +79,6 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
                     updateSingleWidget(context, appWidgetManager, id, allList, prefs.currencySymbol, prefs.monthlyBudget, prefs.language)
                 }
             } catch (_: Exception) {
-                // 异常回退机制 (try-catch fallback):
-                // 如果数据库或数据存储读取失败，回退渲染默认占位数据，
-                // 确保小部件在异常情况下也不会变成白板（Blank）。
                 val (_, _, defaultTitle) = TransactionCalculationEngine.getMonthRangeAndTitle(0, "zh")
                 for (id in appWidgetIds) {
                     WidgetLayoutBinder.renderWidget(context, appWidgetManager, id, 0.0, 5000.0, "￥", defaultTitle, BudgetHealthStatus.NORMAL, "zh")
@@ -100,9 +98,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         const val ACTION_PREV_MONTH = "com.listen.expensetracker.widget.ACTION_PREV_MONTH"
         const val ACTION_NEXT_MONTH = "com.listen.expensetracker.widget.ACTION_NEXT_MONTH"
         const val ACTION_TOGGLE_HIDE_AMOUNT = "com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT"
+        const val ACTION_RESET_MONTH = "com.listen.expensetracker.widget.ACTION_RESET_MONTH"
 
-        // 统一小部件与深层链接 (Deep Link) 路由常量，避免在 Activity 中硬编码 (Rule 22)。
-        // 采用 URI_SCHEME/URI_HOST 的规范模式，使跨文件的路由配置保持一致且易于维护。
+        // 统一小部件与深层链接 (Deep Link) 路由常量 (Rule 22)
         const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
         const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
         const val URI_SCHEME = "lexpense"
@@ -233,6 +231,9 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
 
         fun createToggleEyePendingIntent(context: Context, widgetId: Int): PendingIntent =
             WidgetIntentFactory.createToggleEyePendingIntent(context, widgetId)
+
+        fun createResetMonthPendingIntent(context: Context, widgetId: Int): PendingIntent =
+            WidgetIntentFactory.createResetMonthPendingIntent(context, widgetId)
 
         fun createQuickAddPendingIntent(
             context: Context,

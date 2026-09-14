@@ -1,0 +1,107 @@
+﻿{
+  "metadata": {
+    "generated": "2026-09-14T21:40:00.000Z"
+  },
+  "licenses": {
+    "Apache-2.0": {
+      "content": "Licensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.",
+      "name": "Apache License 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "MIT": {
+      "content": "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "libraries": [
+    {
+      "uniqueId": "androidx.compose.ui:ui",
+      "artifactVersion": "2026.02.01",
+      "name": "Jetpack Compose UI",
+      "description": "Android's modern toolkit for building native user interfaces.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "androidx.compose.material3:material3",
+      "artifactVersion": "1.4.0",
+      "name": "Compose Material 3",
+      "description": "Jetpack Compose Material Design 3 components and design system.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "androidx.core:core-ktx",
+      "artifactVersion": "1.12.0",
+      "name": "AndroidX Core KTX",
+      "description": "Kotlin extensions for AndroidX core libraries providing idiomatic Kotlin APIs.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "androidx.room:room-runtime",
+      "artifactVersion": "2.8.4",
+      "name": "AndroidX Room Database",
+      "description": "The Room persistence library provides an abstraction layer over SQLite for robust database access.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "androidx.biometric:biometric",
+      "artifactVersion": "1.2.0-alpha05",
+      "name": "AndroidX Biometric",
+      "description": "Authentication library supporting biometric (fingerprint and face) and device credentials.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "androidx.credentials:credentials",
+      "artifactVersion": "1.3.0",
+      "name": "AndroidX Credentials",
+      "description": "Unified authentication credentials management across passwords, passkeys, and federated sign-in.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "The Android Open Source Project"}]
+    },
+    {
+      "uniqueId": "com.google.android.libraries.identity.googleid:googleid",
+      "artifactVersion": "1.1.1",
+      "name": "Google ID",
+      "description": "Google Identity Services library for Credential Manager integration.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "Google LLC"}]
+    },
+    {
+      "uniqueId": "com.google.android.gms:play-services-auth-base",
+      "artifactVersion": "18.0.10",
+      "name": "Google Play Services Auth Base",
+      "description": "Lightweight GoogleAuthUtil core for authorization and token handling.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "Google LLC"}]
+    },
+    {
+      "uniqueId": "io.coil-kt:coil-compose",
+      "artifactVersion": "2.6.0",
+      "name": "Coil Compose",
+      "description": "Fast, lightweight image loading library for Android and Jetpack Compose backed by Kotlin Coroutines.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "Colin White"}]
+    },
+    {
+      "uniqueId": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+      "artifactVersion": "1.8.0",
+      "name": "Kotlinx Coroutines",
+      "description": "Coroutines support libraries for Kotlin and Android concurrency.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "JetBrains"}]
+    },
+    {
+      "uniqueId": "com.mikepenz:aboutlibraries-compose-m3",
+      "artifactVersion": "11.2.3",
+      "name": "AboutLibraries",
+      "description": "Material 3 Compose component for displaying open source licenses and dependency information.",
+      "licenses": ["Apache-2.0"],
+      "developers": [{"name": "Mike Penz"}]
+    }
+  ]
+}

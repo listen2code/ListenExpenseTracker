@@ -76,6 +76,7 @@ class ListenExpenseAppWidgetProviderTest {
         assertEquals("com.listen.expensetracker.widget.ACTION_PREV_MONTH", ListenExpenseAppWidgetProvider.ACTION_PREV_MONTH)
         assertEquals("com.listen.expensetracker.widget.ACTION_NEXT_MONTH", ListenExpenseAppWidgetProvider.ACTION_NEXT_MONTH)
         assertEquals("com.listen.expensetracker.widget.ACTION_TOGGLE_HIDE_AMOUNT", ListenExpenseAppWidgetProvider.ACTION_TOGGLE_HIDE_AMOUNT)
+        assertEquals("com.listen.expensetracker.widget.ACTION_RESET_MONTH", ListenExpenseAppWidgetProvider.ACTION_RESET_MONTH)
     }
 
     @Test
