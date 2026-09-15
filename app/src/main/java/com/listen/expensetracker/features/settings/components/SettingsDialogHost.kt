@@ -153,7 +153,6 @@ fun SettingsDialogHost(
         is SettingsDialog.OpenSourceLicenses -> {
             OpenSourceLicensesDialog(
                 onDismiss = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
-                lang = lang
             )
         }
         is SettingsDialog.UpdateAvailable -> {
@@ -171,8 +170,7 @@ fun SettingsDialogHost(
                     viewModel?.handleIntent(SettingsIntent.ShareExcel(startTs, endTs, type))
                     viewModel?.handleIntent(SettingsIntent.DismissDialog)
                 },
-                onDismiss = { viewModel?.handleIntent(SettingsIntent.DismissDialog) },
-                lang = lang
+                onDismiss = { viewModel?.handleIntent(SettingsIntent.DismissDialog) }
             )
         }
         is SettingsDialog.SimulateNotifications -> {

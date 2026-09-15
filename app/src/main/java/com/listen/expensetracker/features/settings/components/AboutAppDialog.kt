@@ -139,13 +139,13 @@ private fun AboutAppHeader(
                 modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.AccountBalanceWallet, "lExpense", tint = Color.White, modifier = Modifier.size(28.dp))
+                Icon(Icons.Default.AccountBalanceWallet, AppConstants.ContentDescription.APP_ICON, tint = Color.White, modifier = Modifier.size(28.dp))
             }
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "lExpense",
+                text = AppConstants.APP_NAME,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

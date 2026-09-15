@@ -16,27 +16,26 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import com.listen.uicomponent.components.CommonDivider
 import androidx.compose.material3.MaterialTheme
-import com.listen.uicomponent.components.CommonSwitchRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.listen.arch.sync.SyncState
 import com.listen.arch.sync.SyncStatus
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonDivider
+import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.components.SurfaceCard
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Unified Data Center Section Card.
@@ -44,26 +43,26 @@ import com.listen.expensetracker.data.model.AppConstants
  */
 @Composable
 fun SettingsDataCenterSection(
-    modifier: Modifier = Modifier,
     googleAccountEmail: String?,
     googleDisplayName: String?,
-    googleAvatarUrl: String? = null,
-    autoBackupDrive: Boolean = true,
-    autoBackupWifiOnly: Boolean = false,
     syncState: SyncState,
     onLoginGoogle: () -> Unit,
     onLogoutGoogle: () -> Unit,
-    onToggleAutoBackupDrive: (Boolean) -> Unit = {},
-    onToggleAutoBackupWifiOnly: (Boolean) -> Unit = {},
     onTriggerBackup: () -> Unit,
     onTriggerRestore: () -> Unit,
-    onExportExcel: () -> Unit = {},
     onExportJson: () -> Unit,
     onImportJson: () -> Unit,
+    modifier: Modifier = Modifier,
+    googleAvatarUrl: String? = null,
+    autoBackupDrive: Boolean = true,
+    autoBackupWifiOnly: Boolean = false,
+    onToggleAutoBackupDrive: (Boolean) -> Unit = {},
+    onToggleAutoBackupWifiOnly: (Boolean) -> Unit = {},
+    onExportExcel: () -> Unit = {},
     isOperating: Boolean = false
 ) {
     val isLoggedIn = !googleAccountEmail.isNullOrBlank()
-    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    val sdf = SimpleDateFormat(AppConstants.DateFormat.DATETIME_MINUTES, Locale.getDefault())
 
     SurfaceCard(
         cornerRadius = AppDimens.CornerCard,

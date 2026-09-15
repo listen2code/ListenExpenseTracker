@@ -200,7 +200,7 @@ fun TransactionDatePickerButton(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val sdf = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val sdf = remember { SimpleDateFormat(AppConstants.DateFormat.ISO_DATE, Locale.getDefault()) }
     OutlinedButton(
         onClick = {
             val cal = Calendar.getInstance().apply { timeInMillis = selectedTimestamp }

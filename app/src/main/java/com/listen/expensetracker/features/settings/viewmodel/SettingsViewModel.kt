@@ -123,15 +123,15 @@ class SettingsViewModel(
                 emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_ACCOUNT_LOGOUT_TOAST.tr()))
             }
             is SettingsIntent.TriggerCloudBackup -> viewModelScope.launch {
-                syncDelegate.triggerCloudBackup(currentState.googleAccountEmail, currentState.language, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
+                syncDelegate.triggerCloudBackup(currentState.googleAccountEmail, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
             }
             is SettingsIntent.TriggerCloudRestore -> viewModelScope.launch {
-                syncDelegate.triggerCloudRestore(currentState.googleAccountEmail, currentState.language, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
+                syncDelegate.triggerCloudRestore(currentState.googleAccountEmail, traceId, { op -> updateState { copy(isOperating = op) } }, { emitEffect(CommonUiEffect.ShowToast(it)) })
             }
             is SettingsIntent.SeedDemoData -> viewModelScope.launch { syncDelegate.seedDemoData(intent.monthOffset, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
-            is SettingsIntent.ClearAllData -> viewModelScope.launch { syncDelegate.clearAllData(currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
-            is SettingsIntent.ExportJsonToFile -> viewModelScope.launch { syncDelegate.exportJsonToFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
-            is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch { syncDelegate.importJsonFromFile(intent.uri, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ClearAllData -> viewModelScope.launch { syncDelegate.clearAllData { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ExportJsonToFile -> viewModelScope.launch { syncDelegate.exportJsonToFile(intent.uri) { emitEffect(CommonUiEffect.ShowToast(it)) } }
+            is SettingsIntent.ImportJsonFromFile -> viewModelScope.launch { syncDelegate.importJsonFromFile(intent.uri) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.ExportExcelToFile -> viewModelScope.launch { syncDelegate.exportExcelToFile(intent.uri, intent.startTs, intent.endTs, intent.typeFilter, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.ShareExcel -> viewModelScope.launch { syncDelegate.shareExcel(intent.startTs, intent.endTs, intent.typeFilter, currentState.language) { emitEffect(CommonUiEffect.ShowToast(it)) } }
             is SettingsIntent.TriggerGoogleSignIn -> { emitEffect(SettingsEffect.LaunchGoogleSignIn) }
@@ -141,7 +141,7 @@ class SettingsViewModel(
             
             // 处理文件系统请求意图
             is SettingsIntent.RequestExportJson -> {
-                val fileName = AppConstants.Export.BACKUP_FILE_PREFIX + SimpleDateFormat(AppConstants.Export.BACKUP_DATE_FORMAT, Locale.getDefault()).format(Date()) + ".json"
+                val fileName = AppConstants.Export.BACKUP_FILE_PREFIX + SimpleDateFormat(AppConstants.Export.BACKUP_DATE_FORMAT, Locale.getDefault()).format(Date()) + AppConstants.FileExtension.JSON
                 emitEffect(SettingsEffect.TriggerJsonExport(fileName))
             }
             is SettingsIntent.RequestImportJson -> emitEffect(SettingsEffect.TriggerJsonImport)
@@ -226,7 +226,7 @@ class SettingsViewModel(
             profileResult.onSuccess { profile ->
                 handleIntent(SettingsIntent.LinkGoogleAccount(profile.email, profile.displayName, profile.avatarUrl))
             }.onFailure { err -> emitEffect(CommonUiEffect.ShowToast(AppStrings.GOOGLE_AUTH_RESOLVE_FAILED_TOAST.tr().format(err.message ?: ""))) }
-        } catch (e: GetCredentialCancellationException) {
+        } catch (_: GetCredentialCancellationException) {
             // Cancelled by user
         } catch (e: Throwable) {
             ApmLogger.e("GoogleAuth", "Login error: ${e.javaClass.name}: ${e.message}")

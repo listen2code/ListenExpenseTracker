@@ -34,6 +34,7 @@ import com.listen.uicomponent.theme.ListenTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 单条 APM 日志卡片行组件 (ApmFloatingLogRow)。
@@ -44,14 +45,14 @@ fun ApmFloatingLogRow(
     log: LogEntryUi,
     modifier: Modifier = Modifier
 ) {
-    val sdf = remember { SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()) }
+    val sdf = remember { SimpleDateFormat(AppConstants.DateFormat.TIME_MILLIS, Locale.getDefault()) }
     val timeStr = remember(log.timestamp) { sdf.format(Date(log.timestamp)) }
 
     val levelColor = when (log.levelName) {
-        "DEBUG" -> Color(0xFF6B7280)
-        "INFO" -> IncomeGreen
-        "WARN" -> Color(0xFFF59E0B)
-        "ERROR" -> ExpenseRed
+        AppConstants.Apm.LEVEL_DEBUG -> Color(0xFF6B7280)
+        AppConstants.Apm.LEVEL_INFO -> IncomeGreen
+        AppConstants.Apm.LEVEL_WARN -> Color(0xFFF59E0B)
+        AppConstants.Apm.LEVEL_ERROR -> ExpenseRed
         else -> MaterialTheme.colorScheme.onSurface
     }
 

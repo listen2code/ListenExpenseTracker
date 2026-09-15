@@ -1,11 +1,9 @@
 package com.listen.expensetracker.features.settings.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,12 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.db.TransactionType
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.model.CategoryRepository
 import com.listen.uicomponent.components.CommonButton
@@ -48,7 +45,6 @@ import com.listen.uicomponent.components.CommonEditText
 import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.parseHexColor
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Category Management Dialog allowing custom category creation and deletion using standardized ListenUiComponent elements.
@@ -154,7 +150,6 @@ fun CategoryManageDialog(
                 onCategoriesChanged()
                 showAddDialog = false
             },
-            lang = lang
         )
     }
 }
@@ -164,7 +159,6 @@ private fun AddCustomCategoryDialog(
     type: String,
     onDismiss: () -> Unit,
     onCategoryAdded: () -> Unit,
-    lang: String
 ) {
     var name by remember { mutableStateOf("") }
     val colorHexOptions = listOf("#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6", "#EC4899", "#06B6D4", "#64748B")

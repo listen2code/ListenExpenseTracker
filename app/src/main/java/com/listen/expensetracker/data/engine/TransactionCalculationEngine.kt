@@ -177,7 +177,7 @@ object TransactionCalculationEngine {
     }
 
     fun calculateRecentDaysTrend(expenses: List<TransactionEntity>): List<BarChartItem> {
-        val sdf = SimpleDateFormat("MM-dd", Locale.getDefault())
+        val sdf = SimpleDateFormat(AppConstants.DateFormat.MONTH_DAY, Locale.getDefault())
         val dayGroups = expenses.groupBy {
             sdf.format(Date(it.timestamp))
         }

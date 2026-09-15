@@ -14,6 +14,7 @@ import com.listen.arch.mvi.BaseViewModel
 import com.listen.arch.mvi.CommonUiEffect
 import kotlinx.coroutines.flow.collectLatest
 import androidx.core.net.toUri
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 集中化 UI 副作用处理器 (Common UI Effect Handler)。
@@ -83,7 +84,7 @@ fun shareSystemText(context: Context, content: String, title: String) {
     val sendIntent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, content)
-        type = "text/plain"
+        type = AppConstants.MimeTypes.PLAIN_TEXT
     }
     val chooser = Intent.createChooser(sendIntent, title).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

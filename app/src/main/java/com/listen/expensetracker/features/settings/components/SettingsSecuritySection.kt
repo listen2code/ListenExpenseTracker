@@ -20,12 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonSegmentedControl
 import com.listen.uicomponent.components.CommonSwitchRow
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 设置页「安全与隐私」卡片组件 (SettingsSecuritySection)。

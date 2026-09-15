@@ -50,6 +50,7 @@ object AppConstants {
     const val DEFAULT_CURRENCY = "￥"
     const val FILTER_ALL = "ALL"
     const val RECURRING_TAG = "[周期]"
+    const val APP_NAME = "lExpense"
 
     object Language {
         const val ZH = "zh"
@@ -73,6 +74,10 @@ object AppConstants {
         const val MONTH_YEAR_EN = "MMM yyyy"
         const val BACKUP_TIMESTAMP = "yyyyMMdd_HHmmss"
         const val TIME_DEFAULT = "HH:mm"
+        const val DATETIME_SECONDS = "yyyy-MM-dd HH:mm:ss"
+        const val DATETIME_MINUTES = "yyyy-MM-dd HH:mm"
+        const val MONTH_DAY = "MM-dd"
+        const val TIME_MILLIS = "HH:mm:ss.SSS"
 
         val MONTH_NAMES_EN = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
@@ -112,13 +117,55 @@ object AppConstants {
     }
 
     /**
+     * Google Play Store market intent and web URLs.
+     */
+    object GooglePlay {
+        const val MARKET_DETAILS_PREFIX = "market://details?id="
+        const val WEB_DETAILS_PREFIX = "https://play.google.com/store/apps/details?id="
+    }
+
+    /**
      * MIME types used for file system operations (Export/Import).
      */
     object MimeTypes {
         const val JSON = "application/json"
         const val CSV = "text/csv"
+        const val PLAIN_TEXT = "text/plain"
         const val ANY_TEXT = "text/*"
         const val ANY = "*/*"
+    }
+
+    /**
+     * File extensions used throughout the app.
+     */
+    object FileExtension {
+        const val JSON = ".json"
+        const val CSV = ".csv"
+        const val APK = ".apk"
+    }
+
+    /**
+     * File storage paths and provider authorities.
+     */
+    object Storage {
+        const val EXPORTS_DIR = "exports"
+        const val FILE_PROVIDER_SUFFIX = ".fileprovider"
+        const val GOOGLE_DRIVE_BACKUP_FILE_NAME = "lexpense_backup.json"
+    }
+
+    /**
+     * APM logging channels and level constants.
+     */
+    object Apm {
+        const val CHANNEL_APP = "APP"
+        const val CHANNEL_DB = "DB"
+        const val CHANNEL_SYNC = "SYNC"
+        const val CHANNEL_CRASH = "CRASH"
+
+        const val LEVEL_DEBUG = "DEBUG"
+        const val LEVEL_INFO = "INFO"
+        const val LEVEL_WARN = "WARN"
+        const val LEVEL_ERROR = "ERROR"
     }
 
     /**

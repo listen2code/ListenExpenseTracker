@@ -1,9 +1,5 @@
 package com.listen.expensetracker.features.settings.components
 
-import androidx.compose.ui.tooling.preview.Preview
-import com.listen.expensetracker.data.i18n.ExpenseStrings
-import com.listen.uicomponent.theme.ListenTheme
-
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -35,15 +31,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
-import com.listen.expensetracker.data.model.AppConstants
+import com.listen.uicomponent.theme.ListenTheme
 
 /**
  * Settings Bottom Version Footer Item.

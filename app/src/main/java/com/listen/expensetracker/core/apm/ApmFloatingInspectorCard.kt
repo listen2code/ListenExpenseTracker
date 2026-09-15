@@ -77,7 +77,7 @@ fun ApmFloatingInspectorCard(
         }
     }
 
-    val channels = remember { listOf("APP", "DB", "SYNC", "CRASH") }
+    val channels = remember { listOf(AppConstants.Apm.CHANNEL_APP, AppConstants.Apm.CHANNEL_DB, AppConstants.Apm.CHANNEL_SYNC, AppConstants.Apm.CHANNEL_CRASH) }
 
     Card(
         shape = RoundedCornerShape(16.dp),

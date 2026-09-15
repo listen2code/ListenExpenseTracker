@@ -30,6 +30,7 @@ import androidx.core.net.toUri
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.expensetracker.data.update.ReleaseInfo
 import com.listen.uicomponent.components.CommonButton
@@ -37,7 +38,6 @@ import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.CommonDialog
 import com.listen.uicomponent.components.CommonText
 import com.listen.uicomponent.theme.ListenTheme
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Modern dialog presented when a newer GitHub Release is detected.
@@ -159,12 +159,12 @@ fun UpdateAvailableDialogPreview() {
 fun openGooglePlay(context: Context) {
     val packageName = context.packageName
     try {
-        val intent = Intent(Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()).apply {
+        val intent = Intent(Intent.ACTION_VIEW, "${AppConstants.GooglePlay.MARKET_DETAILS_PREFIX}$packageName".toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     } catch (_: Exception) {
-        val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()).apply {
+        val webIntent = Intent(Intent.ACTION_VIEW, "${AppConstants.GooglePlay.WEB_DETAILS_PREFIX}$packageName".toUri()).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(webIntent)

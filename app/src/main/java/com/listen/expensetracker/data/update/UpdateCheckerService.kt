@@ -7,6 +7,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import com.listen.expensetracker.data.model.AppConstants
 
 data class ReleaseInfo(
     val tagName: String,
@@ -43,7 +44,7 @@ object UpdateCheckerService {
                 requestMethod = "GET"
                 connectTimeout = 8000
                 readTimeout = 8000
-                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Accept", AppConstants.MimeTypes.JSON)
                 setRequestProperty("User-Agent", "lExpense-Android-App")
             }
 
@@ -98,7 +99,7 @@ object UpdateCheckerService {
                         title = "v$cleanRemote",
                         changelog = changelogText,
                         htmlUrl = targetUrl,
-                        apkDownloadUrl = if (targetUrl.endsWith(".apk", ignoreCase = true)) targetUrl else null
+                        apkDownloadUrl = if (targetUrl.endsWith(AppConstants.FileExtension.APK, ignoreCase = true)) targetUrl else null
                     )
                 )
             } else {

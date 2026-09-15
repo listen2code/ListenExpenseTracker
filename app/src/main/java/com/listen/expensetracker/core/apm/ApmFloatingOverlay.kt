@@ -56,6 +56,7 @@ import com.listen.uicomponent.apm.LogEntryUi
 import com.listen.uicomponent.theme.ExpenseRed
 import kotlin.math.hypot
 import kotlin.math.roundToInt
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 全局可拖拽 APM 调试悬浮窗 (ApmFloatingOverlay)。
@@ -90,7 +91,7 @@ fun ApmFloatingOverlay(
         }
     }
 
-    val errorCount = remember(logs) { logs.count { it.levelName == "ERROR" } }
+    val errorCount = remember(logs) { logs.count { it.levelName == AppConstants.Apm.LEVEL_ERROR } }
 
     var isExpanded by remember { mutableStateOf(false) }
     var offsetX by remember { mutableFloatStateOf(-1f) }

@@ -7,7 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import com.listen.expensetracker.MainActivity
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.db.AppDatabase
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.db.TransactionType
@@ -103,8 +103,8 @@ class ListenExpenseAppWidgetProvider : AppWidgetProvider() {
         // 统一小部件与深层链接 (Deep Link) 路由常量 (Rule 22)
         const val EXTRA_QUICK_ADD_CATEGORY = "extra_quick_add_category"
         const val EXTRA_QUICK_ADD_TYPE = "extra_quick_add_type"
-        const val URI_SCHEME = "lexpense"
-        const val URI_HOST_QUICK_ADD = "quick_add"
+        const val URI_SCHEME = AppConstants.DeepLink.SCHEME
+        const val URI_HOST_QUICK_ADD = AppConstants.DeepLink.HOST_QUICK_ADD
         const val PARAM_CATEGORY = "category"
         const val PARAM_TYPE = "type"
 

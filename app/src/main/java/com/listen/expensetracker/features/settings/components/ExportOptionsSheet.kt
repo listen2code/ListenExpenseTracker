@@ -12,11 +12,9 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import com.listen.uicomponent.components.CommonFilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
-import com.listen.uicomponent.components.CommonBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,15 +29,17 @@ import com.listen.expensetracker.data.backup.TransactionBackupManager
 import com.listen.expensetracker.data.db.TransactionEntity
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
+import com.listen.uicomponent.components.CommonBottomSheet
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
+import com.listen.uicomponent.components.CommonFilterChip
 import com.listen.uicomponent.components.SurfaceCard
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import com.listen.expensetracker.data.model.AppConstants
 
 enum class ExportDateRange {
     ALL, THIS_MONTH, THIS_YEAR
@@ -57,7 +57,6 @@ fun ExportOptionsSheet(
     onSaveToFile: (startTs: Long?, endTs: Long?, typeFilter: String, defaultFileName: String) -> Unit,
     onShare: (startTs: Long?, endTs: Long?, typeFilter: String) -> Unit,
     onDismiss: () -> Unit,
-    lang: String = "zh",
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -99,8 +98,8 @@ fun ExportOptionsSheet(
     val totalSum = remember(filteredList) { filteredList.sumOf { it.amount } }
 
     val defaultFileName = remember(selectedRange, selectedType) {
-        val dateSuffix = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        "ListenExpense_${selectedRange.name.lowercase()}_$dateSuffix.csv"
+        val dateSuffix = SimpleDateFormat(AppConstants.DateFormat.BACKUP_TIMESTAMP, Locale.getDefault()).format(Date())
+        "ListenExpense_${selectedRange.name.lowercase()}_$dateSuffix${AppConstants.FileExtension.CSV}"
     }
     // [ListenUiComponent] 使用共通 CommonBottomSheet 统一抽屉圆角、避让与标题呈现 (Rule 25)
     CommonBottomSheet(

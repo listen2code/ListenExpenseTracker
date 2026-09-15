@@ -23,12 +23,12 @@ import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.engine.formatAmount
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppDimens
 import com.listen.uicomponent.components.CommonButton
 import com.listen.uicomponent.components.CommonButtonStyle
 import com.listen.uicomponent.components.SurfaceCard
 import com.listen.uicomponent.theme.ListenTheme
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Finance Preferences & Rules Section Card.

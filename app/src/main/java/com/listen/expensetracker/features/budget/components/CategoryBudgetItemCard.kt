@@ -42,10 +42,10 @@ import kotlin.math.abs
  */
 @Composable
 fun CategoryBudgetItemCard(
-    modifier: Modifier = Modifier,
     status: CategoryBudgetStatus,
     currencySymbol: String,
     lang: String,
+    modifier: Modifier = Modifier,
     hideAmount: Boolean = false,
 ) {
     val statusColor = when (status.status) {

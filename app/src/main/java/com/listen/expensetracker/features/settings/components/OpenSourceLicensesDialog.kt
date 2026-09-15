@@ -1,5 +1,6 @@
 package com.listen.expensetracker.features.settings.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,23 +16,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.listen.expensetracker.R
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.i18n.ExpenseStrings
+import com.listen.expensetracker.data.model.AppConstants
 import com.listen.uicomponent.theme.ListenTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
-import com.listen.expensetracker.R
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * Full-screen immersive dialog presenting all third-party open source licenses.
@@ -40,7 +40,6 @@ import com.listen.expensetracker.data.model.AppConstants
 @Composable
 fun OpenSourceLicensesDialog(
     onDismiss: () -> Unit,
-    lang: String = "zh"
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -50,7 +49,6 @@ fun OpenSourceLicensesDialog(
     ) {
         OpenSourceLicensesContent(
             onDismiss = onDismiss,
-            lang = lang
         )
     }
 }
@@ -59,8 +57,7 @@ fun OpenSourceLicensesDialog(
 @Composable
 fun OpenSourceLicensesContent(
     onDismiss: () -> Unit,
-    lang: String = "zh",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -143,7 +140,6 @@ fun OpenSourceLicensesDialogPreview() {
     ListenTheme {
         OpenSourceLicensesContent(
             onDismiss = {},
-            lang = "zh"
         )
     }
 }

@@ -20,6 +20,7 @@ import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import com.listen.expensetracker.data.model.AppConstants
 
 /**
  * 原生 Google Drive REST API v3 云端同步服务 (轻量化无 SDK 架构)
@@ -33,7 +34,7 @@ import java.net.URLEncoder
  */
 object GoogleDriveService {
 
-    private const val BACKUP_FILE_NAME = "lexpense_backup.json"
+    private const val BACKUP_FILE_NAME = AppConstants.Storage.GOOGLE_DRIVE_BACKUP_FILE_NAME
     private const val DRIVE_API_FILES = "https://www.googleapis.com/drive/v3/files"
     private const val DRIVE_UPLOAD_MULTIPART = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
     private const val DRIVE_UPLOAD_MEDIA = "https://www.googleapis.com/upload/drive/v3/files/%s?uploadType=media"
@@ -156,7 +157,7 @@ object GoogleDriveService {
 
         val metadata = JSONObject().apply {
             put("name", BACKUP_FILE_NAME)
-            put("mimeType", "application/json")
+            put("mimeType", AppConstants.MimeTypes.JSON)
         }.toString()
 
         val outputStream: OutputStream = connection.outputStream
@@ -187,7 +188,7 @@ object GoogleDriveService {
             requestMethod = "PATCH"
             doOutput = true
             setRequestProperty("Authorization", "Bearer $accessToken")
-            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Content-Type", AppConstants.MimeTypes.JSON)
             connectTimeout = 15000
             readTimeout = 20000
         }

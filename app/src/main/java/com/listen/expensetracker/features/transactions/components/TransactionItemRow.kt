@@ -58,12 +58,12 @@ import com.listen.uicomponent.theme.parseHexColor
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionItemRow(
-    modifier: Modifier = Modifier,
     transaction: TransactionEntity,
     currencySymbol: String,
     hideAmount: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
     lang: String = "zh"
 ) {
     SurfaceCard(

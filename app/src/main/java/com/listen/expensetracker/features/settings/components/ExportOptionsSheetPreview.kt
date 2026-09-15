@@ -41,7 +41,6 @@ fun ExportOptionsSheetPreview() {
             onSaveToFile = { _, _, _, _ -> },
             onShare = { _, _, _ -> },
             onDismiss = {},
-            lang = "zh"
         )
     }
 }

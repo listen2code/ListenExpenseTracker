@@ -112,7 +112,7 @@ object TransactionBackupManager {
     fun exportToCsv(transactions: List<TransactionEntity>, @Suppress("UNUSED_PARAMETER") lang: String? = null): String {
         val sb = StringBuilder()
         sb.append("ID,Type,Category,Amount,Account,Note,Date\n")
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        val sdf = SimpleDateFormat(AppConstants.DateFormat.DATETIME_SECONDS, Locale.US)
         transactions.forEach { tx ->
             val timeStr = sdf.format(Date(tx.timestamp))
             val cleanNote = tx.note.replace(",", " ")
@@ -138,7 +138,7 @@ object TransactionBackupManager {
         val header = ExpenseStrings.get(AppStrings.CSV_HEADER, lang)
         writer.write(header + "\r\n")
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        val sdf = SimpleDateFormat(AppConstants.DateFormat.DATETIME_SECONDS, Locale.US)
         for (tx in transactions) {
             val dateStr = sdf.format(Date(tx.timestamp))
             val typeStr = if (tx.type == TransactionType.INCOME) {
