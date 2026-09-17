@@ -11,7 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.data.i18n.AppStrings
 import com.listen.expensetracker.data.model.AppConstants
-import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
+import com.listen.expensetracker.data.pref.ExpensePreferences
 
 /**
  * 应用安全与隐私防窥生命周期协调器 (AppSecurityCoordinator)。
@@ -21,7 +21,7 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
  * 自主监听 Activity 的生命周期回调，无需 Activity 手动重写 onStart/onResume/onPause。
  */
 class AppSecurityCoordinator(
-    private val settingsProvider: () -> SettingsUiState? = { null }
+    private val preferencesProvider: () -> ExpensePreferences? = { null }
 ) : DefaultLifecycleObserver {
 
     /**
@@ -64,9 +64,9 @@ class AppSecurityCoordinator(
 
     override fun onStart(owner: LifecycleOwner) {
         val activity = owner as? FragmentActivity ?: return
-        val s = settingsProvider()
+        val s = preferencesProvider()
         val enabled = s?.biometricLockEnabled ?: SecurityPreferences.isBiometricEnabled(activity)
-        val supported = s?.isBiometricSupported ?: BiometricSecurityManager.isBiometricOrCredentialAvailable(activity)
+        val supported = BiometricSecurityManager.isBiometricOrCredentialAvailable(activity)
         val timeout = s?.lockTimeoutSeconds ?: SecurityPreferences.getLockTimeoutSeconds(activity)
         val lang = s?.language ?: AppConstants.DEFAULT_LANG
         val shield = s?.recentAppsShieldEnabled ?: true
@@ -88,13 +88,13 @@ class AppSecurityCoordinator(
 
     override fun onResume(owner: LifecycleOwner) {
         val activity = owner as? FragmentActivity ?: return
-        val shield = settingsProvider()?.recentAppsShieldEnabled ?: true
+        val shield = preferencesProvider()?.recentAppsShieldEnabled ?: true
         applyRecentAppsShield(activity, shield)
     }
 
     override fun onPause(owner: LifecycleOwner) {
         val activity = owner as? FragmentActivity ?: return
-        val shield = settingsProvider()?.recentAppsShieldEnabled ?: true
+        val shield = preferencesProvider()?.recentAppsShieldEnabled ?: true
         applyRecentAppsShield(activity, shield)
     }
 

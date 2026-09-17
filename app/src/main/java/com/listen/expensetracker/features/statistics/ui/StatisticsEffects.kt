@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
+import com.listen.expensetracker.core.state.NavTab
+import kotlinx.coroutines.flow.SharedFlow
+
 /**
  * 统计分析画面专用副作用集中调度器 (StatisticsEffects)。
  * 统一承接按月与按年模式下的 Pager 联动、单次副作用监听与手势快照同步。
@@ -29,7 +32,8 @@ fun StatisticsEffects(
     listState: LazyListState,
     period: StatisticsPeriod,
     selectedMonthOffset: Int,
-    selectedYearOffset: Int
+    selectedYearOffset: Int,
+    scrollToTopFlow: SharedFlow<NavTab>? = null
 ) {
     val currentPeriod by rememberUpdatedState(period)
     val currentMonthOffset by rememberUpdatedState(selectedMonthOffset)
@@ -108,6 +112,17 @@ fun StatisticsEffects(
                                 currentListState.animateScrollToItem(0)
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // 任务 3.5：监听外部全局双击 Tab 置顶流
+        if (scrollToTopFlow != null && viewModel != null) {
+            launch {
+                scrollToTopFlow.collectLatest { tab ->
+                    if (tab == NavTab.STATISTICS) {
+                        viewModel.handleIntent(StatisticsIntent.ScrollToTop)
                     }
                 }
             }

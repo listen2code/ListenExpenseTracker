@@ -34,6 +34,9 @@ import com.listen.uicomponent.components.CommonSegmentedControl
 import java.util.Calendar
 import com.listen.expensetracker.data.model.AppConstants
 
+import com.listen.expensetracker.core.state.NavTab
+import kotlinx.coroutines.flow.SharedFlow
+
 /**
  * 纯无状态统计分析主画面 (StatisticsScreen)。
  * 完美支持按月 (Month) 与按年 (Year) 双维度无缝切换展示。
@@ -44,6 +47,7 @@ fun StatisticsScreen(
     state: StatisticsUiState,
     modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel? = null,
+    scrollToTopFlow: SharedFlow<NavTab>? = null,
     onNavigateToTransactions: ((monthOffset: Int, categoryName: String) -> Unit)? = null,
     onNavigateToTransactionsAnnualCategory: ((year: Int, categoryName: String) -> Unit)? = null,
     onNavigateToTransactionsDate: ((monthOffset: Int, day: Int, dateLabel: String) -> Unit)? = null,
@@ -62,7 +66,8 @@ fun StatisticsScreen(
         listState = holder.listState,
         period = state.period,
         selectedMonthOffset = state.selectedMonthOffset,
-        selectedYearOffset = state.selectedYearOffset
+        selectedYearOffset = state.selectedYearOffset,
+        scrollToTopFlow = scrollToTopFlow
     )
 
     val isExpenseTab = state.statisticsTab == StatisticsTab.EXPENSE

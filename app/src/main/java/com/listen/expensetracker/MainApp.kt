@@ -1,5 +1,6 @@
 package com.listen.expensetracker
 
+import android.app.Application
 import android.os.SystemClock.uptimeMillis
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,12 +12,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.listen.expensetracker.core.i18n.LocalAppLanguage
 import com.listen.expensetracker.core.i18n.tr
 import com.listen.expensetracker.core.route.CommonRoute
@@ -29,7 +33,10 @@ import com.listen.expensetracker.core.state.navigateToTransactionsCategory
 import com.listen.expensetracker.core.state.navigateToTransactionsDate
 import com.listen.expensetracker.core.state.navigateToTransactionsMonth
 import com.listen.expensetracker.features.settings.ui.SettingsScreen
+import com.listen.expensetracker.features.settings.viewmodel.SettingsIntent
+import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.expensetracker.features.statistics.ui.StatisticsScreen
+import com.listen.expensetracker.features.statistics.viewmodel.StatisticsViewModel
 import com.listen.expensetracker.features.transactions.ui.TransactionsScreen
 
 /**
@@ -105,47 +112,68 @@ fun MainApp(
                         modifier = screenModifier
                     )
                 }
-                // 统计报表与趋势分析界面
-                NavTab.STATISTICS -> CommonRoute(appState.statisticsViewModel) { state, _ ->
-                    StatisticsScreen(
-                        state = state,
-                        viewModel = appState.statisticsViewModel,
-                        // 【穿透导航逻辑】从统计图表点击后的深度跳转行为
-                        // 1. 跳转至特定月份、特定分类的账单列表
-                        onNavigateToTransactions = { monthOffset, categoryName ->
-                            appState.navigateToTransactionsCategory(categoryName, monthOffset)
-                        },
-                        // 2. 跳转至年度统计中特定分类的明细列表
-                        onNavigateToTransactionsAnnualCategory = { year, categoryName ->
-                            appState.navigateToTransactionsAnnualCategory(year, categoryName)
-                        },
-                        // 3. 跳转至特定日期的账单列表（通常从日历或趋势图点击）
-                        onNavigateToTransactionsDate = { monthOffset, day, dateLabel ->
-                            appState.navigateToTransactionsDate(monthOffset, day, dateLabel)
-                        },
-                        // 4. 跳转至单笔账单的具体详情页
-                        onNavigateToTransaction = { monthOffset, tx ->
-                            appState.navigateToTransaction(monthOffset, tx)
-                        },
-                        // 5. 跳转至预算设置/调整界面
-                        onNavigateToBudget = { monthOffset ->
-                            appState.navigateToBudgetAdjustment(monthOffset)
-                        },
-                        // 6. 跳转至某一整月的账单明细列表
-                        onNavigateToTransactionsMonth = { monthOffset ->
-                            appState.navigateToTransactionsMonth(monthOffset)
-                        },
-                        modifier = screenModifier
+                // 统计报表与趋势分析界面（按需惰性创建 ViewModel）
+                NavTab.STATISTICS -> {
+                    val app = LocalContext.current.applicationContext as Application
+                    val statsVm: StatisticsViewModel = viewModel(
+                        factory = StatisticsViewModel.Factory(app)
                     )
+                    CommonRoute(statsVm) { state, _ ->
+                        StatisticsScreen(
+                            state = state,
+                            viewModel = statsVm,
+                            scrollToTopFlow = appState.scrollToTopEvents,
+                            // 【穿透导航逻辑】从统计图表点击后的深度跳转行为
+                            // 1. 跳转至特定月份、特定分类的账单列表
+                            onNavigateToTransactions = { monthOffset, categoryName ->
+                                appState.navigateToTransactionsCategory(categoryName, monthOffset)
+                            },
+                            // 2. 跳转至年度统计中特定分类的明细列表
+                            onNavigateToTransactionsAnnualCategory = { year, categoryName ->
+                                appState.navigateToTransactionsAnnualCategory(year, categoryName)
+                            },
+                            // 3. 跳转至特定日期的账单列表（通常从日历或趋势图点击）
+                            onNavigateToTransactionsDate = { monthOffset, day, dateLabel ->
+                                appState.navigateToTransactionsDate(monthOffset, day, dateLabel)
+                            },
+                            // 4. 跳转至单笔账单的具体详情页
+                            onNavigateToTransaction = { monthOffset, tx ->
+                                appState.navigateToTransaction(monthOffset, tx)
+                            },
+                            // 5. 跳转至预算设置/调整界面
+                            onNavigateToBudget = { monthOffset ->
+                                appState.navigateToBudgetAdjustment(monthOffset)
+                            },
+                            // 6. 跳转至某一整月的账单明细列表
+                            onNavigateToTransactionsMonth = { monthOffset ->
+                                appState.navigateToTransactionsMonth(monthOffset)
+                            },
+                            modifier = screenModifier
+                        )
+                    }
                 }
-                // 系统设置与偏好配置界面
-                NavTab.SETTINGS -> CommonRoute(appState.settingsViewModel) { state, _ ->
-                    SettingsScreen(
-                        state = state,
-                        targetMonthOffset = appState.activeMonthOffset,
-                        viewModel = appState.settingsViewModel,
-                        modifier = screenModifier
+                // 系统设置与偏好配置界面（按需惰性创建 ViewModel）
+                NavTab.SETTINGS -> {
+                    val app = LocalContext.current.applicationContext as Application
+                    val settingsVm: SettingsViewModel = viewModel(
+                        factory = SettingsViewModel.Factory(app)
                     )
+                    // 消费待处理的更新检查（如果存在 DeepLink 传入的 targetUpdateVersion）
+                    LaunchedEffect(appState.targetUpdateVersion) {
+                        appState.targetUpdateVersion?.let { ver ->
+                            settingsVm.handleIntent(SettingsIntent.CheckForUpdates(ver))
+                            appState.targetUpdateVersion = null
+                        }
+                    }
+                    CommonRoute(settingsVm) { state, _ ->
+                        SettingsScreen(
+                            state = state,
+                            targetMonthOffset = appState.activeMonthOffset,
+                            viewModel = settingsVm,
+                            scrollToTopFlow = appState.scrollToTopEvents,
+                            modifier = screenModifier
+                        )
+                    }
                 }
             }
         }

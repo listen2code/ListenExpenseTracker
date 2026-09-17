@@ -12,17 +12,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import com.listen.expensetracker.core.i18n.LocalAppLanguage
+import androidx.lifecycle.lifecycleScope
 import com.listen.expensetracker.core.effect.AppSideEffectHandler
 import com.listen.expensetracker.core.effect.CommonUiEffectHandler
+import com.listen.expensetracker.core.i18n.LocalAppLanguage
 import com.listen.expensetracker.core.overlay.AppOverlayHost
 import com.listen.expensetracker.core.security.AppSecurityCoordinator
 import com.listen.expensetracker.core.security.BiometricLockOverlay
 import com.listen.expensetracker.core.state.ExpenseAppState
 import com.listen.expensetracker.core.state.rememberExpenseAppState
 import com.listen.expensetracker.data.cloud.GoogleDriveAutoBackupManager
+import com.listen.expensetracker.data.pref.ExpenseDataStoreManager
+import com.listen.expensetracker.data.pref.ExpensePreferences
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import com.listen.uicomponent.theme.ListenTheme
+import kotlinx.coroutines.launch
 
 /**
  * 应用主入口 Activity。
@@ -34,12 +38,16 @@ class MainActivity : FragmentActivity() {
     // 缓存当前的 AppState 引用，用于在非 Composable 的生命周期回调中访问 ViewModel 状态
     private var activeAppState: ExpenseAppState? = null
 
+    // 缓存最新偏好设置，供给 AppSecurityCoordinator 安全生命周期快速同步判定（未就绪时为 null 走安全兜底）
+    @Volatile
+    private var latestPreferences: ExpensePreferences? = null
+
     /**
      * 安全协调器：统一管理生物识别锁、超时验证、多任务防窥等核心安全逻辑。
-     * 架构：实现 DefaultLifecycleObserver，通过 settingsProvider 动态获取最新偏好，自动响应生命周期事件。
+     * 架构：实现 DefaultLifecycleObserver，通过 preferencesProvider 动态获取最新偏好，自动响应生命周期事件。
      */
     private val securityCoordinator = AppSecurityCoordinator(
-        settingsProvider = { activeAppState?.settingsViewModel?.viewState?.value }
+        preferencesProvider = { latestPreferences }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +59,13 @@ class MainActivity : FragmentActivity() {
         
         super.onCreate(savedInstanceState)
         
+        val prefManager = ExpenseDataStoreManager.getInstance(applicationContext)
+        lifecycleScope.launch {
+            prefManager.preferencesFlow.collect {
+                latestPreferences = it
+            }
+        }
+
         // 3. 在 UI 挂载前立即执行初次锁定状态检查，并注册生命周期自感知观察者
         securityCoordinator.checkInitialLock(this)
         lifecycle.addObserver(securityCoordinator)
@@ -60,35 +75,33 @@ class MainActivity : FragmentActivity() {
             val appState = rememberExpenseAppState()
             activeAppState = appState
 
-            val settingsState by appState.settingsViewModel.viewState.collectAsState()
+            val preferences by prefManager.preferencesFlow.collectAsState(initial = latestPreferences ?: ExpensePreferences())
+            latestPreferences = preferences
 
             // 5. 联动控制启动页：只要 AppState 标记为“未就绪”，SplashScreen 就会一直遮盖 Activity。
-            // 它是通过 AppSideEffectHandler 监听首屏加载成功后触发 isInitialReady 的。
             splashScreen.setKeepOnScreenCondition { !appState.isInitialReady }
 
             /**
              * 系统级副作用处理器 (System-Level Side Effects)
              * 职责：处理冷/热启动 Intent 路由、多任务预览防窥设置、首屏就绪监控。
              */
-            AppSideEffectHandler(appState, securityCoordinator)
+            AppSideEffectHandler(appState, securityCoordinator, preferences)
 
             // 业务级副作用处理器 (Global UI Event Collector)
-            // 职责：跨 ViewModel 统一收集并消费 Toast、Snackbar 撤销、分享、导航跳转等瞬时事件。
+            // 职责：统一收集并消费 Toast、Snackbar 撤销、分享、导航跳转等瞬时事件。
             CommonUiEffectHandler(
                 appState.transactionsViewModel,
-                appState.statisticsViewModel,
-                appState.settingsViewModel,
                 snackbarHostState = appState.snackbarHostState
             )
 
             // 6. 注入全局语言环境 (CompositionLocal) 与主题 (ListenTheme)
             CompositionLocalProvider(
-                LocalAppLanguage provides settingsState.language
+                LocalAppLanguage provides preferences.language
             ) {
                 ListenTheme(
-                    themeMode = settingsState.themeMode,
-                    accentColor = settingsState.accentColor,
-                    pureBlackDark = settingsState.isPureBlackDark
+                    themeMode = preferences.themeMode,
+                    accentColor = preferences.accentColor,
+                    pureBlackDark = preferences.isPureBlackDark
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         /**
@@ -101,8 +114,8 @@ class MainActivity : FragmentActivity() {
                                 onUnlockRequest = {
                                     securityCoordinator.promptUnlock(
                                         this@MainActivity,
-                                        settingsState.language,
-                                        settingsState.recentAppsShieldEnabled
+                                        preferences.language,
+                                        preferences.recentAppsShieldEnabled
                                     )
                                 }
                             )
@@ -110,8 +123,8 @@ class MainActivity : FragmentActivity() {
                             // 渲染主功能导航架构（无需层层传 lang，由 LocalAppLanguage 自动提供）
                             MainApp(appState = appState)
 
-                            // 全局声明式覆盖物宿主 (处理全屏加载 HUD、检查器等)
-                            AppOverlayHost(appState = appState)
+                            // 全局声明式覆盖物宿主 (处理全屏加载 HUD、APM 监控悬浮窗等)
+                            AppOverlayHost(preferences = preferences)
                         }
                     }
                 }
@@ -136,6 +149,11 @@ class MainActivity : FragmentActivity() {
     override fun onStop() {
         super.onStop()
         GoogleDriveAutoBackupManager.scheduleAutoBackup(this, delayMs = 500L)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activeAppState = null
     }
 
     companion object {

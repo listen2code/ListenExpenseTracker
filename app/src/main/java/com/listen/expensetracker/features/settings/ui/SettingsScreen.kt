@@ -26,6 +26,9 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsUiState
 import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import com.listen.uicomponent.components.BaseScreenScaffold
 
+import com.listen.expensetracker.core.state.NavTab
+import kotlinx.coroutines.flow.SharedFlow
+
 /**
  * 纯无状态设置主画面 (SettingsScreen)。
  *
@@ -41,7 +44,8 @@ fun SettingsScreen(
     state: SettingsUiState,
     modifier: Modifier = Modifier,
     targetMonthOffset: Int = 0,
-    viewModel: SettingsViewModel? = null
+    viewModel: SettingsViewModel? = null,
+    scrollToTopFlow: SharedFlow<NavTab>? = null
 ) {
     // 🌟 UI 交互状态（滚动位置、标题计算）
     val holder = rememberSettingsStateHolder(state, targetMonthOffset)
@@ -52,7 +56,8 @@ fun SettingsScreen(
     SettingsEffects(
         viewModel = viewModel,
         context = context,
-        listState = holder.listState
+        listState = holder.listState,
+        scrollToTopFlow = scrollToTopFlow
     )
 
     BaseScreenScaffold(

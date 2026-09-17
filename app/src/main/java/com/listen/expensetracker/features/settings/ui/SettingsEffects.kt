@@ -18,6 +18,10 @@ import com.listen.expensetracker.features.settings.viewmodel.SettingsViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 
+import com.listen.expensetracker.core.state.NavTab
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
+
 /**
  * 设置画面专用副作用集中调度器 (SettingsEffects)。
  *
@@ -30,7 +34,8 @@ import kotlinx.coroutines.flow.filterIsInstance
 fun SettingsEffects(
     viewModel: SettingsViewModel?,
     context: Context,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollToTopFlow: SharedFlow<NavTab>? = null
 ) {
     val currentListState by rememberUpdatedState(listState)
 
@@ -77,6 +82,16 @@ fun SettingsEffects(
                 is SettingsEffect.TriggerExcelExport -> {
                     pendingExcelConfig = Triple(effect.startTs, effect.endTs, effect.typeFilter)
                     exportExcelLauncher.launch(effect.fileName)
+                }
+            }
+        }
+    }
+
+    if (scrollToTopFlow != null) {
+        LaunchedEffect(scrollToTopFlow) {
+            scrollToTopFlow.collectLatest { tab ->
+                if (tab == NavTab.SETTINGS) {
+                    currentListState.animateScrollToItem(0)
                 }
             }
         }

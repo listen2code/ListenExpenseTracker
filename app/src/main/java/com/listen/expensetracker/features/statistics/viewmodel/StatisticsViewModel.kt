@@ -25,7 +25,7 @@ class StatisticsViewModel(
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
-    private val prefManager = ExpenseDataStoreManager(application)
+    private val prefManager = ExpenseDataStoreManager.getInstance(application)
 
     init {
         ApmLogger.i(tag = "VM", message = "StatisticsViewModel initialized")

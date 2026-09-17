@@ -4,8 +4,6 @@ import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
@@ -21,6 +19,7 @@ import com.listen.expensetracker.core.state.openQuickAdd
 import com.listen.expensetracker.core.state.openRecurringTransactions
 import com.listen.expensetracker.data.model.AppConstants
 import com.listen.expensetracker.data.model.AppConstants.DeepLink
+import com.listen.expensetracker.data.pref.ExpensePreferences
 import com.listen.expensetracker.features.transactions.viewmodel.TransactionsIntent
 import com.listen.expensetracker.widget.ListenExpenseAppWidgetProvider
 import kotlinx.coroutines.flow.first
@@ -34,11 +33,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppSideEffectHandler(
     appState: ExpenseAppState,
-    securityCoordinator: AppSecurityCoordinator
+    securityCoordinator: AppSecurityCoordinator,
+    preferences: ExpensePreferences
 ) {
     val context = LocalContext.current as FragmentActivity
-    val settingsState by appState.settingsViewModel.viewState.collectAsState()
-    val transactionsState by appState.transactionsViewModel.viewState.collectAsState()
 
     // 【DisposableEffect 使用说明】：
     // 1. 适用场景：用于需要“成对”操作的副作用任务（例如：注册/注销、开启/停止、订阅/取消）。
@@ -46,8 +44,8 @@ fun AppSideEffectHandler(
     // 3. 强制要求：必须以 onDispose { ... } 结尾，确保资源在组件销毁或 Key 变化时被干净地释放，防止内存泄漏。
     
     // 摇一摇手势副作用：仅当开关开启且界面位于前台活跃状态时注册加速度传感器
-    DisposableEffect(context, settingsState.shakeToHideBalanceEnabled) {
-        if (!settingsState.shakeToHideBalanceEnabled) {
+    DisposableEffect(context, preferences.shakeToHideBalanceEnabled) {
+        if (!preferences.shakeToHideBalanceEnabled) {
             // 如果开关关闭，直接返回一个空的清理块
             return@DisposableEffect onDispose {}
         }
@@ -84,18 +82,16 @@ fun AppSideEffectHandler(
         }
     }
 
+    // 动态响应多任务防窥设置变更 (FLAG_SECURE)
+    LaunchedEffect(preferences.recentAppsShieldEnabled) {
+        securityCoordinator.applyRecentAppsShield(context, preferences.recentAppsShieldEnabled)
+    }
+
     LaunchedEffect(appState) {
         // 冷启动：初次构筑时，将 Activity 原始启动 Intent 注入单向数据流管道
         context.intent?.let { appState.sendIntent(it) }
 
-        // 子任务 1：响应式观察者 - 多任务防窥设置 (FLAG_SECURE)
-        launch {
-            snapshotFlow { settingsState.recentAppsShieldEnabled }.collect { enabled ->
-                securityCoordinator.applyRecentAppsShield(context, enabled)
-            }
-        }
-
-        // 子任务 2：单向数据流 (UDF) 管道 - 处理 Intent 跳转
+        // 子任务 1：单向数据流 (UDF) 管道 - 处理 Intent 跳转
         launch {
             appState.intentChannel.receiveAsFlow().collect { incomingIntent ->
                 // 等待直到 App 安全解锁
@@ -104,9 +100,9 @@ fun AppSideEffectHandler(
             }
         }
 
-        // 子任务 3：首次加载成功后，永久标记 App 为就绪状态
+        // 子任务 2：首次加载成功后，永久标记 App 为就绪状态（无需在 Composable 层 collectAsState 引发无效重组）
         launch {
-            snapshotFlow { transactionsState.isLoading }.first { !it }
+            appState.transactionsViewModel.viewState.first { !it.isLoading }
             appState.markReady()
         }
     }

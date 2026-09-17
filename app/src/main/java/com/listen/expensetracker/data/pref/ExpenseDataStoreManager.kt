@@ -22,9 +22,20 @@ import kotlinx.coroutines.flow.map
  * Inherits common system preferences from BaseDataStoreManager (language, theme, accent, auth)
  * and extends ledger-specific preferences (currency symbol, monthly budget, auto backup).
  */
-class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) {
+class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context.applicationContext) {
+
+    private val appContext = context.applicationContext
 
     companion object {
+        @Volatile
+        private var instance: ExpenseDataStoreManager? = null
+
+        fun getInstance(context: Context): ExpenseDataStoreManager {
+            return instance ?: synchronized(this) {
+                instance ?: ExpenseDataStoreManager(context.applicationContext).also { instance = it }
+            }
+        }
+
         val KEY_CURRENCY_SYMBOL = stringPreferencesKey("expense_currency_symbol")
         val KEY_MONTHLY_BUDGET = doublePreferencesKey("expense_monthly_budget")
         val KEY_CUSTOM_ACCOUNTS = stringPreferencesKey("expense_custom_accounts")
@@ -42,7 +53,7 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         val KEY_PURE_BLACK_DARK = booleanPreferencesKey("expense_pure_black_dark")
     }
 
-    val preferencesFlow: Flow<ExpensePreferences> = context.archDataStore.data.map { prefs ->
+    val preferencesFlow: Flow<ExpensePreferences> = appContext.archDataStore.data.map { prefs ->
         val lang = prefs[KEY_LANGUAGE] ?: "zh"
         AppLanguage.update(lang)
         ExpensePreferences(
@@ -66,10 +77,10 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
             isDeveloperMode = prefs[KEY_DEVELOPER_MODE] ?: false,
             hideBalance = prefs[KEY_HIDE_BALANCE] ?: false,
             biometricLockEnabled = (prefs[KEY_BIOMETRIC_LOCK_ENABLED] ?: false).also {
-                SecurityPreferences.setBiometricEnabled(context, it)
+                SecurityPreferences.setBiometricEnabled(appContext, it)
             },
             lockTimeoutSeconds = (prefs[KEY_LOCK_TIMEOUT_SECONDS] ?: 0).also {
-                SecurityPreferences.setLockTimeoutSeconds(context, it)
+                SecurityPreferences.setLockTimeoutSeconds(appContext, it)
             },
             recentAppsShieldEnabled = prefs[KEY_RECENT_APPS_SHIELD_ENABLED] ?: true,
             shakeToHideBalanceEnabled = prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] ?: true,
@@ -78,99 +89,99 @@ class ExpenseDataStoreManager(context: Context) : BaseDataStoreManager(context) 
         )
     }
 
-    val currencySymbolFlow: Flow<String> = context.archDataStore.data.map { prefs ->
+    val currencySymbolFlow: Flow<String> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_CURRENCY_SYMBOL] ?: "￥"
     }
 
-    val monthlyBudgetFlow: Flow<Double> = context.archDataStore.data.map { prefs ->
+    val monthlyBudgetFlow: Flow<Double> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_MONTHLY_BUDGET] ?: 5000.0
     }
 
-    val customAccountsFlow: Flow<String> = context.archDataStore.data.map { prefs ->
+    val customAccountsFlow: Flow<String> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_CUSTOM_ACCOUNTS] ?: ""
     }
 
-    val autoBackupDriveFlow: Flow<Boolean> = context.archDataStore.data.map { prefs ->
+    val autoBackupDriveFlow: Flow<Boolean> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_AUTO_BACKUP_DRIVE] ?: true
     }
 
-    val autoBackupWifiOnlyFlow: Flow<Boolean> = context.archDataStore.data.map { prefs ->
+    val autoBackupWifiOnlyFlow: Flow<Boolean> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_AUTO_BACKUP_WIFI_ONLY] ?: false
     }
 
-    val lastBackupHashFlow: Flow<String> = context.archDataStore.data.map { prefs ->
+    val lastBackupHashFlow: Flow<String> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_LAST_BACKUP_HASH] ?: ""
     }
 
-    val isDeveloperModeFlow: Flow<Boolean> = context.archDataStore.data.map { prefs ->
+    val isDeveloperModeFlow: Flow<Boolean> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_DEVELOPER_MODE] ?: false
     }
 
-    val hideBalanceFlow: Flow<Boolean> = context.archDataStore.data.map { prefs ->
+    val hideBalanceFlow: Flow<Boolean> = appContext.archDataStore.data.map { prefs ->
         prefs[KEY_HIDE_BALANCE] ?: false
     }
 
     suspend fun setCurrencySymbol(symbol: String) {
-        context.archDataStore.edit { prefs -> prefs[KEY_CURRENCY_SYMBOL] = symbol }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_CURRENCY_SYMBOL] = symbol }
     }
 
     suspend fun setMonthlyBudget(budget: Double) {
-        context.archDataStore.edit { prefs -> prefs[KEY_MONTHLY_BUDGET] = budget }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_MONTHLY_BUDGET] = budget }
     }
 
     suspend fun setCustomAccountsJson(json: String) {
-        context.archDataStore.edit { prefs -> prefs[KEY_CUSTOM_ACCOUNTS] = json }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_CUSTOM_ACCOUNTS] = json }
     }
 
     suspend fun setAutoBackupDrive(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_AUTO_BACKUP_DRIVE] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_AUTO_BACKUP_DRIVE] = enabled }
     }
 
     suspend fun setAutoBackupWifiOnly(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_AUTO_BACKUP_WIFI_ONLY] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_AUTO_BACKUP_WIFI_ONLY] = enabled }
     }
 
     suspend fun setLastBackupHash(hash: String) {
-        context.archDataStore.edit { prefs -> prefs[KEY_LAST_BACKUP_HASH] = hash }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_LAST_BACKUP_HASH] = hash }
     }
 
     suspend fun setDeveloperMode(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_DEVELOPER_MODE] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_DEVELOPER_MODE] = enabled }
     }
 
     suspend fun setHideBalance(hide: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_HIDE_BALANCE] = hide }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_HIDE_BALANCE] = hide }
     }
 
     suspend fun setBiometricLockEnabled(enabled: Boolean) {
-        SecurityPreferences.setBiometricEnabled(context, enabled)
-        context.archDataStore.edit { prefs -> prefs[KEY_BIOMETRIC_LOCK_ENABLED] = enabled }
+        SecurityPreferences.setBiometricEnabled(appContext, enabled)
+        appContext.archDataStore.edit { prefs -> prefs[KEY_BIOMETRIC_LOCK_ENABLED] = enabled }
     }
 
     suspend fun setLockTimeoutSeconds(seconds: Int) {
-        SecurityPreferences.setLockTimeoutSeconds(context, seconds)
-        context.archDataStore.edit { prefs -> prefs[KEY_LOCK_TIMEOUT_SECONDS] = seconds }
+        SecurityPreferences.setLockTimeoutSeconds(appContext, seconds)
+        appContext.archDataStore.edit { prefs -> prefs[KEY_LOCK_TIMEOUT_SECONDS] = seconds }
     }
 
     suspend fun setRecentAppsShieldEnabled(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_RECENT_APPS_SHIELD_ENABLED] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_RECENT_APPS_SHIELD_ENABLED] = enabled }
     }
 
     suspend fun setShakeToHideBalanceEnabled(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_SHAKE_TO_HIDE_BALANCE_ENABLED] = enabled }
     }
 
     suspend fun setApmFloatingWindowEnabled(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_APM_FLOATING_WINDOW_ENABLED] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_APM_FLOATING_WINDOW_ENABLED] = enabled }
     }
 
     suspend fun setPureBlackDark(enabled: Boolean) {
-        context.archDataStore.edit { prefs -> prefs[KEY_PURE_BLACK_DARK] = enabled }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_PURE_BLACK_DARK] = enabled }
     }
 
     suspend fun setCategoryBudgetRatios(ratios: Map<String, Float>) {
         val serialized = ratios.entries.joinToString(",") { "${it.key}:${it.value}" }
-        context.archDataStore.edit { prefs -> prefs[KEY_CATEGORY_BUDGETS] = serialized }
+        appContext.archDataStore.edit { prefs -> prefs[KEY_CATEGORY_BUDGETS] = serialized }
     }
 
     private fun parseCategoryRatios(raw: String?): Map<String, Float> {

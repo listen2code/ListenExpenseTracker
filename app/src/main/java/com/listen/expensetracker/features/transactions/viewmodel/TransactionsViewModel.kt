@@ -36,7 +36,7 @@ class TransactionsViewModel(
 
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
-    private val prefManager = ExpenseDataStoreManager(application)
+    private val prefManager = ExpenseDataStoreManager.getInstance(application)
     private val mutationHandler = TransactionMutationHandler(
         application = application, dao = dao, scope = viewModelScope,
         emitEffect = { emitEffect(it) }, onRestore = { handleIntent(TransactionsIntent.RestoreDeletedTransaction(it)) }

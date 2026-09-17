@@ -39,7 +39,7 @@ class SettingsViewModel(
     private val db = AppDatabase.getInstance(application)
     private val dao = db.transactionDao()
     private val recurringDao = db.recurringRuleDao()
-    private val prefManager = ExpenseDataStoreManager(application)
+    private val prefManager = ExpenseDataStoreManager.getInstance(application)
     private val syncDelegate = SettingsSyncDelegate(application, dao, recurringDao, prefManager)
     private val notificationDelegate = SettingsNotificationDelegate(application, viewModelScope)
 
