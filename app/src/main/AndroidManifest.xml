@@ -72,6 +72,11 @@
                     android:scheme="lexpense"
                     android:host="update" />
             </intent-filter>
+
+            <!-- 桌面长按快捷方式 (App Shortcuts) -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <!-- 桌面小组件接收器 (AppWidget Provider) -->
@@ -97,6 +102,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/listen_expense_widget_info" />
         </receiver>
+
+        <!-- 控制中心快捷记账磁贴服务 (Quick Settings Tile) -->
+        <service
+            android:name=".core.tile.ExpenseQuickTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_qs_quick_add"
+            android:label="@string/qs_tile_quick_add_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <!-- 文件共享提供者：用于安全地导出账本数据或分享生成的统计图片 -->
         <provider

@@ -177,9 +177,10 @@ dependencies {
     implementation(libs.coil.compose)    // 高性能图片异步加载库 (Compose 专用版)
     implementation(libs.aboutlibraries.compose.m3)     // 自动从 Gradle 依赖中提取并显示第三方许可信息的 UI 库
     
-    // --- 生命周期管理 (Lifecycle & ViewModel) ---
+    // --- 生命周期与后台任务管理 (Lifecycle & WorkManager) ---
     implementation(libs.androidx.lifecycle.runtime.ktx)    // 监控 Activity/Fragment 生命周期并支持协程挂起
     implementation(libs.androidx.lifecycle.viewmodel.compose) // 让 Compose 能够轻松获取和持有 ViewModel 实例
+    implementation(libs.androidx.work.runtime.ktx)            // WorkManager 离线后台定时任务调度
 
     // --- 单元测试 (Local Unit Tests) ---
     testImplementation(libs.junit)                         // Java 测试框架标准
@@ -187,6 +188,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)      // 专门用于测试 Kotlin 协程的工具
     testImplementation(libs.mockito.core)                 // 模拟对象框架，用于隔离测试
     testImplementation(libs.mockito.kotlin)               // Mockito 的 Kotlin 友好封装版本
+    testImplementation(libs.androidx.work.testing)        // WorkManager 单元测试支持
 
     // --- UI 测试 (Android Instrumentation Tests) ---
     androidTestImplementation(platform(libs.androidx.compose.bom))  // 确保 UI 测试使用同样的 Compose 版本

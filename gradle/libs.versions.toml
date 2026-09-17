@@ -28,6 +28,7 @@ json = "20240303"                       # 测试用 JSON 库
 coroutinesTest = "1.8.0"                # 协程单元测试
 mockitoCore = "5.11.0"                  # Mockito 测试框架
 mockitoKotlin = "5.2.1"                 # Mockito Kotlin 封装
+work = "2.9.0"                          # WorkManager 后台离线任务调度库
 
 [libraries]
 # 这里定义具体的依赖库别名及其坐标 (group:name)。
@@ -82,6 +83,10 @@ play-services-auth-base = { group = "com.google.android.gms", name = "play-servi
 # 核心系统 UI 与多媒体
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# WorkManager 后台任务调度
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "work" }
 
 [plugins]
 # 这里声明项目中使用的 Gradle 插件别名及其 ID。

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">lExpense</string>
+
+    <!-- App Shortcuts & Quick Settings Tile Strings (zh) -->
+    <string name="shortcut_quick_add_short">记一笔</string>
+    <string name="shortcut_quick_add_long">快速记一笔账</string>
+    <string name="shortcut_transactions_short">账单明细</string>
+    <string name="shortcut_transactions_long">查看全部账单流水</string>
+    <string name="qs_tile_quick_add_label">快速记账</string>
 </resources>

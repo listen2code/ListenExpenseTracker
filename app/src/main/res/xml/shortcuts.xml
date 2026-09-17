@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="shortcut_quick_add"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_quick_add"
+        android:shortcutShortLabel="@string/shortcut_quick_add_short"
+        android:shortcutLongLabel="@string/shortcut_quick_add_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.listen.expensetracker"
+            android:targetClass="com.listen.expensetracker.MainActivity"
+            android:data="lexpense://quick_add" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_transactions"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_transactions"
+        android:shortcutShortLabel="@string/shortcut_transactions_short"
+        android:shortcutLongLabel="@string/shortcut_transactions_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.listen.expensetracker"
+            android:targetClass="com.listen.expensetracker.MainActivity"
+            android:data="lexpense://transactions" />
+    </shortcut>
+</shortcuts>

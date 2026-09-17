@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">lExpense</string>
+
+    <!-- App Shortcuts & Quick Settings Tile Strings (ja) -->
+    <string name="shortcut_quick_add_short">支出を記録</string>
+    <string name="shortcut_quick_add_long">素早く支出を記録する</string>
+    <string name="shortcut_transactions_short">利用明細</string>
+    <string name="shortcut_transactions_long">すべての明細を表示</string>
+    <string name="qs_tile_quick_add_label">すばやく記録</string>
+</resources>

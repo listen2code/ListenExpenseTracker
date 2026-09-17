@@ -3,13 +3,14 @@ package com.listen.expensetracker
 import android.app.Application
 import com.listen.arch.apm.CrashHandler
 import com.listen.expensetracker.core.notification.LocalNotificationManager
+import com.listen.expensetracker.core.worker.ExpenseWorkManagerScheduler
 import com.listen.expensetracker.data.i18n.ExpenseStrings
 
 /**
  * Global Application class for ListenExpenseTracker.
  * Ensures system-wide initialization of internationalization dictionaries,
- * crash reporting handlers, and notification channels across all process entry points
- * (Activities, BroadcastReceivers, Services, and App Widgets).
+ * crash reporting handlers, notification channels, and periodic WorkManager schedules
+ * across all process entry points (Activities, BroadcastReceivers, Services, and App Widgets).
  */
 class ListenExpenseApplication : Application() {
 
@@ -18,5 +19,6 @@ class ListenExpenseApplication : Application() {
         ExpenseStrings.init()
         CrashHandler.init(this)
         LocalNotificationManager.createNotificationChannels(this)
+        ExpenseWorkManagerScheduler.schedulePeriodicWorker(this)
     }
 }
