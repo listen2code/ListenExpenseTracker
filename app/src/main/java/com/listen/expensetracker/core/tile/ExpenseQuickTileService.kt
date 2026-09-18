@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.listen.expensetracker.MainActivity
+import com.listen.expensetracker.core.quickadd.QuickAddActivity
 import com.listen.expensetracker.data.model.AppConstants
 
 /**
@@ -63,7 +63,7 @@ class ExpenseQuickTileService : TileService() {
          * 构建快速记账深度链接启动意图（暴露为纯逻辑函数供单元测试）。
          */
         fun createQuickAddIntent(context: Context): Intent {
-            return Intent(context, MainActivity::class.java).apply {
+            return Intent(context, QuickAddActivity::class.java).apply {
                 action = TILE_ACTION
                 data = Uri.parse(QUICK_ADD_URI)
                 flags = TILE_FLAGS

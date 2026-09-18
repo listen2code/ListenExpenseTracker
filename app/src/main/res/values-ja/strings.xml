@@ -6,5 +6,10 @@
     <string name="shortcut_quick_add_long">素早く支出を記録する</string>
     <string name="shortcut_transactions_short">利用明細</string>
     <string name="shortcut_transactions_long">すべての明細を表示</string>
-    <string name="qs_tile_quick_add_label">すばやく記録</string>
+    <string name="qs_tile_quick_add_label">稲妻記録</string>
+
+    <string name="shortcut_category_food">飲食を記録</string>
+    <string name="shortcut_category_transport">交通を記録</string>
+    <string name="shortcut_category_shopping">買物を記録</string>
+    <string name="quick_add_saved_toast">記録が保存されました</string>
 </resources>

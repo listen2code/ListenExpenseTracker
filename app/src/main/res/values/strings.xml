@@ -6,5 +6,10 @@
     <string name="shortcut_quick_add_long">快速记一笔账</string>
     <string name="shortcut_transactions_short">账单明细</string>
     <string name="shortcut_transactions_long">查看全部账单流水</string>
-    <string name="qs_tile_quick_add_label">快速记账</string>
+    <string name="qs_tile_quick_add_label">闪电记账</string>
+
+    <string name="shortcut_category_food">记餐饮</string>
+    <string name="shortcut_category_transport">记交通</string>
+    <string name="shortcut_category_shopping">记购物</string>
+    <string name="quick_add_saved_toast">已成功入账</string>
 </resources>

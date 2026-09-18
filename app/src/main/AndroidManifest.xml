@@ -79,6 +79,15 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- 闪电记账轻量半透明浮动窗口 (不切换全屏宿主直接在顶层拉起半屏记账弹窗) -->
+        <activity
+            android:name=".core.quickadd.QuickAddActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ListenExpenseTracker.QuickAddDialog"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- 桌面小组件接收器 (AppWidget Provider) -->
         <receiver
             android:name=".widget.ListenExpenseAppWidgetProvider"

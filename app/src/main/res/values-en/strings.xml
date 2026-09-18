@@ -6,5 +6,10 @@
     <string name="shortcut_quick_add_long">Quick Add Transaction</string>
     <string name="shortcut_transactions_short">Transactions</string>
     <string name="shortcut_transactions_long">View Transactions &amp; Stats</string>
-    <string name="qs_tile_quick_add_label">Quick Add</string>
+    <string name="qs_tile_quick_add_label">Lightning Add</string>
+
+    <string name="shortcut_category_food">Add Food</string>
+    <string name="shortcut_category_transport">Add Transport</string>
+    <string name="shortcut_category_shopping">Add Shopping</string>
+    <string name="quick_add_saved_toast">Transaction saved</string>
 </resources>
